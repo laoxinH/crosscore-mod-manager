@@ -30,7 +30,7 @@
 
 **运行界面（实验室需要shizuku授权，如果不知道怎么使用shizuku请参考[shizuku官方使用说明](https://shizuku.rikka.app/zh-hans/guide/setup/#%E9%80%9A%E8%BF%87%E6%97%A0%E7%BA%BF%E8%B0%83%E8%AF%95%E5%90%AF%E5%8A%A8)）**
 
-![1715962256872](image/readme/1715962256872.png?msec=1715965017839 "app主页")![1715962345763](image/readme/1715962345763.png?msec=1715965017839 "首次打开Mod页面")![1715962369620](/image/readme/1715962369620.png?msec=1715965017829)
+![1715962256872](image/readme/1715962256872.png?msec=1715965017839 "app主页")![1715962345763](image/readme/1715962345763.png?msec=1715965017839 "首次打开Mod页面")
 
 ![1715962378369](/image/readme/1715962378369.png?msec=1715965017831 "shizuku授权")![1715962396435](/image/readme/1715962396435.png?msec=1715965017839 "扫描到的mod")![1715962416212](/image/readme/1715962416212.png?msec=1715965017839 "设置页面")
 
