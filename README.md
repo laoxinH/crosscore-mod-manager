@@ -12,7 +12,7 @@
 
 ## 已实现功能
 
-**注意本软件功能高度依赖shizuku（为兼容安卓14）**
+**目前实验室已经对安卓7-14进行适配，除了安卓14之外不在强制使用shizuku**
 
 1. [X] 扫描QQ下载目录中的Mod
 2. [X] 扫描系统Download目录中的Mod
@@ -28,14 +28,14 @@
 
 **[点击下载](https://github.com/laoxinH/crosscore-mod-manager/releases)最新的Mod实验室**
 
-**运行界面（实验室需要shizuku授权，如果不知道怎么使用shizuku请参考[shizuku官方使用说明](https://shizuku.rikka.app/zh-hans/guide/setup/#%E9%80%9A%E8%BF%87%E6%97%A0%E7%BA%BF%E8%B0%83%E8%AF%95%E5%90%AF%E5%8A%A8)）**
+**运行界面（安卓14使用实验室需要shizuku授权，如果不知道怎么使用shizuku请参考[shizuku官方使用说明](https://shizuku.rikka.app/zh-hans/guide/setup/#%E9%80%9A%E8%BF%87%E6%97%A0%E7%BA%BF%E8%B0%83%E8%AF%95%E5%90%AF%E5%8A%A8)）**
 
 ![1715962256872](image/readme/1715962256872.png?msec=1715965017839 "app主页")![1715962345763](image/readme/1715962345763.png?msec=1715965017839 "首次打开Mod页面")
 
 ![1715962378369](/image/readme/1715962378369.png?msec=1715965017831 "shizuku授权")![1715962396435](/image/readme/1715962396435.png?msec=1715965017839 "扫描到的mod")![1715962416212](/image/readme/1715962416212.png?msec=1715965017839 "设置页面")
 
 - **首次运行打开Mod页面会请仔细阅读后点击*同意并授权*才能继续使用软件**
-- **授权后需要重新打开Mod页面将会扫描Mod**
+- **授权后需要打开Mod页面点击刷新将会扫描Mod**
 - **默认扫描控制台*配置的Mod目录*，需要扫描QQ目录和系统下载目录请去控制台开启**
 - **扫描的的Mod会自动移动到配置的Mod目录，方便管理**
 - **新曾Mod建议直接放置到配置的Mod目录**
