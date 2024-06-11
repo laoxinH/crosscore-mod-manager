@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 4
+    val versionCode = 3
     val versionName = "1.8.5 beta"
     val versionDes = "1.8.5 beta"
     val updateBaseUrl = "https://raw.githubusercontent.com/laoxinH/crosscore-mod-manager/main/update/"
