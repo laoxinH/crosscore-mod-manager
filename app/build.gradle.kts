@@ -1,10 +1,23 @@
-import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.org.apache.commons.logging.LogFactory.release
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
+import groovy.util.Expando
+import java.security.MessageDigest
+ object buildInfo {
+    val versionCode = 4
+    val versionName = "1.8.5 beta"
+    val versionDes = "1.8.5 beta"
+    val updateBaseUrl = "https://raw.githubusercontent.com/laoxinH/crosscore-mod-manager/main/update/"
+    val updatePath = "update"
+    val updateInfoFilename = "update.json"
+
+}
 
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
    // id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta01"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 android {
 
@@ -16,13 +29,21 @@ android {
 
         //...
     applicationVariants.all {
+        val ver = defaultConfig.versionName?.replace(" ","-")
         outputs.all {
-            val ver = defaultConfig.versionName?.replace(" ","-")
+
             //val minSdk = defaultConfig.minSdk
             //val abi = filters.find{it.filterType == "ABI"}?.identifier ?:"all"
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
                 "ModManager-release-$ver.apk";
         }
+
+        if (this.buildType.name == "release") {
+            this.assembleProvider.get().doLast {
+                generateUpdateInfo("ModManager-release-$ver.apk")
+            }
+        }
+
     }
 
 
@@ -35,8 +56,8 @@ android {
         applicationId = "top.laoxin.modmanager"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.8.5 beta"
+        versionCode = buildInfo.versionCode
+        versionName = buildInfo.versionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -177,4 +198,78 @@ implementation(libs.androidx.navigation.runtime.ktx)
 // Retrofit with Scalar Converter
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 
+}
+
+// 计算apk的md5
+fun generateMD5(file : File) :String? {
+    println("generateMD5: $file")
+    return file.name
+}
+
+
+fun generateUpdateInfo(apkName :String) {
+    println("------------------ Generating version info ------------------")
+    println("------------------ 开始生成apk信息 ------------------")
+    // 把apk文件从build目录复制到根项目的update文件夹下
+    val apkFile = project.file("build/outputs/apk/release/$apkName")
+    if (!apkFile.exists()) {
+        //throw  GradleScriptException("hhh")
+        println("apk file not found.")
+    }
+
+    val toDir = rootProject.file(buildInfo.updatePath)
+    val apkHash = generateMD5(apkFile)
+    val  updateJsonFile = File(toDir, buildInfo.updateInfoFilename)
+    var writeNewFile = true
+
+    // 如果有以前的json文件，检查这次打包是否有改变
+    if (updateJsonFile.exists()) {
+        try {
+            val oldUpdateInfo = JsonSlurper().parse(updateJsonFile) as Map<*, *>
+            if (buildInfo.versionCode <= oldUpdateInfo["code"] as Int && apkHash == oldUpdateInfo["md5"] as String) {
+                writeNewFile = false
+            }
+        } catch (e : Exception) {
+            writeNewFile = true
+            e.printStackTrace()
+            updateJsonFile.delete()
+        }
+    }
+
+    if (writeNewFile) {
+        toDir.listFiles()?.forEach {
+            if (!it.delete()) {
+                it.deleteOnExit()
+            }
+        }
+        copy {
+            from(apkFile)
+            into(toDir)
+        }
+
+        // 创建json的实体类
+        // Expando可以简单理解为Map
+        val updateInfo = mutableMapOf(
+            "code" to buildInfo.versionCode,
+            "name" to buildInfo.versionName,
+            "filename" to apkFile.name,
+            "url" to "${buildInfo.updateBaseUrl}${apkFile.name}",
+            "time" to System.currentTimeMillis(),
+            "des" to buildInfo.versionDes,
+            "size" to apkFile.length(),
+            "md5" to apkHash
+        )
+        val newApkHash = generateMD5(File(toDir, apkName))
+        println("new apk md5: $newApkHash")
+        val outputJson = JsonBuilder(updateInfo).toPrettyString()
+        // println(outputJson)
+        // 将json写入文件中，用于查询更新
+        updateJsonFile.writeText(outputJson)
+    } else {
+        // 不需要更新
+        println("This version is already released.\n" +
+                "VersionCode = ${buildInfo.versionCode}\n" +
+                "Skip generateUpdateInfo.")
+    }
+    println("------------------ Finish Generating version info ------------------")
 }

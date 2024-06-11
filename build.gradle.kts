@@ -16,4 +16,7 @@ buildscript {
         val kotlin_version
         classpath ("org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version")
     }*/
+    dependencies {
+        classpath("com.squareup.okhttp3:okhttp:4.9.0")
+    }
 }

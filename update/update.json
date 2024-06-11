@@ -1,10 +1,10 @@
 {
-  "code": 2,
-  "name": "0.2.0",
-  "filename": "EveryDownload-release-0.2.0.apk",
-  "url": "https://raw.githubusercontent.com/SirLYC/EveryDownload/master/update/EveryDownload-release-0.2.0.apk",
-  "time": 1562244720615,
-  "des": "1. \u6dfb\u52a0\u68c0\u67e5\u66f4\u65b0\u529f\u80fd\n2. \u7f8e\u5316`\u5173\u4e8e\u9875\u9762`",
-  "size": 3339869,
-  "md5": "09283d79f77e9a162b8edc6811ecfe42"
+    "code": 3,
+    "name": "1.8.5 beta",
+    "filename": "ModManager-release-1.8.5-beta.apk",
+    "url": "https://raw.githubusercontent.com/laoxinH/crosscore-mod-manager/main/update/ModManager-release-1.8.5-beta.apk",
+    "time": 1718111187984,
+    "des": "1.8.5 beta",
+    "size": 13364995,
+    "md5": "ModManager-release-1.8.5-beta.apk"
 }

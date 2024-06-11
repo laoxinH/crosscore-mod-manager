@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import top.laoxin.modmanager.bean.UpdateBean
 
 private const val BASE_URL =
-    "https://raw.githubusercontent.com/laoxinH/crosscore-mod-manager/main"
+    "https://raw.githubusercontent.com"
 
 /**
  * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
@@ -22,14 +22,14 @@ private val retrofit = Retrofit.Builder()
  * Retrofit service object for creating api calls
  */
 interface ModManagerApiService {
-    @GET("update/update.json")
-    suspend fun getUpdate(): List<UpdateBean>
+    @GET("/laoxinH/crosscore-mod-manager/main/update/update.json")
+    suspend fun getUpdate(): UpdateBean
 }
 
 /**
  * A public Api object that exposes the lazy-initialized Retrofit service
  */
-object MarsApi {
+object ModManagerApi {
     val retrofitService: ModManagerApiService by lazy {
         retrofit.create(ModManagerApiService::class.java)
     }

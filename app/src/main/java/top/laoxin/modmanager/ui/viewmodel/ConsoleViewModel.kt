@@ -41,6 +41,8 @@ import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.data.UserPreferencesRepository
 import top.laoxin.modmanager.data.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.data.mods.ModRepository
+import top.laoxin.modmanager.network.ModManagerApi
+import top.laoxin.modmanager.network.ModManagerApiService
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
@@ -138,6 +140,10 @@ class ConsoleViewModel(
     )
 
     init {
+        viewModelScope.launch {
+            val listResult = ModManagerApi.retrofitService.getUpdate()
+            Log.d("ConsoleViewModel", "更新检测: $listResult")
+        }
         ModTools.updateGameConfig()
         updateGameInfo()
         gameInfoJob = viewModelScope.launch {
@@ -459,6 +465,20 @@ class ConsoleViewModel(
     private fun setGameInfo(gameInfo: GameInfo) {
         _uiState.update {
             it.copy(gameInfo = gameInfo)
+        }
+    }
+
+    //检测软件更新
+    fun checkUpdate() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                ModManagerApi.retrofitService.getUpdate()
+            }.onFailure {
+                Log.e("ConsoleViewModel", "checkUpdate: $it")
+            }.onSuccess {
+                Log.d("ConsoleViewModel", "checkUpdate: $it")
+
+            }
         }
     }
 }

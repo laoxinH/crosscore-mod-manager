@@ -1,5 +1,8 @@
 package top.laoxin.modmanager.bean
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class UpdateBean (
     val code: Int,
     val name: String,
