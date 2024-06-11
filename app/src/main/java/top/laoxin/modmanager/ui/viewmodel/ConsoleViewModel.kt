@@ -2,7 +2,6 @@ package top.laoxin.modmanager.ui.viewmodel
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -12,10 +11,10 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -26,29 +25,41 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
+import top.laoxin.modmanager.R
+import top.laoxin.modmanager.bean.AntiHarmonyBean
 import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.constant.ModPath
-import top.laoxin.modmanager.constant.OSVersion
+import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.data.UserPreferencesRepository
+import top.laoxin.modmanager.data.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.data.mods.ModRepository
-import top.laoxin.modmanager.tools.FileTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
+import java.io.File
 
 
 class ConsoleViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val modRepository: ModRepository
+    private val modRepository: ModRepository,
+    private val antiHarmonyRepository: AntiHarmonyRepository
 ) : ViewModel() {
 
+    // 请求权限路径
+    private var _requestPermissionPath by mutableStateOf("")
+    val requestPermissionPath: String
+        get() = _requestPermissionPath
+
+
+    private val _uiState = MutableStateFlow<ConsoleUiState>(ConsoleUiState())
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -56,97 +67,113 @@ class ConsoleViewModel(
                 val application = (this[APPLICATION_KEY] as App)
                 ConsoleViewModel(
                     application.userPreferencesRepository,
-                    application.container.modRepository
+                    application.container.modRepository,
+                    application.container.antiHarmonyRepository
                 )
             }
         }
         var gameInfoJob: Job? = null
+        var isInited = false
     }
 
-    // private val _uiState = MutableStateFlow(ConsoleUiState())
-    //val uiState: StateFlow<ConsoleUiState> = _uiState.asStateFlow()
-    // 使用热数据流读取用户设置并实时更新
-    private val antiHarmonyFlow = userPreferencesRepository.getPreferenceFlow("ANTI_HARMONY", false)
+
+
+    // 选择的游戏
+    private val selectedGameFlow = userPreferencesRepository.getPreferenceFlow("SELECTED_GAME", 0)
+
     private val scanQQDirectoryFlow =
         userPreferencesRepository.getPreferenceFlow("SCAN_QQ_DIRECTORY", false)
     private val selectedDirectoryFlow =
         userPreferencesRepository.getPreferenceFlow(
             "SELECTED_DIRECTORY",
-            ModTools.DOWNLOAD_MOD_PATH_JC
+            ModTools.DOWNLOAD_MOD_PATH
         )
     private val scanDownloadFlow =
         userPreferencesRepository.getPreferenceFlow("SCAN_DOWNLOAD", false)
     private val openPermissionRequestDialogFlow =
         userPreferencesRepository.getPreferenceFlow("OPEN_PERMISSION_REQUEST_DIALOG", false)
+    private val scanDirectoryModsFlow =
+        userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", false)
+    private val userPreferencesState = combine(
+        selectedGameFlow,
+        selectedDirectoryFlow
+    ) { selectedGame,selectedDirectory ->
+        UserPreferencesState(
+            selectedGameIndex = selectedGame,
+            selectedDirectory = selectedDirectory
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        UserPreferencesState()
+    )
 
-    // 安装位置
-    private val installPath = userPreferencesRepository.getPreferenceFlow("INSTALL_PATH", "")
 
-    // mod数量
-    private val modCountFlow = modRepository.getModCount()
-
-    // 已开启mod数量
-    private val enableModCountFlow = modRepository.getEnableModCount()
-
-    // 游戏服务器
-    private val gameServiceFlow = userPreferencesRepository.getPreferenceFlow("GAME_SERVICE", "")
-
-    private val flowList = listOf(
-
-        antiHarmonyFlow,
+    val uiState = combine(
         scanQQDirectoryFlow,
         selectedDirectoryFlow,
         scanDownloadFlow,
         openPermissionRequestDialogFlow,
-        modCountFlow,
-        enableModCountFlow,
-
-    )
-    val uiState = combine(flowList) { values ->
+        scanDirectoryModsFlow,
+        _uiState
+    ) { values ->
         ConsoleUiState(
-            antiHarmony = values[0] as Boolean,
-            scanQQDirectory = values[1] as Boolean,
-            selectedDirectory = values[2] as String,
-            scanDownload = values[3] as Boolean,
-            openPermissionRequestDialog = values[4] as Boolean,
-            modCount = values[5] as Int,
-            enableModCount = values[6] as Int,
+            scanQQDirectory = values[0] as Boolean,
+            selectedDirectory = values[1] as String,
+            scanDownload = values[2] as Boolean,
+            openPermissionRequestDialog = values[3] as Boolean,
+            scanDirectoryMods = values[4] as Boolean,
+            gameInfo = (values[5] as ConsoleUiState).gameInfo,
+            modCount = (values[5] as ConsoleUiState).modCount,
+            enableModCount = (values[5] as ConsoleUiState).enableModCount,
+            canInstallMod = (values[5] as ConsoleUiState).canInstallMod,
+            showScanDirectoryModsDialog = (values[5] as ConsoleUiState).showScanDirectoryModsDialog,
+            antiHarmony = (values[5] as ConsoleUiState).antiHarmony
 
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
+        SharingStarted.WhileSubscribed(),
         ConsoleUiState()
     )
 
-
-    // 是否可以安装mod
-    private var _canInstallMod = false
-    val canInstallMod: Boolean
-        get() = _canInstallMod
-
-    private lateinit var _gameInfo: GameInfo
-    val gameInfo: GameInfo
-        get() = _gameInfo
-
-    private var _requestPermissionPath by mutableStateOf("")
-    val requestPermissionPath: String
-        get() = _requestPermissionPath
-
     init {
-        getGameInfo()
+        ModTools.updateGameConfig()
+        updateGameInfo()
         gameInfoJob = viewModelScope.launch {
-            installPath.collect{
-                if (it.isEmpty()) {
-                    _canInstallMod = false
-                }else if (PermissionTools.checkPermission(it) != PathType.NULL) {
-                    _canInstallMod = true
-                }
-                gameInfoJob?.cancel()
+            selectedGameFlow.collectLatest {
+                checkInstallMod()
+                setGameInfo(GameInfoConstant.gameInfoList[it])
+                updateAntiHarmony()
+                updateModCount()
+                updateEnableModCount()
             }
         }
     }
 
+    private fun updateAntiHarmony() {
+        viewModelScope.launch {
+            val gameInfo = getGameInfo()
+
+            antiHarmonyRepository.getByGamePackageName(gameInfo.packageName).collectLatest {antiHarmonyBean->
+                if (antiHarmonyBean == null) {
+                    antiHarmonyRepository.insert(
+                        AntiHarmonyBean(
+                            gamePackageName = gameInfo.packageName,
+                            isEnable = false
+                        )
+                    )
+                    _uiState.update {
+                        it.copy(antiHarmony = false)
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(antiHarmony = antiHarmonyBean.isEnable)
+                    }
+                }
+            }
+        }
+    }
 
     private fun setAntiHarmony(antiHarmony: Boolean) {
         viewModelScope.launch {
@@ -170,12 +197,22 @@ class ConsoleViewModel(
 
     fun setSelectedDirectory(selectedDirectory: String) {
         viewModelScope.launch {
-            /*var path = selectedDirectory.subSequence(14, selectedDirectory.length)
-            path = "/$path/"*/
-            userPreferencesRepository.savePreference(
-                "SELECTED_DIRECTORY",
-                "/$selectedDirectory/"
-            )
+            try {
+                File(
+                    (ModTools.ROOT_PATH + "/$selectedDirectory/" + ModTools.GAME_CONFIG).replace(
+                        "//",
+                        "/"
+                    )
+                ).mkdirs()
+                userPreferencesRepository.savePreference(
+                    "SELECTED_DIRECTORY",
+                    "/$selectedDirectory/".replace("//", "/")
+                )
+            } catch (e: Exception) {
+                ToastUtils.longCall(R.string.toast_this_dir_has_no_prim)
+                Log.e("ConsoleViewModel", "setSelectedDirectory: $e")
+            }
+
         }
     }
 
@@ -207,127 +244,66 @@ class ConsoleViewModel(
         }
     }
 
-    // 设置游戏服务器
-    private fun setGameService(gameService: String) {
+
+    // 设置扫描文件夹中的Mods
+    fun setScanDirectoryMods(scanDirectoryMods: Boolean) {
+        /*  if (gameInfo.isGameFileRepeat){
+              ToastUtils.longCall(R.string.toast_game_config_not_suppose)
+              return
+          }*/
         viewModelScope.launch {
             userPreferencesRepository.savePreference(
-                "GAME_SERVICE",
-                gameService
+                "SCAN_DIRECTORY_MODS",
+                scanDirectoryMods
             )
         }
     }
+
     // 设置请求权路径
     fun setRequestPermissionPath(path: String) {
         Log.d("ConsoleViewModel", "setRequestPermissionPath: $path")
         _requestPermissionPath = path
     }
 
-    fun getPermissionShizuku(
-        messageOk: String,
-        messageNo: String,
-        messageNoShizuku: String,
-    ) {
-        this.setOpenPermissionRequestDialog(false)
-        if (PermissionTools.isShizukuAvailable) {
-            PermissionTools.requestShizukuPermission()
-        } else {
-            ToastUtils.longCall(messageNoShizuku)
-            //this.setScanQQDirectory(false)
-
-        }
-    }
-
-
-    // 检查shizuku权限
-    private fun checkShizukuPermission(): Boolean {
-        return PermissionTools.checkShizukuPermission()
-    }
 
     // 通过名称软件包名获取软件包信息
-    private fun getGameInfo() {
+    private fun updateGameInfo() {
         gameInfoJob?.cancel()
-        _gameInfo = GameInfo(
-            "未安装",
-            "未安装",
-            "未安装",
-            "未安装",
-            (App.get()
-                .getDrawable(top.laoxin.modmanager.R.drawable.app_icon) as BitmapDrawable).bitmap.asImageBitmap()
-        )
         gameInfoJob = viewModelScope.launch(Dispatchers.IO) {
-
-            gameServiceFlow.collect { gameService ->
-                Log.d("ConsoleViewModel", "getGameInfo: $gameService")
-                if (gameService.isNotEmpty()) {
-                    GameInfoConstant.entries.forEach {
-                        if (it.serviceName == gameService) {
-                            val packageName = it.packageName
-                            try {
-                                val packageInfo =
-                                    App.get().packageManager.getPackageInfo(packageName, 0)
-                                if (packageInfo != null) {
-                                    withContext(Dispatchers.Main) {
-                                        _gameInfo = GameInfo(
-                                            it.gameName,
-                                            packageName,
-                                            packageInfo.versionName ?: "未知",
-                                            it.serviceName,
-                                            getGameIcon(packageInfo)    // 获取游戏图标
-                                        )
-                                    }
-                                }
-                            } catch (e: PackageManager.NameNotFoundException) {
-                                e.printStackTrace()
-                            }
-                            setInstallPath(it.gamePath)
-                        }
-                    }
-                } else {
-                    GameInfoConstant.entries.forEach {
-                        val packageName = it.packageName
+            userPreferencesState.collectLatest {
+                    val gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex]
+                    ModTools.createModsDirectory(gameInfo,it.selectedDirectory)
+                    Log.d("ConsoleViewModel", "getGameInfo: $gameInfo")
+                    if (gameInfo.packageName.isNotEmpty()) {
                         try {
                             val packageInfo =
-                                App.get().packageManager.getPackageInfo(packageName, 0)
+                                App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
                             if (packageInfo != null) {
                                 withContext(Dispatchers.Main) {
-                                    _gameInfo = GameInfo(
-                                        it.gameName,
-                                        packageName,
-                                        packageInfo.versionName ?: "未知",
-                                        it.serviceName,
-                                        getGameIcon(packageInfo)
+                                    setGameInfo(
+                                        gameInfo.copy(
+                                            version = packageInfo.versionName ?: "未知",
+                                        )
                                     )
                                 }
-                                setInstallPath(it.gamePath)
-                                setGameService(it.serviceName)
                             }
                         } catch (e: PackageManager.NameNotFoundException) {
                             e.printStackTrace()
                         }
                     }
-                }
-                //gameInfoJob?.cancel()
+                    // gameInfoJob?.cancel()
+
+
             }
+
         }
     }
 
     // 开启扫描QQ目录
     fun openScanQQDirectoryDialog(b: Boolean) {
-        when (App.osVersion) {
-            OSVersion.OS_11 -> {
-                setRequestPermissionPath(ModPath.ANDROID_DATA)
-            }
-            OSVersion.OS_13 -> {
-                setRequestPermissionPath(PermissionTools.getRequestPermissionPath(ModPath.MOD_PATH_QQ))
-            }
-            else -> {
-                setRequestPermissionPath(ModPath.MOD_PATH_QQ)
-            }
-        }
-        if (PermissionTools.checkPermission(ModPath.MOD_PATH_QQ) != PathType.NULL){
+        setRequestPermissionPath(PermissionTools.getRequestPermissionPath(ScanModPath.MOD_PATH_QQ))
+        if (PermissionTools.checkPermission(ScanModPath.MOD_PATH_QQ) != PathType.NULL) {
             setScanQQDirectory(b)
-            FileTools.getFileListByFile(ModTools.MY_APP_PATH)
-
         } else {
             setOpenPermissionRequestDialog(true)
         }
@@ -335,31 +311,36 @@ class ConsoleViewModel(
 
     // 开启反和谐
     fun openAntiHarmony(flag: Boolean) {
-        viewModelScope.launch {
-            val path = "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/"
-            when (App.osVersion) {
-                OSVersion.OS_11 -> {
-                    setRequestPermissionPath(ModPath.ANDROID_DATA)
-                }
-                OSVersion.OS_13 -> {
-                    setRequestPermissionPath(PermissionTools.getRequestPermissionPath(path))
-                }
-                else -> {
-                    setRequestPermissionPath(path)
-                }
-            }
-            val pathType = PermissionTools.checkPermission(path)
-            if (pathType != PathType.NULL) {
-                if (flag) {
-                    setAntiHarmony(true)
-                    ModTools.writeAntiHarmonyFile("1", gameInfo.packageName,pathType)
-                } else {
-                    setAntiHarmony(false)
-                    ModTools.writeAntiHarmonyFile("0",gameInfo.packageName ,pathType)
-                }
-            } else {
+        val gameInfo = getGameInfo()
+        if (gameInfo.antiHarmonyFile.isEmpty() || gameInfo.antiHarmonyContent.isEmpty()) {
+            ToastUtils.longCall(R.string.toast_game_not_suppose_anti)
+            return
+        }
+        val pathType = PermissionTools.checkPermission(gameInfo.gamePath)
+        if (pathType == PathType.NULL) {
+            setRequestPermissionPath(PermissionTools.getRequestPermissionPath(gameInfo.gamePath))
+            setOpenPermissionRequestDialog(true)
+            return
+        } else if (pathType == PathType.DOCUMENT) {
+            setRequestPermissionPath(ModTools.MY_APP_PATH)
+            val myPathType = PermissionTools.checkPermission(ModTools.MY_APP_PATH)
+            if (myPathType == PathType.NULL) {
                 setOpenPermissionRequestDialog(true)
+                return
             }
+        }
+        viewModelScope.launch {
+            ModTools.setModsToolsSpecialPathReadType(pathType)
+
+            if (flag) {
+
+                val antiHarmony = ModTools.antiHarmony(gameInfo, true)
+                antiHarmonyRepository.updateByGamePackageName(gameInfo.packageName, antiHarmony)
+            } else {
+                antiHarmonyRepository.updateByGamePackageName(gameInfo.packageName, false)
+                ModTools.antiHarmony(gameInfo, false)
+            }
+
         }
     }
 
@@ -369,6 +350,12 @@ class ConsoleViewModel(
     }
 
 
+    // 设置showScanDirectoryModsDialog
+    fun setShowScanDirectoryModsDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showScanDirectoryModsDialog = b)
+        }
+    }
 
 
     fun openUrl(context: Context, url: String) {
@@ -380,26 +367,99 @@ class ConsoleViewModel(
     }
 
     // 通过包名读取应用信息
-    private fun getGameIcon(packageInfo: PackageInfo): ImageBitmap {
-        val drawable = packageInfo.applicationInfo.loadIcon(App.get().packageManager)
-        val bitmap = when (drawable) {
-            is BitmapDrawable -> drawable.bitmap
-            is AdaptiveIconDrawable -> {
-                Bitmap.createBitmap(
-                    drawable.intrinsicWidth,
-                    drawable.intrinsicHeight,
-                    Bitmap.Config.ARGB_8888
-                ).also { bitmap ->
-                    val canvas = Canvas(bitmap)
-                    drawable.setBounds(0, 0, canvas.width, canvas.height)
-                    drawable.draw(canvas)
+    fun getGameIcon(packageName: String): ImageBitmap {
+        try {
+            val packageInfo = App.get().packageManager.getPackageInfo(packageName, 0)
+            val drawable = packageInfo.applicationInfo.loadIcon(App.get().packageManager)
+            val bitmap = when (drawable) {
+                is BitmapDrawable -> drawable.bitmap
+                is AdaptiveIconDrawable -> {
+                    Bitmap.createBitmap(
+                        drawable.intrinsicWidth,
+                        drawable.intrinsicHeight,
+                        Bitmap.Config.ARGB_8888
+                    ).also { bitmap ->
+                        val canvas = Canvas(bitmap)
+                        drawable.setBounds(0, 0, canvas.width, canvas.height)
+                        drawable.draw(canvas)
+                    }
+                }
+
+                else -> throw IllegalArgumentException("Unsupported drawable type")
+            }
+            return bitmap.asImageBitmap()
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            val context = App.get()
+            val drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
+            val bitmap = drawable.toBitmap()
+            return bitmap.asImageBitmap()
+        }
+    }
+
+    fun openScanDirectoryMods(state: Boolean) {
+        if (state) {
+            _uiState.update {
+                it.copy(showScanDirectoryModsDialog = true)
+            }
+        } else {
+            setScanDirectoryMods(false)
+        }
+    }
+
+    // 检查是否支持安装mod
+    private fun checkInstallMod() {
+        val gameInfo = getGameInfo()
+        val checkPermission = PermissionTools.checkPermission(gameInfo.gamePath)
+        if (checkPermission != PathType.NULL && gameInfo.gamePath.isNotEmpty()) {
+            Log.d("ConsoleViewModel", "checkInstallMod: true")
+            _uiState.update {
+                it.copy(canInstallMod = true)
+            }
+        } else {
+            _uiState.update {
+                it.copy(canInstallMod = false)
+            }
+        }
+    }
+
+    // 更新mod数量
+    private fun updateModCount() {
+
+        //gameInfoJob?.cancel()
+        gameInfoJob = viewModelScope.launch {
+            val gameInfo = getGameInfo()
+            modRepository.getModsCountByGamePackageName(gameInfo.packageName).collectLatest { count ->
+                _uiState.update {
+                    it.copy(modCount = count)
                 }
             }
-
-            else -> throw IllegalArgumentException("Unsupported drawable type")
         }
-        return bitmap.asImageBitmap()
+    }
 
+    // 更新已开启mod数量
+    private fun updateEnableModCount() {
+        //gameInfoJob?.cancel()
+        gameInfoJob = viewModelScope.launch {
+            val gameInfo = getGameInfo()
+            modRepository.getEnableModsCountByGamePackageName(gameInfo.packageName).collectLatest { count ->
+                _uiState.update {
+                    it.copy(enableModCount = count)
+                }
+            }
+        }
+    }
+
+    // 获取游戏信息
+    private fun getGameInfo(): GameInfo {
+        return _uiState.value.gameInfo
+    }
+
+    // 设置游戏信息
+    private fun setGameInfo(gameInfo: GameInfo) {
+        _uiState.update {
+            it.copy(gameInfo = gameInfo)
+        }
     }
 }
 

@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.SettingUiState
@@ -81,7 +82,8 @@ fun SettingPage() {
             viewModel::deleteTemp,
             viewModel::openUrl,
             viewModel::showAcknowledgments,
-            viewModel::showSwitchGame
+            viewModel::showSwitchGame,
+            viewModel::flashGameConfig
         )
         DialogCommon(
             title = stringResource(R.string.setting_acknowledgments),
@@ -111,6 +113,7 @@ fun SettingContent(
     openUrl: (Context, String) -> Unit,
     showAcknowledgments: (Boolean) -> Unit,
     showSwitchGame: (Boolean) -> Unit,
+    flashGameConfig : () -> Unit
 ) {
     val context = LocalContext.current
     DialogCommon(
@@ -118,7 +121,7 @@ fun SettingContent(
         content = stringResource(R.string.setting_del_backups_dialog_content_txt),
         onConfirm = { deleteAllBackups() },
         onCancel = { setDeleteBackupDialog(false) },
-        showDialog = uiState.deleteBackupDialog
+        showDialog = uiState.deleteBackupDialog,
     )
     Column(
         modifier = Modifier
@@ -145,6 +148,11 @@ fun SettingContent(
             name = stringResource(R.string.setting_page_app_clean_temp),
             description = stringResource(R.string.setting_page_app_clean_temp_descript),
             onClick = { deleteTemp() }
+        )
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_flash_game_config),
+            description = stringResource(R.string.setting_page_app_flash_game_config_descript),
+            onClick = { flashGameConfig() }
         )
         SettingItem(
             name = stringResource(R.string.setting_page_app_swtch_game),
@@ -287,8 +295,8 @@ fun SettingTitle(
 // 切换游戏版本的弹窗
 @Composable
 fun SwitchGameDialog(
-    gameInfoList: List<GameInfoConstant>,
-    setGameInfo: (GameInfoConstant) -> Unit,
+    gameInfoList: List<GameInfo>,
+    setGameInfo: (GameInfo) -> Unit,
     showSwitchGameInfo: (Boolean) -> Unit,
     showDialog: Boolean
 ) {
@@ -297,10 +305,13 @@ fun SwitchGameDialog(
             onDismissRequest = {showSwitchGameInfo(false)}, // 点击对话框外的区域时关闭对话框
             title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) },
             text = {
+                val toMutableList = gameInfoList.toMutableList()
+                toMutableList.removeAt(0)
+
                 LazyColumn {
-                    itemsIndexed(gameInfoList) { index, gameInfo ->
+                    itemsIndexed(toMutableList) { index, gameInfo ->
                         SettingItem(
-                            name = gameInfo.serviceName,
+                            name = gameInfo.gameName + "(${gameInfo.serviceName})",
                             description = gameInfo.packageName,
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {

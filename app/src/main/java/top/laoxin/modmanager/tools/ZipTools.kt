@@ -7,6 +7,8 @@ import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.FileHeader
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
+import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -19,6 +21,8 @@ import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 
 object ZipTools {
+    private const val TAG = "ZipTools"
+    private val fileTools = FileTools
 
 
     // 通过file生成zip压缩对象,需要判断是否为zip文件
@@ -27,7 +31,8 @@ object ZipTools {
         if (zipFile.isValidZipFile) {
             return zipFile
         }
-        return null
+        return zipFile
+        //return null
     }
 
     // 通过zip对象获取文件列表判断存在readme.txt文件
@@ -96,7 +101,11 @@ object ZipTools {
                     readmePath = modBeanTemp.readmePath,
                     fileReadmePath = modBeanTemp.fileReadmePath,
                     password = null,
-                    isEnable = false
+                    isEnable = false,
+                    gamePackageName = modBeanTemp.gamePackageName,
+                    gameModPath = modBeanTemp.gameModPath,
+                    modType = modBeanTemp.modType,
+
                 )
 
 
@@ -108,14 +117,19 @@ object ZipTools {
 
     // 从zip对象中读取第一个图片文件并写入appPath同时返回图片路径
 
-    private fun getFirstImageFromZip(
+    fun getFirstImageFromZip(
         zipFile: ZipFile,
         appPath: String,
         iconPath: String?
     ): String? {
+       // Log.d("ZipTools", "图标路径: $iconPath")
+       // Log.d("ZipTools", "zip文件头: ${zipFile.fileHeaders.map { getFileName(it) }}")
         val fileHeaders = zipFile.fileHeaders
         for (fileHeaderObj in fileHeaders) {
+           // Log.d("ZipTools", "对比: ${getFileName(fileHeaderObj)} ---- $iconPath")
+           // Log.d("ZipTools", "对比结果: ${getFileName(fileHeaderObj).equals(iconPath, ignoreCase = true)}")
             if (getFileName(fileHeaderObj).equals(iconPath, ignoreCase = true)) {
+
                 val inputStream = zipFile.getInputStream(fileHeaderObj)
                 val calculateMD5 = calculateMD5(inputStream)
                 Log.d("ZipTools", "文件路径: $appPath")
@@ -127,7 +141,7 @@ object ZipTools {
     }
 
     // 从zip对象中读取所有图片文件并写入appPath路径同时返回图片路径列表
-    private fun getImagesFromZip(
+    fun getImagesFromZip(
         zipFile: ZipFile,
         appPath: String,
         images: MutableList<String>
@@ -154,18 +168,26 @@ object ZipTools {
             if (file.parentFile?.exists() != true) {
                 file.parentFile?.mkdirs()
             }
+            if (file.exists()) {
+                file.delete()
+            }
             file.createNewFile()
             val fileOutputStream = FileOutputStream(file)
-            fileOutputStream.write(inputStream.readBytes())
-            fileOutputStream.flush()
-            fileOutputStream.close()
+            inputStream.use { input ->
+                fileOutputStream.use { outputStream ->
+                    input.copyTo(outputStream)
+                }
+            }
         }
         return file.absolutePath
     }
 
     // 解压zip文件
-    suspend fun unZip(modTempPath: String, s: String, password: String?): String? {
+    fun unZip(modTempPath: String, s: String, password: String?): String? {
+        Log.d("ZipTools", "文件路径: $modTempPath")
+        Log.d("ZipTools", "解压路径: $s")
         val zipFile = ZipFile(modTempPath)
+
         if (password != null) {
             zipFile.setPassword(password.toCharArray())
         }
@@ -174,15 +196,17 @@ object ZipTools {
             return upZipPath
         }
         // 创建目标文件路径
-        withContext(Dispatchers.IO) {
-            Files.createDirectories(Paths.get(upZipPath).parent)
-        }
+
+        //Files.createDirectories(Paths.get(upZipPath).parent)
+
         // 解压
         return try {
+            //zipFile.charset = Charset.forName(checkZipFileCharset(zipFile))
+            //zipFile.extractAll()
             zipFile.extractAll(upZipPath)
             upZipPath
         } catch (e: Exception) {
-            FileTools.deleteFileByFile(upZipPath)
+            fileTools.deleteFile(upZipPath)
             Log.e("ZipTools", "解压失败: $e")
             e.printStackTrace()
             null
@@ -246,75 +270,12 @@ object ZipTools {
         }
     }
 
+
     // 判断zip文件是否加密
     fun isEncrypted(zipFile: ZipFile): Boolean {
         return zipFile.isEncrypted
     }
 
-    fun readModBeans(
-        zipFile: ZipFile,
-        modTempMap: MutableMap<String, ModBeanTemp>,
-        appPath: String,
-        downloadModPath: String
-    ): List<ModBean> {
-        if (modTempMap.isEmpty()) {
-            return emptyList()
-        }
-        val modPath = moveFile(zipFile.file.path, downloadModPath + zipFile.file.name)
-        val list = mutableListOf<ModBean>()
-        for (entry in modTempMap.entries) {
-            val modBeanTemp = entry.value
-            if (modBeanTemp.isEncrypted) {
-                val modBean = ModBean(
-                    id = 0,
-                    name = modBeanTemp.name,
-                    version = "已加密",
-                    description = "MOD文件已加密, 无法读取详细信息",
-                    author = "未知",
-                    date = zipFile.file.lastModified(),
-                    path = modPath,
-                    icon = modBeanTemp.iconPath,
-                    images = modBeanTemp.images,
-                    modFiles = modBeanTemp.modFiles,
-                    isEncrypted = modBeanTemp.isEncrypted,
-                    password = null,
-                    readmePath = modBeanTemp.readmePath,
-                    fileReadmePath = modBeanTemp.fileReadmePath,
-                    isEnable = false
-                )
-                list.add(modBean)
-            } else {
-                if (modBeanTemp.readmePath != null) {
-                    val modBean = readModBean(zipFile, modBeanTemp, appPath)
-                    if (modBean != null) {
-                        list.add(modBean)
-                    }
-                } else {
-                    val modBean = ModBean(
-                        id = 0,
-                        name = modBeanTemp.name,
-                        version = "未适配",
-                        description = "不存在readme描述文件,无法读取详细信息",
-                        author = "未知",
-                        date = zipFile.file.lastModified(),
-                        path = modPath,
-                        icon = getFirstImageFromZip(zipFile, appPath, modBeanTemp.iconPath),
-                        images = getImagesFromZip(zipFile, appPath, modBeanTemp.images),
-                        modFiles = modBeanTemp.modFiles,
-                        isEncrypted = modBeanTemp.isEncrypted,
-                        password = null,
-                        readmePath = modBeanTemp.readmePath,
-                        fileReadmePath = modBeanTemp.fileReadmePath,
-                        isEnable = false
-                    )
-                    list.add(modBean)
-                }
-            }
-
-        }
-        return list
-
-    }
 
     fun isZipFile(zipFile: ZipFile): Boolean {
         return zipFile.isValidZipFile
@@ -350,6 +311,7 @@ object ZipTools {
         }
         return flag.all { it }
     }
+
 }
 
 // 读取加密mod信息

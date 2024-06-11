@@ -6,4 +6,6 @@ data class UserPreferencesState (
     val scanDownload: Boolean = false,
     val installPath : String = "",
     val gameService : String = "",
+    val selectedGameIndex : Int = 0,
+    val scanDirectoryMods : Boolean = false,
 )

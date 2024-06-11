@@ -21,4 +21,6 @@ data class ModUiState(
     val showTips: Boolean = false,   // 是否显示提示
     val modSwitchEnable: Boolean = true,   // 是否正在切换mod
     val showUserTipsDialog: Boolean = false,   // 显示用户提示对话框
+    val delEnableModsList : List<ModBean> = emptyList(),     // mod列表
+    val showDisEnableModsDialog : Boolean = false,   // 是否显示禁用mod对话框
     )

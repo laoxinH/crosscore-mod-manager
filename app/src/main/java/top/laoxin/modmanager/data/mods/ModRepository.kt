@@ -5,55 +5,49 @@ import top.laoxin.modmanager.bean.ModBean
 
 interface ModRepository {
 
-    /**
-     * Retrieve all the items from the the given data source.
-     */
-    fun getAllIModsStream(): Flow<List<ModBean>>
-
-    /**
-     * Retrieve an item from the given data source that matches with the [id].
-     */
-    fun getModStream(id: Int): Flow<ModBean?>
-
-    /**
-     * Insert item in the data source
-     */
+    // 插入数据
     suspend fun insertMod(mod: ModBean)
 
-    /**
-     * Delete item from the data source
-     */
-    suspend fun deleteMod(mod: ModBean)
-
-    /**
-     * Update item in the data source
-     */
+    // 更新数据
     suspend fun updateMod(mod: ModBean)
 
-    // 通过名字模糊查询
-    fun search(name: String): Flow<List<ModBean>>
+    // 删除数据
+    suspend fun deleteMod(mod: ModBean)
 
-    // 获取已开启的mod
-    fun getEnableMods(): Flow<List<ModBean>>
+    // 获取所有数据
+    fun getAllIModsStream(): Flow<List<ModBean>>
 
-    // 插入所有数据
+    // 通过gamePackageName和名字模糊查询
+    fun search(name: String, gamePackageName : String): Flow<List<ModBean>>
+
+    // 通过List<ModBean>插入数据
     suspend fun insertAll(mods: List<ModBean>)
 
-    // 查询mod数量
-    fun getModCount(): Flow<Int>
+    //通过gamePackageName 查询关闭的mod
+    fun getDisableMods(gamePackageName: String): Flow<List<ModBean>>
 
-    // 查询已开启mod数量
-    fun getEnableModCount(): Flow<Int>
-
-    // 查询关闭的mod
-    fun getDisableMods(): Flow<List<ModBean>>
-
-    // 通过list批量删除
+    // 通过list批量删除mods
     suspend fun deleteAll(mods: List<ModBean>)
 
-    // 通过path查询
-    fun getByPath(path: String): Flow<List<ModBean>>
-
-    // 通过list<modben>更新数据
+    // 通过List<modbean>更新
     suspend fun updateAll(mods: List<ModBean>)
+
+    // // 通过gamePackageName查询mods
+    fun getModsByGamePackageName(gamePackageName: String): Flow<List<ModBean>>
+
+    // // 通过gamePackageName查询mods数量
+    fun getModsCountByGamePackageName(gamePackageName: String): Flow<Int>
+
+    // 通过gamePackageName查询已开启的mods
+    fun getEnableMods(gamePackageName: String): Flow<List<ModBean>>
+
+
+    // 通过path和gamePackageName查询mods
+    fun getModsByPathAndGamePackageName(path: String, gamePackageName: String): Flow<List<ModBean>>
+
+    //通过包名查询已开启的mods数量
+    fun getEnableModsCountByGamePackageName(gamePackageName: String): Flow<Int>
+
+
+
 }

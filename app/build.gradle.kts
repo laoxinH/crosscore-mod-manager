@@ -7,11 +7,26 @@ plugins {
    // id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta01"
 }
 android {
+
     namespace = "top.laoxin.modmanager"
     compileSdk = 34
     buildFeatures {
         compose = true
     }
+
+        //...
+    applicationVariants.all {
+        outputs.all {
+            val ver = defaultConfig.versionName?.replace(" ","-")
+            //val minSdk = defaultConfig.minSdk
+            //val abi = filters.find{it.filterType == "ABI"}?.identifier ?:"all"
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                "ModManager-release-$ver.apk";
+        }
+    }
+
+
+    //...
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.11"
@@ -21,7 +36,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 3
-        versionName = "1.7.2 beta"
+        versionName = "1.8.5 beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -59,6 +74,8 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+
 }
 
 dependencies {
@@ -149,5 +166,15 @@ implementation(libs.androidx.navigation.runtime.ktx)
     implementation("com.google.code.gson:gson:2.10.1")
     //添加 documentfile 依赖（SDK自带的那个版本有问题）：
     implementation("androidx.documentfile:documentfile:1.0.1")
+
+    // Retrofit
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    // Retrofit
+// Retrofit with Scalar Converter
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 
 }

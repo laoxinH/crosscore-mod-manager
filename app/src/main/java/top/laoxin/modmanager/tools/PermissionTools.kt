@@ -11,7 +11,7 @@ import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.constant.ModPath
+import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.RequestCode
@@ -39,7 +39,7 @@ object PermissionTools {
     var REQUEST_PERMISSION_RESULT_LISTENER = OnRequestPermissionResultListener { requestCode, grantResult ->
         if (requestCode == RequestCode.SHIZUKU) {
             if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                ModTools.specialPathReadType = PathType.SHIZUKU
+                ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
                 FileExplorerServiceManager.bindService()
                 //this.setScanQQDirectory(true)
                 ToastUtils.longCall(R.string.toast_shizuku_permission_granted)
@@ -56,7 +56,7 @@ object PermissionTools {
 
         return if (isShizukuAvailable) {
             if (hasShizukuPermission()) {
-                ModTools.specialPathReadType = PathType.SHIZUKU
+                ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
                 FileExplorerServiceManager.bindService()
                 true
             } else {
@@ -113,7 +113,7 @@ object PermissionTools {
 
     // 检查全权限
     fun checkPermission(path : String) : Int {
-        if (FileTools.isFromMyPackageNamePath(path) && App.osVersion == OSVersion.OS_11) {
+        if (isFromMyPackageNamePath(path) && App.osVersion == OSVersion.OS_11) {
             return PathType.FILE
         }
         when (App.osVersion) {
@@ -146,9 +146,8 @@ object PermissionTools {
             OSVersion.OS_11 -> {
                 var path1 = path
                 if (isUnderDataPath(path)) {
-                    path1 = ModPath.ANDROID_DATA
+                    path1 = ScanModPath.ANDROID_DATA
                 }
-                Log.d("FileTools", "检查权限: $path1")
                 if (isShizukuAvailable) {
                     return if (checkShizukuPermission()) {
                         PathType.SHIZUKU
@@ -180,7 +179,7 @@ object PermissionTools {
     fun getRequestPermissionPath(path: String): String {
         return if (App.osVersion == OSVersion.OS_11) {
             if (isUnderDataPath(path)) {
-                ModPath.ANDROID_DATA
+                ScanModPath.ANDROID_DATA
             } else {
                 path
             }
@@ -220,6 +219,10 @@ object PermissionTools {
         return "$ROOT_PATH/Android/data/$appPath"
     }
 
-
+    fun isFromMyPackageNamePath(path: String): Boolean {
+        return ("$path/").contains(
+            (ModTools.ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")).toString() + "/"
+        )
+    }
 }
 

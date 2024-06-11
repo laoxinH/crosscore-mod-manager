@@ -5,17 +5,13 @@ import top.laoxin.modmanager.bean.BackupBean
 
 class OfflineBackupRepository (private val backupDao: BackupDao): BackupRepository{
 
-    override fun getAll(): List<BackupBean> {
-        return backupDao.getAll()
-    }
-
-    override fun getByName(name: String): BackupBean? {
-        return backupDao.getByName(name)
-    }
 
 
 
-    override suspend fun getByModPath(modPath: String): Flow<List<BackupBean?>> {
+
+
+
+    override suspend fun getByModPath(modPath: String): Flow<List<BackupBean>> {
         return backupDao.getByModPath(modPath)
     }
 
@@ -26,6 +22,18 @@ class OfflineBackupRepository (private val backupDao: BackupDao): BackupReposito
     override fun deleteAllBackups() {
         backupDao.deleteAll()
     }
+
+    override suspend fun deleteByGamePackageName(gamePackageName: String) {
+        backupDao.deleteByGamePackageName(gamePackageName)
+    }
+
+    override fun getByModNameAndGamePackageName(
+        modName: String,
+        gamePackageName: String
+    ): Flow<List<BackupBean>> {
+        return backupDao.getByModNameAndGamePackageName(modName, gamePackageName)
+    }
+
 
     override suspend fun insert(backupBean: BackupBean) {
         backupDao.insert(backupBean)

@@ -20,6 +20,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,10 +36,10 @@ import com.google.accompanist.permissions.rememberPermissionState
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.OSVersion
-import top.laoxin.modmanager.tools.FileTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import top.laoxin.modmanager.ui.view.SettingItem
 
 
@@ -62,6 +63,7 @@ fun RequestStoragePermission(
 
                                 ToastUtils.longCall(R.string.toast_permission_not_granted)
                             } else {
+                                ModTools.makeModsDirs()
                                 ToastUtils.longCall(R.string.toast_permission_granted)
                                 showDialog = false
                             }
@@ -160,7 +162,7 @@ fun RequestUriPermission(path: String,showDialog: Boolean, onDismissRequest: () 
 
 
 
-// 切换游戏版本的弹窗
+
 @Composable
 fun SelectPermissionDialog(
     path : String,
@@ -168,6 +170,7 @@ fun SelectPermissionDialog(
     showDialog: Boolean
 ) {
     Log.d("SelectPermissionDialog", "SelectPermissionDialog: $path")
+    val requestPermissionPath = PermissionTools.getRequestPermissionPath(path)
     if (showDialog) {
         val context = LocalContext.current
         val startForResult =
@@ -176,9 +179,7 @@ fun SelectPermissionDialog(
                 Log.d("SelectPermissionDialog", "SelectPermissionDialog: ${result.resultCode}")
                 if (result.resultCode == Activity.RESULT_OK) {
                     ToastUtils.longCall(R.string.toast_permission_granted)
-                    val fileListByDocument =
-                        FileTools.getFileListByDocument("/storage/emulated/0/Android/data/com.tencent.mobileqq/Tencent/QQfile_recv/")
-                    Log.d("RequestStoragePermission", "RequestStoragePermission: $fileListByDocument")
+
                     val  uri = result.data?.data
                     if (uri != null){
                         Log.d("SelectPermissionDialog", "SelectPermissionDialog: $uri")
@@ -199,7 +200,7 @@ fun SelectPermissionDialog(
                     Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
         )
 
-        val treeUri = FileTools.pathToUri(path)
+        val treeUri = FileTools.pathToUri(requestPermissionPath)
         val df = DocumentFile.fromTreeUri(context, treeUri)
 
         if (df != null) {

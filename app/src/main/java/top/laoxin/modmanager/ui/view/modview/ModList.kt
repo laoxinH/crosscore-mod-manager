@@ -240,6 +240,13 @@ fun ModDetailDialog(
                             )
                             Text(
                                 text = stringResource(
+                                    R.string.mod_page_mod_detail_dialog_detali_modType,
+                                    mod.modType ?: ""
+                                ),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Text(
+                                text = stringResource(
                                     R.string.mod_page_mod_detail_dialog_detali_author,
                                     mod.author ?: ""
                                 ),

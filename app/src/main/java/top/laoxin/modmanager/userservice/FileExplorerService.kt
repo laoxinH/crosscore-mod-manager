@@ -2,9 +2,8 @@ package top.laoxin.modmanager.userservice
 
 import android.os.RemoteException
 import android.util.Log
-import androidx.documentfile.provider.DocumentFile
 import net.lingala.zip4j.ZipFile
-import top.laoxin.modmanager.App
+import top.laoxin.modmanager.bean.GameInfo
 
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
@@ -21,26 +20,18 @@ import java.nio.file.StandardCopyOption
 
 class FileExplorerService : IFileExplorerService.Stub() {
     @Throws(RemoteException::class)
-    override fun listFiles(
-        path: String?,
-        appPath: String,
-        gameModPath: String,
-        downloadModPath : String
-    ): MutableList<ModBean> {
-        val list: MutableList<ModBean> = ArrayList<ModBean>()
-        val files = path?.let { File(it).listFiles() }
-        if (files != null) {
-            // 判断file是否为压缩文件
-            for (f in files) {
-                if (f.isDirectory) continue
-                val zipFile = ZipTools.createZipFile(f)
-                if (zipFile != null && ZipTools.isZipFile(zipFile)) {
-                    // 读取zip文件中的mod文件
-                    val modTempMap = createModTempMap(zipFile, gameModPath)
-                    val mods : List<ModBean> = ZipTools.readModBeans(zipFile,modTempMap,appPath,downloadModPath)
-                    list.addAll(mods)
+    override fun getFilesNames(path: String?): MutableList<String> {
+        val list: MutableList<String> = ArrayList()
+        try {
+            val files = File(path!!).listFiles()
+            if (files != null) {
+                for (f in files) {
+                    if (f.isDirectory || isFileType(f)) continue
+                    list.add(f.name)
                 }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "getGameFiles: $e")
         }
         return list
     }
@@ -60,13 +51,13 @@ class FileExplorerService : IFileExplorerService.Stub() {
 
     override fun copyFile(srcPath: String?, destPath: String?): Boolean {
         // 通过srcPath和destPath路径复制文件
-        Log.d(TAG, "copyFile: $srcPath--- $destPath")
-
         return try {
             val source = Paths.get(srcPath)
             val destination = Paths.get(destPath)
+            if (File(destPath!!).parentFile?.exists() == false) {
+                File(destPath).parentFile?.mkdirs()
+            }
             // 创建目标文件路径
-            Files.createDirectories(destination.parent)
             Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: IOException) {
@@ -78,21 +69,11 @@ class FileExplorerService : IFileExplorerService.Stub() {
 
     override fun writeFile(srcPath: String, name: String, content: String?): Boolean {
         //return false
-        Log.d(TAG, "writeFile: $srcPath")
         return try {
             val file = File(srcPath, name)
-            if (!file.exists()) {
-                file.createNewFile()
-            }
-            file.parentFile?.mkdirs()
-            val fileOutputStream = FileOutputStream(file)
-            if (content != null) {
-                fileOutputStream.write(content.toByteArray())
-            }
-            fileOutputStream.close()
+            file.writeText(content!!)
             true
-
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "writeFile: $e")
             false
         }
@@ -102,8 +83,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
     override fun fileExists(path: String?): Boolean {
         return try {
             Log.d(TAG, "fileExists: $path==${ File(path!!).exists()}")
-
-            File(path!!).exists()
+            File(path).exists()
         } catch (e: Exception) {
             false
         }
@@ -140,23 +120,30 @@ class FileExplorerService : IFileExplorerService.Stub() {
         }
     }
 
-    override fun scanMods(
-        path: String?,
-        appPath: String?,
-        gameModPath: String?,
-        downloadModPath: String?
-    ): Boolean {
+    override fun scanMods(sacnPath: String?, gameInfo: GameInfo?): Boolean {
         return try {
-            val files = File(path!!).listFiles()
+            val files = File(sacnPath!!).listFiles()
+            val gameFiles = mutableListOf<String>()
+            gameInfo?.gameFilePath?.forEach {
+                gameFiles.addAll(getFilesNames(it))
+            }
+            Log.d(TAG, "游戏中的文件: ${gameFiles}")
             if (files != null) {
                 // 判断file是否为压缩文件
                 for (f in files) {
-                    if (f.isDirectory) continue
+                    if (f.isDirectory || isFileType(f)) continue
                     val zipFile = ZipTools.createZipFile(f)
+                    Log.d(TAG, "scanMods: ${f.name}")
+
                     if (zipFile != null && ZipTools.isZipFile(zipFile)) {
-                        // 读取zip文件中的mod文件
-                        val modTempMap = createModTempMap(zipFile, gameModPath!!)
-                        if (modTempMap.isNotEmpty()) moveFile(zipFile.file.path, downloadModPath + zipFile.file.name)
+                        zipFile.fileHeaders.forEach {
+                            val modFileName = File(ZipTools.getFileName(it)).name
+                            if (gameFiles.contains(modFileName)) {
+                                Log.d(TAG, "开始移动文件: ${f.name}==${modFileName}")
+                                moveFile(f.path, Paths.get(gameInfo!!.modSavePath, f.name).toString())
+                                return@forEach
+                            }
+                        }
                     }
                 }
             }
@@ -166,92 +153,49 @@ class FileExplorerService : IFileExplorerService.Stub() {
         }
     }
 
-    fun moveFile(srcPath: String?, destPath: String?): String? {
-        Log.d("ZipTools", "moveFile: $srcPath--- $destPath")
+
+    override fun moveFile(srcPath: String?, destPath: String?): Boolean {
         // 通过srcPath和destPath路径复制文件
-        if (srcPath == destPath) return destPath
+        if (srcPath == destPath) return true
         return try {
             val source = Paths.get(srcPath)
             val destination = Paths.get(destPath)
             // 创建目标文件路径
-            Files.createDirectories(destination.parent)
+            if (File(destPath!!).parentFile?.exists() == false) {
+                File(destPath).parentFile?.mkdirs()
+            }
             Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING)
-            destPath
+            true
         } catch (e: Exception) {
-            e.printStackTrace()
-            null
+           Log.e(TAG, "moveFile失败: $e")
+            false
         }
     }
 
-    fun createModTempMap(
-        zipFile: ZipFile,
-        gameModPath: String
-    ): MutableMap<String, ModBeanTemp> {
-        // 创建一个ModBeanTemp的map
-        val modBeanTempMap = mutableMapOf<String, ModBeanTemp>()
-        val fileHeaders = zipFile.fileHeaders
-        for (fileHeaderObj in fileHeaders) {
-            val modName = fileHeaderObj.fileName.substringAfterLast("/")
-            val gameFile = File(gameModPath,modName)
-            if (gameFile.exists() && gameFile.isFile) {
-                val modEntries = File(ZipTools.getFileName(fileHeaderObj))
-                val key = modEntries.parent ?: zipFile.file.name
-                val modBeanTemp = modBeanTempMap[key]
-                if (modBeanTemp == null) {
-                    val beanTemp = ModBeanTemp(
-                        name = zipFile.file.nameWithoutExtension + if (modEntries.parentFile == null) "" else "(" + modEntries.parentFile!!.path.replace(
-                            "/",
-                            "|"
-                        ) + ")", // 如果是根目录则不加括号
-                        iconPath = null,
-                        readmePath = null,
-                        modFiles = mutableListOf(fileHeaderObj.fileName),
-                        images = mutableListOf(),
-                        fileReadmePath = null,
-                        isEncrypted = ZipTools.isEncrypted(zipFile)
-                    )
-                    modBeanTempMap[key] = beanTemp
-                } else {
-                    modBeanTemp.modFiles.add(fileHeaderObj.fileName)
-                }
-            }
+    override fun isFile(path: String?): Boolean {
+        return try {
+            val file = File(path!!)
+            file.isFile
+        } catch (e: Exception) {
+            false
         }
-        Log.d("ZipTools", "modBeanTempMap: $modBeanTempMap")
-        // 判断是否存在readme.txt文件
-        for (fileHeaderObj in fileHeaders) {
-            val fileName = ZipTools.getFileName(fileHeaderObj)
-            if (fileName.substringAfterLast("/").equals("readme.txt", ignoreCase = true)) {
-                Log.d("ZipTools", "readme文件路径: $fileName")
-                val key = File(fileName).parent ?: zipFile.file.name
-                Log.d("ZipTools", "readme文件key: $key")
-                val modBeanTemp = modBeanTempMap[key]
-                if (modBeanTemp != null) {
-                    modBeanTemp.readmePath = fileName
-                }
-            } else if (fileName.contains(".jpg", ignoreCase = true)
-                || fileName.contains(".png", ignoreCase = true)
-                || fileName.contains(".gif", ignoreCase = true)
-                || fileName.contains(".jpeg", ignoreCase = true)
-            ) {
-                val key = File(fileName).parent ?: zipFile.file.name
-                val modBeanTemp = modBeanTempMap[key]
-                modBeanTemp?.images?.add(fileName)
-                modBeanTemp?.iconPath = fileName
-            } else if (fileName.equals("readme.txt", ignoreCase = true)) {
-                modBeanTempMap.forEach {
-                    val modBeanTemp = it.value
-                    modBeanTemp.fileReadmePath = fileName
-                }
-            }
-        }
-        return modBeanTempMap
     }
 
 
+    // 判断文件类型,如果是图片, 视频, 音频, apk文件则返回false
+    private fun isFileType(file: File): Boolean {
+        val name = file.name
+        return (/*name.contains(".jpg", ignoreCase = true) ||
+                name.contains(".png", ignoreCase = true) ||
+                name.contains(".gif", ignoreCase = true) ||
+                name.contains(".jpeg", ignoreCase = true) ||
+                name.contains(".mp4", ignoreCase = true) ||
+                name.contains(".mp3", ignoreCase = true) ||*/
+                name.contains(".apk", ignoreCase = true))
+    }
 
     companion object {
         private const val TAG = "FileExplorerService"
     }
-
 
 }

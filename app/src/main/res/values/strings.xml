@@ -30,8 +30,8 @@
     <string name="console_setting_info_configuration_install_loction">MOD可安装: %s</string>
     <string name="console_configuration_title">配置项</string>
     <string name="console_configuration_anti_harmony">反和谐</string>
-    <string name="console_configuration_scanQQ">扫描QQ下载目录</string>
-    <string name="console_configuration_scan_download">扫描下载目录</string>
+    <string name="console_configuration_scanQQ">扫描QQ下载目录(可能无效)</string>
+    <string name="console_configuration_scan_download">扫描系统DOWNLOAD目录</string>
     <string name="console_configuration_select_mod_directory">配置MOD目录</string>
     <string name="dialog_shizuku_message">此功能需要shizuku授权才能开启, 若没有安装请先去下载</string>
     <string name="toast_backup_failed">备份失败</string>
@@ -66,12 +66,12 @@
     <string name="setting_page_app_clean_cache_descript">清楚缓存的图片等文件</string>
     <string name="setting_page_about_author">作者: laoxin</string>
     <string name="setting_page_about_title">About</string>
-    <string name="setting_page_about_pay">请作者喝咖啡</string>
-    <string name="setting_page_about_pay_descript">给作者买杯咖啡支持一下</string>
+    <string name="setting_page_about_pay">投喂开发者</string>
+    <string name="setting_page_about_pay_descript">感觉用着不错?支持一下开发者</string>
     <string name="setting_page_about_github">前往Github下载最新版</string>
     <string name="toast_del_buckup_when_mod_enable">请先关闭所有mod再删除备份</string>
-    <string name="toast_del_buckup_success">删除备份成功</string>
-    <string name="toast_del_buckup_filed">删除文件失败</string>
+    <string name="toast_del_buckup_success">%s : 删除备份成功</string>
+    <string name="toast_del_buckup_filed">%s : 删除备份失败</string>
     <string name="setting_del_backups_dialog_title">警告</string>
     <string name="setting_del_backups_dialog_content_txt">删除备份后将无法正常恢复游戏文件, 请谨慎操作！请在关闭所有Mod后进行操作</string>
     <string name="toast_del_cache_success">删除缓存成功</string>
@@ -120,10 +120,10 @@
     <string name="tips_restore_game_files">正在还原游戏文件</string>
     <string name="tips_check_password">校验密码</string>
     <string name="tips_read_mod">正在读取Mod信息</string>
-    <string name="setting_page_app_swtch_game">切换游戏服务器</string>
-    <string name="setting_page_app_swtch_game_descript">需要先关闭所有MOD(切换后反和谐需要重新开启)</string>
-    <string name="toast_set_game_info_success">已切换游戏服务器</string>
-    <string name="switch_game_service_tiltle">切换游戏服务器</string>
+    <string name="setting_page_app_swtch_game">选择游戏</string>
+    <string name="setting_page_app_swtch_game_descript">选择需要管理MOD的游戏</string>
+    <string name="toast_set_game_info_success">切换游戏: %s</string>
+    <string name="switch_game_service_tiltle">选择游戏</string>
     <string name="toast_switch_game_when_mod_enable">请先关闭所有Mod再切换游戏版本</string>
     <string name="setting_page_more_qq">实验室交流群</string>
     <string name="qq_url"><![CDATA[http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=lynCj4WRXPNwATYiZKfYkySm0utpUAAO&authKey=qFoE9Wpp9h5%2FCqMSXF7yQAG%2BG6WSxjGkjU7mwez%2BU%2FO7MpmzSbpivyx1OjCHFldQ&noverify=0&group_code=939934555]]></string>
@@ -137,5 +137,23 @@
     <string name="select_permission_dialog_by_shizuku">通过shizuku授权</string>
     <string name="select_permission_dialog_by_shizuku_descript">通过shuzuku获取文件读写权限</string>
     <string name="dialog_storage_message_a6">实验室需要文件管理权限才能继续使用</string>
+    <string name="toast_setect_game_success">已选择: %1$s %2$s</string>
+    <string name="toast_set_game_info_failed">游戏未安装: %1$s %2$s</string>
+    <string name="toast_please_select_game">请到设置中选择游戏</string>
+    <string name="console_configuration_scan_dictionary">扫描文件夹MOD</string>
+    <string name="console_scan_directory_mods">注意</string>
+    <string name="console_scan_directory_mods_content">此功能只会扫描配置的MOD目录中游戏包名(比如:com.bilibili.azurlane)文件夹包含的MOD(QQ和系统下载均不会扫描)</string>
+    <string name="toast_scanQQ_failed">扫描QQ目录失败</string>
+    <string name="toast_this_dir_has_no_prim">此文件夹权限不足</string>
+    <string name="setting_page_app_flash_game_config">读取游戏配置文件</string>
+    <string name="setting_page_app_flash_game_config_descript">配置文件放到配置的MOD目录中的GameConfig中</string>
+    <string name="toast_game_config_not_suppose">游戏配置不支持此功能</string>
+    <string name="toast_game_not_suppose_anti">此游戏无反和谐配置</string>
+    <string name="mod_page_mod_detail_dialog_detali_modType">MOD类型: %1$s</string>
+    <string name="toast_load_game_config_err">读取游戏配置失败: %1$s</string>
+    <string name="toast_game_config_del">游戏配置文件已被删除</string>
+    <string name="console_setting_info_configuration_can_install">是</string>
+    <string name="console_setting_info_configuration_not_install">否</string>
+    <string name="dialog_dis_enable_mods_title">以下MOD已被删除是否关闭?</string>
 
 </resources>

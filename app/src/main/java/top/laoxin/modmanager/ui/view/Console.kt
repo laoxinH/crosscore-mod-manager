@@ -2,7 +2,6 @@ package top.laoxin.modmanager.ui.view
 
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -36,9 +34,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,8 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
+import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.viewmodel.ConsoleUiState
@@ -64,7 +61,18 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp)) {
     )
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
-    var showPermissionDialog by remember { mutableStateOf(true) }
+    DialogCommon(
+        title = stringResource(id = R.string.console_scan_directory_mods),
+        content = stringResource(id = R.string.console_scan_directory_mods_content),
+        onConfirm = {
+            viewModel.setShowScanDirectoryModsDialog(false)
+            viewModel.setScanDirectoryMods(true)
+        },
+        onCancel = {
+            viewModel.setShowScanDirectoryModsDialog(false)
+        },
+        showDialog = uiState.showScanDirectoryModsDialog
+    )
 
     Column(
         modifier = Modifier
@@ -84,7 +92,7 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp)) {
             }
         }
 
-        GameInformationCard(viewModel, Modifier.align(Alignment.CenterHorizontally))
+        GameInformationCard(viewModel,uiState.gameInfo, Modifier.align(Alignment.CenterHorizontally))
         // 添加一些间距
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -92,15 +100,18 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp)) {
         SettingInformationCard(viewModel, uiState)
         Spacer(modifier = Modifier.height(16.dp))
 
-        ConfigurationCard(viewModel)
+        ConfigurationCard(viewModel,uiState)
 
     }
 }
 
 // 游戏信息选项卡
 @Composable
-fun GameInformationCard(viewModel: ConsoleViewModel, modifier: Modifier = Modifier) {
-    val gameInfo = viewModel.gameInfo
+fun GameInformationCard(
+    viewModel: ConsoleViewModel,
+    gameInfo: GameInfo,
+    modifier: Modifier = Modifier
+) {
     // 第一部分：一个卡片展示当前设置项目的一些信息
     Box(
         modifier = modifier
@@ -111,7 +122,7 @@ fun GameInformationCard(viewModel: ConsoleViewModel, modifier: Modifier = Modifi
         ) {
             // 第一个区域：添加一个圆角图片
             Image(
-                bitmap = gameInfo.icon, // 替换为你的图片资源
+                bitmap = viewModel.getGameIcon(gameInfo.packageName), // 替换为你的图片资源
                 contentDescription = null,
                 modifier = Modifier
                     .size(80.dp)
@@ -124,7 +135,7 @@ fun GameInformationCard(viewModel: ConsoleViewModel, modifier: Modifier = Modifi
             // 第二个区域：采用垂直布局，添加一些描述信息
             Column {
                 Text(
-                    text = stringResource(id = R.string.console_game_name, gameInfo.name),
+                    text = stringResource(id = R.string.console_game_name, gameInfo.gameName),
                     style = typography.labelLarge
                 )
                 Text(
@@ -136,7 +147,7 @@ fun GameInformationCard(viewModel: ConsoleViewModel, modifier: Modifier = Modifi
                 Text(
                     text = stringResource(
                         id = R.string.console_game_version,
-                        gameInfo.versionCode
+                        gameInfo.version
                     ), style = typography.labelLarge
                 )
                 Text(
@@ -208,7 +219,9 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
                 Text(
                     stringResource(
                         id = R.string.console_setting_info_configuration_install_loction,
-                        if (viewModel.canInstallMod) "是" else "否"
+                        if (uiState.canInstallMod) stringResource(R.string.console_setting_info_configuration_can_install) else stringResource(
+                            R.string.console_setting_info_configuration_not_install
+                        )
                     ),
                     style = typography.labelLarge
                 )
@@ -219,8 +232,10 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
 
 // 配置选项卡
 @Composable
-fun ConfigurationCard(viewModel: ConsoleViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
+fun ConfigurationCard(viewModel: ConsoleViewModel,
+                      uiState: ConsoleUiState
+) {
+    //val uiState by viewModel.uiState.collectAsState()
 
     val context = LocalContext.current
     val openDirectoryLauncher =
@@ -229,13 +244,13 @@ fun ConfigurationCard(viewModel: ConsoleViewModel) {
             // 你可以在这里处理用户选择的目录
             if (uri != null) {
                 // 使用uri
-                val path = uri.path?.split(":")?.last()
+                val path = uri.path?.split(":")?.last()?.replace(ModTools.ROOT_PATH + "/","")
 
 
 // 使用"/"将路径部分连接起来
 
                 viewModel.setSelectedDirectory(
-                    path ?: context.getString(R.string.console_configuration_mod_path_not_select)
+                    path ?: (ModTools.ROOT_PATH + "/" + ModTools.DOWNLOAD_MOD_PATH)
                 )
                 // TODO: 使用path
             }
@@ -302,6 +317,19 @@ fun ConfigurationCard(viewModel: ConsoleViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Text(
+                    text = stringResource(id = R.string.console_configuration_scan_dictionary),
+                    style = typography.titleMedium
+                )
+                Switch(checked = uiState.scanDirectoryMods, onCheckedChange = {
+                    viewModel.openScanDirectoryMods(it)
+                })
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 TextButton(
                     onClick = { openDirectoryLauncher.launch(null) },
                     contentPadding = PaddingValues(0.dp)
@@ -345,44 +373,6 @@ fun ConsolePage() {
         ConsoleContent(innerPadding)
     }
 }
-
-// 权限请求弹窗
-@Composable
-fun PermissionShizukuRequestDialog(
-    showDialog: Boolean,
-    viewModel: ConsoleViewModel,
-
-    ) {
-    val messageOk = stringResource(id = R.string.toast_shizuku_permission_granted)
-    val messageNo = stringResource(id = R.string.toast_shizuku_permission_denied)
-    val messageNoShizuku = stringResource(id = R.string.toast_shizuku_not_available)
-    val context = LocalContext.current
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                viewModel.setOpenPermissionRequestDialog(false)
-            }, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
-            title = { Text(stringResource(id = R.string.dialog_shizhuku_title)) },
-            text = { Text(stringResource(id = R.string.dialog_shizuku_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.getPermissionShizuku(messageOk, messageNo, messageNoShizuku)
-                }) {
-                    Text(stringResource(id = R.string.dialog_button_request_permission))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    viewModel.setOpenPermissionRequestDialog(false)
-                    viewModel.openUrl(context, "https://shizuku.rikka.app/")
-                }) {
-                    Text(stringResource(id = R.string.dialog_button_request_download))
-                }
-            }
-        )
-    }
-}
-
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Preview(showBackground = true)

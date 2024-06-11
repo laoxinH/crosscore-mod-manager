@@ -9,9 +9,9 @@ import rikka.shizuku.Shizuku.UserServiceArgs
 import rikka.shizuku.shared.BuildConfig
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.tools.FileTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ToastUtils
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import top.laoxin.modmanager.useservice.IFileExplorerService
 
 
@@ -27,7 +27,7 @@ object FileExplorerServiceManager {
             Log.d(TAG, "onServiceConnected: ")
             isBind = true
             ModTools.iFileExplorerService = IFileExplorerService.Stub.asInterface(service)
-            FileTools.iFileExplorerService = IFileExplorerService.Stub.asInterface(service)
+            ShizukuFileTools.iFileExplorerService = IFileExplorerService.Stub.asInterface(service)
             ToastUtils.shortCall(R.string.toast_shizuku_connected)
         }
 

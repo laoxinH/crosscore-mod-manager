@@ -18,17 +18,27 @@ interface BackupDao {
     @androidx.room.Query("SELECT * from backups")
     fun getAll(): List<BackupBean>
 
-    // 通过name查询数据
-    @androidx.room.Query("SELECT * from backups WHERE name = :name")
-    fun getByName(name: String): BackupBean?
-
-    // 通过modPath查询
-    @androidx.room.Query("SELECT * from backups WHERE modPath = :modPath")
-    fun getByModPath(modPath: String): Flow<List<BackupBean?>>
+    @androidx.room.Query("SELECT * from backups WHERE modName = :modPath")
+    fun getByModPath(modPath: String): Flow<List<BackupBean>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(backups: List<BackupBean>)
 
     @androidx.room.Query("DELETE FROM backups")
     fun deleteAll()
+
+
+
+    //通过gamePackageName删除
+    @androidx.room.Query("DELETE FROM backups WHERE gamePackageName = :gamePackageName")
+    fun deleteByGamePackageName(gamePackageName: String)
+
+
+    // 通过modName和gamePackageName查询backups
+    @androidx.room.Query("SELECT * from backups WHERE modName = :modName AND gamePackageName = :gamePackageName")
+    fun getByModNameAndGamePackageName(modName: String, gamePackageName: String): Flow<List<BackupBean>>
+
+
+
+
 }

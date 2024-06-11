@@ -16,9 +16,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -26,8 +27,10 @@ import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.BackupBean
+import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.constant.ModPath
+import top.laoxin.modmanager.constant.GameInfoConstant
+import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.data.mods.ModRepository
 import top.laoxin.modmanager.data.UserPreferencesRepository
@@ -54,6 +57,11 @@ class ModViewModel(
     private var _requestPermissionPath by mutableStateOf("")
     val requestPermissionPath: String
         get() = _requestPermissionPath
+
+    private var _gameInfo = GameInfoConstant.gameInfoList[0]
+
+    // 删除的mods
+    private var delModsList = emptyList<ModBean>()
 
 
     // mod列表
@@ -86,99 +94,99 @@ class ModViewModel(
     private val selectedDirectoryFlow =
         userPreferencesRepository.getPreferenceFlow(
             "SELECTED_DIRECTORY",
-            ModTools.DOWNLOAD_MOD_PATH_JC
+            ModTools.DOWNLOAD_MOD_PATH
         )
     private val scanDownloadFlow =
         userPreferencesRepository.getPreferenceFlow("SCAN_DOWNLOAD", false)
 
-    // 安装位置
-    private val installPath = userPreferencesRepository.getPreferenceFlow("INSTALL_PATH", "")
-
-    // 游戏服务器
-    private val gameService = userPreferencesRepository.getPreferenceFlow("GAME_SERVER", "")
-
     // 用户提示
     private val userTips = userPreferencesRepository.getPreferenceFlow("USER_TIPS", true)
+
+    // 选择游戏`
+    private val selectedGame = userPreferencesRepository.getPreferenceFlow("SELECTED_GAME", 0)
+
+    // 扫描文件夹中的Mods
+    private val scanDirectoryMods =
+        userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", false)
 
 
     // 生成用户配置对象
     private val userPreferences: Flow<UserPreferencesState> = combine(
-        scanQQDirectoryFlow, selectedDirectoryFlow, scanDownloadFlow, installPath
-    ) { scanQQDirectory, selectedDirectory, scanDownload, installPath ->
+        scanQQDirectoryFlow,
+        selectedDirectoryFlow,
+        scanDownloadFlow,
+        selectedGame,
+        scanDirectoryMods
+    ) { scanQQDirectory, selectedDirectory, scanDownload, selectedGame, scanDirectoryMods ->
         UserPreferencesState(
             scanQQDirectory = scanQQDirectory,
             selectedDirectory = selectedDirectory,
             scanDownload = scanDownload,
-            installPath = installPath
+            selectedGameIndex = selectedGame,
+            scanDirectoryMods = scanDirectoryMods
         )
     }
 
-    // 获取全部mods
-    private val modsFlow = modRepository.getAllIModsStream()
-    // 转化statFlow
 
-    // 获取开启的mods
-    private val enableModsFlow = modRepository.getEnableMods()
-
-    // 获取关闭的mods
-    private val disableModsFlow = modRepository.getDisableMods()
-
-    // 搜索mods
-    private val searchModsFlow = modRepository.search(_searchText.value)
-
-    /*    // 组合到uiState
-        private val uiStateFlow = combine(
-            modsFlow, enableModsFlow, disableModsFlow, searchModsFlow
-        ) { mods, enableMods, disableMods, searchMods ->
-            ModUiState(
-                modList = mods,
-                enableModList = enableMods,
-                disableModList = disableMods,
-                searchModList = searchMods
-            )
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(10000),
-            ModUiState()
-        )*/
-
-    val uiState: StateFlow<ModUiState> = combine(
-        _uiState,
-        modsFlow,
-        enableModsFlow,
-        disableModsFlow,
-        userTips
-    ) { uiState, mods, enableMods, disableMods, userTips ->
-        // 在这里，你可以定义一个新的ModUiState对象来保存这四个值
-        // 在这个示例中，我将创建一个新的ModUiState对象
-        ModUiState(
-            modList = mods,
-            enableModList = enableMods,
-            disableModList = disableMods,
-            // 其他属性保持不变
-            searchModList = uiState.searchModList,
-            isLoading = uiState.isLoading,
-            openPermissionRequestDialog = uiState.openPermissionRequestDialog,
-            modDetail = uiState.modDetail,
-            showModDetail = uiState.showModDetail,
-            searchBoxVisible = uiState.searchBoxVisible,
-            loadingPath = uiState.loadingPath,
-            selectedMenuItem = uiState.selectedMenuItem,
-            showPasswordDialog = uiState.showPasswordDialog,
-            tipsText = uiState.tipsText,
-            showTips = uiState.showTips,
-            modSwitchEnable = uiState.modSwitchEnable,
-            showUserTipsDialog = userTips
-        )
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(10000),
-        _uiState.value
-    )
+    var uiState = _uiState.asStateFlow()
 
     init {
         //checkPermission()
+        viewModelScope.launch {
+            userPreferences.collect {
+                _gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex]
+                // 获取全部mods
+                val modsFlow =
+                    modRepository.getModsByGamePackageName(_gameInfo.packageName)
+                // 转化statFlow
 
+                // 获取开启的mods
+                val enableModsFlow =
+                    modRepository.getEnableMods(_gameInfo.packageName)
+
+                // 获取关闭的mods
+                val disableModsFlow =
+                    modRepository.getDisableMods(_gameInfo.packageName)
+                uiState = combine(
+                    _uiState,
+                    modsFlow,
+                    enableModsFlow,
+                    disableModsFlow,
+                    userTips
+                ) { uiState, mods, enableMods, disableMods, userTips ->
+                    // 在这里，你可以定义一个新的ModUiState对象来保存这四个值
+                    // 在这个示例中，我将创建一个新的ModUiState对象
+                    ModUiState(
+                        modList = mods,
+                        enableModList = enableMods,
+                        disableModList = disableMods,
+                        // 其他属性保持不变
+                        searchModList = uiState.searchModList,
+                        isLoading = uiState.isLoading,
+                        openPermissionRequestDialog = uiState.openPermissionRequestDialog,
+                        modDetail = uiState.modDetail,
+                        showModDetail = uiState.showModDetail,
+                        searchBoxVisible = uiState.searchBoxVisible,
+                        loadingPath = uiState.loadingPath,
+                        selectedMenuItem = uiState.selectedMenuItem,
+                        showPasswordDialog = uiState.showPasswordDialog,
+                        tipsText = uiState.tipsText,
+                        showTips = uiState.showTips,
+                        modSwitchEnable = uiState.modSwitchEnable,
+                        showUserTipsDialog = userTips,
+                        delEnableModsList = uiState.delEnableModsList,
+                        showDisEnableModsDialog = uiState.showDisEnableModsDialog
+                    )
+                }.stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5000),
+                    _uiState.value
+                )
+
+
+            }
+
+        }
         if (PermissionTools.checkShizukuPermission()) {
             init()
         } else {
@@ -197,21 +205,24 @@ class ModViewModel(
         setLoading(true)
         flashModsJob = viewModelScope.launch(Dispatchers.IO) {
             userPreferences.collect { it ->
-                if (it.installPath.isEmpty()) {
+
+                val gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex].copy(
+                    modSavePath = ModTools.ROOT_PATH + it.selectedDirectory + GameInfoConstant.gameInfoList[it.selectedGameIndex].packageName + "/"
+                )
+                _gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex]
+                if (gameInfo.packageName.isEmpty()) {
                     setLoading(false)
-                    Log.d("ModViewModel", "flashMods: installPath 为空")
+                    withContext(Dispatchers.Main) {
+                        ToastUtils.longCall(R.string.toast_please_select_game)
+                    }
                     this@launch.cancel()
                 }
-                Log.d("ModViewModel", "flashMods: 开始扫描: ${it.installPath}")
-                val gameModPath = it.installPath + "files/Custom/"
-                val requestPermissionPath = PermissionTools.getRequestPermissionPath(gameModPath)
-                if (PermissionTools.checkPermission(gameModPath) == PathType.NULL) {
+
+                val gamePath = gameInfo.gamePath
+                //val requestPermissionPath = PermissionTools.getRequestPermissionPath(gamePath)
+                if (PermissionTools.checkPermission(gamePath) == PathType.NULL) {
                     withContext(Dispatchers.Main) {
-                        setRequestPermissionPath(
-                            PermissionTools.getRequestPermissionPath(
-                                gameModPath
-                            )
-                        )
+                        setRequestPermissionPath(gamePath)
                         setOpenPermissionRequestDialog(true)
                     }
                     setLoading(false)
@@ -221,14 +232,14 @@ class ModViewModel(
                 var modsSelected = mutableListOf<ModBean>()
                 if (it.scanQQDirectory) {
                     withContext(Dispatchers.Main) {
-                        setLoadingPath(ModPath.MOD_PATH_QQ)
+                        setLoadingPath(ScanModPath.MOD_PATH_QQ)
                     }
-                    pathType = PermissionTools.checkPermission(ModPath.MOD_PATH_QQ)
+                    pathType = PermissionTools.checkPermission(ScanModPath.MOD_PATH_QQ)
                     if (pathType == PathType.NULL) {
                         withContext(Dispatchers.Main) {
                             setRequestPermissionPath(
                                 PermissionTools.getRequestPermissionPath(
-                                    ModPath.MOD_PATH_QQ
+                                    ScanModPath.MOD_PATH_QQ
                                 )
                             )
                             setOpenPermissionRequestDialog(true)
@@ -236,40 +247,58 @@ class ModViewModel(
                         setLoading(false)
                         this@launch.cancel()
                     }
-                    ModTools.scanMods(
-                        ModPath.MOD_PATH_QQ,
-                        gameModPath,
-                        ModTools.ROOT_PATH + it.selectedDirectory,
-                        pathType
-                    )
+                    try {
+                        ModTools.scanMods(
+                            ScanModPath.MOD_PATH_QQ,
+                            gameInfo
+                        )
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            //setLoading(false)
+                            ToastUtils.longCall(R.string.toast_scanQQ_failed)
+                        }
+                    }
+
 
                 }
+                try {
+                    ModTools.scanMods(
+                        ModTools.ROOT_PATH + it.selectedDirectory,
+                        gameInfo
+                    )
+                } catch (e: Exception) {
+                    Log.e("ModViewModel", "flashMods: $e")
+                }
+
                 if (it.scanDownload) {
                     withContext(Dispatchers.Main) {
-                        setLoadingPath(ModPath.MOD_PATH_DOWNLOAD)
+                        setLoadingPath(ScanModPath.MOD_PATH_DOWNLOAD)
                     }
-                    ModTools.scanDownload(
-                        ModPath.MOD_PATH_DOWNLOAD,
-                        gameModPath,
-                        ModTools.ROOT_PATH + it.selectedDirectory,
-                        PermissionTools.checkPermission(gameModPath)
+                    ModTools.setModsToolsSpecialPathReadType(PathType.FILE)
+                    ModTools.scanMods(
+                        ScanModPath.MOD_PATH_DOWNLOAD,
+                        gameInfo,
                     )
                 }
                 withContext(Dispatchers.Main) {
                     setLoadingPath(ModTools.ROOT_PATH + it.selectedDirectory)
                 }
+
                 modsSelected =
                     ModTools.createMods(
-                        ModTools.ROOT_PATH + it.selectedDirectory,
-                        gameModPath,
-                        ModTools.ROOT_PATH + it.selectedDirectory,
-                        PermissionTools.checkPermission(gameModPath)
+                        gameInfo.modSavePath,
+                        gameInfo,
                     )
                         .toMutableList()
+
+
                 val modsScan = mutableListOf<ModBean>()
                 //modsScan.addAll(modsQQ)
                 //modsScan.addAll(modsDownload)
                 modsScan.addAll(modsSelected)
+                if (it.scanDirectoryMods) {
+                    modsScan.addAll(ModTools.scanDirectoryMods(gameInfo.modSavePath, gameInfo))
+                }
                 // 从数据库中获取所有mods
                 Log.d("ModViewModel", "扫描到的mod: $modsScan")
                 modRepository.getAllIModsStream().collect { mods ->
@@ -278,11 +307,10 @@ class ModViewModel(
                     val addMods = modsScan.filter { mod -> mods.none { it.path == mod.path } }
                     Log.d("ModViewModel", "添加的mod: $addMods")
                     // 对比modsScan和mods，删除数据库中不存在的mod
-                    val delMods = mods.filter { mod -> modsScan.none { it.path == mod.path } }
-                    Log.d("ModViewModel", "删除的mod: $delMods")
+                    checkDelMods(mods, modsScan, gameInfo, isInit)
                     // 去除数据库mods中重复的Mod
                     modRepository.insertAll(addMods)
-                    if (!isInit) modRepository.deleteAll(delMods)
+
                     setLoading(false)
                     flashModsJob?.cancel()
                 }
@@ -290,18 +318,36 @@ class ModViewModel(
         }
     }
 
+    private suspend fun checkDelMods(
+        mods: List<ModBean>,
+        modsScan: MutableList<ModBean>,
+        gameInfo: GameInfo,
+        init: Boolean
+    ) {
+        var delMods = mods.filter { mod -> modsScan.none { it.path == mod.path } }
+        delMods = delMods.filter { it.gamePackageName == gameInfo.packageName }
+        val delEnableMods = delMods.filter { it.isEnable }
+        delModsList = delMods
+        withContext(Dispatchers.Main) {
+            if (delEnableMods.isNotEmpty()) {
+                setShowDisEnableModsDialog(true)
+                _uiState.update {
+                    it.copy(delEnableModsList = delEnableMods)
+                }
+            } else {
+                delMods()
+            }
+        }
+
+    }
+
 
     private fun init() {
-        /*viewModelScope.launch(Dispatchers.IO) {
-            uiStateFlow.collect {
-                withContext(Dispatchers.Main) {
-                    setModList(it.modList)
-                    setEnableMods(it.enableModList)
-                    setDisableMods(it.disableModList)
-                    //setSearchMods(it.searchModList)
-                }
+        viewModelScope.launch(Dispatchers.IO) {
+            userPreferences.collect { userPreference ->
+                _gameInfo = GameInfoConstant.gameInfoList[userPreference.selectedGameIndex]
             }
-        }*/
+        }
         if (!isInitialized) {
             Log.d("ModViewModel", "init: 初始化")
             //flashMods(true)
@@ -350,7 +396,7 @@ class ModViewModel(
         // 取消上一个搜索任务
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
-            modRepository.search(searchText).collect {
+            modRepository.search(searchText, _gameInfo.packageName).collect {
                 setSearchMods(it)
             }
         }
@@ -432,25 +478,24 @@ class ModViewModel(
     }
 
     // 开启或关闭mod
-    fun switchMod(modBean: ModBean, b: Boolean) {
-        if (PermissionTools.checkPermission(ModTools.MY_APP_PATH) == PathType.NULL){
-
-            setRequestPermissionPath(
-                PermissionTools.getRequestPermissionPath(
-                    ModTools.MY_APP_PATH
-                )
-            )
+    fun switchMod(modBean: ModBean, b: Boolean, isDel : Boolean = false) {
+        if (PermissionTools.checkPermission(ModTools.MY_APP_PATH) == PathType.NULL) {
+            setRequestPermissionPath(ModTools.MY_APP_PATH)
             setOpenPermissionRequestDialog(true)
-
-            setShowTips(false)
-            setModSwitchEnable(true)
             return
         }
+
+        if (PermissionTools.checkPermission(modBean.gameModPath!!) == PathType.NULL) {
+            setRequestPermissionPath(modBean.gameModPath)
+            setOpenPermissionRequestDialog(true)
+            return
+        }
+
         Log.d("ModViewModel", "enableMod called with: modBean = $modBean, b = $b")
         if (b) {
-            enableMod(modBean)
+            enableMod(modBean,isDel)
         } else {
-            disableMod(modBean)
+            disableMod(modBean, isDel)
         }
     }
 
@@ -461,9 +506,7 @@ class ModViewModel(
 
 
     // 开启mod
-    private fun enableMod(modBean: ModBean) {
-
-
+    private fun enableMod(modBean: ModBean, isDel: Boolean) {
         // 判断modbean是否包含密码
         if (modBean.isEncrypted && modBean.password == null) {
             // 如果包含密码，弹出密码输入框
@@ -478,52 +521,38 @@ class ModViewModel(
         Log.d("ModViewModel", "enableMod: 开始执行开启")
         enableJob?.cancel()
         enableJob = viewModelScope.launch(Dispatchers.IO) {
-            installPath.collect { gamePath ->
-                // 鉴权
-                val gameModPath = gamePath + "files/Custom/"
-                if (PermissionTools.checkPermission(gameModPath) == PathType.NULL) {
-                    withContext(Dispatchers.Main) {
-                        setRequestPermissionPath(
-                            PermissionTools.getRequestPermissionPath(
-                                gameModPath
-                            )
-                        )
-                        setOpenPermissionRequestDialog(true)
-                    }
+            // 鉴权
+            val gameModPath = modBean.gameModPath!!
+
+            withContext(Dispatchers.Main) {
+                setTipsText(R.string.tips_backups_game_files)
+            }
+            val backups = ModTools.backupGameFiles(
+                gameModPath,
+                modBean,
+                _gameInfo.packageName + "/"
+            )
+            Log.d("ModViewModel", "开启mod: $backups")
+            if (backups.isEmpty()) {
+                withContext(Dispatchers.Main) {
                     setShowTips(false)
                     setModSwitchEnable(true)
+                    ToastUtils.longCall(R.string.toast_backup_failed)
                     this@launch.cancel()
                 }
-
-
-
-                withContext(Dispatchers.Main) {
-                    setTipsText(R.string.tips_backups_game_files)
-                }
-                val backups = ModTools.backupGameFiles(
-                    gameModPath,
-                    modBean,
-                    PermissionTools.checkPermission(gameModPath)
-                )
-                Log.d("ModViewModel", "开启mod: $backups")
-                if (backups.isEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        setShowTips(false)
-                        setModSwitchEnable(true)
-                        ToastUtils.longCall(R.string.toast_backup_failed)
-                        this@launch.cancel()
-                    }
-                }
-                backupRepository.insertAll(backups)
-                withContext(Dispatchers.Main) {
-                    setTipsText(R.string.tips_unzip_mod)
-                }
-                // 解压缩mod文件到零时目录
-                val unZipPath: String? = ZipTools.unZip(
+            }
+            backupRepository.insertAll(backups)
+            withContext(Dispatchers.Main) {
+                setTipsText(R.string.tips_unzip_mod)
+            }
+            var unZipPath: String? = null
+            if (modBean.isZipFile) {
+                unZipPath = ZipTools.unZip(
                     modBean.path!!,
-                    ModTools.MODS_UNZIP_PATH,
+                    ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/",
                     modBean.password
                 )
+
                 if (unZipPath == null) {
                     withContext(Dispatchers.Main) {
                         //setTipsText(R.string.tips_unzip_failed)
@@ -534,116 +563,127 @@ class ModViewModel(
                     }
                 }
 
-
-                withContext(Dispatchers.Main) {
-                    setTipsText(R.string.tips_copy_mod_to_game)
-                }
-                val copyMod: Boolean = ModTools.copyModFiles(
-                    modBean,
-                    gameModPath,
-                    unZipPath!!,
-                    PermissionTools.checkPermission(gameModPath)
-                )
-                if (!copyMod) {
-                    withContext(Dispatchers.Main) {
-                        setTipsText(R.string.tips_copy_mod_failed)
-                        /*setShowTips(false)
-                        setModSwitchEnable(true)
-                        ToastUtils.longCall(R.string.toast_copy_failed)
-                        this@launch.cancel()*/
-                        val unZip = ModTools.copyModsByStream(
-                            modBean.path,
-                            gameModPath,
-                            modBean.modFiles!!,
-                            modBean.password,
-                            PermissionTools.checkPermission(gameModPath)
-                        )
-                        if (!unZip) {
-                            withContext(Dispatchers.Main) {
-                                setShowTips(false)
-                                setModSwitchEnable(true)
-                                ToastUtils.longCall(R.string.toast_copy_failed)
-                                this@launch.cancel()
-                            }
-                        }
-
-                    }
-
-                }
-
-
-                modRepository.updateMod(modBean.copy(isEnable = true))
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(R.string.toast_mod_open_success)
-                    setShowTips(false)
-                    setModSwitchEnable(true)
-                    //updateMod(modBean, true)
-                }
-
-                enableJob?.cancel()
-                /*modRepository.getAllIModsStream().collect { mods ->
-                    withContext(Dispatchers.Main) {
-                        setModList(mods)
-                    }
-                }*/
+            } else {
+                unZipPath = ""
             }
+
+
+            withContext(Dispatchers.Main) {
+                setTipsText(R.string.tips_copy_mod_to_game)
+            }
+            val copyMod: Boolean = ModTools.copyModFiles(
+                modBean,
+                gameModPath,
+                unZipPath!!,
+            )
+            //copyMod = false
+            if (!copyMod) {
+                withContext(Dispatchers.Main) {
+                    setTipsText(R.string.tips_copy_mod_failed)
+                    /*setShowTips(false)
+                    setModSwitchEnable(true)
+                    ToastUtils.longCall(R.string.toast_copy_failed)
+                    this@launch.cancel()*/
+                    val unZip = ModTools.copyModsByStream(
+                        modBean.path!!,
+                        gameModPath,
+                        modBean.modFiles!!,
+                        modBean.password,
+                        PermissionTools.checkPermission(gameModPath)
+                    )
+                    if (!unZip) {
+                        withContext(Dispatchers.Main) {
+                            setShowTips(false)
+                            setModSwitchEnable(true)
+                            ToastUtils.longCall(R.string.toast_copy_failed)
+                            this@launch.cancel()
+                        }
+                    }
+
+                }
+
+            }
+
+
+            modRepository.updateMod(modBean.copy(isEnable = true))
+            withContext(Dispatchers.Main) {
+                ToastUtils.longCall(R.string.toast_mod_open_success)
+                setShowTips(false)
+                setModSwitchEnable(true)
+                //updateMod(modBean, true)
+            }
+
+            enableJob?.cancel()
+            /*modRepository.getAllIModsStream().collect { mods ->
+                withContext(Dispatchers.Main) {
+                    setModList(mods)
+                }
+            }*/
+
         }
     }
 
     // 关闭mod
-    private fun disableMod(modBean: ModBean) {
+    private fun disableMod(modBean: ModBean, isDel: Boolean) {
         setModSwitchEnable(false)
         setTipsText(R.string.tips_close_mod)
         setShowTips(true)
         enableJob?.cancel()
         Log.d("ModViewModel", "disableMod: 开始执行关闭")
         enableJob = viewModelScope.launch(Dispatchers.IO) {
-            backupRepository.getByModPath(modBean.name!!).collect { backupBeans ->
-                if (PermissionTools.checkPermission(backupBeans[0]?.gamePath!!) == PathType.NULL) {
-                    withContext(Dispatchers.Main) {
-                        setRequestPermissionPath(
-                            PermissionTools.getRequestPermissionPath(
-                                backupBeans[0]?.gamePath!!
+            backupRepository.getByModNameAndGamePackageName(modBean.name!!, _gameInfo.packageName)
+                .collect { backupBeans ->
+                    if (PermissionTools.checkPermission(backupBeans[0].gameFilePath!!) == PathType.NULL) {
+                        withContext(Dispatchers.Main) {
+                            setRequestPermissionPath(
+                                PermissionTools.getRequestPermissionPath(
+                                    backupBeans[0].gameFilePath!!
+                                )
                             )
-                        )
-                        setOpenPermissionRequestDialog(true)
-                    }
-                    setShowTips(false)
-                    setModSwitchEnable(true)
-                    this@launch.cancel()
-                }
-                withContext(Dispatchers.Main) {
-                    setTipsText(R.string.tips_restore_game_files)
-                }
-                val restoreFlag: Boolean = ModTools.restoreGameFiles(
-                    backupBeans,
-                    PermissionTools.checkPermission(backupBeans[0]?.gamePath!!)
-                )
-                if (!restoreFlag) {
-                    withContext(Dispatchers.Main) {
-                        ToastUtils.longCall(R.string.toast_restore_failed)
+                            setOpenPermissionRequestDialog(true)
+                        }
                         setShowTips(false)
                         setModSwitchEnable(true)
                         this@launch.cancel()
                     }
-                }
-
-                modRepository.updateMod(modBean.copy(isEnable = false))
-                withContext(Dispatchers.Main) {
-                    Log.d("ModViewModel", "disableMod: 开始关闭提示")
-                    ToastUtils.longCall(R.string.toast_mod_close_success)
-                    setShowTips(false)
-                    setModSwitchEnable(true)
-                    //updateMod(modBean, false )
-                }
-
-                enableJob?.cancel()
-                /*modRepository.getAllIModsStream().collect { mods ->
                     withContext(Dispatchers.Main) {
-                        setModList(mods)
+                        setTipsText(R.string.tips_restore_game_files)
                     }
-                }*/
-            }
+                    val restoreFlag: Boolean = ModTools.restoreGameFiles(
+                        backupBeans,
+                    )
+                    if (!restoreFlag) {
+                        withContext(Dispatchers.Main) {
+                            ToastUtils.longCall(R.string.toast_restore_failed)
+                            setShowTips(false)
+                            setModSwitchEnable(true)
+                            this@launch.cancel()
+                        }
+                    }
+
+                    modRepository.updateMod(modBean.copy(isEnable = false))
+                    withContext(Dispatchers.Main) {
+                        Log.d("ModViewModel", "disableMod: 开始关闭提示")
+                        ToastUtils.longCall(R.string.toast_mod_close_success)
+                        setShowTips(false)
+                        setModSwitchEnable(true)
+                        //updateMod(modBean, false )
+                    }
+                    if (isDel) {
+                        _uiState.update {
+                            it.copy(
+                                delEnableModsList = it.delEnableModsList.filter { it.path != modBean.path }
+                            )
+                        }
+                    }
+
+                    enableJob?.cancel()
+                    /*modRepository.getAllIModsStream().collect { mods ->
+                        withContext(Dispatchers.Main) {
+                            setModList(mods)
+                        }
+                    }*/
+                }
         }
     }
 
@@ -664,12 +704,15 @@ class ModViewModel(
         checkPasswordJob = viewModelScope.launch(Dispatchers.IO) {
             val modBean = _uiState.value.modDetail
             if (modBean != null) {
-
                 withContext(Dispatchers.Main) {
                     setTipsText(R.string.tips_unzip_mod)
                 }
                 val unZipPath =
-                    ZipTools.unZip(modBean.path!!, ModTools.MODS_UNZIP_PATH, s)
+                    ZipTools.unZip(
+                        modBean.path!!,
+                        ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/",
+                        s
+                    )
                 if (unZipPath == null) {
                     withContext(Dispatchers.Main) {
                         setShowTips(false)
@@ -678,7 +721,10 @@ class ModViewModel(
                         return@withContext
                     }
                 } else {
-                    modRepository.getByPath(modBean.path!!).collect { mods ->
+                    modRepository.getModsByPathAndGamePackageName(
+                        modBean.path,
+                        modBean.gamePackageName!!
+                    ).collect { mods ->
                         withContext(Dispatchers.Main) {
                             setTipsText(R.string.tips_read_mod)
                         }
@@ -707,17 +753,6 @@ class ModViewModel(
 
     }
 
-    fun getPermissionShizuku() {
-        setOpenPermissionRequestDialog(false)
-        if (PermissionTools.isShizukuAvailable) {
-            PermissionTools.requestShizukuPermission()
-        } else {
-
-            ToastUtils.longCall(R.string.toast_shizuku_not_available)
-
-        }
-    }
-
 
     fun setShowTips(b: Boolean) {
         _uiState.value = _uiState.value.copy(showTips = b)
@@ -744,6 +779,19 @@ class ModViewModel(
                 "USER_TIPS",
                 b
             )
+        }
+    }
+
+    fun setShowDisEnableModsDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showDisEnableModsDialog = b)
+        }
+    }
+
+    fun delMods() {
+        viewModelScope.launch {
+            modRepository.deleteAll(delModsList)
+            setShowDisEnableModsDialog(false)
         }
     }
 }

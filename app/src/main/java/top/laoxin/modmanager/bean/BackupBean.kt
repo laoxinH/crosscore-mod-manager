@@ -4,10 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-import android.os.Parcel
-import android.os.Parcelable
-
-
 /**
  * 备份实体类
  */
@@ -15,8 +11,10 @@ import android.os.Parcelable
 data class BackupBean(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val name: String?,
+    val filename: String?,
     val gamePath: String?,
+    val gameFilePath : String?,
     val backupPath: String?,
-    val modPath : String?,
+    val gamePackageName: String?,
+    val modName : String?,
 )

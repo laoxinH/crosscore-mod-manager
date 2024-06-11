@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.zip.ZipFile
 
 /**
  * mod实体类
@@ -21,11 +22,15 @@ data class ModBean(
     val icon: String?,
     val images: List<String>?,
     val modFiles: List<String>?,
-    val isEncrypted : Boolean,
-    val password : String?,
+    val isEncrypted: Boolean,
+    val password: String?,
     var readmePath: String?,
     var fileReadmePath: String?,
-    var isEnable: Boolean
+    var gamePackageName: String?,
+    val gameModPath: String?,
+    var modType: String?,
+    var isEnable: Boolean,
+    var isZipFile: Boolean = true,
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -42,6 +47,10 @@ data class ModBean(
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte()
 
     )
@@ -61,7 +70,11 @@ data class ModBean(
         parcel.writeString(password)
         parcel.writeString(readmePath)
         parcel.writeString(fileReadmePath)
+        parcel.writeString(gamePackageName)
+        parcel.writeString(gameModPath)
+        parcel.writeString(modType)
         parcel.writeByte(if (isEnable) 1 else 0)
+        parcel.writeByte(if (isZipFile) 1 else 0)
     }
 
     override fun describeContents(): Int {

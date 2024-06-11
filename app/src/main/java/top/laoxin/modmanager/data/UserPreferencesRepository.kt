@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -33,9 +34,11 @@ class UserPreferencesRepository(
             // 游戏服务器
             "GAME_SERVICE" to stringPreferencesKey("GAME_SERVICE"),
             // 用户提示
-             "USER_TIPS" to booleanPreferencesKey("USER_TIPS")
-
-
+             "USER_TIPS" to booleanPreferencesKey("USER_TIPS"),
+            // 选择的游戏
+            "SELECTED_GAME" to intPreferencesKey("SELECTED_GAME"),
+            // 扫描文件夹中的Mods
+            "SCAN_DIRECTORY_MODS" to booleanPreferencesKey("SCAN_DIRECTORY_MODS"),
         )
         const val TAG = "UserPreferencesRepo"
     }

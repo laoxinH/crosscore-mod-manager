@@ -40,6 +40,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -103,7 +105,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.tools.PermissionTools
+import top.laoxin.modmanager.ui.view.SettingItem
 import top.laoxin.modmanager.ui.view.commen.SelectPermissionDialog
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
@@ -133,7 +137,6 @@ fun ModPage() {
     )
     val uiState by viewModel.uiState.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
 
 
     Scaffold(
@@ -257,6 +260,15 @@ fun ModPage() {
                 showDialog = uiState.showUserTipsDialog,
                 setUserTipsDialog = viewModel::setUserTipsDialog
             )
+            DisEnableModsDialog(
+                showDialog = uiState.showDisEnableModsDialog,
+                mods = uiState.delEnableModsList,
+                switchMod = { mod, enable -> viewModel.switchMod(mod, enable,true) },
+                onConfirmRequest = {
+                    viewModel.delMods()
+                }
+            )
+
             if (viewModel.requestPermissionPath.isNotEmpty()) {
                 SelectPermissionDialog(path = viewModel.requestPermissionPath, onDismissRequest = { viewModel.setOpenPermissionRequestDialog(false) }, showDialog = uiState.openPermissionRequestDialog)
             }
@@ -376,6 +388,44 @@ fun UserTipsDialog(
                 }
             }
         )
+    }
+}
+
+// 关闭mods提示框
+@Composable
+fun DisEnableModsDialog(
+    showDialog: Boolean,
+    mods : List<ModBean>,
+    switchMod: (ModBean,Boolean) -> Unit,
+    onConfirmRequest: () -> Unit,
+) {
+    if (showDialog) {
+        if (mods.isNotEmpty()) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text(stringResource(id = R.string.dialog_dis_enable_mods_title)) },
+                text = {
+                    LazyColumn {
+                        itemsIndexed(mods) { _, mod ->
+                            ModListItem(mod = mod, modSwitchEnable = true, showDialog = { _, _ ->}, enableMod = switchMod)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        onConfirmRequest()
+                    }) {
+                        Text(stringResource(id = R.string.dialog_button_confirm))
+                    }
+                },
+                dismissButton = {
+
+                }
+            )
+        } else {
+            onConfirmRequest()
+        }
     }
 }
 
