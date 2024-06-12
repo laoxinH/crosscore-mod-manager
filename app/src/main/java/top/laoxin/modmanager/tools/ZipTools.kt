@@ -1,13 +1,12 @@
 package top.laoxin.modmanager.tools
 
+import android.text.TextUtils
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.FileHeader
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
-import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import java.io.BufferedReader
 import java.io.File
@@ -15,10 +14,12 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
+
 
 object ZipTools {
     private const val TAG = "ZipTools"
@@ -106,7 +107,7 @@ object ZipTools {
                     gameModPath = modBeanTemp.gameModPath,
                     modType = modBeanTemp.modType,
 
-                )
+                    )
 
 
             }
@@ -122,20 +123,34 @@ object ZipTools {
         appPath: String,
         iconPath: String?
     ): String? {
-       // Log.d("ZipTools", "图标路径: $iconPath")
-       // Log.d("ZipTools", "zip文件头: ${zipFile.fileHeaders.map { getFileName(it) }}")
-        val fileHeaders = zipFile.fileHeaders
-        for (fileHeaderObj in fileHeaders) {
-           // Log.d("ZipTools", "对比: ${getFileName(fileHeaderObj)} ---- $iconPath")
-           // Log.d("ZipTools", "对比结果: ${getFileName(fileHeaderObj).equals(iconPath, ignoreCase = true)}")
-            if (getFileName(fileHeaderObj).equals(iconPath, ignoreCase = true)) {
-
-                val inputStream = zipFile.getInputStream(fileHeaderObj)
-                val calculateMD5 = calculateMD5(inputStream)
-                Log.d("ZipTools", "文件路径: $appPath")
-                val name = calculateMD5 + fileHeaderObj.fileName
-                return createFile(appPath, name, zipFile.getInputStream(fileHeaderObj))
+        // Log.d("ZipTools", "图标路径: $iconPath")
+        // Log.d("ZipTools", "zip文件头: ${zipFile.fileHeaders.map { getFileName(it) }}")
+        try {
+            val zFilePath = zipFile.file.absoluteFile
+            var zFile = ZipFile(zFilePath)
+            zFile.charset = StandardCharsets.UTF_8
+            val headers = zFile.fileHeaders
+            if (isRandomCode(headers)) { //判断文件名是否有乱码，有乱码，将编码格式设置成GBK
+                zFile.close()
+                zFile = ZipFile(zFilePath)
+                zFile.charset = Charset.forName("GBK")
             }
+            val fileHeaders = zFile.fileHeaders
+            for (fileHeaderObj in fileHeaders) {
+
+                if (fileHeaderObj.fileName.equals(iconPath, ignoreCase = true)) {
+
+                    val inputStream = zFile.getInputStream(fileHeaderObj)
+                    val calculateMD5 = calculateMD5(inputStream)
+                    Log.d("ZipTools", "文件路径: $appPath")
+                    val name = calculateMD5 + fileHeaderObj.fileName
+                    return createFile(appPath, name, zFile.getInputStream(fileHeaderObj))
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.e("ZipTools", "获取图标失败: $e")
+            return null
         }
         return null
     }
@@ -146,18 +161,33 @@ object ZipTools {
         appPath: String,
         images: MutableList<String>
     ): List<String> {
-        val fileHeaders = zipFile.fileHeaders
-        val imagesList = mutableListOf<String>()
-        for (fileHeaderObj in fileHeaders) {
-            if (getFileName(fileHeaderObj) in images) {
-                val inputStream = zipFile.getInputStream(fileHeaderObj)
-                val calculateMD5 = calculateMD5(inputStream)
-                Log.d("ZipTools", "文件路径: $appPath")
-                val name = calculateMD5 + fileHeaderObj.fileName
-                imagesList.add(createFile(appPath, name, zipFile.getInputStream(fileHeaderObj)))
+        try {
+            val zFilePath = zipFile.file.absoluteFile
+            var zFile = ZipFile(zFilePath)
+            zFile.charset = StandardCharsets.UTF_8
+            val headers = zFile.fileHeaders
+            if (isRandomCode(headers)) { //判断文件名是否有乱码，有乱码，将编码格式设置成GBK
+                zFile.close()
+                zFile = ZipFile(zFilePath)
+                zFile.charset = Charset.forName("GBK")
             }
+            val fileHeaders = zFile.fileHeaders
+            val imagesList = mutableListOf<String>()
+            for (fileHeaderObj in fileHeaders) {
+                if (fileHeaderObj.fileName in images) {
+                    val inputStream = zFile.getInputStream(fileHeaderObj)
+                    val calculateMD5 = calculateMD5(inputStream)
+                    Log.d("ZipTools", "文件路径: $appPath")
+                    val name = calculateMD5 + fileHeaderObj.fileName
+                    imagesList.add(createFile(appPath, name, zFile.getInputStream(fileHeaderObj)))
+                }
+            }
+            return imagesList
+        } catch (e: Exception) {
+            Log.e("ZipTools", "获取图片失败: $e")
+            return emptyList()
         }
-        return imagesList
+
     }
 
     // 通过路径和流对象创建文件
@@ -182,36 +212,54 @@ object ZipTools {
         return file.absolutePath
     }
 
-    // 解压zip文件
-    fun unZip(modTempPath: String, s: String, password: String?): String? {
-        Log.d("ZipTools", "文件路径: $modTempPath")
-        Log.d("ZipTools", "解压路径: $s")
-        val zipFile = ZipFile(modTempPath)
+    fun unZip(srcFilePath: String?, destFilePath: String?) {
+        unZip(srcFilePath, destFilePath, "")
+    }
 
-        if (password != null) {
-            zipFile.setPassword(password.toCharArray())
-        }
-        val upZipPath = s + File(modTempPath).name + "/"
-        if (File(upZipPath).exists()) {
-            return upZipPath
-        }
-        // 创建目标文件路径
+    fun unZip(srcFilePath: String?, destFilePath: String?, password: String): String? {
+        try {
+            if (File(destFilePath!!).exists()) {
+                return destFilePath
+            }
+            var zFile = ZipFile(srcFilePath)
+            zFile.charset = StandardCharsets.UTF_8
+            val headers = zFile.fileHeaders
+            if (isRandomCode(headers)) { //判断文件名是否有乱码，有乱码，将编码格式设置成GBK
+                zFile.close()
+                zFile = ZipFile(srcFilePath)
+                zFile.charset = Charset.forName("GBK")
+            }
 
-        //Files.createDirectories(Paths.get(upZipPath).parent)
-
-        // 解压
-        return try {
-            //zipFile.charset = Charset.forName(checkZipFileCharset(zipFile))
-            //zipFile.extractAll()
-            zipFile.extractAll(upZipPath)
-            upZipPath
-        } catch (e: Exception) {
-            fileTools.deleteFile(upZipPath)
-            Log.e("ZipTools", "解压失败: $e")
-            e.printStackTrace()
-            null
+            if (!zFile.isValidZipFile) {
+                throw ZipException("压缩文件不合法,可能被损坏.")
+            }
+            if (zFile.isEncrypted && !TextUtils.isEmpty(password)) { //加密zip，且输入的密码不为空，直接进行解密。
+                zFile.setPassword(password.toCharArray())
+            }
+            val destDir = File(destFilePath)
+            if (!destDir.parentFile.exists()) {
+                destDir.mkdir()
+            }
+            zFile.extractAll(destFilePath)
+            return destFilePath
+        } catch (exception: java.lang.Exception) {
+            exception.printStackTrace()
+            return null
         }
     }
+
+    //待解压的文件名是否乱码
+    private fun isRandomCode(fileHeaders: List<FileHeader>): Boolean {
+        for (i in fileHeaders.indices) {
+            val fileHeader = fileHeaders[i]
+            val canEnCode = Charset.forName("GBK").newEncoder().canEncode(fileHeader.fileName)
+            if (!canEnCode) { //canEnCode为true，表示不是乱码。false.表示乱码。是乱码则需要重新设置编码格式
+                return true
+            }
+        }
+        return false
+    }
+
 
 
     fun calculateMD5(inputStream: InputStream): String {
@@ -234,8 +282,6 @@ object ZipTools {
 
         return result.toString()
     }
-
-
 
 
     fun moveFile(srcPath: String?, destPath: String?): String? {
@@ -287,29 +333,43 @@ object ZipTools {
         files: String?,
         password: String?
     ): Boolean {
-        val zipFile = ZipFile(modTempPath)
-        if (password != null) {
-            zipFile.setPassword(password.toCharArray())
-        }
-        val fileHeaders = zipFile.fileHeaders
-        val flag: MutableList<Boolean> = mutableListOf()
-        for (fileHeaderObj in fileHeaders) {
-            if (getFileName(fileHeaderObj) == files) {
-                try {
-                    createFile(
-                        gameModPath,
-                        File(fileHeaderObj.fileName).name,
-                        zipFile.getInputStream(fileHeaderObj)
-                    )
-                    flag.add(true)
-                } catch (e: Exception) {
-                    Log.e("ZipTools", "通过流解压失败: $e")
-                    e.printStackTrace()
-                    flag.add(false)
+        try {
+            var zFile = ZipFile(modTempPath)
+            zFile.charset = StandardCharsets.UTF_8
+            val headers = zFile.fileHeaders
+            if (isRandomCode(headers)) { //判断文件名是否有乱码，有乱码，将编码格式设置成GBK
+                zFile.close()
+                zFile = ZipFile(modTempPath)
+                zFile.charset = Charset.forName("GBK")
+            }
+            if (password != null) {
+                zFile.setPassword(password.toCharArray())
+            }
+            val fileHeaders = zFile.fileHeaders
+            val flag: MutableList<Boolean> = mutableListOf()
+            for (fileHeaderObj in fileHeaders) {
+                if (fileHeaderObj.fileName == files) {
+                    try {
+                        createFile(
+                            gameModPath,
+                            File(fileHeaderObj.fileName).name,
+                            zFile.getInputStream(fileHeaderObj)
+                        )
+                        flag.add(true)
+                    } catch (e: Exception) {
+                        Log.e("ZipTools", "通过流解压失败: $e")
+                        e.printStackTrace()
+                        flag.add(false)
+                    }
                 }
             }
+            return flag.all { it }
+        } catch (e: Exception) {
+            Log.e("ZipTools", "流解压失败: $e")
+            e.printStackTrace()
+            return false
         }
-        return flag.all { it }
+
     }
 
 }

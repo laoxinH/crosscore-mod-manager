@@ -518,7 +518,7 @@ class ModViewModel(
         setModSwitchEnable(false)
         setTipsText(R.string.tips_open_mod)
         setShowTips(true)
-        Log.d("ModViewModel", "enableMod: 开始执行开启")
+        Log.d("ModViewModel", "enableMod: 开始执行开启 : $modBean")
         enableJob?.cancel()
         enableJob = viewModelScope.launch(Dispatchers.IO) {
             // 鉴权
@@ -545,12 +545,12 @@ class ModViewModel(
             withContext(Dispatchers.Main) {
                 setTipsText(R.string.tips_unzip_mod)
             }
-            var unZipPath: String? = null
+            var unZipPath: String? = ""
             if (modBean.isZipFile) {
                 unZipPath = ZipTools.unZip(
                     modBean.path!!,
                     ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/",
-                    modBean.password
+                    modBean.password ?: ""
                 )
 
                 if (unZipPath == null) {
@@ -558,8 +558,8 @@ class ModViewModel(
                         //setTipsText(R.string.tips_unzip_failed)
                         setShowTips(false)
                         setModSwitchEnable(true)
-                        ToastUtils.longCall(R.string.toast_unzip_failed)
-                        this@launch.cancel()
+                        //ToastUtils.longCall(R.string.toast_unzip_failed)
+                        //this@launch.cancel()
                     }
                 }
 

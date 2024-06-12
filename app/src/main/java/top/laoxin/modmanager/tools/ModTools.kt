@@ -579,7 +579,7 @@ object ModTools {
                 if (zipFile != null && ZipTools.isZipFile(zipFile)) {
                     val modTempMap = createModTempMap(zipFile,
                         scanPath,
-                        zipFile.fileHeaders.map { mutableListOf(it.fileName, getFileName(it)) }
+                        zipFile.fileHeaders.map { mutableListOf(getFileName(it), getFileName(it)) }
                             .toMutableList(),
                         gameInfo)
                     Log.d(TAG, "modTempMap: $modTempMap")
@@ -646,7 +646,7 @@ object ModTools {
                             scanPath, ModBean(
                                 id = 0,
                                 name = modBeanTemp.name,
-                                version = "未适配",
+                                version = "未知",
                                 description = "不存在readme描述文件,无法读取详细信息",
                                 author = "未知",
                                 date = Date().time,
@@ -673,7 +673,7 @@ object ModTools {
                     val modBean = ModBean(
                         id = 0,
                         name = modBeanTemp.name,
-                        version = "未适配",
+                        version = "未知",
                         description = "不存在readme描述文件,无法读取详细信息",
                         author = "未知",
                         date = zipFile?.file?.lastModified() ?: Date().time,
@@ -914,13 +914,9 @@ object ModTools {
         try {
             val listFiles = File(path + GAME_CONFIG).listFiles()
             File(MY_APP_PATH + GAME_CONFIG).mkdirs()
-
-
             for (listFile in listFiles!!) {
-
                 if (listFile.name.endsWith(".json")) {
                     try {
-
                         withContext(Dispatchers.IO) {
                             Log.d(TAG, "文件${listFile.name + listFile.totalSpace}")
                             val fromJson =
@@ -933,7 +929,6 @@ object ModTools {
                                     Paths.get(MY_APP_PATH + GAME_CONFIG + checkGameInfo.packageName + ".json")
                                 )
                             }
-
                             Files.copy(
                                 Paths.get(listFile.absolutePath),
                                 Paths.get(MY_APP_PATH + GAME_CONFIG + checkGameInfo.packageName + ".json"),
