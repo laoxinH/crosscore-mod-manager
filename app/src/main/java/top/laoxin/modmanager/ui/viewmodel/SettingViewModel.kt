@@ -250,8 +250,7 @@ class SettingViewModel(
             }.onFailure {
                 Log.e("SettingViewModel", "checkUpdate: $it")
             }.onSuccess {
-                Log.e("SettingViewModel", "checkUpdate: $it")
-
+                Log.d("SettingViewModel", "checkUpdate: $it")
                 if (it.code > ModTools.getVersionCode()) {
                     _downloadUrl = it.url
                     _updateDescription = it.des
