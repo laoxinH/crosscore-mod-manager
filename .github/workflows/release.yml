@@ -2,8 +2,8 @@ name: Create Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -13,20 +13,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Get build file name
+        id: get_filename
+        run: echo "::set-output name=filename::$(ls update/*.apk | head -n 1)"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.MOD_TEST }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref.replace('refs/tags/', '') }}
+          release_name: Release ${{ steps.get_filename.outputs.filename }}
           draft: false
           prerelease: false
 
-      - name: Get build file name
-        id: get_filename
-        run: echo "::set-output name=filename::$(ls update/*.apk | head -n 1)"
+
 
       - name: Upload Release Asset
         id: upload_release_asset
