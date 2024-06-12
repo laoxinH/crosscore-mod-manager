@@ -403,7 +403,9 @@ fun DisEnableModsDialog(
         if (mods.isNotEmpty()) {
             AlertDialog(
                 onDismissRequest = {},
-                title = { Text(stringResource(id = R.string.dialog_dis_enable_mods_title)) },
+                title = { Text(stringResource(id = R.string.dialog_dis_enable_mods_title),
+                    style = MaterialTheme.typography.titleSmall
+                    )},
                 text = {
                     LazyColumn {
                         itemsIndexed(mods) { _, mod ->

@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -15,6 +18,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
@@ -24,8 +28,11 @@ import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.data.UserPreferencesRepository
 import top.laoxin.modmanager.data.backups.BackupRepository
 import top.laoxin.modmanager.data.mods.ModRepository
+import top.laoxin.modmanager.network.ModManagerApi
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ToastUtils
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class SettingViewModel(
     private val backupRepository: BackupRepository,
@@ -49,9 +56,16 @@ class SettingViewModel(
 
     private val _uiState = MutableStateFlow(SettingUiState())
     val uiState = _uiState.asStateFlow()
-    var _gameInfo = GameInfoConstant.gameInfoList[0]
+    private var _gameInfo = GameInfoConstant.gameInfoList[0]
+    // 更新描述
+    private var _updateDescription by mutableStateOf("")
+    // 下载地址
+    private var _downloadUrl by mutableStateOf("")
+
+    val updateDescription get() = _updateDescription
 
     init {
+
         viewModelScope.launch(Dispatchers.IO) {
             userPreferencesRepository.getPreferenceFlow("SELECTED_GAME", 0).collect {
                 _gameInfo = GameInfoConstant.gameInfoList[it]
@@ -59,6 +73,7 @@ class SettingViewModel(
 
         }
         getGameInfo()
+        getVersionName()
     }
 
     // 删除所有备份
@@ -224,6 +239,45 @@ class SettingViewModel(
                  gameInfoJob?.cancel()
             }
 
+        }
+    }
+
+    // 检测更新
+    fun checkUpdate() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                ModManagerApi.retrofitService.getUpdate()
+            }.onFailure {
+                Log.e("ConsoleViewModel", "checkUpdate: $it")
+            }.onSuccess {
+                if (it.code > ModTools.getVersionCode()) {
+                    _downloadUrl = it.url
+                    _updateDescription = URLDecoder.decode(it.des, StandardCharsets.UTF_8.toString())
+                    setShowUpgradeDialog(true)
+                } else {
+                    ToastUtils.longCall(R.string.toast_no_update)
+                }
+            }
+        }
+    }
+
+    // 设置更新弹窗
+    fun setShowUpgradeDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showUpdateDialog = b)
+        }
+    }
+
+    // 设置版本号
+    fun setVersionName(versionName: String) {
+        _uiState.update {
+            it.copy(versionName = versionName)
+        }
+    }
+    // 获取版本号
+    fun getVersionName() {
+        viewModelScope.launch() {
+            setVersionName(ModTools.getVersionName())
         }
     }
 }

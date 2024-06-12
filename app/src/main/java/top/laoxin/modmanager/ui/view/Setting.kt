@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.constant.GameInfoConstant
+import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
@@ -83,7 +84,8 @@ fun SettingPage() {
             viewModel::openUrl,
             viewModel::showAcknowledgments,
             viewModel::showSwitchGame,
-            viewModel::flashGameConfig
+            viewModel::flashGameConfig,
+            viewModel::checkUpdate
         )
         DialogCommon(
             title = stringResource(R.string.setting_acknowledgments),
@@ -113,7 +115,8 @@ fun SettingContent(
     openUrl: (Context, String) -> Unit,
     showAcknowledgments: (Boolean) -> Unit,
     showSwitchGame: (Boolean) -> Unit,
-    flashGameConfig : () -> Unit
+    flashGameConfig : () -> Unit,
+    checkUpdate : () -> Unit
 ) {
     val context = LocalContext.current
     DialogCommon(
@@ -175,6 +178,14 @@ fun SettingContent(
             icon = painterResource(id = R.drawable.alipay_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.alipay_url))
+            }
+        )
+        SettingItem(
+            name = stringResource(R.string.setting_page_about_update),
+            description = stringResource(R.string.setting_page_about_update_descript, uiState.versionName),
+            icon = painterResource(id = R.drawable.update_icon),
+            onClick = {
+                checkUpdate()
             }
         )
         SettingTitle(

@@ -7,5 +7,9 @@ data class SettingUiState(
     val deleteBackupDialog: Boolean = false,
     val showAcknowledgments: Boolean = false,
     val showSwitchGame: Boolean = false,
-    val gameInfoList: List<GameInfo> = emptyList()
+    val gameInfoList: List<GameInfo> = emptyList(),
+    // 更新弹窗
+    val showUpdateDialog: Boolean = false,
+    // 当前的versionName
+    val versionName: String = "",
 )

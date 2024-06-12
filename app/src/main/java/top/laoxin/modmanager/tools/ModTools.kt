@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.tools
 
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment
 import android.os.RemoteException
 import android.util.Log
@@ -1059,6 +1060,31 @@ object ModTools {
             } catch (e: Exception) {
                 Log.e(TAG, "创建文件夹失败: $e")
             }
+        }
+    }
+
+    fun getVersionCode(): Int {
+        return try {
+            val context = App.get()
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionCode
+            } else {
+                val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+                packageInfo.longVersionCode.toInt() // Use this for Android versions 9.0 (API level 28) and higher
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            -1
+        }
+    }
+
+    fun getVersionName(): String {
+        return try {
+            val context = App.get()
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            "未知"
         }
     }
 

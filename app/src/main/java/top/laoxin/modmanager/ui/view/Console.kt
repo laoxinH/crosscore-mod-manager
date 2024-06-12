@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.ui.view
 
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -55,7 +56,7 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp)) {
-
+    val context = LocalContext.current
     val viewModel: ConsoleViewModel = viewModel(
         factory = ConsoleViewModel.Factory
     )
@@ -84,7 +85,20 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp)) {
 
         // 权限提示框
        RequestStoragePermission()
-        // 亲求权限
+        // 升级提示
+        DialogCommon(
+            title = stringResource(id = R.string.console_upgrade_title),
+            content = viewModel.updateContent,
+            onConfirm = {
+                viewModel.setShowUpgradeDialog(false)
+                viewModel.openUrl(context,viewModel.downloadUrl)
+            },
+            onCancel = {
+                viewModel.setShowUpgradeDialog(false)
+            },
+            showDialog = uiState.showUpgradeDialog
+        )
+
 
         if (viewModel.requestPermissionPath.isNotEmpty()) {
             RequestUriPermission(path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog) {

@@ -8,7 +8,9 @@ import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -47,6 +49,8 @@ import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import java.io.File
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 
 class ConsoleViewModel(
@@ -57,8 +61,16 @@ class ConsoleViewModel(
 
     // 请求权限路径
     private var _requestPermissionPath by mutableStateOf("")
+    // 下载地址
+    private var _downloadUrl by mutableStateOf("")
+    val downloadUrl: String
+        get() = _downloadUrl
     val requestPermissionPath: String
         get() = _requestPermissionPath
+    // 更新类容
+    private var _updateContent by mutableStateOf("")
+    val updateContent: String
+        get() = _updateContent
 
 
     private val _uiState = MutableStateFlow<ConsoleUiState>(ConsoleUiState())
@@ -130,8 +142,8 @@ class ConsoleViewModel(
             enableModCount = (values[5] as ConsoleUiState).enableModCount,
             canInstallMod = (values[5] as ConsoleUiState).canInstallMod,
             showScanDirectoryModsDialog = (values[5] as ConsoleUiState).showScanDirectoryModsDialog,
-            antiHarmony = (values[5] as ConsoleUiState).antiHarmony
-
+            antiHarmony = (values[5] as ConsoleUiState).antiHarmony,
+            showUpgradeDialog = (values[5] as ConsoleUiState).showUpgradeDialog
         )
     }.stateIn(
         viewModelScope,
@@ -140,10 +152,7 @@ class ConsoleViewModel(
     )
 
     init {
-        viewModelScope.launch {
-            val listResult = ModManagerApi.retrofitService.getUpdate()
-            Log.d("ConsoleViewModel", "更新检测: $listResult")
-        }
+        checkUpdate()
         ModTools.updateGameConfig()
         updateGameInfo()
         gameInfoJob = viewModelScope.launch {
@@ -467,20 +476,32 @@ class ConsoleViewModel(
             it.copy(gameInfo = gameInfo)
         }
     }
+    // 设置显示升级弹窗
+    fun setShowUpgradeDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showUpgradeDialog = b)
+        }
+    }
 
     //检测软件更新
-    fun checkUpdate() {
+    private fun checkUpdate() {
         viewModelScope.launch {
             kotlin.runCatching {
                 ModManagerApi.retrofitService.getUpdate()
             }.onFailure {
                 Log.e("ConsoleViewModel", "checkUpdate: $it")
             }.onSuccess {
-                Log.d("ConsoleViewModel", "checkUpdate: $it")
-
+               if (it.code > ModTools.getVersionCode()) {
+                   _downloadUrl = it.url
+                   _updateContent = URLDecoder.decode(it.des, StandardCharsets.UTF_8.toString())
+                   setShowUpgradeDialog(true)
+                }
             }
         }
     }
+
+
+
 }
 
 

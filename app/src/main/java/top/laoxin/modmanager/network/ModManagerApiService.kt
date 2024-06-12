@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import top.laoxin.modmanager.bean.UpdateBean
 
 private const val BASE_URL =
-    "https://raw.githubusercontent.com"
+    "https://gitee.com"
 
 /**
  * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
@@ -22,7 +22,7 @@ private val retrofit = Retrofit.Builder()
  * Retrofit service object for creating api calls
  */
 interface ModManagerApiService {
-    @GET("/laoxinH/crosscore-mod-manager/main/update/update.json")
+    @GET("/laoxinH/Mod_Manager/raw/main/update/update.json")
     suspend fun getUpdate(): UpdateBean
 }
 

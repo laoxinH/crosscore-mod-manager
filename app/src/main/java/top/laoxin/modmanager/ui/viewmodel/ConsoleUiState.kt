@@ -21,6 +21,9 @@ data class ConsoleUiState (
     val canInstallMod: Boolean = false,
     // 是否显示扫描文件夹中的Mods对话框
     val showScanDirectoryModsDialog: Boolean = false,
+    // 显示升级弹窗
+    val showUpgradeDialog: Boolean = false,
+
 
 
 
