@@ -59,10 +59,11 @@ class SettingViewModel(
     private var _gameInfo = GameInfoConstant.gameInfoList[0]
     // 更新描述
     private var _updateDescription by mutableStateOf("")
+    val updateDescription get() = _updateDescription
     // 下载地址
     private var _downloadUrl by mutableStateOf("")
 
-    val updateDescription get() = _updateDescription
+    val downloadUrl get() = _downloadUrl
 
     init {
 

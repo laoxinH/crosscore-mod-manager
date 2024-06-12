@@ -57,6 +57,7 @@ fun SettingPage() {
         factory = SettingViewModel.Factory
     )
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -93,6 +94,18 @@ fun SettingPage() {
             onConfirm = { viewModel.showAcknowledgments(false) },
             onCancel = { viewModel.showAcknowledgments(false) },
             showDialog = uiState.showAcknowledgments
+        )
+        DialogCommon(
+            title = stringResource(id = R.string.console_upgrade_title),
+            content = viewModel.updateDescription,
+            onConfirm = {
+                viewModel.setShowUpgradeDialog(false)
+                viewModel.openUrl(context,viewModel.downloadUrl)
+            },
+            onCancel = {
+                viewModel.setShowUpgradeDialog(false)
+            },
+            showDialog = uiState.showUpdateDialog
         )
         SwitchGameDialog(
             gameInfoList = uiState.gameInfoList,
