@@ -31,8 +31,7 @@ import top.laoxin.modmanager.data.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ToastUtils
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
+
 
 class SettingViewModel(
     private val backupRepository: BackupRepository,
