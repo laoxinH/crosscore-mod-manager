@@ -1,10 +1,10 @@
 {
-    "code": 4,
-    "name": "1.8.6 beta",
-    "filename": "ModManager-release-1.8.6-beta.apk",
-    "url": "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/ModManager-release-1.8.6-beta.apk",
-    "time": 1718164734163,
-    "des": "1.\u4fee\u590d\u5220\u9664MOD\u4e0d\u6d88\u5931\u95ee\u9898\n2.\u4fee\u590d\u6e05\u9664\u7f13\u5b58\u548c\u5907\u4efd\u63d0\u793a\u5931\u8d25\u7684\u95ee\u9898\n3.\u6dfb\u52a0\u66f4\u65b0\u68c0\u6d4b",
-    "size": 13384387,
-    "md5": "ModManager-release-1.8.6-beta.apk"
+    "code": 5,
+    "name": "1.8.7 beta",
+    "filename": "ModManager-release-1.8.7-beta.apk",
+    "url": "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/ModManager-release-1.8.7-beta.apk",
+    "time": 1718208950603,
+    "des": "1.\u4fee\u590d\u4e24\u4e2a\u9648\u5e74\u8001bug\n2.\u4fee\u590d\u89e3\u538b\u5931\u8d25, \u626b\u63cf\u5931\u8d25",
+    "size": 13384975,
+    "md5": "ModManager-release-1.8.7-beta.apk"
 }

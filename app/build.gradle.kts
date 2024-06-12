@@ -5,7 +5,7 @@ import java.security.MessageDigest
  object buildInfo {
     val versionCode = 5
     val versionName = "1.8.7 beta"
-    val versionDes = "1.修复删除MOD不消失问题\n2.修复清除缓存和备份提示失败的问题\n3.添加更新检测"
+    val versionDes = "1.修复两个陈年老bug\n2.修复解压失败, 扫描失败"
     val updateBaseUrl = "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/"
     val updatePath = "update"
     val updateInfoFilename = "update.json"
