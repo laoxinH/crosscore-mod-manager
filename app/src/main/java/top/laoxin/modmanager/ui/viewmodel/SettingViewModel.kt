@@ -254,7 +254,7 @@ class SettingViewModel(
 
                 if (it.code > ModTools.getVersionCode()) {
                     _downloadUrl = it.url
-                    _updateDescription = URLDecoder.decode(it.des, StandardCharsets.UTF_8.toString())
+                    _updateDescription = it.des
                     setShowUpgradeDialog(true)
                 } else {
                     ToastUtils.longCall(R.string.toast_no_update)
