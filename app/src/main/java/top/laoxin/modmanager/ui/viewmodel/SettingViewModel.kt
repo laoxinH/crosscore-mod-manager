@@ -248,8 +248,10 @@ class SettingViewModel(
             kotlin.runCatching {
                 ModManagerApi.retrofitService.getUpdate()
             }.onFailure {
-                Log.e("ConsoleViewModel", "checkUpdate: $it")
+                Log.e("SettingViewModel", "checkUpdate: $it")
             }.onSuccess {
+                Log.e("SettingViewModel", "checkUpdate: $it")
+
                 if (it.code > ModTools.getVersionCode()) {
                     _downloadUrl = it.url
                     _updateDescription = URLDecoder.decode(it.des, StandardCharsets.UTF_8.toString())

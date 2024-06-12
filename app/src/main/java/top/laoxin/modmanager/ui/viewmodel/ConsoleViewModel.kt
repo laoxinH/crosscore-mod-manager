@@ -492,6 +492,7 @@ class ConsoleViewModel(
                 Log.e("ConsoleViewModel", "checkUpdate: $it")
             }.onSuccess {
                if (it.code > ModTools.getVersionCode()) {
+                   Log.d("ConsoleViewModel", "checkUpdate: ${it}")
                    _downloadUrl = it.url
                    _updateContent = URLDecoder.decode(it.des, StandardCharsets.UTF_8.toString())
                    setShowUpgradeDialog(true)
