@@ -1099,4 +1099,17 @@ object ModTools {
         }
     }
 
+    fun writeGameConfigFile(downloadGameConfig: GameInfo) {
+        try {
+            val file = File(MY_APP_PATH + GAME_CONFIG + downloadGameConfig.packageName + ".json")
+            if (file.exists()) {
+                file.delete()
+            }
+            file.createNewFile()
+            file.writeText(Gson().toJson(downloadGameConfig, GameInfo::class.java))
+        } catch (e: Exception) {
+            Log.e(TAG, "写入游戏配置失败: $e")
+        }
+    }
+
 }

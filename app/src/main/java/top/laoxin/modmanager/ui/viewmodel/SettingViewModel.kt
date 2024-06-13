@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.data.UserPreferencesRepository
@@ -279,6 +280,50 @@ class SettingViewModel(
     fun getVersionName() {
         viewModelScope.launch() {
             setVersionName(ModTools.getVersionName())
+        }
+    }
+
+    fun setShowDownloadGameConfig(b : Boolean) {
+        if (b) {
+            viewModelScope.launch {
+                kotlin.runCatching {
+                    val gameConfigs = ModManagerApi.retrofitService.getGameConfigs()
+                    _uiState.update {
+                        it.copy(downloadGameConfigList = gameConfigs)
+                    }
+                }.onFailure {
+                    ToastUtils.longCall(R.string.toast_get_game_config_failed)
+                }.onSuccess {
+                    _uiState.update {
+                        it.copy(showDownloadGameConfigDialog = b)
+                    }
+                }
+            }
+        } else {
+            _uiState.update {
+                it.copy(showDownloadGameConfigDialog = b)
+            }
+        }
+    }
+
+    fun downloadGameConfig(downloadGameConfigBean: DownloadGameConfigBean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            kotlin.runCatching {
+                val downloadGameConfig =
+                    ModManagerApi.retrofitService.downloadGameConfig(downloadGameConfigBean.packageName)
+                    ModTools.writeGameConfigFile(downloadGameConfig)
+            }.onFailure {
+                Log.e("SettingViewModel", "downloadGameConfig: $it")
+                withContext(Dispatchers.Main) {
+                    ToastUtils.longCall(R.string.toast_download_game_config_failed)
+                }
+            }.onSuccess {
+                withContext(Dispatchers.Main) {
+                    ToastUtils.longCall(R.string.toast_download_game_config_success)
+                    flashGameConfig()
+                }
+
+            }
         }
     }
 }

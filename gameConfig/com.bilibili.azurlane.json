@@ -1,0 +1,17 @@
+{
+  "gameName" : "碧蓝航线",
+  "serviceName" : "官服",
+  "packageName": "com.bilibili.azurlane",
+  "version" : "1.0.0",
+  "gamePath" : "Android/data/com.bilibili.azurlane/",
+  "antiHarmonyFile" : "Android/data/com.bilibili.azurlane/files/localization.txt",
+  "antiHarmonyContent" : "Localization = true\nLocalization_skin = true",
+  "gameFilePath" : [
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/shipyardicon/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/paintingface/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/painting/"
+  ],
+  "modType" : ["shipyardicon","paintingface","painting"],
+  "modSavePath" : "",
+  "isGameFileRepeat" : true
+}

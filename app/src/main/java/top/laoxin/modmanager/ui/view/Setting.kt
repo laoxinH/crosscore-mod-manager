@@ -43,9 +43,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfo
-import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
@@ -86,7 +85,8 @@ fun SettingPage() {
             viewModel::showAcknowledgments,
             viewModel::showSwitchGame,
             viewModel::flashGameConfig,
-            viewModel::checkUpdate
+            viewModel::checkUpdate,
+            viewModel::setShowUpgradeDialog
         )
         DialogCommon(
             title = stringResource(R.string.setting_acknowledgments),
@@ -113,6 +113,12 @@ fun SettingPage() {
             showSwitchGameInfo = viewModel::showSwitchGame,
             showDialog = uiState.showSwitchGame
         )
+        DownloadGameConfigDialog(
+            gameInfoList = uiState.downloadGameConfigList,
+            downloadGameConfig = viewModel::downloadGameConfig,
+            showDownloadGameConfigDialog = viewModel::setShowDownloadGameConfig,
+            showDialog = uiState.showDownloadGameConfigDialog
+        )
     }
 }
 
@@ -129,7 +135,8 @@ fun SettingContent(
     showAcknowledgments: (Boolean) -> Unit,
     showSwitchGame: (Boolean) -> Unit,
     flashGameConfig : () -> Unit,
-    checkUpdate : () -> Unit
+    checkUpdate : () -> Unit,
+    showDownloadGameConfig : (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     DialogCommon(
@@ -164,6 +171,11 @@ fun SettingContent(
             name = stringResource(R.string.setting_page_app_clean_temp),
             description = stringResource(R.string.setting_page_app_clean_temp_descript),
             onClick = { deleteTemp() }
+        )
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_download_game_config),
+            description = stringResource(R.string.setting_page_app_download_game_config_descript),
+            onClick = { showDownloadGameConfig(true) }
         )
         SettingItem(
             name = stringResource(R.string.setting_page_app_flash_game_config),
@@ -359,6 +371,47 @@ fun SwitchGameDialog(
 
 }
 
+@Composable
+fun DownloadGameConfigDialog(
+    gameInfoList: List<DownloadGameConfigBean>,
+    downloadGameConfig: (DownloadGameConfigBean) -> Unit,
+    showDownloadGameConfigDialog: (Boolean) -> Unit,
+    showDialog: Boolean
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {showDownloadGameConfigDialog(false)}, // 点击对话框外的区域时关闭对话框
+            title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) },
+            text = {
+                val toMutableList = gameInfoList.toMutableList()
+                toMutableList.removeAt(0)
+
+                LazyColumn {
+                    itemsIndexed(toMutableList) { index, gameInfo ->
+                        SettingItem(
+                            name = gameInfo.gameName + "(${gameInfo.serviceName})",
+                            description = gameInfo.packageName,
+                            //icon = painterResource(id = R.drawable.ic_launcher_foreground),
+                            onClick = {
+                                downloadGameConfig(gameInfo)
+                                showDownloadGameConfigDialog(false)
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDownloadGameConfigDialog(false)
+                }) {
+                    Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
+                }
+            }
+        )
+
+    }
+
+}
 @Preview
 @Composable
 fun PreviewSettingPage() {

@@ -15,6 +15,8 @@ import java.security.MessageDigest
     val updateBaseUrl = "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/"
     val updatePath = "update"
     val updateInfoFilename = "update.json"
+    val gameConfigPaht = "gameConfig"
+     val gameConfigFilename = "gameConfig.json"
 
 }
 
@@ -47,6 +49,7 @@ android {
         if (this.buildType.name == "release") {
             this.assembleProvider.get().doLast {
                 generateUpdateInfo("ModManager-release-$ver.apk")
+                generateGameConfigApi()
             }
         }
 
@@ -279,3 +282,28 @@ fun generateUpdateInfo(apkName :String) {
     }
     println("------------------ Finish Generating version info ------------------")
 }
+ fun generateGameConfigApi(){
+     val gameConfigDir = rootProject.file(buildInfo.gameConfigPaht)
+     val gameConfigList : MutableList<Map<String,String>> = mutableListOf()
+     gameConfigDir.listFiles()?.forEach {
+         if (it.name.endsWith(".json")) {
+             try {
+                 val gameConfigMap = JsonSlurper().parse(it) as Map<*, *>
+                 val gameConfig = mutableMapOf(
+                     "gameName" to gameConfigMap["gameName"] as String,
+                     "packageName" to gameConfigMap["packageName"] as String,
+                     "serviceName" to gameConfigMap["serviceName"] as String,
+                     "downloadUrl" to "",
+                 )
+                 gameConfigList.add(gameConfig)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+             }
+
+         }
+     }
+     val gameConfigFile = rootProject.file(buildInfo.gameConfigPaht+"/api/"+buildInfo.gameConfigFilename)
+        val outputJson = JsonBuilder(gameConfigList).toPrettyString()
+        gameConfigFile.writeText(outputJson)
+
+ }

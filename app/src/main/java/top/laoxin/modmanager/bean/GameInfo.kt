@@ -2,7 +2,9 @@ package top.laoxin.modmanager.bean
 
 import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class GameInfo(
     val gameName: String,
     val serviceName: String,
