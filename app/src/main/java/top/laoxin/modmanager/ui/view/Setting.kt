@@ -384,7 +384,7 @@ fun DownloadGameConfigDialog(
             title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) },
             text = {
                 val toMutableList = gameInfoList.toMutableList()
-                toMutableList.removeAt(0)
+                //toMutableList.removeAt(0)
 
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->

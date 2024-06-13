@@ -16,8 +16,10 @@ private const val BASE_URL =
 /**
  * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
  */
+private val json = Json { encodeDefaults = true; ignoreUnknownKeys = true; isLenient = true; allowSpecialFloatingPointValues = true; useArrayPolymorphism = false; allowStructuredMapKeys = true; prettyPrint = true; useAlternativeNames = false; classDiscriminator = "type" }
+
 private val retrofit = Retrofit.Builder()
-    .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
     .baseUrl(BASE_URL)
     .build()
 

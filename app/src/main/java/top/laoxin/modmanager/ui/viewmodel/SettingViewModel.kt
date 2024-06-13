@@ -285,17 +285,20 @@ class SettingViewModel(
 
     fun setShowDownloadGameConfig(b : Boolean) {
         if (b) {
-            viewModelScope.launch {
+            viewModelScope.launch (Dispatchers.IO){
                 kotlin.runCatching {
                     val gameConfigs = ModManagerApi.retrofitService.getGameConfigs()
-                    _uiState.update {
-                        it.copy(downloadGameConfigList = gameConfigs)
+                    Log.d("SettingViewModel", "getGameConfigs: $gameConfigs")
+                    withContext(Dispatchers.Main){
+                        _uiState.update {
+                            it.copy(downloadGameConfigList = gameConfigs,
+                                showDownloadGameConfigDialog = b)
+                        }
                     }
+
                 }.onFailure {
-                    ToastUtils.longCall(R.string.toast_get_game_config_failed)
-                }.onSuccess {
-                    _uiState.update {
-                        it.copy(showDownloadGameConfigDialog = b)
+                    withContext(Dispatchers.Main){
+                        ToastUtils.longCall(R.string.toast_get_game_config_failed)
                     }
                 }
             }

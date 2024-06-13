@@ -3,8 +3,8 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 7
-    val versionName = "1.8.9 beta"
+    val versionCode = 8
+    val versionName = "1.9.0 beta"
     val versionDes = versionName + " 更新\n" +
             "1.修复因为开发者过于煞笔导致的bug\n" +
             "2.修复开启某一mod之后开启其他mod无效的bug\n" +
