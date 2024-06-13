@@ -1,9 +1,11 @@
 package top.laoxin.modmanager.network
 
+import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
@@ -17,9 +19,12 @@ private const val BASE_URL =
  * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
  */
 private val json = Json { encodeDefaults = true; ignoreUnknownKeys = true; isLenient = true; allowSpecialFloatingPointValues = true; useArrayPolymorphism = false; allowStructuredMapKeys = true; prettyPrint = true; useAlternativeNames = false; classDiscriminator = "type" }
-
+val gson = GsonBuilder()
+    //.disableHtmlEscaping()
+    .create()
 private val retrofit = Retrofit.Builder()
-    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+    //.addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+    .addConverterFactory(GsonConverterFactory.create(gson))
     .baseUrl(BASE_URL)
     .build()
 

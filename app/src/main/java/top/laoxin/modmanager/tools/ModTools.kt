@@ -7,6 +7,7 @@ import android.os.RemoteException
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.lingala.zip4j.ZipFile
@@ -1105,8 +1106,14 @@ object ModTools {
             if (file.exists()) {
                 file.delete()
             }
+            if (file.parentFile?.exists() == false) {
+                file.parentFile?.mkdirs()
+            }
             file.createNewFile()
-            file.writeText(Gson().toJson(downloadGameConfig, GameInfo::class.java))
+            val gson = GsonBuilder()
+                .disableHtmlEscaping()
+                .create()
+            file.writeText(gson.toJson(downloadGameConfig, GameInfo::class.java))
         } catch (e: Exception) {
             Log.e(TAG, "写入游戏配置失败: $e")
         }
