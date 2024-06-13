@@ -86,7 +86,7 @@ fun SettingPage() {
             viewModel::showSwitchGame,
             viewModel::flashGameConfig,
             viewModel::checkUpdate,
-            viewModel::setShowUpgradeDialog
+            viewModel::setShowDownloadGameConfig
         )
         DialogCommon(
             title = stringResource(R.string.setting_acknowledgments),

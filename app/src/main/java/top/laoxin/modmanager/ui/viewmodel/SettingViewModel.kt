@@ -320,7 +320,7 @@ class SettingViewModel(
             }.onSuccess {
                 withContext(Dispatchers.Main) {
                     ToastUtils.longCall(R.string.toast_download_game_config_success)
-                    flashGameConfig()
+                   // flashGameConfig()
                 }
 
             }

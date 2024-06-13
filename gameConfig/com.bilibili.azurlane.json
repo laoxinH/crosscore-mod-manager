@@ -5,7 +5,7 @@
   "version" : "1.0.0",
   "gamePath" : "Android/data/com.bilibili.azurlane/",
   "antiHarmonyFile" : "Android/data/com.bilibili.azurlane/files/localization.txt",
-  "antiHarmonyContent" : "Localization = true\nLocalization_skin = true",
+  "antiHarmonyContent" : "Localization=true\nLocalization_skin=true",
   "gameFilePath" : [
     "Android/data/com.bilibili.azurlane/files/AssetBundles/shipyardicon/",
     "Android/data/com.bilibili.azurlane/files/AssetBundles/paintingface/",
