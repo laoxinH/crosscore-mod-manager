@@ -306,12 +306,12 @@ fun PasswordInputDialog(
             title = { Text(text = stringResource(R.string.password_dialog_title),
                 style = MaterialTheme.typography.titleLarge)
                     },
+
             text = {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text(stringResource(R.string.password_dialog_label)) },
-                    visualTransformation = PasswordVisualTransformation(),
                     //keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
             },

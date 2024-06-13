@@ -552,19 +552,6 @@ class ModViewModel(
                     ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/",
                     modBean.password ?: ""
                 )
-
-                if (unZipPath == null) {
-                    withContext(Dispatchers.Main) {
-                        //setTipsText(R.string.tips_unzip_failed)
-                        setShowTips(false)
-                        setModSwitchEnable(true)
-                        //ToastUtils.longCall(R.string.toast_unzip_failed)
-                        //this@launch.cancel()
-                    }
-                }
-
-            } else {
-                unZipPath = ""
             }
 
 

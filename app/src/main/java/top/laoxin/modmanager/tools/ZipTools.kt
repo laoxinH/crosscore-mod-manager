@@ -212,14 +212,15 @@ object ZipTools {
         return file.absolutePath
     }
 
-    fun unZip(srcFilePath: String?, destFilePath: String?) {
+    fun unZip(srcFilePath: String, destFilePath: String) {
         unZip(srcFilePath, destFilePath, "")
     }
 
-    fun unZip(srcFilePath: String?, destFilePath: String?, password: String): String? {
+    fun unZip(srcFilePath: String, destFilePath: String, password: String): String? {
         try {
-            if (File(destFilePath!!).exists()) {
-                return destFilePath
+            val unzipPath = destFilePath + File(srcFilePath).nameWithoutExtension + "/"
+            if (File(unzipPath).exists()) {
+                return unzipPath
             }
             var zFile = ZipFile(srcFilePath)
             zFile.charset = StandardCharsets.UTF_8
@@ -236,20 +237,20 @@ object ZipTools {
             if (zFile.isEncrypted && !TextUtils.isEmpty(password)) { //加密zip，且输入的密码不为空，直接进行解密。
                 zFile.setPassword(password.toCharArray())
             }
-            val destDir = File(destFilePath)
-            if (!destDir.parentFile.exists()) {
+            val destDir = File(unzipPath)
+            if (destDir.parentFile?.exists() != true) {
                 destDir.mkdir()
             }
-            zFile.extractAll(destFilePath)
-            return destFilePath
-        } catch (exception: java.lang.Exception) {
+            zFile.extractAll(unzipPath)
+            return unzipPath
+        } catch (exception: Exception) {
             exception.printStackTrace()
             return null
         }
     }
 
     //待解压的文件名是否乱码
-    private fun isRandomCode(fileHeaders: List<FileHeader>): Boolean {
+    fun isRandomCode(fileHeaders: List<FileHeader>): Boolean {
         for (i in fileHeaders.indices) {
             val fileHeader = fileHeaders[i]
             val canEnCode = Charset.forName("GBK").newEncoder().canEncode(fileHeader.fileName)
@@ -342,7 +343,7 @@ object ZipTools {
                 zFile = ZipFile(modTempPath)
                 zFile.charset = Charset.forName("GBK")
             }
-            if (password != null) {
+            if (!password.isNullOrEmpty()) {
                 zFile.setPassword(password.toCharArray())
             }
             val fileHeaders = zFile.fileHeaders
@@ -350,6 +351,7 @@ object ZipTools {
             for (fileHeaderObj in fileHeaders) {
                 if (fileHeaderObj.fileName == files) {
                     try {
+                        File(gameModPath,File(fileHeaderObj.fileName).name).delete()
                         createFile(
                             gameModPath,
                             File(fileHeaderObj.fileName).name,

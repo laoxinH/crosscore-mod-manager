@@ -3,9 +3,15 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 5
-    val versionName = "1.8.7 beta"
-    val versionDes = "1.修复两个陈年老bug\n2.修复解压失败, 扫描失败"
+    val versionCode = 6
+    val versionName = "1.8.8 beta"
+    val versionDes = versionName + " 更新\n" +
+            "1.修复因为开发者过于煞笔导致的bug\n" +
+            "2.修复开启某一mod之后开启其他mod无效的bug\n" +
+            "3.优化密码输入\n" +
+            "4.下载的更新包如果是以zip结尾请自行修改成apk\n" +
+            "5.默认通过Gitee服务器下载,可能需要登录\n" +
+            "6.如果不想注册自行在设置页面前往Github下载最新版\n"
     val updateBaseUrl = "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/"
     val updatePath = "update"
     val updateInfoFilename = "update.json"

@@ -30,6 +30,8 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.useservice.IFileExplorerService
 import java.io.File
 import java.io.IOException
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -767,11 +769,18 @@ object ModTools {
 
     }
 
-    fun unZipModsByFileHeardByFile(
+    private fun unZipModsByFileHeardByFile(
         modTempPath: String, gameModPath: String, files: String?, password: String?
     ): Boolean {
-        val zipFile = ZipFile(modTempPath)
-        if (password != null) {
+        var zipFile = ZipFile(modTempPath)
+        zipFile.charset = StandardCharsets.UTF_8
+        val headers = zipFile.fileHeaders
+        if (ZipTools.isRandomCode(headers)) { //判断文件名是否有乱码，有乱码，将编码格式设置成GBK
+            zipFile.close()
+            zipFile = ZipFile(modTempPath)
+            zipFile.charset = Charset.forName("GBK")
+        }
+        if (!password.isNullOrEmpty()) {
             zipFile.setPassword(password.toCharArray())
         }
         val fileHeaders = zipFile.fileHeaders
@@ -795,11 +804,18 @@ object ModTools {
         return flag.all { it }
     }
 
-    fun unZipModsByFileHeardByDocument(
+    private fun unZipModsByFileHeardByDocument(
         modTempPath: String, gameModPath: String, files: String?, password: String?
     ): Boolean {
-        val zipFile = ZipFile(modTempPath)
-        if (password != null) {
+        var zipFile = ZipFile(modTempPath)
+        zipFile.charset = StandardCharsets.UTF_8
+        val headers = zipFile.fileHeaders
+        if (ZipTools.isRandomCode(headers)) { //判断文件名是否有乱码，有乱码，将编码格式设置成GBK
+            zipFile.close()
+            zipFile = ZipFile(modTempPath)
+            zipFile.charset = Charset.forName("GBK")
+        }
+        if (!password.isNullOrEmpty()) {
             zipFile.setPassword(password.toCharArray())
         }
         val fileHeaders = zipFile.fileHeaders

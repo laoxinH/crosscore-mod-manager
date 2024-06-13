@@ -89,6 +89,7 @@ interface BaseFileTools {
     }
 
     fun copyFileByFD(srcPath: String, destPath: String): Boolean{
+        if (!File(srcPath).exists()) return false
         return try {
             val app = App.get()
             val destPathUri = DocumentFileTools.pathToUri(destPath)
@@ -105,6 +106,7 @@ interface BaseFileTools {
                     destDocumentFile = it
                 }
             }
+
 
             val outputStream = app.contentResolver.openOutputStream(destDocumentFile?.uri!!)
             val inputStream = File(srcPath).inputStream()
