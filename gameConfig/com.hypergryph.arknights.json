@@ -1,0 +1,16 @@
+{
+  "gameName" : "明日方舟",
+  "serviceName" : "官服",
+  "packageName": "com.hypergryph.arknights",
+  "version" : "1.0.0",
+  "gamePath" : "Android/data/com.hypergryph.arknights/",
+  "antiHarmonyFile" : "",
+  "antiHarmonyContent" : "",
+  "gameFilePath" : [
+    "/Android/data/com.hypergryph.arknights/files/AB/Android/chararts/",
+    "/Android/data/com.hypergryph.arknights/files/AB/Android/skinpack/"
+  ],
+  "modType" : ["普通立绘","皮肤"],
+  "modSavePath" : "",
+  "isGameFileRepeat" : true
+}

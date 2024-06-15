@@ -4,5 +4,11 @@
         "packageName": "com.bilibili.azurlane",
         "serviceName": "\u5b98\u670d",
         "downloadUrl": ""
+    },
+    {
+        "gameName": "\u660e\u65e5\u65b9\u821f",
+        "packageName": "com.hypergryph.arknights",
+        "serviceName": "\u5b98\u670d",
+        "downloadUrl": ""
     }
 ]

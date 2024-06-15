@@ -554,7 +554,15 @@ class ModViewModel(
                 )
             }
 
-
+            // 特殊游戏操作
+            if (!ModTools.specialOperationEnable(modBean, _gameInfo.packageName)) {
+                withContext(Dispatchers.Main) {
+                    setShowTips(false)
+                    setModSwitchEnable(true)
+                    ToastUtils.longCall(R.string.toast_special_operation_failed)
+                    this@launch.cancel()
+                }
+            }
             withContext(Dispatchers.Main) {
                 setTipsText(R.string.tips_copy_mod_to_game)
             }
@@ -635,6 +643,14 @@ class ModViewModel(
                     }
                     withContext(Dispatchers.Main) {
                         setTipsText(R.string.tips_restore_game_files)
+                    }
+                    // 特殊游戏操作
+                    if (!ModTools.specialOperationDisable(backupBeans, _gameInfo.packageName)) {
+                        withContext(Dispatchers.Main) {
+                            setShowTips(false)
+                            setModSwitchEnable(true)
+                            ToastUtils.longCall(R.string.toast_special_operation_failed)
+                        }
                     }
                     val restoreFlag: Boolean = ModTools.restoreGameFiles(
                         backupBeans,

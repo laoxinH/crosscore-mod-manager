@@ -23,7 +23,6 @@ import java.security.MessageDigest
 
 object ZipTools {
     private const val TAG = "ZipTools"
-    private val fileTools = FileTools
 
 
     // 通过file生成zip压缩对象,需要判断是否为zip文件
@@ -32,8 +31,8 @@ object ZipTools {
         if (zipFile.isValidZipFile) {
             return zipFile
         }
-        return zipFile
-        //return null
+        //return zipFile
+        return null
     }
 
     // 通过zip对象获取文件列表判断存在readme.txt文件

@@ -20,6 +20,7 @@ import top.laoxin.modmanager.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ScanModPath
+import top.laoxin.modmanager.constant.SpecialGame
 import top.laoxin.modmanager.tools.ZipTools.getFileName
 import top.laoxin.modmanager.tools.ZipTools.getFirstImageFromZip
 import top.laoxin.modmanager.tools.ZipTools.getImagesFromZip
@@ -42,7 +43,7 @@ object ModTools {
     val ROOT_PATH: String = Environment.getExternalStorageDirectory().path
     val MY_APP_PATH =
         (ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")).toString() + "/"
-    private val BACKUP_PATH = MY_APP_PATH + "backup/"
+    val BACKUP_PATH = MY_APP_PATH + "backup/"
     private val MODS_TEMP_PATH = MY_APP_PATH + "temp/"
     val MODS_UNZIP_PATH = MY_APP_PATH + "temp/unzip/"
     private val MODS_ICON_PATH = MY_APP_PATH + "icon/"
@@ -1119,4 +1120,21 @@ object ModTools {
         }
     }
 
+    suspend fun specialOperationEnable(modBean: ModBean, packageName: String): Boolean {
+        SpecialGame.entries.forEach job@{
+            if (it.packageName == packageName) {
+                return it.BaseSpecialGameTools.specialOperationEnable(modBean,packageName)
+            }
+        }
+        return true
+    }
+
+    fun specialOperationDisable(backupBeans: List<BackupBean>, packageName: String): Boolean {
+        SpecialGame.entries.forEach job@{
+            if (it.packageName == packageName) {
+                return it.BaseSpecialGameTools.specialOperationDisable(backupBeans,packageName)
+            }
+        }
+        return true
+    }
 }
