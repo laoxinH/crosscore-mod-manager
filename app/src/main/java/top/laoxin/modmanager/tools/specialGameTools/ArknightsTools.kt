@@ -1,20 +1,62 @@
 package top.laoxin.modmanager.tools.specialGameTools
 
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import com.google.gson.GsonBuilder
+import com.google.gson.LongSerializationPolicy
 import com.google.gson.reflect.TypeToken
+import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import java.io.File
+import java.io.InputStreamReader
+import java.nio.charset.StandardCharsets
 
 object ArknightsTools : BaseSpecialGameTools {
+
     private val CHECK_FILEPATH = ModTools.ROOT_PATH + "/Android/data/com.hypergryph.arknights/files/AB/Android/"
     private const val CHECK_FILENAME_1 = "persistent_res_list.json"
     private const val CHECK_FILENAME_2 = "hot_update_list.json"
     val gson = GsonBuilder()
-        .disableHtmlEscaping()
+        /*.disableHtmlEscaping()
+        .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
         .create()
+    private val app = App.get()
+    data class HotUpdate(
+        var fullPack: FullPack = FullPack(),
+        var versionId: String = "",
+        var abInfos: MutableList<AbInfo> = mutableListOf(),
+        var countOfTypedRes : String = "",
+        var packInfos : MutableList<AbInfo> = mutableListOf()
+    )
+    data class PersistentRes(
+        val abInfos: MutableList<AbInfo> = mutableListOf(),
+
+        )
+
+    data class FullPack(
+        val totalSize: Long = 0,
+        val abSize : Long = 0,
+        val type : String = "",
+        val cid : Int = -1,
+    )
+
+    data class AbInfo(
+        val name : String? ,
+        val hash : String? ,
+        val md5 : String?,
+        val totalSize : Long?,
+        val abSize : Long?,
+        val thash : String?,
+        val type : String?,
+        val pid : String?,
+        val cid : Int?,
+
+
+        )
     override fun specialOperationEnable(mod: ModBean, packageName: String) : Boolean{
         val unZipPath = ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag : MutableList<Boolean> = mutableListOf()
@@ -45,6 +87,9 @@ object ArknightsTools : BaseSpecialGameTools {
             }
 
             val checkFileName = File(mod.gameModPath!!).name + "/" + File(modFilePath).name
+            Log.d("ArknightsTools", "checkFileName: $checkFileName")
+            Log.d("ArknightsTools", "md5: $md5")
+            Log.d("ArknightsTools", "fileSize: $fileSize")
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize!!))
         }
         return flag.all { it }
@@ -62,6 +107,9 @@ object ArknightsTools : BaseSpecialGameTools {
                 0
             }
             val checkFileName = (File(backupBean.backupPath).parentFile?.name ?: "") + "/" + backupBean.filename
+            Log.d("ArknightsTools", "checkFileName: $checkFileName")
+            Log.d("ArknightsTools", "md5: $md5")
+            Log.d("ArknightsTools", "fileSize: $fileSize")
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
 
         }
@@ -72,34 +120,70 @@ object ArknightsTools : BaseSpecialGameTools {
     // 修改check文件
     private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long) : Boolean {
         try {
-            val mapType = object : TypeToken<MutableMap<String, Any>>() {}.type
-            val checkFile1 = File(CHECK_FILEPATH + CHECK_FILENAME_1)
-            val checkFile2 = File(CHECK_FILEPATH + CHECK_FILENAME_2)
-            val checkFile1Map: MutableMap<String, Any> = gson.fromJson(checkFile1.readText(), mapType)
-            val checkFile2Map: MutableMap<String, Any> = gson.fromJson(checkFile2.readText(), mapType)
-            val abInfos1 = checkFile1Map["abInfos"] as List<MutableMap<String, Any>>
-            val abInfos2 = checkFile2Map["abInfos"] as List<MutableMap<String, Any>>
+            // 通过documentFile读取文件
+            FileTools.copyFileByDF(
+                CHECK_FILEPATH + CHECK_FILENAME_1,
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
+            )
+            FileTools.copyFileByDF(
+                CHECK_FILEPATH + CHECK_FILENAME_2,
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
+            )
+            val checkFile1 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1)
+            val checkFile2 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2)
+
+            val checkFile1Map = gson.fromJson(
+                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1).readText(),
+                PersistentRes::class.java
+            )
+            val checkFile2Map = gson.fromJson(
+                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2).readText(),
+                HotUpdate::class.java
+            )
+            val abInfos1 = checkFile1Map.abInfos
+            val abInfos2 = checkFile2Map.abInfos
             var index1 = -1
             abInfos1.forEachIndexed { index, mutableMap ->
-                if (mutableMap["name"] == fileName) {
+                if (mutableMap.name == fileName) {
                     index1 = index
                 }
             }
-            abInfos1[index1]["md5"] = md5
-            abInfos1[index1]["abSize"] = fileSize
+            Log.d("ArknightsTools", "index1: $index1")
+            abInfos1[index1] = abInfos1[index1].copy(
+                md5 = md5,
+                abSize = fileSize
+            )
             index1 = -1
             abInfos2.forEachIndexed { index, mutableMap ->
-                if (mutableMap["name"] == fileName) {
+                if (mutableMap.name == fileName) {
                     index1 = index
                 }
             }
-            abInfos2[index1]["md5"] = md5
-            abInfos2[index1]["abSize"] = fileSize
-            gson.toJson(abInfos1, mapType).let {
-                checkFile1.writeText(it)
+            abInfos2[index1] = abInfos2[index1].copy(
+                md5 = md5,
+                abSize = fileSize
+            )
+            gson.toJson(checkFile1Map, PersistentRes::class.java).let { it ->
+                if (checkFile1.exists()) {
+                    checkFile1.delete()
+                    checkFile1.createNewFile()
+                    checkFile1.writeText(it)
+                    FileTools.copyFileByFD(
+                        ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
+                        CHECK_FILEPATH + CHECK_FILENAME_1
+                    )
+                }
             }
-            gson.toJson(abInfos2, mapType).let {
-                checkFile2.writeText(it)
+            gson.toJson(checkFile2Map, HotUpdate::class.java).let {
+                if (checkFile2.exists()) {
+                    checkFile2.delete()
+                    checkFile2.createNewFile()
+                    checkFile2.writeText(it)
+                    FileTools.copyFileByFD(
+                        ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
+                        CHECK_FILEPATH + CHECK_FILENAME_2
+                    )
+                }
             }
             return true
         } catch (e: Exception) {
