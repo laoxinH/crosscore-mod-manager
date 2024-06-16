@@ -8,9 +8,14 @@ import com.google.gson.reflect.TypeToken
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.constant.PathType
+import top.laoxin.modmanager.data.backups.BackupRepository
 import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.tools.PermissionTools
+import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import java.io.File
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
@@ -25,6 +30,7 @@ object ArknightsTools : BaseSpecialGameTools {
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
         .create()
     private val app = App.get()
+    lateinit var fileTools : BaseFileTools
     data class HotUpdate(
         var fullPack: FullPack = FullPack(),
         var versionId: String = "",
@@ -120,15 +126,40 @@ object ArknightsTools : BaseSpecialGameTools {
     // 修改check文件
     private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long) : Boolean {
         try {
+            val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
+            if (checkPermission == PathType.FILE) {
+                Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
+                fileTools = FileTools
+
+            } else if (checkPermission == PathType.DOCUMENT) {
+                fileTools = DocumentFileTools
+            } else if (checkPermission == PathType.SHIZUKU) {
+                fileTools = ShizukuFileTools
+            } else {
+                Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
+                return false
+            }
             // 通过documentFile读取文件
-            FileTools.copyFileByDF(
-                CHECK_FILEPATH + CHECK_FILENAME_1,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
-            )
-            FileTools.copyFileByDF(
-                CHECK_FILEPATH + CHECK_FILENAME_2,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
-            )
+            if (checkPermission == PathType.FILE) {
+                fileTools.copyFileByDF(
+                    CHECK_FILEPATH + CHECK_FILENAME_1,
+                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
+                )
+                fileTools.copyFileByDF(
+                    CHECK_FILEPATH + CHECK_FILENAME_2,
+                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
+                )
+            } else {
+                fileTools.copyFile(
+                    CHECK_FILEPATH + CHECK_FILENAME_1,
+                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
+                )
+                fileTools.copyFile(
+                    CHECK_FILEPATH + CHECK_FILENAME_2,
+                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
+                )
+            }
+
             val checkFile1 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1)
             val checkFile2 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2)
 
@@ -168,10 +199,18 @@ object ArknightsTools : BaseSpecialGameTools {
                     checkFile1.delete()
                     checkFile1.createNewFile()
                     checkFile1.writeText(it)
-                    FileTools.copyFileByFD(
-                        ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
-                        CHECK_FILEPATH + CHECK_FILENAME_1
-                    )
+
+                    if (checkPermission == PathType.DOCUMENT) {
+                        fileTools.copyFileByFD(
+                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
+                            CHECK_FILEPATH + CHECK_FILENAME_1
+                        )
+                    } else {
+                        fileTools.copyFile(
+                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
+                            CHECK_FILEPATH + CHECK_FILENAME_1
+                        )
+                    }
                 }
             }
             gson.toJson(checkFile2Map, HotUpdate::class.java).let {
@@ -179,10 +218,18 @@ object ArknightsTools : BaseSpecialGameTools {
                     checkFile2.delete()
                     checkFile2.createNewFile()
                     checkFile2.writeText(it)
-                    FileTools.copyFileByFD(
-                        ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
-                        CHECK_FILEPATH + CHECK_FILENAME_2
-                    )
+                    if (checkPermission == PathType.DOCUMENT) {
+                        fileTools.copyFileByFD(
+                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
+                            CHECK_FILEPATH + CHECK_FILENAME_2
+                        )
+                    } else {
+                        fileTools.copyFile(
+                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
+                            CHECK_FILEPATH + CHECK_FILENAME_2
+                        )
+                    }
+
                 }
             }
             return true
