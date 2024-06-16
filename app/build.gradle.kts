@@ -3,13 +3,11 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 8
-    val versionName = "1.9.0 beta"
+    val versionCode = 9
+    val versionName = "2.0.0 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.修复因为开发者过于煞笔导致的bug\n" +
-            "2.修复开启某一mod之后开启其他mod无效的bug\n" +
-            "3.优化密码输入\n" +
-            "4.添加下载游戏配置\n" +
+            "1.重大更新,对明日方舟单独适配\n" +
+            "2.提供官方的明日方舟配置文件\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册自行在设置页面前往Github下载最新版\n"
