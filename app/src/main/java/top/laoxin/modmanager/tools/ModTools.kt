@@ -1122,16 +1122,16 @@ object ModTools {
 
     suspend fun specialOperationEnable(modBean: ModBean, packageName: String): Boolean {
         SpecialGame.entries.forEach job@{
-            if (it.packageName == packageName) {
+            if (packageName.contains(it.packageName)) {
                 return it.BaseSpecialGameTools.specialOperationEnable(modBean,packageName)
             }
         }
         return true
     }
 
-    fun specialOperationDisable(backupBeans: List<BackupBean>, packageName: String): Boolean {
+    suspend fun specialOperationDisable(backupBeans: List<BackupBean>, packageName: String): Boolean {
         SpecialGame.entries.forEach job@{
-            if (it.packageName == packageName) {
+            if (packageName.contains(it.packageName)) {
                 return it.BaseSpecialGameTools.specialOperationDisable(backupBeans,packageName)
             }
         }

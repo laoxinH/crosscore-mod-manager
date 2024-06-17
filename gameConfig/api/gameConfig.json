@@ -6,6 +6,12 @@
         "downloadUrl": ""
     },
     {
+        "gameName": "\u660e\u65e5\u65b9\u821f-\u8981\u6c42\u5b9e\u9a8c\u5ba4\u7248\u672c2.0.2\u53ca\u4ee5\u4e0a",
+        "packageName": "com.hypergryph.arknights.bilibili",
+        "serviceName": "B\u670d",
+        "downloadUrl": ""
+    },
+    {
         "gameName": "\u660e\u65e5\u65b9\u821f-\u8981\u6c42\u5b9e\u9a8c\u5ba4\u7248\u672c2.0\u53ca\u4ee5\u4e0a",
         "packageName": "com.hypergryph.arknights",
         "serviceName": "\u5b98\u670d",

@@ -1,0 +1,17 @@
+{
+  "gameName" : "明日方舟-要求实验室版本2.0.2及以上",
+  "serviceName" : "B服",
+  "packageName": "com.hypergryph.arknights.bilibili",
+  "version" : "1.0.0",
+  "gamePath" : "Android/data/com.hypergryph.arknights.bilibili/",
+  "antiHarmonyFile" : "",
+  "antiHarmonyContent" : "",
+  "gameFilePath" : [
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/dynchars/"
+  ],
+  "modType" : ["普通立绘","静态皮肤","动态皮肤"],
+  "modSavePath" : "",
+  "isGameFileRepeat" : true
+}

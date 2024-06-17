@@ -3,11 +3,11 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 10
-    val versionName = "2.0.1 beta"
+    val versionCode = 11
+    val versionName = "2.0.2 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.重大更新,对明日方舟单独适配\n" +
-            "2.提供官方的明日方舟配置文件\n" +
+            "1.一时疏忽吧明日方舟包名写死了,导致不能已配置文件的形式添加其他服务器\n" +
+            "2.提供官方的明日方舟B服配置文件\n" +
             "3.刚刚的更新忘记添加对shizuku的支持,抱歉\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +

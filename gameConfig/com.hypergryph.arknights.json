@@ -8,9 +8,10 @@
   "antiHarmonyContent" : "",
   "gameFilePath" : [
     "/Android/data/com.hypergryph.arknights/files/AB/Android/chararts/",
-    "/Android/data/com.hypergryph.arknights/files/AB/Android/skinpack/"
+    "/Android/data/com.hypergryph.arknights/files/AB/Android/skinpack/",
+    "/Android/data/com.hypergryph.arknights/files/AB/Android/arts/dynchars/"
   ],
-  "modType" : ["普通立绘","皮肤"],
+  "modType" : ["普通立绘","静态皮肤","动态皮肤"],
   "modSavePath" : "",
   "isGameFileRepeat" : true
 }
