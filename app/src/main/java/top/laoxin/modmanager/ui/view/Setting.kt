@@ -95,14 +95,9 @@ fun SettingPage() {
             onCancel = { viewModel.showAcknowledgments(false)  },
             thinks = uiState.thinksList,
             openUrl = viewModel::openUrl,
-        )
-        DialogCommon(
-            title = stringResource(R.string.setting_acknowledgments),
-            content = stringResource(R.string.setting_acknowledgments_content),
-            onConfirm = { viewModel.showAcknowledgments(false) },
-            onCancel = { viewModel.showAcknowledgments(false) },
             showDialog = uiState.showAcknowledgments
         )
+
         DialogCommon(
             title = stringResource(id = R.string.console_upgrade_title),
             content = viewModel.updateDescription,

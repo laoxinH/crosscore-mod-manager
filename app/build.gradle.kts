@@ -3,15 +3,16 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 11
-    val versionName = "2.0.2 beta"
+    val versionCode = 12
+    val versionName = "2.0.3 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.一时疏忽吧明日方舟包名写死了,导致不能已配置文件的形式添加其他服务器\n" +
-            "2.提供官方的明日方舟B服配置文件\n" +
-            "3.刚刚的更新忘记添加对shizuku的支持,抱歉\n" +
+            "1.开发者又犯傻了,整了两个bug\n" +
+            "2.修复华为方舟反检测失败\n" +
+            "3.修复方舟切换服务器的bug\n" +
+            "4.更新感谢名单\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
-            "如果不想注册自行在设置页面前往Github下载最新版\n"
+            "如果不想注册Gitee自行在设置页面前往Github下载最新版"
     val updateBaseUrl = "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/"
     val updatePath = "update"
     val updateInfoFilename = "update.json"

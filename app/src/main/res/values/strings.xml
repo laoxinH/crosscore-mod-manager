@@ -99,8 +99,8 @@
     <string name="shzuiku_url">https://shizuku.rikka.app/zh-hans/download/</string>
     <string name="setting_page_more_shizuku_descript">前往shizuku下载页面</string>
     <string name="setting_page_more_reference">实验室指南</string>
-    <string name="setting_page_more_reference_descript">前往Github仓库查看使用说明</string>
-    <string name="reference_url">https://github.com/laoxinH/crosscore-mod-manager</string>
+    <string name="setting_page_more_reference_descript">前往Gitee查看使用说明</string>
+    <string name="reference_url">https://gitee.com/laoxinH/Mod_Manager</string>
     <string name="setting_page_app_clean_temp">删除解压文件</string>
     <string name="setting_page_app_clean_temp_descript">删除解压的MOD文件(开启MOD时会再次创建)</string>
     <string name="toast_del_temp_success">已删除解压MOD目录</string>
@@ -127,7 +127,7 @@
     <string name="toast_switch_game_when_mod_enable">请先关闭所有Mod再切换游戏版本</string>
     <string name="setting_page_more_qq">实验室交流群</string>
     <string name="qq_url"><![CDATA[http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=lynCj4WRXPNwATYiZKfYkySm0utpUAAO&authKey=qFoE9Wpp9h5%2FCqMSXF7yQAG%2BG6WSxjGkjU7mwez%2BU%2FO7MpmzSbpivyx1OjCHFldQ&noverify=0&group_code=939934555]]></string>
-    <string name="setting_page_more_qq_descript">BUG反馈(游戏交流)</string>
+    <string name="setting_page_more_qq_descript">BUG反馈(游戏交流: 939934555)</string>
     <string name="tips_copy_mod_failed">复制Mod文件失败, 尝试流写入</string>
     <string name="tips_unzip_failed">解压失败尝试文件流直接写入Mod</string>
     <string name="choose_method_title">请选择授权方式</string>
