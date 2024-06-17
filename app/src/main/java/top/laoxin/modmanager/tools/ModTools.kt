@@ -31,12 +31,14 @@ import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.useservice.IFileExplorerService
 import java.io.File
+import java.io.FileWriter
 import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.text.SimpleDateFormat
 import java.util.Date
 
 object ModTools {
@@ -1136,5 +1138,27 @@ object ModTools {
             }
         }
         return true
+    }
+
+    // 日志记录
+    fun logRecord(log: String) {
+        try {
+            val file = File(MY_APP_PATH + "log.txt")
+            if (!file.exists()) {
+                file.createNewFile()
+            }
+            val fileWriter = FileWriter(file, true)
+
+            // 获取当前日期和时间
+            val currentDateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
+
+            // 在日志信息前添加日期和时间
+            val logWithDateAndTime = "$currentDateAndTime: $log"
+
+            fileWriter.write(logWithDateAndTime)
+            fileWriter.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "写入日志失败: $e")
+        }
     }
 }

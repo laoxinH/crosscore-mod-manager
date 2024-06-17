@@ -55,6 +55,7 @@ interface BaseFileTools {
             true
         } catch (e: Exception) {
             Log.e("FileTools", "copyFileByDF: $e")
+            ModTools.logRecord("FileTools-copyFileByDF: $e")
             false
         }
     }
@@ -119,6 +120,7 @@ interface BaseFileTools {
             true
         } catch (e: Exception) {
             Log.e("FileTools", "copyFileByDF: $e")
+            ModTools.logRecord("FileTools-copyFileByFD: $e")
             false
         }
     }

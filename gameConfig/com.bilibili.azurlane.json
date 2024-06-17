@@ -1,5 +1,5 @@
 {
-  "gameName" : "碧蓝航线",
+  "gameName" : "碧蓝航线-配置版本2.0",
   "serviceName" : "官服",
   "packageName": "com.bilibili.azurlane",
   "version" : "1.0.0",
@@ -9,9 +9,15 @@
   "gameFilePath" : [
     "Android/data/com.bilibili.azurlane/files/AssetBundles/shipyardicon/",
     "Android/data/com.bilibili.azurlane/files/AssetBundles/paintingface/",
-    "Android/data/com.bilibili.azurlane/files/AssetBundles/painting/"
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/painting/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/strategyicon/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/squareicon/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/herohrzicon/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/live2d/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/loadingbg/",
+    "Android/data/com.bilibili.azurlane/files/AssetBundles/spinepainting/"
   ],
-  "modType" : ["shipyardicon","paintingface","painting"],
+  "modType" : ["shipyardicon","paintingface","painting","strategyicon","squareicon","herohrzicon","live2d","loadingbg","spinepainting"],
   "modSavePath" : "",
   "isGameFileRepeat" : true
 }

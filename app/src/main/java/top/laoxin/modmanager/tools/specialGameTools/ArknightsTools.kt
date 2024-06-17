@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets
 
 object ArknightsTools : BaseSpecialGameTools {
 
-    private var CHECK_FILEPATH = ModTools.ROOT_PATH
+    private var CHECK_FILEPATH = ""
     private const val CHECK_FILENAME_1 = "persistent_res_list.json"
     private const val CHECK_FILENAME_2 = "hot_update_list.json"
     val gson = GsonBuilder()
@@ -64,7 +64,7 @@ object ArknightsTools : BaseSpecialGameTools {
 
         )
     override fun specialOperationEnable(mod: ModBean, packageName: String) : Boolean{
-        CHECK_FILEPATH = "$CHECK_FILEPATH/Android/data/$packageName/files/AB/Android/"
+        CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
         val unZipPath = ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag : MutableList<Boolean> = mutableListOf()
         for (modFile in  mod.modFiles!!){
@@ -103,7 +103,7 @@ object ArknightsTools : BaseSpecialGameTools {
     }
 
     override fun specialOperationDisable(backup: List<BackupBean>, packageName: String): Boolean {
-        CHECK_FILEPATH = "$CHECK_FILEPATH/Android/data/$packageName/files/AB/Android/"
+        CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
         val flag : MutableList<Boolean> = mutableListOf()
         for (backupBean in backup) {
             // 计算md5
@@ -239,6 +239,7 @@ object ArknightsTools : BaseSpecialGameTools {
             return true
         } catch (e: Exception) {
             Log.e("ArknightsTools", "modifyCheckFile: ${e.message}")
+            ModTools.logRecord("ArknightsTools-modifyCheckFile: $e")
             return false
         }
     }

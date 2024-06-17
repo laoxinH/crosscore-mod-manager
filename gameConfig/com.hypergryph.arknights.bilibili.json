@@ -7,9 +7,9 @@
   "antiHarmonyFile" : "",
   "antiHarmonyContent" : "",
   "gameFilePath" : [
-    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
-    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
-    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/dynchars/"
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/dynchars/"
   ],
   "modType" : ["普通立绘","静态皮肤","动态皮肤"],
   "modSavePath" : "",

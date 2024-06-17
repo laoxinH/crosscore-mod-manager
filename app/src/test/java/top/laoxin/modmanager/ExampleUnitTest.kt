@@ -77,18 +77,18 @@ class ExampleUnitTest {
             gson.fromJson(File("C:\\Users\\thixi\\Documents\\GitHub\\crosscore-mod-manager\\app\\src\\test\\java\\top\\laoxin\\modmanager\\hot_update_list.json").readText(), HotUpdate::class.java)
         val any = fromJson.abInfos/*["abInfos"] as List<MutableMap<String, Any>>*/
          var index1 = -1
-        any.forEachIndexed { index, mutableMap ->
+   /*     any.forEachIndexed { index, mutableMap ->
             if (mutableMap.name == "activity/[uc]act1access.ab") {
                 index1 = index
             }
-            /*mutableMap["abSize"] = *//*formatScientificNumberToNormal((mutableMap["abSize"] as Double).toLong())*//*13131313
+            *//*mutableMap["abSize"] = *//**//*formatScientificNumberToNormal((mutableMap["abSize"] as Double).toLong())*//**//*13131313
             mutableMap["totalSize"] = formatScientificNumberToNormal((mutableMap["totalSize"] as Double).toLong())
             println(mutableMap["abSize"])
-            println(mutableMap["totalSize"])*/
+            println(mutableMap["totalSize"])*//*
             //
         }
-        val a = 461366113466161
-        any[index1] = any[index1].copy(
+        val a = 461366113466161*/
+        any[1] = any[1].copy(
             name = "activity/[uc]act1access.ab测试",
             abSize = 461366113466161
 
