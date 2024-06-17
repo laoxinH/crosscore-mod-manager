@@ -165,5 +165,7 @@
     <string name="toast_download_game_config_failed">下载失败</string>
     <string name="toast_get_game_config_failed">获取游戏配置失败</string>
     <string name="toast_special_operation_failed">防检测失败</string>
+    <string name="switch_download_game_tiltle">下载游戏配置文件</string>
+    <string name="setting_thinks_link_desc">个人主页: %1$s</string>
 
 </resources>

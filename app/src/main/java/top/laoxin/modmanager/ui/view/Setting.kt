@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.ThinksBean
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
@@ -87,6 +88,13 @@ fun SettingPage() {
             viewModel::flashGameConfig,
             viewModel::checkUpdate,
             viewModel::setShowDownloadGameConfig
+        )
+        ThinksDialogCommon(
+            title = stringResource(R.string.setting_acknowledgments),
+            onConfirm = { viewModel.showAcknowledgments(false) },
+            onCancel = { viewModel.showAcknowledgments(false)  },
+            thinks = uiState.thinksList,
+            openUrl = viewModel::openUrl,
         )
         DialogCommon(
             title = stringResource(R.string.setting_acknowledgments),
@@ -381,7 +389,7 @@ fun DownloadGameConfigDialog(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = {showDownloadGameConfigDialog(false)}, // 点击对话框外的区域时关闭对话框
-            title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) },
+            title = { Text(text = stringResource(R.string.switch_download_game_tiltle)) },
             text = {
                 val toMutableList = gameInfoList.toMutableList()
                 //toMutableList.removeAt(0)
@@ -412,6 +420,56 @@ fun DownloadGameConfigDialog(
     }
 
 }
+@Composable
+fun ThinksDialogCommon(
+    title: String,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+    thinks: List<ThinksBean>,
+    showDialog: Boolean = false,
+    openUrl: (Context, String) -> Unit
+){
+    if (showDialog){
+        val context = LocalContext.current
+        AlertDialog(
+            onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
+            title = { Text(text = title) },
+            text = {
+                LazyColumn {
+                    itemsIndexed(thinks) { index, think ->
+                        SettingItem(
+                            name = think.name + "(${think.job})",
+                            description = context.getString(
+                                R.string.setting_thinks_link_desc,
+                                think.link
+                            ),
+                            //icon = painterResource(id = R.drawable.ic_launcher_foreground),
+                            onClick = {
+                                openUrl(context, think.link)
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onConfirm()
+                }) {
+                    Text(stringResource(id = R.string.dialog_button_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    onCancel()
+                }) {
+                    Text(stringResource(id = R.string.dialog_button_request_close))
+                }
+            }
+        )
+
+    }
+}
+
 @Preview
 @Composable
 fun PreviewSettingPage() {

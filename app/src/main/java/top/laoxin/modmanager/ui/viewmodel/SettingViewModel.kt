@@ -137,6 +137,9 @@ class SettingViewModel(
     }
 
     fun openUrl(context: Context, url: String) {
+        if (url.isEmpty()) {
+            return
+        }
         val urlIntent = Intent(
             Intent.ACTION_VIEW,
             Uri.parse(url)
@@ -160,7 +163,23 @@ class SettingViewModel(
     }
 
     fun showAcknowledgments(b: Boolean) {
-        _uiState.value = _uiState.value.copy(showAcknowledgments = b)
+        if (b) {
+            viewModelScope.launch (Dispatchers.IO){
+                kotlin.runCatching {
+                    ModManagerApi.retrofitService.getThinksList()
+                }.onFailure {
+                    Log.e("SettingViewModel", "showAcknowledgments: $it")
+                    ToastUtils.longCall("获取感谢名单失败")
+                }.onSuccess {
+                    withContext(Dispatchers.Main){
+                        _uiState.value = _uiState.value.copy(thinksList = it)
+                        _uiState.value = _uiState.value.copy(showAcknowledgments = b)
+                    }
+                }
+            }
+        } else {
+            _uiState.value = _uiState.value.copy(showAcknowledgments = b)
+        }
     }
 
     fun showSwitchGame(b: Boolean) {
@@ -330,4 +349,6 @@ class SettingViewModel(
             }
         }
     }
+
+
 }

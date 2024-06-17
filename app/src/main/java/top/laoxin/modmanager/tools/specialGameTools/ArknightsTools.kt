@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets
 
 object ArknightsTools : BaseSpecialGameTools {
 
-    private val CHECK_FILEPATH = ModTools.ROOT_PATH + "/Android/data/com.hypergryph.arknights/files/AB/Android/"
+    private var CHECK_FILEPATH = ModTools.ROOT_PATH
     private const val CHECK_FILENAME_1 = "persistent_res_list.json"
     private const val CHECK_FILENAME_2 = "hot_update_list.json"
     val gson = GsonBuilder()
@@ -64,6 +64,7 @@ object ArknightsTools : BaseSpecialGameTools {
 
         )
     override fun specialOperationEnable(mod: ModBean, packageName: String) : Boolean{
+        CHECK_FILEPATH = "$CHECK_FILEPATH/Android/data/$packageName/files/AB/Android/"
         val unZipPath = ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag : MutableList<Boolean> = mutableListOf()
         for (modFile in  mod.modFiles!!){
@@ -102,6 +103,7 @@ object ArknightsTools : BaseSpecialGameTools {
     }
 
     override fun specialOperationDisable(backup: List<BackupBean>, packageName: String): Boolean {
+        CHECK_FILEPATH = "$CHECK_FILEPATH/Android/data/$packageName/files/AB/Android/"
         val flag : MutableList<Boolean> = mutableListOf()
         for (backupBean in backup) {
             // 计算md5
@@ -140,7 +142,7 @@ object ArknightsTools : BaseSpecialGameTools {
                 return false
             }
             // 通过documentFile读取文件
-            if (checkPermission == PathType.FILE) {
+            if (checkPermission == PathType.DOCUMENT) {
                 fileTools.copyFileByDF(
                     CHECK_FILEPATH + CHECK_FILENAME_1,
                     ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
@@ -174,9 +176,10 @@ object ArknightsTools : BaseSpecialGameTools {
             val abInfos1 = checkFile1Map.abInfos
             val abInfos2 = checkFile2Map.abInfos
             var index1 = -1
-            abInfos1.forEachIndexed { index, mutableMap ->
-                if (mutableMap.name == fileName) {
+            abInfos1.forEachIndexed job@{ index, mutableMap ->
+                if (mutableMap.name?.contains(fileName) == true) {
                     index1 = index
+                    return@job
                 }
             }
             Log.d("ArknightsTools", "index1: $index1")
@@ -185,9 +188,10 @@ object ArknightsTools : BaseSpecialGameTools {
                 abSize = fileSize
             )
             index1 = -1
-            abInfos2.forEachIndexed { index, mutableMap ->
-                if (mutableMap.name == fileName) {
+            abInfos2.forEachIndexed job@{ index, mutableMap ->
+                if (mutableMap.name?.contains(fileName) == true) {
                     index1 = index
+                    return@job
                 }
             }
             abInfos2[index1] = abInfos2[index1].copy(
