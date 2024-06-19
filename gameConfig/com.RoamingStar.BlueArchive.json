@@ -1,0 +1,15 @@
+{
+    "gameName": "蔚蓝档案-by Go Koumei",
+    "serviceName": "官服",
+    "packageName": "com.RoamingStar.BlueArchive",
+    "version": "1.0.0",
+    "gamePath": "Android/data/com.RoamingStar.BlueArchive/",
+    "antiHarmonyFile": "Android/data/com.RoamingStar.BlueArchive/files/Localizeconfig.txt",
+    "antiHarmonyContent": "Eny=dey\nlsLocalize=false\nResUrls=http://mx.ivav.net.cn/asdf;http://mx.jvav.net.cn/asdf:http://mx.ivav.net.cn/asdf ",
+    "gameFilePath": [
+        "Android/data/com.RoamingStar.BlueArchive/files/AssetBundles/"
+    ],
+    "modType": [ "AssetBundles" ],
+    "modSavePath": "",
+    "isGameFileRepeat": false
+}

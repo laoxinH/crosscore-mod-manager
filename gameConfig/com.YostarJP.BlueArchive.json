@@ -1,0 +1,16 @@
+{
+    "gameName": "蔚蓝档案-by Go Koumei",
+    "serviceName": "日服",
+    "packageName": "com.YostarJP.BlueArchive",
+    "version": "1.0.0",
+    "gamePath": "Android/data/com.YostarJP.BlueArchive/",
+    "antiHarmonyFile": "",
+    "antiHarmonyContent": "",
+    "gameFilePath": [
+        "Android/data/com.YostarJP.BlueArchive/files/AssetBundles/"
+    ],
+    "modType": [ "AssetBundles" ],
+    "modSavePath": "",
+    "isGameFileRepeat": false
+
+}

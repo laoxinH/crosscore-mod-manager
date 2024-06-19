@@ -1,0 +1,16 @@
+{
+    "gameName": "蔚蓝档案-by Go Koumei",
+    "serviceName": "国际服",
+    "packageName": "com.nexon.bluearchive",
+    "version": "1.0.0",
+    "gamePath": "Android/data/com.nexon.bluearchive/",
+    "antiHarmonyFile": "",
+    "antiHarmonyContent": "",
+    "gameFilePath": [
+        "Android/data/com.nexon.bluearchive/files/AssetBundles/"
+    ],
+    "modType": [ "AssetBundles" ],
+    "modSavePath": "",
+    "isGameFileRepeat": false
+
+}

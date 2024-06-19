@@ -16,5 +16,29 @@
         "packageName": "com.hypergryph.arknights",
         "serviceName": "\u5b98\u670d",
         "downloadUrl": ""
+    },
+    {
+        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "packageName": "com.nexon.bluearchive",
+        "serviceName": "\u56fd\u9645\u670d",
+        "downloadUrl": ""
+    },
+    {
+        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "packageName": "com.RoamingStar.BlueArchive.bilibili",
+        "serviceName": "B\u670d",
+        "downloadUrl": ""
+    },
+    {
+        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "packageName": "com.RoamingStar.BlueArchive",
+        "serviceName": "\u5b98\u670d",
+        "downloadUrl": ""
+    },
+    {
+        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "packageName": "com.YostarJP.BlueArchive",
+        "serviceName": "\u65e5\u670d",
+        "downloadUrl": ""
     }
 ]

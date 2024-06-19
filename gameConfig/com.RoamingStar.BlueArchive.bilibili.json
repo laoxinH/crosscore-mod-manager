@@ -1,0 +1,17 @@
+{
+    "gameName": "蔚蓝档案-by Go Koumei",
+    "serviceName": "B服",
+    "packageName": "com.RoamingStar.BlueArchive.bilibili",
+    "version": "1.0.0",
+    "gamePath": "Android/data/com.RoamingStar.BlueArchive.bilibili/",
+    "antiHarmonyFile": "Android/data/com.RoamingStar.BlueArchive.bilibili/files/Localizeconfig.txt",
+    "antiHarmonyContent": "Eny=dey\nlsLocalize=false\nResUrls=http://mx.ivav.net.cn/asdf;http://mx.jvav.net.cn/asdf:http://mx.ivav.net.cn/asdf ",
+    "gameFilePath": [
+        "Android/data/com.RoamingStar.BlueArchive.bilibili/files/AssetBundles/"
+    ],
+    "modType": [ "AssetBundles" ],
+    "modSavePath": "",
+    "isGameFileRepeat": false
+
+
+}
