@@ -1,17 +1,27 @@
 {
-  "gameName" : "明日方舟-要求实验室版本2.0.2及以上",
-  "serviceName" : "B服",
-  "packageName": "com.hypergryph.arknights.bilibili",
-  "version" : "1.0.0",
-  "gamePath" : "Android/data/com.hypergryph.arknights.bilibili/",
-  "antiHarmonyFile" : "",
-  "antiHarmonyContent" : "",
-  "gameFilePath" : [
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/dynchars/"
+  "antiHarmonyContent": "",
+  "antiHarmonyFile": "",
+  "gameFilePath": [
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/dynchars/",
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/avg/characters/",
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/avg/imgs/",
+    "/Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/spritepack/"
   ],
-  "modType" : ["普通立绘","静态皮肤","动态皮肤"],
-  "modSavePath" : "",
-  "isGameFileRepeat" : true
+  "gameName": "明日方舟",
+  "gamePath": "Android/data/com.hypergryph.arknights.bilibili/",
+  "isGameFileRepeat": true,
+  "modSavePath": "",
+  "modType": [
+    "普通立绘",
+    "静态皮肤",
+    "动态皮肤",
+    "剧情立绘",
+    "剧情cg",
+    "道具贴图"
+  ],
+  "packageName": "com.hypergryph.arknights.bilibili",
+  "serviceName": "B服：配置版本2.0-要求实验室版本2.0.2及以上",
+  "version": "2.0.0"
 }
