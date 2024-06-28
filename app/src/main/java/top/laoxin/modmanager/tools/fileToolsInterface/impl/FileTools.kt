@@ -4,7 +4,9 @@ import android.util.Log
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import top.laoxin.modmanager.userservice.FileExplorerService
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -99,4 +101,33 @@ object FileTools : BaseFileTools {
         }
     }
 
+    override fun createFileByStream(
+        path: String,
+        filename: String,
+        inputStream: InputStream?
+    ): Boolean {
+        Log.d("ZipTools", "文件路径: $path + $filename")
+        val file = File(path, filename)
+        try {
+            if (!file.exists()) {
+                if (file.parentFile?.exists() != true) {
+                    file.parentFile?.mkdirs()
+                }
+                if (file.exists()) {
+                    file.delete()
+                }
+                file.createNewFile()
+                val fileOutputStream = FileOutputStream(file)
+                inputStream.use { input ->
+                    fileOutputStream.use { outputStream ->
+                        input?.copyTo(outputStream)
+                    }
+                }
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "createFileByStream: $e")
+            return false
+        }
+    }
 }

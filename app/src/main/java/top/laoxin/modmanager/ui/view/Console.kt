@@ -1,6 +1,5 @@
 package top.laoxin.modmanager.ui.view
 
-import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
@@ -356,6 +356,23 @@ fun ConfigurationCard(viewModel: ConsoleViewModel,
                 }
                 Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
             }
+        /*    Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TextButton(
+                    onClick = { ArchiveUtil.test() },
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text(
+                        text = "测试",
+                        modifier = Modifier.padding(0.dp),
+                        style = typography.titleMedium
+                    )
+                }
+                Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
+            }*/
             // 添加一个按钮，用户点击按钮后，打开文件选择器
 
         }

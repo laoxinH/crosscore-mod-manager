@@ -1,17 +1,10 @@
 package top.laoxin.modmanager.tools.specialGameTools
 
-import android.text.TextUtils
 import android.util.Log
-import net.lingala.zip4j.ZipFile
-import net.lingala.zip4j.exception.ZipException
-import net.lingala.zip4j.io.inputstream.ZipInputStream
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.tools.ZipTools
-import java.io.File
+import top.laoxin.modmanager.tools.ArchiveUtil
 import java.io.InputStream
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 interface BaseSpecialGameTools {
@@ -48,26 +41,14 @@ interface BaseSpecialGameTools {
     fun getZipFileInputStream(
         zipFilePath: String,
         fileName: String,
-        password: String = ""
+        password: String?
     ): InputStream? {
         kotlin.runCatching {
-            val file = File(zipFilePath)
-            var zipFile = ZipFile(file)
-            zipFile.charset = StandardCharsets.UTF_8
-            val headers = zipFile.fileHeaders
-            if (ZipTools.isRandomCode(headers)) { //判断文件名是否有乱码，有乱码，将编码格式设置成GBK
-                zipFile.close()
-                zipFile = ZipFile(zipFilePath)
-                zipFile.charset = Charset.forName("GBK")
-            }
-            if (!zipFile.isValidZipFile) {
-                throw ZipException("压缩文件不合法,可能被损坏.")
-            }
-            if (zipFile.isEncrypted && password.isNotEmpty()) { //加密zip，且输入的密码不为空，直接进行解密。
-                zipFile.setPassword(password.toCharArray())
-            }
-            val fileHeader = zipFile.getFileHeader(fileName)
-            zipFile.getInputStream(fileHeader)
+            ArchiveUtil.getArchiveItemInputStream(
+                zipFilePath,
+                fileName,
+                password
+            )
         }.onSuccess {
             return it
         }.onFailure {

@@ -9,6 +9,7 @@ import top.laoxin.modmanager.App
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import java.io.File
+import java.io.InputStream
 
 interface BaseFileTools {
 
@@ -32,6 +33,9 @@ interface BaseFileTools {
 
     // 判断是否未文件
     fun isFile(filename: String): Boolean
+
+    // 通过流创建文件
+    fun createFileByStream(path: String, filename: String, inputStream: InputStream?): Boolean
 
     // 通过DocumentFile和File复制文件
     fun copyFileByDF(srcPath: String, destPath: String): Boolean {

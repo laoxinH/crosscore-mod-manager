@@ -4,6 +4,7 @@ import android.util.Log
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import top.laoxin.modmanager.useservice.IFileExplorerService
+import java.io.InputStream
 
 object ShizukuFileTools : BaseFileTools {
     private const val TAG = "ShizukuFileTools"
@@ -72,6 +73,14 @@ object ShizukuFileTools : BaseFileTools {
             Log.e(TAG, "isFile: $e")
             false
         }
+    }
+
+    override fun createFileByStream(
+        path: String,
+        filename: String,
+        inputStream: InputStream?
+    ): Boolean {
+        TODO("Not yet implemented")
     }
 
 }

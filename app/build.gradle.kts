@@ -3,11 +3,11 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 13
-    val versionName = "2.0.4 beta"
+    val versionCode = 14
+    val versionName = "2.0.5 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.开发者又犯傻了,整了个煞笔bug导致反检测失败\n" +
-            "2.现在已经紧急修复\n" +
+            "1.内置7z解压,现在完美支持7z和rar压缩包\n" +
+            "2.修复老生常谈的中文密码问题,大概已经完美解决\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册Gitee自行在设置页面前往Github下载最新版"
@@ -110,6 +110,7 @@ android {
 dependencies {
 
 implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.rules)
     testImplementation("junit:junit:4.12")
     /*    implementation(libs.androidx.core.ktx)
        implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -206,6 +207,12 @@ implementation(libs.androidx.navigation.runtime.ktx)
     // Retrofit
 // Retrofit with Scalar Converter
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    // 解压库
+    implementation("org.apache.commons:commons-compress:1.26.2")
+   implementation("org.tukaani:xz:1.9")
+    // 7z
+   //implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
+    implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
 
 }
 

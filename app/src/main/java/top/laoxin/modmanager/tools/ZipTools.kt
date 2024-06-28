@@ -5,14 +5,24 @@ import android.util.Log
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.FileHeader
+import net.sf.sevenzipjbinding.ExtractAskMode
+import net.sf.sevenzipjbinding.ExtractOperationResult
+import net.sf.sevenzipjbinding.IArchiveExtractCallback
+import net.sf.sevenzipjbinding.IInArchive
+import net.sf.sevenzipjbinding.ISequentialOutStream
+import net.sf.sevenzipjbinding.PropID
+import net.sf.sevenzipjbinding.SevenZip
+import net.sf.sevenzipjbinding.SevenZipException
+import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.RandomAccessFile
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -21,7 +31,7 @@ import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 
 
-object ZipTools {
+object ZipTools77 {
     private const val TAG = "ZipTools"
 
 
@@ -35,17 +45,6 @@ object ZipTools {
         return null
     }
 
-    // 通过zip对象获取文件列表判断存在readme.txt文件
-    fun hasReadmeFile(zipFile: ZipFile): Boolean {
-        val fileHeaders = zipFile.fileHeaders
-        for (fileHeaderObj in fileHeaders) {
-            val fileHeader = fileHeaderObj as FileHeader
-            if (fileHeader.fileName.equals("readme.txt", ignoreCase = true)) {
-                return true
-            }
-        }
-        return false
-    }
 
     // 读取readme.txt文件中的字段,并生成mod对象
     fun readModBean(
@@ -372,7 +371,96 @@ object ZipTools {
         }
 
     }
+    fun useAppContext() {
 
+        // Context of the app under test.
+        try {
+            Log.d(TAG, "useAppContext: 开始测试")
+            val file = File(ModTools.ROOT_PATH + "/Download/Telegram/测.rar")
+            extract(file.path, ModTools.ROOT_PATH + "/Download/Telegram/测/")
+        } catch (e: Exception) {
+            Log.e(TAG, "useAppContext: $e")
+        }
+
+    }
+
+
+    @Throws(SevenZipException::class, IOException::class)
+    fun extract(file: String?, extractPath: String) {
+        var inArchive: IInArchive? = null
+        var randomAccessFile: RandomAccessFile? = null
+
+        try {
+            randomAccessFile = RandomAccessFile(File(file), "r")
+            inArchive = SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
+            inArchive.numberOfItems
+            inArchive.extract(null, false, ExtractCallback(inArchive, extractPath))
+        } finally {
+            inArchive?.close()
+            randomAccessFile?.close()
+        }
+    }
+
+    private class ExtractCallback(inArchive: IInArchive?, extractPath: String) :
+        IArchiveExtractCallback {
+        private val inArchive: IInArchive?
+
+        private val extractPath: String
+
+        init {
+            var extractPath = extractPath
+            this.inArchive = inArchive
+            if (!extractPath.endsWith("/") && !extractPath.endsWith("\\")) {
+                extractPath += File.separator
+            }
+            this.extractPath = extractPath
+        }
+
+        override fun setTotal(total: Long) {
+        }
+
+        override fun setCompleted(complete: Long) {
+        }
+
+        @Throws(SevenZipException::class)
+        override fun getStream(index: Int, extractAskMode: ExtractAskMode): ISequentialOutStream {
+            return ISequentialOutStream { data: ByteArray ->
+                val filePath = inArchive!!.getStringProperty(index, PropID.PATH)
+                var fos: FileOutputStream? = null
+                try {
+                    val path = File(extractPath + filePath)
+
+                    if (!path.parentFile.exists()) {
+                        path.parentFile.mkdirs()
+                    }
+
+                    if (!path.exists()) {
+                        path.createNewFile()
+                    }
+                    fos = FileOutputStream(path, true)
+                    fos.write(data)
+                } catch (e: IOException) {
+                    Log.e(TAG, "IOException while extracting $filePath")
+                } finally {
+                    try {
+                        if (fos != null) {
+                            fos.flush()
+                            fos.close()
+                        }
+                    } catch (e: IOException) {
+                        Log.e(TAG, "Could not close FileOutputStream", e)
+                    }
+                }
+                data.size
+            }
+        }
+
+        override fun prepareOperation(extractAskMode: ExtractAskMode) {
+        }
+
+        override fun setOperationResult(extractOperationResult: ExtractOperationResult) {
+        }
+    }
 }
 
 // 读取加密mod信息

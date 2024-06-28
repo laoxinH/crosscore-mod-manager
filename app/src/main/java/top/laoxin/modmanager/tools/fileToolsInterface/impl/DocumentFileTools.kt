@@ -8,6 +8,7 @@ import top.laoxin.modmanager.App
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import java.io.File
+import java.io.InputStream
 import java.io.RandomAccessFile
 
 object DocumentFileTools : BaseFileTools {
@@ -153,8 +154,29 @@ object DocumentFileTools : BaseFileTools {
         }
     }
 
-
-
+    override fun createFileByStream(
+        path: String,
+        filename: String,
+        inputStream: InputStream?
+    ): Boolean {
+        val pathUri = pathToUri(path)
+        val documentFile = DocumentFile.fromTreeUri(app, pathUri)
+        val file = documentFile?.createFile("application/octet-stream", filename)
+        return try {
+            file?.let {
+                app.contentResolver.openOutputStream(it.uri)?.use { outputStream ->
+                    inputStream?.use { input ->
+                        input.copyTo(outputStream)
+                        outputStream.flush()
+                    }
+                }
+            }
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "createFileByStream: $e")
+            false
+        }
+    }
 
 
 }

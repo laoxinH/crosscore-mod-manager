@@ -11,6 +11,7 @@ import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.data.AppContainer
 import top.laoxin.modmanager.data.AppDataContainer
 import top.laoxin.modmanager.data.UserPreferencesRepository
+import top.laoxin.modmanager.tools.ModTools
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Objects
@@ -33,7 +34,11 @@ class App : Application() {
         sApp = this
         checkOsVersion()
         createFile()
-        Log.d("App", "onCreate: ")
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            // 这里处理全局异常
+            Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
+            ModTools.logRecord("Uncaught exception in thread ${thread.name}: $throwable")
+        }
 
     }
 

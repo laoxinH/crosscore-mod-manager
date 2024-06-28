@@ -2,16 +2,12 @@ package top.laoxin.modmanager.userservice
 
 import android.os.RemoteException
 import android.util.Log
-import net.lingala.zip4j.ZipFile
 import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.tools.ArchiveUtil
 
-import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.bean.ModBeanTemp
-import top.laoxin.modmanager.tools.ZipTools
 import top.laoxin.modmanager.useservice.IFileExplorerService
 
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -113,7 +109,8 @@ class FileExplorerService : IFileExplorerService.Stub() {
         password: String?
     ): Boolean {
         return try {
-            ZipTools.unZipByFileHeard(zipPath!!, unzipPath!!, filename, password)
+           ArchiveUtil.extractSpecificFile(zipPath!!, listOf(filename!!), unzipPath!!, password)
+            true
         } catch (e: Exception) {
             Log.e(TAG, "unZipFile: $e")
             false
@@ -132,12 +129,9 @@ class FileExplorerService : IFileExplorerService.Stub() {
                 // 判断file是否为压缩文件
                 for (f in files) {
                     if (f.isDirectory || isFileType(f)) continue
-                    val zipFile = ZipTools.createZipFile(f)
-                    Log.d(TAG, "scanMods: ${f.name}")
-
-                    if (zipFile != null && ZipTools.isZipFile(zipFile)) {
-                        zipFile.fileHeaders.forEach {
-                            val modFileName = File(ZipTools.getFileName(it)).name
+                    if (ArchiveUtil.isArchive(f.absolutePath)) {
+                        ArchiveUtil.listInArchiveFiles(f.absolutePath).forEach {
+                            val modFileName = File(it).name
                             if (gameFiles.contains(modFileName)) {
                                 Log.d(TAG, "开始移动文件: ${f.name}==${modFileName}")
                                 moveFile(f.path, Paths.get(gameInfo!!.modSavePath, f.name).toString())

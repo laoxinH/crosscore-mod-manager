@@ -76,7 +76,7 @@ object ArknightsTools : BaseSpecialGameTools {
             // 计算md5
             var md5 = calculateMD5(File(modFilePath).inputStream())
             if (md5 == null){
-                getZipFileInputStream(zipFilePath =  mod.path,fileName = modFile, password = mod.password!!)?.let {
+                getZipFileInputStream(zipFilePath =  mod.path,fileName = modFile, password = mod.password!!)?.use {
                     md5 = calculateMD5(it)
                 }
             }
@@ -88,7 +88,7 @@ object ArknightsTools : BaseSpecialGameTools {
                 null
             }
             if (fileSize == null) {
-                getZipFileInputStream(zipFilePath = mod.path, fileName = modFile, password = mod.password!!)?.let {
+                getZipFileInputStream(zipFilePath = mod.path, fileName = modFile, password = mod.password!!)?.use {
                     fileSize = getInputStreamSize(it)
                 }
             }

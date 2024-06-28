@@ -19,4 +19,10 @@ buildscript {
     dependencies {
         classpath("com.squareup.okhttp3:okhttp:4.9.0")
     }
+    repositories{
+        maven { url = uri("https://jitpack.io") }
+    }
+
 }
+
+

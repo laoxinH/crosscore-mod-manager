@@ -35,10 +35,11 @@ import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.data.mods.ModRepository
 import top.laoxin.modmanager.data.UserPreferencesRepository
 import top.laoxin.modmanager.data.backups.BackupRepository
+import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
-import top.laoxin.modmanager.tools.ZipTools
+import java.io.File
 
 class ModViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
@@ -545,13 +546,16 @@ class ModViewModel(
             withContext(Dispatchers.Main) {
                 setTipsText(R.string.tips_unzip_mod)
             }
-            var unZipPath: String? = ""
+            var unZipPath: String = ""
             if (modBean.isZipFile) {
-                unZipPath = ZipTools.unZip(
+                val decompression = ArchiveUtil.decompression(
                     modBean.path!!,
-                    ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/",
-                    modBean.password ?: ""
+                    ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path).nameWithoutExtension + "/",
+                    modBean.password
                 )
+                if (decompression){
+                    unZipPath = ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path).nameWithoutExtension + "/"
+                }
             }
 
             // 特殊游戏操作
@@ -569,7 +573,7 @@ class ModViewModel(
             val copyMod: Boolean = ModTools.copyModFiles(
                 modBean,
                 gameModPath,
-                unZipPath!!,
+                unZipPath,
             )
             //copyMod = false
             if (!copyMod) {
@@ -710,13 +714,16 @@ class ModViewModel(
                 withContext(Dispatchers.Main) {
                     setTipsText(R.string.tips_unzip_mod)
                 }
-                val unZipPath =
-                    ZipTools.unZip(
-                        modBean.path!!,
-                        ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/",
-                        s
-                    )
-                if (unZipPath == null) {
+                val unZipPath = ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path!!).nameWithoutExtension + "/"
+                Log.d("ModViewModel", "开始解压: ${modBean.path}")
+                val decompression = ArchiveUtil.decompression(
+                    modBean.path,
+                    unZipPath,
+                    s
+                )
+                Log.d("ModViewModel", "解压完成: ${modBean.path}")
+
+                if (!decompression) {
                     withContext(Dispatchers.Main) {
                         setShowTips(false)
                         setModSwitchEnable(true)

@@ -22,7 +22,7 @@
     <string name="console_game_packegname">包名: %s</string>
     <string name="console_game_version">版本: %s</string>
     <string name="console_game_service">服务器: %s</string>
-    <string name="console_setting_info_configuration">配置</string>
+    <string name="console_setting_info_configuration">状态</string>
     <string name="console_setting_info_mod">MOD</string>
     <string name="console_setting_info_mod_total">MOD 数量: %s</string>
     <string name="console_setting_info_mod_enable">已启用: %s</string>
@@ -32,7 +32,7 @@
     <string name="console_configuration_anti_harmony">反和谐</string>
     <string name="console_configuration_scanQQ">扫描QQ下载目录(可能无效)</string>
     <string name="console_configuration_scan_download">扫描系统DOWNLOAD目录</string>
-    <string name="console_configuration_select_mod_directory">配置MOD目录</string>
+    <string name="console_configuration_select_mod_directory">选择MOD目录</string>
     <string name="dialog_shizuku_message">此功能需要shizuku授权才能开启, 若没有安装请先去下载</string>
     <string name="toast_backup_failed">备份失败</string>
     <string name="toast_copy_failed">Mod 文件复制失败</string>
@@ -142,7 +142,7 @@
     <string name="toast_please_select_game">请到设置中选择游戏</string>
     <string name="console_configuration_scan_dictionary">扫描文件夹MOD</string>
     <string name="console_scan_directory_mods">注意</string>
-    <string name="console_scan_directory_mods_content">此功能只会扫描配置的MOD目录中游戏包名(比如:com.bilibili.azurlane)文件夹包含的MOD(QQ和系统下载均不会扫描)</string>
+    <string name="console_scan_directory_mods_content">此功能只会扫描配置的MOD目录中游戏包名(比如:com.megagame.crosscore)文件夹包含的MOD(QQ和系统下载均不会扫描)</string>
     <string name="toast_scanQQ_failed">扫描QQ目录失败</string>
     <string name="toast_this_dir_has_no_prim">此文件夹权限不足</string>
     <string name="setting_page_app_flash_game_config">读取游戏配置文件</string>
