@@ -100,7 +100,7 @@ object ArchiveUtil {
         destDir: String,
         password: String?
     ) {
-        if (File(destDir).exists()) return
+        if (File(destDir,files[0]).exists()) return
         var extractPath = destDir
         if (!destDir.endsWith("/") && !destDir.endsWith("\\")) {
             extractPath += File.separator
@@ -146,7 +146,7 @@ object ArchiveUtil {
                             }
                             FileOutputStream(file,true).use {
                                 it.write(data)
-                                //it.flush()
+                                it.flush()
                             }
                         } catch (e: IOException) {
                             Log.e(TAG, "IOException while extracting")

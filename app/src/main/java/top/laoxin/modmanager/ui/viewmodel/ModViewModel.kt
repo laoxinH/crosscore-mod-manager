@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.ui.viewmodel
 
+import android.os.FileObserver
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
@@ -87,6 +88,7 @@ class ModViewModel(
         var enableJob: Job? = null
         var flashModsJob: Job? = null
         var checkPasswordJob: Job? = null
+        var fileObserver: FileObserver? = null
     }
 
     // 使用热数据流读取用户设置并实时更新
@@ -134,7 +136,7 @@ class ModViewModel(
     init {
         //checkPermission()
         viewModelScope.launch {
-            userPreferences.collect {
+            userPreferences.collect { it ->
                 _gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex]
                 // 获取全部mods
                 val modsFlow =
@@ -183,20 +185,96 @@ class ModViewModel(
                     SharingStarted.WhileSubscribed(5000),
                     _uiState.value
                 )
+                fileObserver?.stopWatching()
+                fileObserver = object : FileObserver(
+                    ModTools.ROOT_PATH + it.selectedDirectory + _gameInfo.packageName,
+                    FileObserver.ALL_EVENTS
+                ) {
+                    override fun onEvent(event: Int, path: String?) {
+                        val file =
+                            File(ModTools.ROOT_PATH + it.selectedDirectory + _gameInfo.packageName).absolutePath + "/"
+                        when (event) {
+                            CREATE -> {
+                                onCreateMod(path, file)
+                            }
+                            DELETE -> {
+                                //onDelMod(path, file)
+                            }
+                            MOVED_FROM -> {
+                                //onDelMod(path, file)
+                            }
+                            MOVED_TO -> {
+                                onCreateMod(path, file)
+                            }
+                            // Add more cases if you want to handle more events
+                            else -> return
+                        }
+                    }
 
+                }
+                fileObserver?.startWatching()
 
             }
 
         }
-        if (PermissionTools.checkShizukuPermission()) {
+        
+        
+        /*if (PermissionTools.checkShizukuPermission()) {
             init()
         } else {
             // 开启授权提示窗口
             setOpenPermissionRequestDialog(true)
 
+        }*/
+
+
+    }
+
+    private fun onDelMod(path: String?, file: String) {
+        Log.d("FileObserver", "File $path has been deleted")
+        val filepath = File(file, path).absolutePath
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            modRepository.getModsByPathAndGamePackageName(filepath, _gameInfo.packageName)
+                .collect { mods ->
+                    val filter = mods.filter { it.isEnable }
+                    delModsList = mods
+                    if (filter.isNotEmpty()) {
+                        setShowDisEnableModsDialog(true)
+                        _uiState.update {
+                            it.copy(delEnableModsList = filter)
+                        }
+                    } else {
+                        delMods()
+                    }
+                    searchJob?.cancel()
+                }
         }
+    }
 
-
+    /**
+     * 提取文件
+     */
+    private fun onCreateMod(path: String?, file: String) {
+        Log.d("FileObserver", "New file $path has been created")
+        if (File(file, path).isDirectory) return
+        val filepath = File(file, path).absolutePath
+        if (!ArchiveUtil.isArchive(filepath)) return
+        viewModelScope.launch {
+            val createModTempMap =
+                ModTools.createModTempMap(filepath, file,
+                    ArchiveUtil.listInArchiveFiles(filepath)
+                        .map { mutableListOf(it, it) }
+                        .toMutableList(), _gameInfo)
+            Log.d("ConsoleViewModel", "onEvent: $createModTempMap")
+            val readModBeans = ModTools.readModBeans(
+                filepath,
+                file,
+                createModTempMap,
+                _gameInfo.gamePath
+            )
+            modRepository.insertAll(readModBeans)
+        }
     }
 
     fun flashMods(isInit: Boolean) {

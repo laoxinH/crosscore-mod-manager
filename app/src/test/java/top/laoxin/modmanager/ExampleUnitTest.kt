@@ -118,14 +118,7 @@ class ExampleUnitTest {
         return formatter.format(num)
     }
 
-    @Test
-    fun  unzipTest(){
-        ArchiveUtil().decompression(
-            "C:\\Users\\thixi\\Desktop\\示例\\dynchars中文测试.zip",
-            "C:\\Users\\thixi\\Desktop\\示例\\dynchars1",
-            "123")
 
-    }
     @Test
 
     fun test7z(){

@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.tools.fileToolsInterface
 
 
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -128,4 +129,24 @@ interface BaseFileTools {
             false
         }
     }
+
+    fun isDataPath(path: String): Boolean {
+        return (("${ModTools.ROOT_PATH}/Android/data") == path)
+    }
+
+    fun isObbPath(path: String): Boolean {
+        return (("${ModTools.ROOT_PATH}/Android/obb") == path)
+    }
+
+    private fun isUnderDataPath(path: String): Boolean {
+        return path.contains("${ModTools.ROOT_PATH}/Android/data/")
+    }
+
+    private fun isUnderObbPath(path: String): Boolean {
+        return path.contains("${ModTools.ROOT_PATH}/Android/obb/")
+    }
+
+    /**
+     * 如果字符串是应用包名，返回字符串，反之返回null
+     */
 }

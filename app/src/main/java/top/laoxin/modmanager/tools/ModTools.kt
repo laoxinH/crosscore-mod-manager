@@ -78,34 +78,6 @@ object ModTools {
     }
 
 
-    fun isDataPath(path: String): Boolean {
-        return (("$ROOT_PATH/Android/data") == path)
-    }
-
-    fun isObbPath(path: String): Boolean {
-        return (("$ROOT_PATH/Android/obb") == path)
-    }
-
-    private fun isUnderDataPath(path: String): Boolean {
-        return path.contains("$ROOT_PATH/Android/data/")
-    }
-
-    private fun isUnderObbPath(path: String): Boolean {
-        return path.contains("$ROOT_PATH/Android/obb/")
-    }
-
-    /**
-     * 如果字符串是应用包名，返回字符串，反之返回null
-     */
-    fun getPathPackageName(name: String?): String? {
-        try {
-            PACKAGE_MANAGER.getPackageInfo((name)!!, 0)
-            return name
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-        }
-        return null
-    }
 
 
     suspend fun backupGameFiles(

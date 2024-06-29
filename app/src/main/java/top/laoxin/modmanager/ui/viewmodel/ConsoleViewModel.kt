@@ -9,6 +9,7 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
+import android.os.FileObserver
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
@@ -45,6 +46,7 @@ import top.laoxin.modmanager.data.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.data.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
 import top.laoxin.modmanager.network.ModManagerApiService
+import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
@@ -61,12 +63,14 @@ class ConsoleViewModel(
 
     // 请求权限路径
     private var _requestPermissionPath by mutableStateOf("")
+
     // 下载地址
     private var _downloadUrl by mutableStateOf("")
     val downloadUrl: String
         get() = _downloadUrl
     val requestPermissionPath: String
         get() = _requestPermissionPath
+
     // 更新类容
     private var _updateContent by mutableStateOf("")
     val updateContent: String
@@ -88,8 +92,8 @@ class ConsoleViewModel(
         }
         var gameInfoJob: Job? = null
         var isInited = false
+        var fileObserver: FileObserver? = null
     }
-
 
 
     // 选择的游戏
@@ -111,7 +115,7 @@ class ConsoleViewModel(
     private val userPreferencesState = combine(
         selectedGameFlow,
         selectedDirectoryFlow
-    ) { selectedGame,selectedDirectory ->
+    ) { selectedGame, selectedDirectory ->
         UserPreferencesState(
             selectedGameIndex = selectedGame,
             selectedDirectory = selectedDirectory
@@ -170,23 +174,24 @@ class ConsoleViewModel(
         viewModelScope.launch {
             val gameInfo = getGameInfo()
 
-            antiHarmonyRepository.getByGamePackageName(gameInfo.packageName).collectLatest {antiHarmonyBean->
-                if (antiHarmonyBean == null) {
-                    antiHarmonyRepository.insert(
-                        AntiHarmonyBean(
-                            gamePackageName = gameInfo.packageName,
-                            isEnable = false
+            antiHarmonyRepository.getByGamePackageName(gameInfo.packageName)
+                .collectLatest { antiHarmonyBean ->
+                    if (antiHarmonyBean == null) {
+                        antiHarmonyRepository.insert(
+                            AntiHarmonyBean(
+                                gamePackageName = gameInfo.packageName,
+                                isEnable = false
+                            )
                         )
-                    )
-                    _uiState.update {
-                        it.copy(antiHarmony = false)
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(antiHarmony = antiHarmonyBean.isEnable)
+                        _uiState.update {
+                            it.copy(antiHarmony = false)
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(antiHarmony = antiHarmonyBean.isEnable)
+                        }
                     }
                 }
-            }
         }
     }
 
@@ -285,32 +290,69 @@ class ConsoleViewModel(
     private fun updateGameInfo() {
         gameInfoJob?.cancel()
         gameInfoJob = viewModelScope.launch(Dispatchers.IO) {
-            userPreferencesState.collectLatest {
-                    val gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex]
-                    ModTools.createModsDirectory(gameInfo,it.selectedDirectory)
-                    Log.d("ConsoleViewModel", "getGameInfo: $gameInfo")
-                    if (gameInfo.packageName.isNotEmpty()) {
-                        try {
-                            val packageInfo =
-                                App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
-                            if (packageInfo != null) {
-                                withContext(Dispatchers.Main) {
-                                    setGameInfo(
-                                        gameInfo.copy(
-                                            version = packageInfo.versionName ?: "未知",
-                                        )
+            userPreferencesState.collectLatest { it ->
+                val gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex]
+                ModTools.createModsDirectory(gameInfo, it.selectedDirectory)
+                Log.d("ConsoleViewModel", "getGameInfo: $gameInfo")
+                if (gameInfo.packageName.isNotEmpty()) {
+                    try {
+                        val packageInfo =
+                            App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
+                        if (packageInfo != null) {
+                            withContext(Dispatchers.Main) {
+                                setGameInfo(
+                                    gameInfo.copy(
+                                        version = packageInfo.versionName ?: "未知",
                                     )
-                                }
+                                )
                             }
-                        } catch (e: PackageManager.NameNotFoundException) {
-                            e.printStackTrace()
                         }
+                    } catch (e: PackageManager.NameNotFoundException) {
+                        e.printStackTrace()
                     }
-                    // gameInfoJob?.cancel()
+
+                   fileObserver?.stopWatching()
+                    fileObserver = object : FileObserver(
+                        ModTools.ROOT_PATH + it.selectedDirectory,
+                        FileObserver.ALL_EVENTS
+                    ) {
+                        override fun onEvent(event: Int, path: String?) {
+                            val file =
+                                File(ModTools.ROOT_PATH + it.selectedDirectory).absolutePath + "/"
+                            when (event) {
+                                CREATE -> {
+                                    onNewModScan(it, gameInfo)
+                                }
+
+                                MOVED_TO -> {
+                                    onNewModScan(it, gameInfo)
+                                }
+                                // Add more cases if you want to handle more events
+                                else -> return
+                            }
+                        }
+
+                    }
+                    fileObserver?.startWatching()
+                }
+                // gameInfoJob?.cancel()
 
 
             }
 
+        }
+    }
+
+    private fun onNewModScan(
+        it: UserPreferencesState,
+        gameInfo: GameInfo
+    ) {
+        Log.d("FileObserver", "onEvent: $it")
+        viewModelScope.launch {
+            ModTools.scanMods(
+                ModTools.ROOT_PATH + it.selectedDirectory,
+                gameInfo
+            )
         }
     }
 
@@ -444,11 +486,12 @@ class ConsoleViewModel(
         //gameInfoJob?.cancel()
         gameInfoJob = viewModelScope.launch {
             val gameInfo = getGameInfo()
-            modRepository.getModsCountByGamePackageName(gameInfo.packageName).collectLatest { count ->
-                _uiState.update {
-                    it.copy(modCount = count)
+            modRepository.getModsCountByGamePackageName(gameInfo.packageName)
+                .collectLatest { count ->
+                    _uiState.update {
+                        it.copy(modCount = count)
+                    }
                 }
-            }
         }
     }
 
@@ -457,11 +500,12 @@ class ConsoleViewModel(
         //gameInfoJob?.cancel()
         gameInfoJob = viewModelScope.launch {
             val gameInfo = getGameInfo()
-            modRepository.getEnableModsCountByGamePackageName(gameInfo.packageName).collectLatest { count ->
-                _uiState.update {
-                    it.copy(enableModCount = count)
+            modRepository.getEnableModsCountByGamePackageName(gameInfo.packageName)
+                .collectLatest { count ->
+                    _uiState.update {
+                        it.copy(enableModCount = count)
+                    }
                 }
-            }
         }
     }
 
@@ -476,6 +520,7 @@ class ConsoleViewModel(
             it.copy(gameInfo = gameInfo)
         }
     }
+
     // 设置显示升级弹窗
     fun setShowUpgradeDialog(b: Boolean) {
         _uiState.update {
@@ -491,16 +536,15 @@ class ConsoleViewModel(
             }.onFailure {
                 Log.e("ConsoleViewModel", "checkUpdate: $it")
             }.onSuccess {
-               if (it.code > ModTools.getVersionCode()) {
-                   Log.d("ConsoleViewModel", "checkUpdate: ${it}")
-                   _downloadUrl = it.url
-                   _updateContent = it.des
-                   setShowUpgradeDialog(true)
+                if (it.code > ModTools.getVersionCode()) {
+                    Log.d("ConsoleViewModel", "checkUpdate: ${it}")
+                    _downloadUrl = it.url
+                    _updateContent = it.des
+                    setShowUpgradeDialog(true)
                 }
             }
         }
     }
-
 
 
 }
