@@ -1062,7 +1062,7 @@ object ModTools {
     }
 
     // 校验Gson读取的gameInfo的字段
-    fun checkGameInfo(gameInfo: GameInfo): GameInfo {
+    private fun checkGameInfo(gameInfo: GameInfo): GameInfo {
         var result = gameInfo.copy()
         if (gameInfo.gameName.isEmpty()) {
             throw Exception("gameName : 游戏名称不能为空")

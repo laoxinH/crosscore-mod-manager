@@ -260,9 +260,6 @@ fun ConfigurationCard(viewModel: ConsoleViewModel,
                 // 使用uri
                 val path = uri.path?.split(":")?.last()?.replace(ModTools.ROOT_PATH + "/","")
 
-
-// 使用"/"将路径部分连接起来
-
                 viewModel.setSelectedDirectory(
                     path ?: (ModTools.ROOT_PATH + "/" + ModTools.DOWNLOAD_MOD_PATH)
                 )

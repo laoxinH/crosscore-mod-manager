@@ -19,7 +19,6 @@ private const val BASE_URL =
 /**
  * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
  */
-private val json = Json { encodeDefaults = true; ignoreUnknownKeys = true; isLenient = true; allowSpecialFloatingPointValues = true; useArrayPolymorphism = false; allowStructuredMapKeys = true; prettyPrint = true; useAlternativeNames = false; classDiscriminator = "type" }
 val gson = GsonBuilder()
     //.disableHtmlEscaping()
     .create()

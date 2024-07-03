@@ -8,10 +8,8 @@ import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.os.Build
 import android.os.FileObserver
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -45,14 +43,10 @@ import top.laoxin.modmanager.data.UserPreferencesRepository
 import top.laoxin.modmanager.data.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.data.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
-import top.laoxin.modmanager.network.ModManagerApiService
-import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import java.io.File
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 
 
 class ConsoleViewModel(
@@ -91,7 +85,9 @@ class ConsoleViewModel(
             }
         }
         var gameInfoJob: Job? = null
-        var isInited = false
+        var updateModCountJob: Job? = null
+        var updateAntiHarmonyJob: Job? = null
+        var updateEnableModCountJob: Job? = null
         var fileObserver: FileObserver? = null
     }
 
@@ -122,7 +118,7 @@ class ConsoleViewModel(
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(),
+        SharingStarted.WhileSubscribed(5000),
         UserPreferencesState()
     )
 
@@ -151,29 +147,30 @@ class ConsoleViewModel(
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(),
+        SharingStarted.WhileSubscribed(5000),
         ConsoleUiState()
     )
 
     init {
+        Log.d("ConsoleViewModel", "init: ${userPreferencesState.value}")
+        Log.d("ConsoleViewModel", "init: ${uiState.value}")
         checkUpdate()
         ModTools.updateGameConfig()
-        updateGameInfo()
-        gameInfoJob = viewModelScope.launch {
-            selectedGameFlow.collectLatest {
+        viewModelScope.launch {
+            userPreferencesState.collectLatest{
+                updateGameInfo(it)
                 checkInstallMod()
-                setGameInfo(GameInfoConstant.gameInfoList[it])
-                updateAntiHarmony()
                 updateModCount()
+                updateAntiHarmony()
                 updateEnableModCount()
             }
         }
     }
 
     private fun updateAntiHarmony() {
-        viewModelScope.launch {
-            val gameInfo = getGameInfo()
-
+        val gameInfo = getGameInfo()
+        updateAntiHarmonyJob?.cancel()
+        updateAntiHarmonyJob = viewModelScope.launch {
             antiHarmonyRepository.getByGamePackageName(gameInfo.packageName)
                 .collectLatest { antiHarmonyBean ->
                     if (antiHarmonyBean == null) {
@@ -193,15 +190,6 @@ class ConsoleViewModel(
                     }
                 }
         }
-    }
-
-    private fun setAntiHarmony(antiHarmony: Boolean) {
-        viewModelScope.launch {
-            userPreferencesRepository.savePreference(
-                "ANTI_HARMONY",
-                antiHarmony
-            )
-        }
 
     }
 
@@ -218,15 +206,10 @@ class ConsoleViewModel(
     fun setSelectedDirectory(selectedDirectory: String) {
         viewModelScope.launch {
             try {
-                File(
-                    (ModTools.ROOT_PATH + "/$selectedDirectory/" + ModTools.GAME_CONFIG).replace(
-                        "//",
-                        "/"
-                    )
-                ).mkdirs()
+                File((ModTools.ROOT_PATH + "/$selectedDirectory/" + ModTools.GAME_CONFIG).replace("tree","").replace("//", "/")).mkdirs()
                 userPreferencesRepository.savePreference(
                     "SELECTED_DIRECTORY",
-                    "/$selectedDirectory/".replace("//", "/")
+                    "/$selectedDirectory/".replace("tree","").replace("//", "/")
                 )
             } catch (e: Exception) {
                 ToastUtils.longCall(R.string.toast_this_dir_has_no_prim)
@@ -254,15 +237,6 @@ class ConsoleViewModel(
         }
     }
 
-    // 设置安装位置
-    private fun setInstallPath(installPath: String) {
-        viewModelScope.launch {
-            userPreferencesRepository.savePreference(
-                "INSTALL_PATH",
-                installPath
-            )
-        }
-    }
 
 
     // 设置扫描文件夹中的Mods
@@ -287,58 +261,53 @@ class ConsoleViewModel(
 
 
     // 通过名称软件包名获取软件包信息
-    private fun updateGameInfo() {
-        gameInfoJob?.cancel()
-        gameInfoJob = viewModelScope.launch(Dispatchers.IO) {
-            userPreferencesState.collectLatest { it ->
-                val gameInfo = GameInfoConstant.gameInfoList[it.selectedGameIndex]
-                ModTools.createModsDirectory(gameInfo, it.selectedDirectory)
-                Log.d("ConsoleViewModel", "getGameInfo: $gameInfo")
-                if (gameInfo.packageName.isNotEmpty()) {
-                    try {
-                        val packageInfo =
-                            App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
-                        if (packageInfo != null) {
-                            withContext(Dispatchers.Main) {
-                                setGameInfo(
-                                    gameInfo.copy(
-                                        version = packageInfo.versionName ?: "未知",
-                                    )
-                                )
-                            }
-                        }
-                    } catch (e: PackageManager.NameNotFoundException) {
-                        e.printStackTrace()
+    private suspend fun updateGameInfo(userPreferencesState: UserPreferencesState) {
+        val gameInfo = GameInfoConstant.gameInfoList[userPreferencesState.selectedGameIndex]
+        ModTools.createModsDirectory(gameInfo, userPreferencesState.selectedDirectory)
+        Log.d("ConsoleViewModel", "getGameInfo: $gameInfo")
+        if (gameInfo.packageName.isNotEmpty()) {
+            try {
+                val packageInfo =
+                    App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
+                if (packageInfo != null) {
+                    withContext(Dispatchers.Main) {
+                        setGameInfo(
+                            gameInfo.copy(
+                                version = packageInfo.versionName ?: "未知",
+                            )
+                        )
                     }
-
-                   fileObserver?.stopWatching()
-                    fileObserver = object : FileObserver(
-                        ModTools.ROOT_PATH + it.selectedDirectory,
-                        FileObserver.ALL_EVENTS
-                    ) {
-                        override fun onEvent(event: Int, path: String?) {
-                            val file =
-                                File(ModTools.ROOT_PATH + it.selectedDirectory).absolutePath + "/"
-                            when (event) {
-                                CREATE -> {
-                                    onNewModScan(it, gameInfo)
-                                }
-
-                                MOVED_TO -> {
-                                    onNewModScan(it, gameInfo)
-                                }
-                                // Add more cases if you want to handle more events
-                                else -> return
-                            }
-                        }
-
-                    }
-                    fileObserver?.startWatching()
                 }
-                // gameInfoJob?.cancel()
-
-
+            } catch (e: PackageManager.NameNotFoundException) {
+                e.printStackTrace()
             }
+
+            /*             fileObserver?.stopWatching()
+                         fileObserver = object : FileObserver(
+                             ModTools.ROOT_PATH + it.selectedDirectory,
+                             FileObserver.ALL_EVENTS
+                         ) {
+                             override fun onEvent(event: Int, path: String?) {
+                                 val file =
+                                     File(ModTools.ROOT_PATH + it.selectedDirectory).absolutePath + "/"
+                                 when (event) {
+                                     CREATE -> {
+                                         onNewModScan(it, gameInfo)
+                                     }
+
+                                     MOVED_TO -> {
+                                         onNewModScan(it, gameInfo)
+                                     }
+                                     // Add more cases if you want to handle more events
+                                     else -> return
+                                 }
+                             }
+
+                         }
+                         fileObserver?.startWatching()
+                     }*/
+            // gameInfoJob?.cancel()
+
 
         }
     }
@@ -427,7 +396,7 @@ class ConsoleViewModel(
     fun getGameIcon(packageName: String): ImageBitmap {
         try {
             val packageInfo = App.get().packageManager.getPackageInfo(packageName, 0)
-            val drawable = packageInfo.applicationInfo.loadIcon(App.get().packageManager)
+            var drawable = packageInfo.applicationInfo.loadIcon(App.get().packageManager)
             val bitmap = when (drawable) {
                 is BitmapDrawable -> drawable.bitmap
                 is AdaptiveIconDrawable -> {
@@ -442,11 +411,14 @@ class ConsoleViewModel(
                     }
                 }
 
-                else -> throw IllegalArgumentException("Unsupported drawable type")
+                else -> {
+                    val context = App.get()
+                    drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
+                    drawable.toBitmap()
+                }
             }
             return bitmap.asImageBitmap()
         } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
             val context = App.get()
             val drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
             val bitmap = drawable.toBitmap()
@@ -482,10 +454,9 @@ class ConsoleViewModel(
 
     // 更新mod数量
     private fun updateModCount() {
-
-        //gameInfoJob?.cancel()
-        gameInfoJob = viewModelScope.launch {
-            val gameInfo = getGameInfo()
+        val gameInfo = getGameInfo()
+        updateModCountJob?.cancel()
+        updateModCountJob = viewModelScope.launch {
             modRepository.getModsCountByGamePackageName(gameInfo.packageName)
                 .collectLatest { count ->
                     _uiState.update {
@@ -497,9 +468,9 @@ class ConsoleViewModel(
 
     // 更新已开启mod数量
     private fun updateEnableModCount() {
-        //gameInfoJob?.cancel()
-        gameInfoJob = viewModelScope.launch {
-            val gameInfo = getGameInfo()
+        val gameInfo = getGameInfo()
+        updateEnableModCountJob?.cancel()
+        updateEnableModCountJob = viewModelScope.launch {
             modRepository.getEnableModsCountByGamePackageName(gameInfo.packageName)
                 .collectLatest { count ->
                     _uiState.update {
@@ -507,6 +478,7 @@ class ConsoleViewModel(
                     }
                 }
         }
+
     }
 
     // 获取游戏信息

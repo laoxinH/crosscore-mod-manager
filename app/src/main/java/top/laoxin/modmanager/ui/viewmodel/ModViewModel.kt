@@ -17,7 +17,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -114,7 +116,7 @@ class ModViewModel(
 
 
     // 生成用户配置对象
-    private val userPreferences: Flow<UserPreferencesState> = combine(
+    private val userPreferences: StateFlow<UserPreferencesState> = combine(
         scanQQDirectoryFlow,
         selectedDirectoryFlow,
         scanDownloadFlow,
@@ -128,12 +130,16 @@ class ModViewModel(
             selectedGameIndex = selectedGame,
             scanDirectoryMods = scanDirectoryMods
         )
-    }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        UserPreferencesState())
 
 
     var uiState = _uiState.asStateFlow()
 
     init {
+        Log.d("ModViewModel", "init: 初始化${userPreferences.value}")
         //checkPermission()
         viewModelScope.launch {
             userPreferences.collect { it ->
@@ -230,6 +236,12 @@ class ModViewModel(
 
     }
 
+    private suspend fun updateAllMods(){
+        modRepository.getModsByGamePackageName(_gameInfo.packageName).collectLatest {
+            setModList(it)
+        }
+    }
+
     private fun onDelMod(path: String?, file: String) {
         Log.d("FileObserver", "File $path has been deleted")
         val filepath = File(file, path).absolutePath
@@ -278,7 +290,6 @@ class ModViewModel(
     }
 
     fun flashMods(isInit: Boolean) {
-
         flashModsJob?.cancel()
         var pathType = PathType.NULL
         setLoading(true)
