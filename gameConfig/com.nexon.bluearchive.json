@@ -1,5 +1,5 @@
 {
-    "gameName": "蔚蓝档案-by Go Koumei",
+    "gameName": "蔚蓝档案-by siranaine",
     "serviceName": "国际服",
     "packageName": "com.nexon.bluearchive",
     "version": "1.0.0",
@@ -11,6 +11,8 @@
     ],
     "modType": [ "AssetBundles" ],
     "modSavePath": "",
-    "isGameFileRepeat": false
+    "isGameFileRepeat": false,
+    "enableBackup" : true,
+    "tips" : ""
 
 }

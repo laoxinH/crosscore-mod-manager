@@ -21,6 +21,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.RandomAccessFile
+import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -31,7 +32,7 @@ object ArchiveUtil {
 
     /**
      * 解压文件
-     * 支持的文件格式: 7z, ar, arj, cpio, dump, tar, zip
+     * 支持的文件格式: 7z, zip, rar
      *
      * @param srcFile  需要解压的文件位置
      * @param destDir  解压的目标位置
@@ -249,7 +250,10 @@ object ArchiveUtil {
 
             for (i in 0 until inArchive.numberOfItems) {
                 var filePath = inArchive.getStringProperty(i, PropID.PATH)
+                Log.i(TAG, "filePath原名: $filePath")
                 filePath = formatString(filePath)
+                Log.i(TAG, "filePath格式化: $filePath")
+
                 list.add(filePath)
             }
         } catch (e: Exception) {
@@ -353,16 +357,28 @@ object ArchiveUtil {
     }
 
     fun formatString(fileHeader: String): String {
+        val encodings = listOf("GBK", "UTF-8","GB2312","Big5","ISO-8859-1")
 
-        val canEnCode = Charset.forName("GBK").newEncoder().canEncode(fileHeader)
-        if (canEnCode) { //canEnCode为true，表示不是乱码。false.表示乱码。是乱码则需要重新设置编码格式
-            return fileHeader
-        } else {
-            val bytes = fileHeader.toByteArray(Charset.forName("Cp437"))
-            return String(bytes, Charset.forName("GBK"))
+        for (encoding in encodings) {
+            if (Charset.forName(encoding).newEncoder().canEncode(fileHeader)) {
+                return fileHeader
+            } else {
+                val bytes = fileHeader.toByteArray(Charset.forName("CP437")).toString(Charset.forName(encoding))
+                if (Charset.forName(encoding).newEncoder().canEncode(bytes)) {
+                    return bytes
+                }
+       /*         val ba = fileHeader.toByteArray()
+                val bb = ByteBuffer.wrap(ba)
+                val cs = Charset.forName("GBK")
+                val cd = cs.newDecoder()
+                val cb = cd.decode(bb)
+                val gbk_path = cb.toString()
+                return gbk_path*/
+            }
         }
 
-
+        // 如果所有的编码都无法将字符串解码为可视化字符串，返回原始字符串
+        return fileHeader
     }
 
     fun isRandomCode(fileHeaders: List<String>): Boolean {

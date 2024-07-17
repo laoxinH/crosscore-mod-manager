@@ -72,10 +72,10 @@ object PermissionTools {
     private val isShizukuInstalled: Boolean
         get() {
             try {
-                App.get().getPackageManager()?.getPackageInfo(SHIZUKU_PACKAGE_NAME, 0)
+                App.get().packageManager?.getPackageInfo(SHIZUKU_PACKAGE_NAME, 0)
                 return true
             } catch (e: PackageManager.NameNotFoundException) {
-                e.printStackTrace()
+                Log.e("PermissionTools", "Shizuku not installed")
             }
             return false
         }

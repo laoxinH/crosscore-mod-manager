@@ -145,6 +145,7 @@
     <string name="console_scan_directory_mods_content">此功能只会扫描配置的MOD目录中游戏包名(比如:com.megagame.crosscore)文件夹包含的MOD(QQ和系统下载均不会扫描)</string>
     <string name="toast_scanQQ_failed">扫描QQ目录失败</string>
     <string name="toast_this_dir_has_no_prim">此文件夹权限不足</string>
+    <string name="toast_has_no_prim">未授权</string>
     <string name="setting_page_app_flash_game_config">读取游戏配置文件</string>
     <string name="setting_page_app_flash_game_config_descript">配置文件放到配置的MOD目录中的GameConfig中</string>
     <string name="toast_game_config_not_suppose">游戏配置不支持此功能</string>
@@ -167,5 +168,21 @@
     <string name="toast_special_operation_failed">防检测失败</string>
     <string name="switch_download_game_tiltle">下载游戏配置文件</string>
     <string name="setting_thinks_link_desc">个人主页: %1$s</string>
+    <string name="test1">未授权</string>
+    <string name="tips_special_operation">执行特殊游戏操作</string>
+    <string name="toast_decompression_failed">解压失败</string>
+    <string name="toast_this_dir_has_no_prim_android">不能使用安卓系统目录</string>
+    <string name="channel_name">游戏启动服务</string>
+    <string name="channel_description">某些游戏启动过程中的特殊操作</string>
+    <string name="channel_id">114514</string>
+    <string name="channel_tiile">游戏MOD注入服务</string>
+    <string name="channel_content">游戏MOD注入服务通知</string>
+    <string name="toast_game_not_found">启动游戏失败</string>
+    <string name="setting_page_app_swtch_permission_shizuku">申请shizuku授权</string>
+    <string name="setting_page_app_swtch_permission_shizuku_desc">申请shizuku授权(某些游戏仅支持shizuku授权)</string>
+    <string name="console_game_tips_title">特别注意!</string>
+    <string name="setting_page_more_discord">Discord服务器</string>
+    <string name="setting_page_more_discord_descript">这是一个各种游戏MOD分享交流的Discord服务器</string>
+    <string name="disscord_url">https://discord.com/invite/aKuCDEUWVU</string>
 
 </resources>

@@ -60,7 +60,6 @@ fun RequestStoragePermission(
                             showDialog = false
                         } else {
                             if (!Environment.isExternalStorageManager()) {
-
                                 ToastUtils.longCall(R.string.toast_permission_not_granted)
                             } else {
                                 ModTools.makeModsDirs()

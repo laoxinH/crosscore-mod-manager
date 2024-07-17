@@ -1,0 +1,17 @@
+{
+    "gameName": "尘白禁区",
+    "serviceName": "官服2.0.0",
+    "packageName": "com.dragonli.projectsnow.lhm",
+    "version": "2.0.0",
+    "gamePath": "Android/data/com.dragonli.projectsnow.lhm/",
+    "antiHarmonyFile": "",
+    "antiHarmonyContent": "",
+    "gameFilePath": [
+        "Android/data/com.dragonli.projectsnow.lhm/files/2.0.0/"
+    ],
+    "modType": [ "人物模型" ],
+    "modSavePath": "",
+    "isGameFileRepeat": false,
+    "enableBackup" : false,
+    "tips" : "第一次选择尘白禁区游戏需要先清除游戏数据或者卸载重装再选择(清除或者卸载重装后先运行游戏到登录界面,然后回到这里选择游戏后再运行游戏下载游戏数据),否则会提示MOD文件复制失败,后续有大更新也需要再次操纵"
+}

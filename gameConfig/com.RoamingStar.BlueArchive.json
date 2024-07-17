@@ -1,5 +1,5 @@
 {
-    "gameName": "蔚蓝档案-by Go Koumei",
+    "gameName": "蔚蓝档案-by siranaine",
     "serviceName": "官服",
     "packageName": "com.RoamingStar.BlueArchive",
     "version": "1.0.0",
@@ -11,5 +11,7 @@
     ],
     "modType": [ "AssetBundles" ],
     "modSavePath": "",
-    "isGameFileRepeat": false
+    "isGameFileRepeat": false,
+    "enableBackup" : true,
+    "tips" : ""
 }

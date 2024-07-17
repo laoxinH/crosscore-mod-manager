@@ -23,5 +23,7 @@
     "道具贴图"
   ],
   "modSavePath": "",
-  "isGameFileRepeat": true
+  "isGameFileRepeat": true,
+  "enableBackup" : true,
+  "tips" : ""
 }

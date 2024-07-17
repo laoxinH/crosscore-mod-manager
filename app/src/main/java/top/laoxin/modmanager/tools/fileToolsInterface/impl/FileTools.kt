@@ -49,7 +49,7 @@ object FileTools : BaseFileTools {
                 }
             }
         } catch (e: Exception) {
-           Log.e(TAG, "getGameFiles: $e")
+            Log.e(TAG, "getGameFiles: $e")
         }
         return list
     }
@@ -73,7 +73,7 @@ object FileTools : BaseFileTools {
             if (!File(destPath).exists()) {
                 File(destPath).parentFile?.mkdirs()
             }
-            Files.move(Paths.get(srcPath), Paths.get(destPath),StandardCopyOption.REPLACE_EXISTING)
+            Files.move(Paths.get(srcPath), Paths.get(destPath), StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: IOException) {
             Log.e(TAG, "moveFile: $e")
@@ -127,6 +127,35 @@ object FileTools : BaseFileTools {
             return true
         } catch (e: Exception) {
             Log.e(TAG, "createFileByStream: $e")
+            return false
+        }
+    }
+
+    override fun isFileChanged(path: String): Long {
+        val file = File(path)
+        return file.lastModified()
+
+    }
+
+    override fun changDictionaryName(path: String, name: String): Boolean {
+        val file = File(path)
+        if (file.exists()) {
+            file.renameTo(File(file.parent, name))
+            return true
+        } else {
+            return false
+        }
+    }
+
+    override fun createDictionary(path: String): Boolean {
+        val file = File(path)
+        try {
+            if (!file.exists()) {
+                file.mkdirs()
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "createDictionary: $e")
             return false
         }
     }

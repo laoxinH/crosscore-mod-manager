@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Bundle
 import android.os.FileObserver
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -39,10 +40,12 @@ import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.data.UserPreferencesRepository
-import top.laoxin.modmanager.data.antiHarmony.AntiHarmonyRepository
-import top.laoxin.modmanager.data.mods.ModRepository
+import top.laoxin.modmanager.constant.SpecialGame
+import top.laoxin.modmanager.database.UserPreferencesRepository
+import top.laoxin.modmanager.database.antiHarmony.AntiHarmonyRepository
+import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
+import top.laoxin.modmanager.service.ProjectSnowStartService
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
@@ -152,8 +155,6 @@ class ConsoleViewModel(
     )
 
     init {
-        Log.d("ConsoleViewModel", "init: ${userPreferencesState.value}")
-        Log.d("ConsoleViewModel", "init: ${uiState.value}")
         checkUpdate()
         ModTools.updateGameConfig()
         viewModelScope.launch {
@@ -163,6 +164,8 @@ class ConsoleViewModel(
                 updateModCount()
                 updateAntiHarmony()
                 updateEnableModCount()
+                openDictionaryObserver(it)
+
             }
         }
     }
@@ -193,6 +196,31 @@ class ConsoleViewModel(
 
     }
 
+    private fun openDictionaryObserver(userPreferencesState: UserPreferencesState) {
+        fileObserver?.stopWatching()
+
+        fileObserver = object : FileObserver(
+            ModTools.ROOT_PATH + userPreferencesState.selectedDirectory,
+            ALL_EVENTS
+        ) {
+            override fun onEvent(event: Int, path: String?) {
+                when (event) {
+                    CREATE -> {
+                        onNewModScan(userPreferencesState, getGameInfo())
+                    }
+
+                    MOVED_TO -> {
+                        onNewModScan(userPreferencesState, getGameInfo())
+                    }
+                    // Add more cases if you want to handle more events
+                    else -> return
+                }
+            }
+
+        }
+        fileObserver?.startWatching()
+    }
+
     private fun setScanQQDirectory(scanQQDirectory: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.savePreference(
@@ -206,11 +234,21 @@ class ConsoleViewModel(
     fun setSelectedDirectory(selectedDirectory: String) {
         viewModelScope.launch {
             try {
-                File((ModTools.ROOT_PATH + "/$selectedDirectory/" + ModTools.GAME_CONFIG).replace("tree","").replace("//", "/")).mkdirs()
-                userPreferencesRepository.savePreference(
-                    "SELECTED_DIRECTORY",
-                    "/$selectedDirectory/".replace("tree","").replace("//", "/")
+                val file = File(
+                    (ModTools.ROOT_PATH + "/$selectedDirectory/" + ModTools.GAME_CONFIG).replace(
+                        "tree",
+                        ""
+                    ).replace("//", "/")
                 )
+                if (!file.absolutePath.contains("${ModTools.ROOT_PATH}/Android")) {
+                    file.mkdirs()
+                    userPreferencesRepository.savePreference(
+                        "SELECTED_DIRECTORY",
+                        "/$selectedDirectory/".replace("tree","").replace("//", "/")
+                    )
+                } else {
+                    ToastUtils.longCall(R.string.toast_this_dir_has_no_prim_android)
+                }
             } catch (e: Exception) {
                 ToastUtils.longCall(R.string.toast_this_dir_has_no_prim)
                 Log.e("ConsoleViewModel", "setSelectedDirectory: $e")
@@ -281,34 +319,6 @@ class ConsoleViewModel(
             } catch (e: PackageManager.NameNotFoundException) {
                 e.printStackTrace()
             }
-
-            /*             fileObserver?.stopWatching()
-                         fileObserver = object : FileObserver(
-                             ModTools.ROOT_PATH + it.selectedDirectory,
-                             FileObserver.ALL_EVENTS
-                         ) {
-                             override fun onEvent(event: Int, path: String?) {
-                                 val file =
-                                     File(ModTools.ROOT_PATH + it.selectedDirectory).absolutePath + "/"
-                                 when (event) {
-                                     CREATE -> {
-                                         onNewModScan(it, gameInfo)
-                                     }
-
-                                     MOVED_TO -> {
-                                         onNewModScan(it, gameInfo)
-                                     }
-                                     // Add more cases if you want to handle more events
-                                     else -> return
-                                 }
-                             }
-
-                         }
-                         fileObserver?.startWatching()
-                     }*/
-            // gameInfoJob?.cancel()
-
-
         }
     }
 
@@ -519,6 +529,31 @@ class ConsoleViewModel(
     }
 
 
+    fun startGameService() {
+        val intent = Intent(App.get(), ProjectSnowStartService::class.java)
+        intent.putExtras(
+            Bundle().apply {
+                putParcelable("game_info", getGameInfo())
+            }
+        )
+        App.get().startForegroundService(intent)
+    }
+
+    fun startGame() {
+        // 通过包名获取应用信息
+        val gameInfo = getGameInfo()
+        val intent = App.get().packageManager.getLaunchIntentForPackage(gameInfo.packageName)
+        if (intent != null) {
+            for (entry in SpecialGame.entries) {
+                if (gameInfo.packageName.contains(entry.packageName)) {
+                    startGameService()
+                }
+            }
+            App.get().startActivity(intent)
+        } else {
+            ToastUtils.longCall(R.string.toast_game_not_found)
+        }
+    }
 }
 
 

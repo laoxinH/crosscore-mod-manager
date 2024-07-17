@@ -23,5 +23,7 @@
   ],
   "packageName": "com.hypergryph.arknights.bilibili",
   "serviceName": "B服：配置版本2.0-要求实验室版本2.0.2及以上",
-  "version": "2.0.0"
+  "version": "2.0.0",
+  "enableBackup" : true,
+  "tips" : ""
 }

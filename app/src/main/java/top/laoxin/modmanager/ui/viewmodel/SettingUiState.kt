@@ -20,6 +20,11 @@ data class SettingUiState(
     val downloadGameConfigList: List<DownloadGameConfigBean> = emptyList(),
     // 感谢名单
     val thinksList: List<ThinksBean> = emptyList(),
+    // 游戏提示弹窗
+    val showGameTipsDialog: Boolean = false,
+
+    //权限提示窗
+    val openPermissionRequestDialog: Boolean = false,
 ) {
 
 }

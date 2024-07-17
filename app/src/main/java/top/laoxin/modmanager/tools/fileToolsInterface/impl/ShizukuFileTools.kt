@@ -83,4 +83,31 @@ object ShizukuFileTools : BaseFileTools {
         TODO("Not yet implemented")
     }
 
+    override fun isFileChanged(path: String): Long {
+        return try {
+            iFileExplorerService.isFileChanged(path)
+        } catch (e: Exception) {
+            Log.e(TAG, "isFileChanged: $e")
+            0
+        }
+    }
+
+    override fun changDictionaryName(path: String, name: String) :Boolean {
+        Log.d(TAG, "changDictionaryName: $path==$name")
+       return try {
+            iFileExplorerService.changDictionaryName(path, name)
+        } catch (e: Exception) {
+            Log.e(TAG, "changDictionaryName: $e")
+           false
+        }
+    }
+
+    override fun createDictionary(path : String): Boolean {
+        return try {
+            iFileExplorerService.createDictionary(path)
+        } catch (e: Exception) {
+            Log.e(TAG, "createDictionary: $e")
+            false
+        }
+    }
 }

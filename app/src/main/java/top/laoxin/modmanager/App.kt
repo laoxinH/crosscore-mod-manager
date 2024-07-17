@@ -1,6 +1,8 @@
 package top.laoxin.modmanager
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -8,9 +10,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import top.laoxin.modmanager.constant.OSVersion
-import top.laoxin.modmanager.data.AppContainer
-import top.laoxin.modmanager.data.AppDataContainer
-import top.laoxin.modmanager.data.UserPreferencesRepository
+import top.laoxin.modmanager.database.AppContainer
+import top.laoxin.modmanager.database.AppDataContainer
+import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.tools.ModTools
 import java.io.File
 import java.io.FileOutputStream
@@ -34,6 +36,7 @@ class App : Application() {
         sApp = this
         checkOsVersion()
         createFile()
+       // registerNotificationService()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             // 这里处理全局异常
             Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
@@ -84,4 +87,19 @@ class App : Application() {
 
         Log.d("App", "checkOsVersion: $osVersion")
     }
+
+    // 注册系统通知服务
+private fun registerNotificationService() {
+        val name = getString(R.string.channel_name)
+        val descriptionText = getString(R.string.channel_description)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val CHANNEL_ID = getString(R.string.channel_id)
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
 }

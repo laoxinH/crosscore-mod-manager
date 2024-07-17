@@ -4,6 +4,8 @@ import android.os.RemoteException
 import android.util.Log
 import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.tools.ArchiveUtil
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 
 import top.laoxin.modmanager.useservice.IFileExplorerService
 
@@ -78,7 +80,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
 
     override fun fileExists(path: String?): Boolean {
         return try {
-            Log.d(TAG, "fileExists: $path==${ File(path!!).exists()}")
+            Log.d(TAG, "fileExists: $path==${File(path!!).exists()}")
             File(path).exists()
         } catch (e: Exception) {
             false
@@ -95,8 +97,8 @@ class FileExplorerService : IFileExplorerService.Stub() {
             val runtime = Runtime.getRuntime()
             val proc = runtime.exec(command)
             true
-        } catch (e : IOException) {
-            Log.i("TAG","chmod fail!!!!");
+        } catch (e: IOException) {
+            Log.i("TAG", "chmod fail!!!!");
             e.printStackTrace();
             false
         }
@@ -109,7 +111,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
         password: String?
     ): Boolean {
         return try {
-           ArchiveUtil.extractSpecificFile(zipPath!!, listOf(filename!!), unzipPath!!, password)
+            ArchiveUtil.extractSpecificFile(zipPath!!, listOf(filename!!), unzipPath!!, password)
             true
         } catch (e: Exception) {
             Log.e(TAG, "unZipFile: $e")
@@ -134,7 +136,10 @@ class FileExplorerService : IFileExplorerService.Stub() {
                             val modFileName = File(it).name
                             if (gameFiles.contains(modFileName)) {
                                 Log.d(TAG, "开始移动文件: ${f.name}==${modFileName}")
-                                moveFile(f.path, Paths.get(gameInfo!!.modSavePath, f.name).toString())
+                                moveFile(
+                                    f.path,
+                                    Paths.get(gameInfo!!.modSavePath, f.name).toString()
+                                )
                                 return@forEach
                             }
                         }
@@ -142,7 +147,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
                 }
             }
             true
-        }catch (e : Exception) {
+        } catch (e: Exception) {
             false
         }
     }
@@ -161,7 +166,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
             Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: Exception) {
-           Log.e(TAG, "moveFile失败: $e")
+            Log.e(TAG, "moveFile失败: $e")
             false
         }
     }
@@ -172,6 +177,41 @@ class FileExplorerService : IFileExplorerService.Stub() {
             file.isFile
         } catch (e: Exception) {
             false
+        }
+    }
+
+    override fun isFileChanged(path: String): Long {
+        return try {
+            val lastModified = File(path).lastModified()
+            Log.d(TAG, "isFileChanged: $lastModified")
+            lastModified
+        } catch (e: Exception) {
+            0
+        }
+    }
+
+    override fun changDictionaryName(path: String?, newName: String?): Boolean {
+        return try {
+            //Log.d(TAG, "changDictionaryName: $path==$newName")
+            val file = File(path!!)
+            val newFile = File(file.parent, newName!!)
+            file.renameTo(newFile)
+        } catch (e: Exception) {
+            Log.e(TAG, "changDictionaryName: $e")
+            false
+        }
+    }
+
+    override fun createDictionary(path: String?): Boolean {
+        try {
+            val file = File(path)
+            if (!file.exists()) {
+                file.mkdirs()
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "createDictionary: $e")
+            return false
         }
     }
 

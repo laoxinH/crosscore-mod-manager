@@ -8,7 +8,9 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 <!--    联网权限-->
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <!--    后台权限-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 <!--    shizuku权限-->
     <uses-sdk tools:overrideLibrary="rikka.shizuku.api, rikka.shizuku.provider, rikka.shizuku.shared, rikka.shizuku.aidl" />
     <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
@@ -33,8 +35,17 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
+
         </activity>
+        <service
+            android:name=".service.ProjectSnowStartService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="dataSync"
+            android:permission="android.permission.INTERNET">
+        </service>
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
             android:authorities="${applicationId}.shizuku"
@@ -50,6 +61,8 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
+
         </intent>
     </queries>
+
 </manifest>

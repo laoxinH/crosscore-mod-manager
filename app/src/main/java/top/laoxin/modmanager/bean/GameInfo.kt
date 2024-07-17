@@ -16,7 +16,9 @@ data class GameInfo(
     val gameFilePath : List<String>,
     val version : String,
     val modType : List<String>,
-    val isGameFileRepeat : Boolean = true
+    val isGameFileRepeat : Boolean = true,
+    val enableBackup :  Boolean = true,
+    val tips : String = ""
 
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
@@ -30,7 +32,10 @@ data class GameInfo(
         parcel.createStringArrayList()!!,
         parcel.readString()!!,
         parcel.createStringArrayList()!!,
-        parcel.readByte() != 0.toByte()
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readString()!!
+
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -45,6 +50,8 @@ data class GameInfo(
         parcel.writeString(version)
         parcel.writeStringList(modType)
         parcel.writeByte(if (isGameFileRepeat) 1 else 0)
+        parcel.writeByte(if (enableBackup) 1 else 0)
+        parcel.writeString(tips)
 
     }
 

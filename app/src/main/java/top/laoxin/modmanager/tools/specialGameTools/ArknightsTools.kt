@@ -1,15 +1,14 @@
 package top.laoxin.modmanager.tools.specialGameTools
 
 import android.util.Log
-import androidx.documentfile.provider.DocumentFile
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.LongSerializationPolicy
-import com.google.gson.reflect.TypeToken
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
+import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.data.backups.BackupRepository
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
@@ -17,20 +16,18 @@ import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import java.io.File
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 
 object ArknightsTools : BaseSpecialGameTools {
 
     private var CHECK_FILEPATH = ""
     private const val CHECK_FILENAME_1 = "persistent_res_list.json"
     private const val CHECK_FILENAME_2 = "hot_update_list.json"
-    val gson = GsonBuilder()
+    private val gson: Gson = GsonBuilder()
         /*.disableHtmlEscaping()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
         .create()
     private val app = App.get()
-    lateinit var fileTools : BaseFileTools
+    private lateinit var fileTools : BaseFileTools
     data class HotUpdate(
         var fullPack: FullPack = FullPack(),
         var versionId: String = "",
@@ -60,8 +57,6 @@ object ArknightsTools : BaseSpecialGameTools {
         val type : String?,
         val pid : String?,
         val cid : Int?,
-
-
         )
     override fun specialOperationEnable(mod: ModBean, packageName: String) : Boolean{
         CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
@@ -102,28 +97,47 @@ object ArknightsTools : BaseSpecialGameTools {
         return flag.all { it }
     }
 
-    override fun specialOperationDisable(backup: List<BackupBean>, packageName: String): Boolean {
+    override fun specialOperationDisable(
+        backup: List<BackupBean>,
+        packageName: String,
+        modBean: ModBean
+    ): Boolean {
         CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
         val flag : MutableList<Boolean> = mutableListOf()
         for (backupBean in backup) {
             // 计算md5
-            var md5 = calculateMD5(File(backupBean.backupPath!!).inputStream())
+            val md5 = calculateMD5(File(backupBean.backupPath!!).inputStream())
             // 读取文件大小
-            var fileSize = try {
+            val fileSize = try {
                 File(backupBean.backupPath).length()
             } catch (e: Exception) {
                 0
             }
             val checkFileName = (File(backupBean.backupPath).parentFile?.name ?: "") + "/" + backupBean.filename
-            Log.d("ArknightsTools", "checkFileName: $checkFileName")
-            Log.d("ArknightsTools", "md5: $md5")
-            Log.d("ArknightsTools", "fileSize: $fileSize")
+
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
 
         }
         return flag.all { it }
 
     }
+
+    override fun specialOperationStartGame(gameInfo: GameInfo): Boolean {
+        return true
+    }
+
+    override fun specialOperationCreateMods(gameInfo: GameInfo): List<ModBeanTemp> {
+        TODO("Not yet implemented")
+    }
+
+    override fun specialOperationScanMods(gameInfo: String, modFileName: String): Boolean {
+        return false
+    }
+
+    override fun specialOperationSelectGame(gameInfo: GameInfo): Boolean {
+        return true
+    }
+
 
     // 修改check文件
     private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long) : Boolean {

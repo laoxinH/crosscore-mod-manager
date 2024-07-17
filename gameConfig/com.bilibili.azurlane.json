@@ -19,5 +19,7 @@
   ],
   "modType" : ["shipyardicon","paintingface","painting","strategyicon","squareicon","herohrzicon","live2d","loadingbg","spinepainting"],
   "modSavePath" : "",
-  "isGameFileRepeat" : true
+  "isGameFileRepeat" : true,
+  "enableBackup" : true,
+  "tips" : ""
 }

@@ -1,7 +1,6 @@
 package top.laoxin.modmanager.tools.fileToolsInterface
 
 
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -37,6 +36,9 @@ interface BaseFileTools {
 
     // 通过流创建文件
     fun createFileByStream(path: String, filename: String, inputStream: InputStream?): Boolean
+
+    // 监听文件变化
+    fun isFileChanged(path: String): Long
 
     // 通过DocumentFile和File复制文件
     fun copyFileByDF(srcPath: String, destPath: String): Boolean {
@@ -103,16 +105,19 @@ interface BaseFileTools {
 
             if (destDocumentFile?.exists() == true) {
                 destDocumentFile.delete()
-                val parentFile = File(destPath).parentFile?.absolutePath
-                val parentDocumentFile = DocumentFile.fromTreeUri(
-                    app,
-                    pathToUri(parentFile!!)
-                )
-                parentDocumentFile?.createFile("application/octet-stream",File(destPath).name)?.let {
-                    destDocumentFile = it
-                }
             }
+            val parentFile = File(destPath).parentFile?.absolutePath
+            val parentDocumentFile = DocumentFile.fromTreeUri(
+                app,
+                pathToUri(parentFile!!)
+            )
+            Log.d("FileTools", "copyFileByFD: 开始创建文件")
+           
+            parentDocumentFile!!.createFile("application/octet-stream",File(destPath).name)!!.let {
+                Log.d("FileTools", "copyFileByFD: 开始创建文件")
 
+                destDocumentFile = it
+            }
 
             val outputStream = app.contentResolver.openOutputStream(destDocumentFile?.uri!!)
             val inputStream = File(srcPath).inputStream()
@@ -124,7 +129,7 @@ interface BaseFileTools {
             }
             true
         } catch (e: Exception) {
-            Log.e("FileTools", "copyFileByDF: $e")
+            e.printStackTrace()
             ModTools.logRecord("FileTools-copyFileByFD: $e")
             false
         }
@@ -145,6 +150,9 @@ interface BaseFileTools {
     private fun isUnderObbPath(path: String): Boolean {
         return path.contains("${ModTools.ROOT_PATH}/Android/obb/")
     }
+
+    abstract fun changDictionaryName(path: String, name: String) : Boolean
+    abstract fun createDictionary(path: String): Boolean
 
     /**
      * 如果字符串是应用包名，返回字符串，反之返回null

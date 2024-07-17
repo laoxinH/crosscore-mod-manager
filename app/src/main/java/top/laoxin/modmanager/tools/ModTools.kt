@@ -25,13 +25,9 @@ import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import top.laoxin.modmanager.useservice.IFileExplorerService
-import java.io.BufferedReader
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
-import java.io.InputStreamReader
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -42,15 +38,14 @@ object ModTools {
     val ROOT_PATH: String = Environment.getExternalStorageDirectory().path
     val MY_APP_PATH =
         (ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")).toString() + "/"
-    private val BACKUP_PATH = MY_APP_PATH + "backup/"
+    val BACKUP_PATH = MY_APP_PATH + "backup/"
     private val MODS_TEMP_PATH = MY_APP_PATH + "temp/"
     val MODS_UNZIP_PATH = MY_APP_PATH + "temp/unzip/"
     private val MODS_ICON_PATH = MY_APP_PATH + "icon/"
     private val MODS_IMAGE_PATH = MY_APP_PATH + "images/"
     const val GAME_CONFIG = "GameConfig/"
-    val QQ_DOWNLOAD_PATH =
-        (ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")).toString() + "/"
     const val DOWNLOAD_MOD_PATH = "/Download/Mods/"
+    val GAME_CHECK_FILE_PATH  =  MY_APP_PATH + "gameCheckFile/"
     private var specialPathReadType: Int = PathType.DOCUMENT
     var iFileExplorerService: IFileExplorerService? = null
     private val PACKAGE_MANAGER: PackageManager =
@@ -78,45 +73,39 @@ object ModTools {
     }
 
 
-
-
     suspend fun backupGameFiles(
         gameModPath: String,
         modBean: ModBean,
         gameBackupPath: String,
     ): List<BackupBean> {
-        val list: MutableList<BackupBean> = ArrayList<BackupBean>()
+        val list: MutableList<BackupBean> = mutableListOf()
         // 通过ZipTools解压文件到modTempPath
         val checkPermission = PermissionTools.checkPermission(gameModPath)
         setModsToolsSpecialPathReadType(checkPermission)
         Log.d(TAG, "游戏mod路径: ${modBean.modFiles}")
-        try {
-            modBean.modFiles?.forEach {
-                val file = File(it)
-                val backupPath =
-                    BACKUP_PATH + gameBackupPath + File(modBean.gameModPath!!).name + "/" + file.name
-                val gamePath = gameModPath + file.name
-                if (File(backupPath).exists()) {
-                    list.add(
-                        BackupBean(
-                            id = 0,
-                            filename = file.name,
-                            gamePath = modBean.gameModPath,
-                            gameFilePath = gamePath,
-                            backupPath = backupPath,
-                            gamePackageName = modBean.gamePackageName,
-                            modName = modBean.name
-                        )
+        modBean.modFiles?.forEach {
+            val file = File(it)
+            val backupPath =
+                BACKUP_PATH + gameBackupPath + File(modBean.gameModPath!!).name + "/" + file.name
+            val gamePath = gameModPath + file.name
+            if (File(backupPath).exists()) {
+                list.add(
+                    BackupBean(
+                        id = 0,
+                        filename = file.name,
+                        gamePath = modBean.gameModPath,
+                        gameFilePath = gamePath,
+                        backupPath = backupPath,
+                        gamePackageName = modBean.gamePackageName,
+                        modName = modBean.name
                     )
-                } else {
+                )
+            } else {
+                withContext(Dispatchers.IO) {
                     if (if (specialPathReadType == PathType.DOCUMENT) {
-                            fileTools?.copyFileByDF(
-                                gamePath, backupPath
-                            ) ?: false
+                            fileTools?.copyFileByDF(gamePath, backupPath) ?: false
                         } else {
-                            fileTools?.copyFile(
-                                gamePath, backupPath
-                            ) ?: false
+                            fileTools?.copyFile(gamePath, backupPath) ?: false
                         } && fileTools?.isFileExist(backupPath) == true
                     ) {
                         list.add(
@@ -133,11 +122,10 @@ object ModTools {
                     }
                 }
             }
-        } catch (e: IOException) {
-            Log.e("FileTools", "备份mod文件失败: ${e.printStackTrace()}")
-            e.printStackTrace()
         }
-
+        if (list.isEmpty()) {
+            throw IOException(App.get().getString(R.string.toast_backup_failed))
+        }
         return list
     }
 
@@ -149,54 +137,45 @@ object ModTools {
     ): Boolean {
         val checkPermission = PermissionTools.checkPermission(gameModPath)
         setModsToolsSpecialPathReadType(checkPermission)
-        val flags = mutableListOf<Boolean>()
-        for (modFilePath in modBean.modFiles ?: emptyList()) {
-            try {
+        withContext(Dispatchers.IO){
+            for (modFilePath in modBean.modFiles ?: emptyList()) {
                 val modFile = File(unZipPath + modFilePath)
                 val gameFile = File(gameModPath + modFile.name)
-                flags.add(
-                    if (specialPathReadType == PathType.DOCUMENT) {
-                        fileTools?.copyFileByFD(
-                            modFile.absolutePath, gameFile.absolutePath
-                        ) ?: false
-                    } else {
-                        fileTools?.copyFile(
-                            modFile.absolutePath, gameFile.absolutePath
-                        ) ?: false
-                    }
+                var flag = false
+                flag = if (specialPathReadType == PathType.DOCUMENT) {
+                    fileTools?.copyFileByFD(modFile.absolutePath, gameFile.absolutePath)
+                        ?: false
 
-                )
+                } else {
+                    fileTools?.copyFile(modFile.absolutePath, gameFile.absolutePath) ?: false
 
-            } catch (e: AccessDeniedException) {
-                Log.e(TAG, "复制mod文件失败开始删除: $e")
-                fileTools?.deleteFile(unZipPath)
-
-
-            } catch (e: IOException) {
-                Log.e(TAG, "复制mod文件失败: $e")
-                flags.add(false)
+                }
+                if (!flag) {
+                    throw IOException(App.get().getString(R.string.toast_copy_failed))
+                }
             }
         }
-        return flags.all {
-            return it
-        }
+        return true
     }
 
-    suspend fun restoreGameFiles(backups: List<BackupBean?>): Boolean {
+    suspend fun restoreGameFiles(backups: List<BackupBean?>) {
+        if (backups.isEmpty()) return
         val checkPermission = PermissionTools.checkPermission(backups[0]?.gameFilePath ?: "")
         setModsToolsSpecialPathReadType(checkPermission)
         val flags = mutableListOf<Boolean>()
-        for (backup in backups) {
-            if (backup != null) {
-                flags.add(
-                    fileTools?.copyFile(
-                        backup.backupPath!!, backup.gameFilePath!!
-                    ) ?: false
-                )
+        withContext(Dispatchers.IO){
+            for (backup in backups) {
+                if (backup != null) {
+                    flags.add(
+                        fileTools?.copyFile(
+                            backup.backupPath!!, backup.gameFilePath!!
+                        ) ?: false
+                    )
+                }
             }
         }
-        return flags.all {
-            return it
+        if (!flags.all { it }) {
+            throw IOException(App.get().getString(R.string.toast_restore_failed))
         }
     }
 
@@ -314,7 +293,7 @@ object ModTools {
 
 
     // 通过shizuku扫描mods
-    suspend fun scanModsByShizuku(
+    private suspend fun scanModsByShizuku(
         scanPath: String, gameInfo: GameInfo
     ): Boolean {
         return try {
@@ -335,65 +314,90 @@ object ModTools {
         scanPath: String,
         gameInfo: GameInfo,
     ): Boolean {
-        Log.d(TAG, "gameInfo: $gameInfo")
-        Log.d(TAG, "scanPath: $scanPath")
-        val checkPermission = PermissionTools.checkPermission(scanPath)
-        setModsToolsSpecialPathReadType(checkPermission)
-        if (specialPathReadType == PathType.SHIZUKU) {
-            return scanModsByShizuku(scanPath, gameInfo)
-        }
-        setModsToolsSpecialPathReadType(PermissionTools.checkPermission(gameInfo.gamePath))
-        val gameFiles = mutableListOf<String>()
-        gameInfo.gameFilePath.forEach {
-            val gameFilesNames = fileTools?.getFilesNames(it)
-            gameFiles.addAll(gameFilesNames ?: emptyList())
-        }
-        var tempScanPath = scanPath
-        if (scanPath == ScanModPath.MOD_PATH_QQ) {
-            setModsToolsSpecialPathReadType(PathType.DOCUMENT)
-            Log.d(TAG, "开始扫描QQ: ")
-            tempScanPath = MODS_TEMP_PATH + "Mods/"
-            val pathUri = fileTools?.pathToUri(ScanModPath.MOD_PATH_QQ)
-            val scanModsFile = DocumentFile.fromTreeUri(App.get(), pathUri!!)
-            val documentFiles = scanModsFile?.listFiles()
-            Log.d(TAG, "扫描到的文件:$documentFiles ")
-            for (documentFile in documentFiles!!) {
-                Log.d(TAG, "扫描到的文件: ${documentFile.name}")
-                try {
-                    if (!(documentFile.isDirectory || (fileTools?.isFileType(documentFile.name!!) == true))) {
-                        fileTools?.copyFileByDF(
-                            ScanModPath.MOD_PATH_QQ + documentFile.name!!,
-                            tempScanPath + documentFile.name!!
-                        )
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "扫描文件失败: $e")
+        try {
+            val checkPermission = PermissionTools.checkPermission(scanPath)
+            setModsToolsSpecialPathReadType(checkPermission)
+            if (specialPathReadType == PathType.SHIZUKU) {
+                return scanModsByShizuku(scanPath, gameInfo)
+            }
+            setModsToolsSpecialPathReadType(PermissionTools.checkPermission(gameInfo.gamePath))
+            val gameFiles = mutableListOf<String>()
+            gameInfo.gameFilePath.forEach {
+                withContext(Dispatchers.IO) {
+                    val gameFilesNames = fileTools?.getFilesNames(it)
+                    gameFiles.addAll(gameFilesNames ?: emptyList())
                 }
             }
-        }
-        setModsToolsSpecialPathReadType(PathType.FILE)
-        File(tempScanPath).listFiles()?.forEach { file ->
-            setModsToolsSpecialPathReadType(PathType.FILE)
-            if (!(file.isDirectory || (fileTools?.isFileType(file.name) == true))) {
-                if (ArchiveUtil.isArchive(file.absolutePath)) {
-                    ArchiveUtil.listInArchiveFiles(file.absolutePath).forEach zipFile@{
-                        val modFileName = File(it).name
-                        if (gameFiles.contains(modFileName)) {
-                            Log.d(TAG, "开始移动文件: ${gameInfo.modSavePath + file.name}")
-                            fileTools?.moveFile(file.absolutePath, gameInfo.modSavePath + file.name)
-                            return@zipFile
+            var tempScanPath = scanPath
+            if (scanPath == ScanModPath.MOD_PATH_QQ) {
+                setModsToolsSpecialPathReadType(PathType.DOCUMENT)
+                Log.d(TAG, "开始扫描QQ: ")
+                tempScanPath = MODS_TEMP_PATH + "Mods/"
+                val pathUri = fileTools?.pathToUri(ScanModPath.MOD_PATH_QQ)
+                withContext(Dispatchers.IO) {
+                    val scanModsFile = DocumentFile.fromTreeUri(App.get(), pathUri!!)
+                    val documentFiles = scanModsFile?.listFiles()
+                    Log.d(TAG, "扫描到的文件:$documentFiles ")
+                    for (documentFile in documentFiles!!) {
+                        Log.d(TAG, "扫描到的文件: ${documentFile.name}")
+                        try {
+                            if (!(documentFile.isDirectory || (fileTools?.isFileType(
+                                    documentFile.name!!
+                                ) == true))
+                            ) {
+                                fileTools?.copyFileByDF(
+                                    ScanModPath.MOD_PATH_QQ + documentFile.name!!,
+                                    tempScanPath + documentFile.name!!
+                                )
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "扫描文件失败: $e")
+                            logRecord("扫描$scanPath 失败: $e")
+
                         }
                     }
                 }
+
             }
+            setModsToolsSpecialPathReadType(PathType.FILE)
+            withContext(Dispatchers.IO) {
+                File(tempScanPath).listFiles()?.forEach { file ->
+                    //setModsToolsSpecialPathReadType(PathType.FILE)
+                    if (!(file.isDirectory || (fileTools?.isFileType(file.name) == true))) {
+                        if (ArchiveUtil.isArchive(file.absolutePath)) {
+                            for (filename in ArchiveUtil.listInArchiveFiles(file.absolutePath)) {
+                                val modFileName = File(filename).name
+                                if (gameFiles.contains(modFileName) || specialOperationScanMods(gameInfo.packageName,modFileName) ) {
+                                    Log.d(
+                                        TAG,
+                                        "开始移动文件: ${gameInfo.modSavePath + file.name}"
+                                    )
+                                    fileTools?.moveFile(
+                                        file.absolutePath,
+                                        gameInfo.modSavePath + file.name
+                                    )
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
+                fileTools?.deleteFile(MODS_TEMP_PATH + "Mods/")
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "扫描文件失败: $e")
+            logRecord("扫描$scanPath 失败: $e")
+            return false
         }
-        fileTools?.deleteFile(MODS_TEMP_PATH + "Mods/")
-        return true
     }
 
 
     fun createModTempMap(
-        filepath: String?, scanPath: String, files: List<MutableList<String>>, gameInfo: GameInfo
+        filepath: String?,
+        scanPath: String,
+        files: List<MutableList<String>>,
+        gameInfo: GameInfo
     ): MutableMap<String, ModBeanTemp> {
         var archiveFile: File? = null
         try {
@@ -437,20 +441,21 @@ object ModTools {
 
             Log.d("ZipTools", "gameFileMap: $gameFileMap")
             gameFileMap.forEach {
-                Log.d("ZipTools", "gameFileMap: ${fileTools?.isFileExist(it.value)}")
-                Log.d("ZipTools", "gameFileMap: ${fileTools?.isFile(it.value)}")
 
-                if (fileTools?.isFileExist(it.value) == true && fileTools?.isFile(it.value) == true) {
+                if ((fileTools?.isFileExist(it.value) == true && fileTools?.isFile(it.value) == true) || specialOperationScanMods(
+                        gameInfo.packageName,
+                        modFileName
+                    ) ){
                     val modEntries = File(file[1].replace(scanPath, ""))
                     val key = modEntries.parent ?: archiveFile?.name ?: modEntries.name
                     val modBeanTemp = modBeanTempMap[key]
                     if (modBeanTemp == null) {
                         val beanTemp = ModBeanTemp(
-                            name = archiveFile?.nameWithoutExtension + if (modEntries.parentFile == null) {
+                            name = (archiveFile?.nameWithoutExtension + if (modEntries.parentFile == null) {
                                 if (archiveFile == null) modEntries.name else ""
                             } else "(" + modEntries.parentFile!!.path.replace(
                                 "/", "|"
-                            ) + ")", // 如果是根目录则不加括号
+                            ) + ")").replace("null", "文件夹"), // 如果是根目录则不加括号
                             iconPath = null,
                             readmePath = null,
                             modFiles = mutableListOf(file[0]),
@@ -519,7 +524,8 @@ object ModTools {
         try {
             files.forEach {
                 flags.add(
-                    iFileExplorerService?.unZipFile(modTempPath, gameModPath, it, password) ?: false
+                    iFileExplorerService?.unZipFile(modTempPath, gameModPath, it, password)
+                        ?: false
                 )
             }
 
@@ -557,27 +563,29 @@ object ModTools {
            Log.d(TAG, "游戏文件: ${gameFilesMap}")
    */
         val modsList = mutableListOf<ModBean>()
-        File(scanPath).listFiles()?.forEach { file ->
-            if (!(file.isDirectory || (fileTools?.isFileType(file.name) == true))) {
-                if (ArchiveUtil.isArchive(file.absolutePath)) {
-                    val modTempMap = createModTempMap(file.absolutePath,
-                        scanPath,
-                        ArchiveUtil.listInArchiveFiles(file.absolutePath)
-                            .map { mutableListOf(it, it) }
-                            .toMutableList(),
-                        gameInfo)
-                    Log.d(TAG, "modTempMap: $modTempMap")
-                    val mods: List<ModBean> = readModBeans(
-                        file.absolutePath,
-                        scanPath,
-                        modTempMap,
-                        MODS_IMAGE_PATH,
-                    )
-                    modsList.addAll(mods)
+        withContext(Dispatchers.IO) {
+            File(scanPath).listFiles()?.forEach { file ->
+                if (!(file.isDirectory || (fileTools?.isFileType(file.name) == true))) {
+                    if (ArchiveUtil.isArchive(file.absolutePath)) {
+                        val modTempMap = createModTempMap(file.absolutePath,
+                            scanPath,
+                            ArchiveUtil.listInArchiveFiles(file.absolutePath)
+                                .map { mutableListOf(it, it) }
+                                .toMutableList(),
+                            gameInfo)
+                        Log.d(TAG, "modTempMap: $modTempMap")
+                        val mods: List<ModBean> = readModBeans(
+                            file.absolutePath,
+                            scanPath,
+                            modTempMap,
+                            MODS_IMAGE_PATH,
+                        )
+                        modsList.addAll(mods)
+                    }
                 }
             }
+            Log.d(TAG, "modsList: $modsList")
         }
-        Log.d(TAG, "modsList: $modsList")
         return modsList
 
     }
@@ -601,36 +609,42 @@ object ModTools {
         val list = mutableListOf<ModBean>()
         for (entry in modTempMap.entries) {
             val modBeanTemp = entry.value
+
+            val modBean = ModBean(
+                id = 0,
+                name = modBeanTemp.name,
+                version = "1.0",
+                description = "无readme文件",
+                author = "未知",
+                date = archiveFile?.lastModified() ?: Date().time,
+                path = modBeanTemp.modPath,
+                icon = modBeanTemp.iconPath,
+                images = modBeanTemp.images,
+                modFiles = modBeanTemp.modFiles,
+                isEncrypted = false,
+                password = null,
+                readmePath = modBeanTemp.readmePath,
+                fileReadmePath = modBeanTemp.fileReadmePath,
+                isEnable = false,
+                gamePackageName = modBeanTemp.gamePackageName,
+                gameModPath = modBeanTemp.gameModPath,
+                modType = modBeanTemp.modType,
+                isZipFile = modBeanTemp.isZip
+            )
             if (modBeanTemp.isEncrypted) {
-                val modBean = ModBean(
-                    id = 0,
-                    name = modBeanTemp.name,
+                list.add(modBean.copy(
                     version = "已加密",
-                    description = "MOD文件已加密, 无法读取详细信息",
-                    author = "未知",
-                    date = archiveFile?.lastModified() ?: Date().time,
-                    path = modBeanTemp.modPath,
-                    icon = modBeanTemp.iconPath,
-                    images = modBeanTemp.images,
-                    modFiles = modBeanTemp.modFiles,
-                    isEncrypted = modBeanTemp.isEncrypted,
-                    password = null,
-                    readmePath = modBeanTemp.readmePath,
-                    fileReadmePath = modBeanTemp.fileReadmePath,
-                    isEnable = false,
-                    gamePackageName = modBeanTemp.gamePackageName,
-                    gameModPath = modBeanTemp.gameModPath,
-                    modType = modBeanTemp.modType,
-                    isZipFile = modBeanTemp.isZip
-                )
-                list.add(modBean)
+                    description = "MOD文件已加密",
+                    author = "已加密",
+                    isEncrypted = true
+                ))
             } else {
                 if (modBeanTemp.readmePath != null) {
                     if (archiveFile != null) {
                         //val modBean = ZipTools.readModBean(zipFile, modBeanTemp, imagesPath)
-                        val fileHeaders = ArchiveUtil.listInArchiveFiles(archiveFile.absolutePath)
-                        var modBean: ModBean? = null
-
+                        val fileHeaders =
+                            ArchiveUtil.listInArchiveFiles(archiveFile.absolutePath)
+                        var mod = modBean
                         for (fileHeaderObj in fileHeaders) {
                             if (fileHeaderObj.equals(modBeanTemp.readmePath, ignoreCase = true)
                                 || fileHeaderObj.equals(
@@ -644,24 +658,11 @@ object ModTools {
                                     mutableListOf(fileHeaderObj),
                                     MODS_TEMP_PATH
                                 )
+                                mod = mod.copy(
+                                    readmePath =  fileHeaderObj
+                                )
                                 val readmeFile = File(MODS_TEMP_PATH + fileHeaderObj)
-                                val content = readmeFile.readText()
-                                val lines = content.split("\n")
-                                val infoMap = mutableMapOf<String, String>()
-                                for (line in lines) {
-                                    val parts = line.split("：")
-                                    if (parts.size == 2) {
-                                        val key = parts[0].trim()
-                                        val value = parts[1].trim()
-                                        infoMap[key] = value
-                                    }
-                                }
-                                Log.d("FileExplorerService", "mod信息: $infoMap")
-
-                                val name = infoMap["名称"]
-                                val description = infoMap["描述"]
-                                val version = infoMap["版本"]
-                                val author = infoMap["作者"]
+                                mod = readReadmeFile(MODS_TEMP_PATH, mod)
                                 readmeFile.delete()
                                 // 解压图片
                                 // 解压图片
@@ -674,69 +675,22 @@ object ModTools {
                                         MODS_IMAGE_PATH + archiveFile.nameWithoutExtension
                                     )
                                     icon =
-                                        MODS_TEMP_PATH + archiveFile.nameWithoutExtension + "/" + icon
+                                        MODS_IMAGE_PATH + archiveFile.nameWithoutExtension + "/" + icon
                                     images = modBeanTemp.images.map {
-                                        MODS_TEMP_PATH + archiveFile.nameWithoutExtension + "/" + it
+                                        MODS_IMAGE_PATH + archiveFile.nameWithoutExtension + "/" + it
                                     }
                                 }.onFailure {
                                     Log.e(TAG, "解压图片失败: $it")
                                 }
-
-                                modBean = ModBean(
-                                    id = 0,
-                                    name = name ?: modBeanTemp.name,
-                                    version = version ?: "1.0",
-                                    description = description ?: "由Mod管理器生成",
-                                    author = author ?: "未知",
-                                    date = archiveFile.lastModified(),
-                                    path = archiveFile.path,
+                                mod = mod.copy(
                                     icon = icon,
                                     images = images,
-                                    modFiles = modBeanTemp.modFiles,
-                                    isEncrypted = modBeanTemp.isEncrypted,
-                                    readmePath = modBeanTemp.readmePath,
-                                    fileReadmePath = modBeanTemp.fileReadmePath,
-                                    password = null,
-                                    isEnable = false,
-                                    gamePackageName = modBeanTemp.gamePackageName,
-                                    gameModPath = modBeanTemp.gameModPath,
-                                    modType = modBeanTemp.modType,
-
-                                    )
-
-
+                                )
                             }
                         }
-
-                        if (modBean != null) {
-                            list.add(modBean)
-                        }
+                        list.add(mod)
                     } else {
-                        val modBean = readReadmeFile(
-                            scanPath, ModBean(
-                                id = 0,
-                                name = modBeanTemp.name,
-                                version = "未知",
-                                description = "不存在readme描述文件,无法读取详细信息",
-                                author = "未知",
-                                date = Date().time,
-                                path = modBeanTemp.modPath,
-                                icon = modBeanTemp.iconPath,
-                                images = modBeanTemp.images,
-                                modFiles = modBeanTemp.modFiles,
-                                isEncrypted = modBeanTemp.isEncrypted,
-                                password = null,
-                                readmePath = modBeanTemp.readmePath,
-                                fileReadmePath = modBeanTemp.fileReadmePath,
-                                isEnable = false,
-                                gamePackageName = modBeanTemp.gamePackageName,
-                                gameModPath = modBeanTemp.gameModPath,
-                                modType = modBeanTemp.modType,
-                                isZipFile = modBeanTemp.isZip
-                            )
-                        )
-                        list.add(modBean)
-
+                        list.add(readReadmeFile(scanPath, modBean))
                     }
 
                 } else {
@@ -748,42 +702,23 @@ object ModTools {
                             ArchiveUtil.extractSpecificFile(
                                 archiveFile.absolutePath,
                                 modBeanTemp.images,
-                                MODS_TEMP_PATH + archiveFile.nameWithoutExtension
+                                MODS_IMAGE_PATH + archiveFile.nameWithoutExtension
                             )
                             icon =
-                                MODS_TEMP_PATH + archiveFile.nameWithoutExtension + "/" + icon
+                                MODS_IMAGE_PATH + archiveFile.nameWithoutExtension + "/" + icon
                             images = modBeanTemp.images.map {
-                                MODS_TEMP_PATH + archiveFile.nameWithoutExtension + "/" + it
+                                MODS_IMAGE_PATH + archiveFile.nameWithoutExtension + "/" + it
                             }
                         }.onFailure {
                             Log.e(TAG, "解压图片失败: $it")
                         }
                     }
-                    val modBean = ModBean(
-                        id = 0,
-                        name = modBeanTemp.name,
-                        version = "未知",
-                        description = "不存在readme描述文件,无法读取详细信息",
-                        author = "未知",
-                        date = archiveFile?.lastModified() ?: Date().time,
-                        path = modBeanTemp.modPath,
+                    list.add(modBean.copy(
                         icon = if (archiveFile == null) modBeanTemp.iconPath else icon,
                         images = if (archiveFile == null) modBeanTemp.images else images,
-                        modFiles = modBeanTemp.modFiles,
-                        isEncrypted = modBeanTemp.isEncrypted,
-                        password = null,
-                        readmePath = modBeanTemp.readmePath,
-                        fileReadmePath = modBeanTemp.fileReadmePath,
-                        isEnable = false,
-                        gamePackageName = modBeanTemp.gamePackageName,
-                        gameModPath = modBeanTemp.gameModPath,
-                        modType = modBeanTemp.modType,
-                        isZipFile = modBeanTemp.isZip
-                    )
-                    list.add(modBean)
+                    ))
                 }
             }
-
         }
         return list
 
@@ -792,7 +727,11 @@ object ModTools {
 
     // 通过流写入mod文件
     suspend fun copyModsByStream(
-        path: String, gameModPath: String, modFiles: List<String>, password: String?, pathType: Int
+        path: String,
+        gameModPath: String,
+        modFiles: List<String>,
+        password: String?,
+        pathType: Int
     ): Boolean {
         val checkPermission = PermissionTools.checkPermission(gameModPath)
         setModsToolsSpecialPathReadType(checkPermission)
@@ -840,9 +779,7 @@ object ModTools {
         val flags: MutableList<Boolean> = ArrayList()
         try {
             modFiles.forEach {
-                flags.add(
-                    unZipModsByFileHeardByDocument(path, gameModPath, it, password)
-                )
+                flags.add(unZipModsByFileHeardByDocument(path, gameModPath, it, password))
             }
 
         } catch (e: RemoteException) {
@@ -865,7 +802,11 @@ object ModTools {
                     fileTools?.createFileByStream(
                         gameModPath,
                         File(files).name,
-                        ArchiveUtil.getArchiveItemInputStream(modTempPath, fileHeaderObj, password),
+                        ArchiveUtil.getArchiveItemInputStream(
+                            modTempPath,
+                            fileHeaderObj,
+                            password
+                        ),
                     )
                     flag.add(true)
                 } catch (e: Exception) {
@@ -890,7 +831,11 @@ object ModTools {
                     fileTools?.createFileByStream(
                         gameModPath,
                         File(files).name,
-                        ArchiveUtil.getArchiveItemInputStream(modTempPath, fileHeaderObj, password),
+                        ArchiveUtil.getArchiveItemInputStream(
+                            modTempPath,
+                            fileHeaderObj,
+                            password
+                        ),
                     )
                     flag.add(true)
                 } catch (e: Exception) {
@@ -938,8 +883,11 @@ object ModTools {
         setModsToolsSpecialPathReadType(checkPermission)
         // 遍历scanPath及其子目录中的文件
         try {
+            val modBeans = mutableListOf<ModBean>()
             val files = mutableListOf<String>()
-            Files.walk(Paths.get(scanPath)).sorted(Comparator.reverseOrder()).forEach {
+            withContext(Dispatchers.IO) {
+                Files.walk(Paths.get(scanPath))
+            }.sorted(Comparator.reverseOrder()).forEach {
                 files.add(it.toString())
             }
             val filesList = files.map {
@@ -947,7 +895,10 @@ object ModTools {
             }
             Log.d(TAG, "所有文件路径: $files")
             val createModTempMap = createModTempMap(null, scanPath, filesList, gameInfo)
-            return readModBeans(null, scanPath, createModTempMap, MODS_IMAGE_PATH)
+            withContext(Dispatchers.IO) {
+                modBeans.addAll(readModBeans(null, scanPath, createModTempMap, MODS_IMAGE_PATH))
+            }
+            return modBeans
         } catch (e: Exception) {
             Log.e(TAG, "$e")
             return emptyList()
@@ -984,7 +935,10 @@ object ModTools {
                         withContext(Dispatchers.IO) {
                             Log.d(TAG, "文件${listFile.name + listFile.totalSpace}")
                             val fromJson =
-                                Gson().fromJson<GameInfo>(listFile.readText(), GameInfo::class.java)
+                                Gson().fromJson<GameInfo>(
+                                    listFile.readText(),
+                                    GameInfo::class.java
+                                )
 
                             //val fromJson = Gson().fromJson(listFile.readText(), GameInfo::class.java)
                             val checkGameInfo = checkGameInfo(fromJson)
@@ -1004,7 +958,7 @@ object ModTools {
                             ToastUtils.longCall("已读取 : " + listFile.name)
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "$e")
+                        Log.e(TAG, "读取失败${e.printStackTrace()}")
                         withContext(Dispatchers.Main) {
                             ToastUtils.longCall(listFile.name + ":" + e.message)
                         }
@@ -1029,32 +983,19 @@ object ModTools {
             for (listFile in listFiles!!) {
                 if (listFile.name.endsWith(".json")) {
                     try {
-                        val fromJson = Gson().fromJson(listFile.readText(), GameInfo::class.java)
+                        val fromJson =
+                            Gson().fromJson(listFile.readText(), GameInfo::class.java)
                         val checkGameInfo = checkGameInfo(fromJson)
                         gameInfoList.add(checkGameInfo)
-                        for (gameInfo in GameInfoConstant.gameInfoList) {
-                            if (gameInfo.gameName == checkGameInfo.gameName) {
-                                Log.d(TAG, "移除 : $gameInfo")
-                                val index = GameInfoConstant.gameInfoList.indexOf(gameInfo)
-                                GameInfoConstant.gameInfoList.removeAt(index)
-                                GameInfoConstant.gameInfoList.add(index, checkGameInfo)
-                                break
-                            }
-                        }
-                        for (gameInfo in gameInfoList) {
-                            if (gameInfo.gameName == checkGameInfo.gameName) {
-                                gameInfoList.remove(gameInfo)
-                                gameInfoList.add(checkGameInfo)
-                                break
-                            }
-                        }
+
                     } catch (e: Exception) {
-                        Log.e(TAG, "$e")
+                        e.printStackTrace()
+                        Log.e(TAG, "更新配置文件失败$e")
                     }
                 }
             }
-            val filter =
-                gameInfoList.filter { GameInfoConstant.gameInfoList.none { gameInfo -> gameInfo.packageName == it.packageName } }
+            val filter = gameInfoList.filter { GameInfoConstant.gameInfoList.none { gameInfo -> gameInfo.packageName == it.packageName } }
+            Log.d(TAG, "gameInfoList: $filter")
             GameInfoConstant.gameInfoList.addAll(filter)
         } catch (e: Exception) {
             Log.e(TAG, "读取游戏配置失败: $e")
@@ -1063,6 +1004,7 @@ object ModTools {
 
     // 校验Gson读取的gameInfo的字段
     private fun checkGameInfo(gameInfo: GameInfo): GameInfo {
+        Log.d(TAG, "gameInfo: $gameInfo")
         var result = gameInfo.copy()
         if (gameInfo.gameName.isEmpty()) {
             throw Exception("gameName : 游戏名称不能为空")
@@ -1087,7 +1029,10 @@ object ModTools {
         }
         if (gameInfo.antiHarmonyFile.isNotEmpty()) {
             result = result.copy(
-                antiHarmonyFile = (ROOT_PATH + "/" + gameInfo.antiHarmonyFile).replace("//", "/")
+                antiHarmonyFile = (ROOT_PATH + "/" + gameInfo.antiHarmonyFile).replace(
+                    "//",
+                    "/"
+                )
             )
         }
 
@@ -1149,7 +1094,8 @@ object ModTools {
 
     fun writeGameConfigFile(downloadGameConfig: GameInfo) {
         try {
-            val file = File(MY_APP_PATH + GAME_CONFIG + downloadGameConfig.packageName + ".json")
+            val file =
+                File(MY_APP_PATH + GAME_CONFIG + downloadGameConfig.packageName + ".json")
             if (file.exists()) {
                 file.delete()
             }
@@ -1166,25 +1112,45 @@ object ModTools {
         }
     }
 
-    suspend fun specialOperationEnable(modBean: ModBean, packageName: String): Boolean {
-        SpecialGame.entries.forEach job@{
-            if (packageName.contains(it.packageName)) {
-                return it.BaseSpecialGameTools.specialOperationEnable(modBean, packageName)
+    suspend fun specialOperationEnable(modBean: ModBean, packageName: String) {
+        var specialOperationFlag = true
+        withContext(Dispatchers.IO) {
+            SpecialGame.entries.forEach {
+                if (packageName.contains(it.packageName)) {
+                    specialOperationFlag =
+                        it.baseSpecialGameTools.specialOperationEnable(modBean, packageName)
+
+                }
             }
         }
-        return true
+        if (!specialOperationFlag) {
+            throw Exception(App.get().getString(R.string.toast_special_operation_failed))
+        }
     }
 
     suspend fun specialOperationDisable(
         backupBeans: List<BackupBean>,
-        packageName: String
-    ): Boolean {
-        SpecialGame.entries.forEach job@{
+        packageName: String,
+        modBean: ModBean
+    ) {
+        var specialOperationFlag = true
+        SpecialGame.entries.forEach {
             if (packageName.contains(it.packageName)) {
-                return it.BaseSpecialGameTools.specialOperationDisable(backupBeans, packageName)
+                specialOperationFlag = it.baseSpecialGameTools.specialOperationDisable(backupBeans, packageName,modBean)
             }
         }
-        return true
+        if (!specialOperationFlag) {
+            throw Exception(App.get().getString(R.string.toast_special_operation_failed))
+        }
+    }
+    private fun  specialOperationScanMods(packageName: String, modFileName: String) : Boolean{
+        var flag = false
+        SpecialGame.entries.forEach {
+            if (packageName.contains(it.packageName)) {
+                flag = it.baseSpecialGameTools.specialOperationScanMods(packageName,modFileName)
+            }
+        }
+        return flag
     }
 
     // 日志记录

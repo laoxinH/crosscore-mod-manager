@@ -16,4 +16,8 @@ interface IFileExplorerService {
     boolean scanMods(String sacnPath, in GameInfo gameInfo);
     boolean moveFile(String srcPath, String destPath);
     boolean isFile(String path);
+    // 文件是否发生变化
+    long isFileChanged(String path);
+    boolean changDictionaryName (String path, String newName);
+    boolean createDictionary (String path);
 }

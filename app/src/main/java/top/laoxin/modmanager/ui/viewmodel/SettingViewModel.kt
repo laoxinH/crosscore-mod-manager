@@ -26,11 +26,14 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.data.UserPreferencesRepository
-import top.laoxin.modmanager.data.backups.BackupRepository
-import top.laoxin.modmanager.data.mods.ModRepository
+import top.laoxin.modmanager.constant.PathType
+import top.laoxin.modmanager.constant.SpecialGame
+import top.laoxin.modmanager.database.UserPreferencesRepository
+import top.laoxin.modmanager.database.backups.BackupRepository
+import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
 import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 
 
@@ -54,9 +57,13 @@ class SettingViewModel(
         var gameInfoJob: Job? = null
     }
 
+    private var _requestPermissionPath by mutableStateOf("")
+    val requestPermissionPath get() = _requestPermissionPath
     private val _uiState = MutableStateFlow(SettingUiState())
     val uiState = _uiState.asStateFlow()
-    private var _gameInfo = GameInfoConstant.gameInfoList[0]
+    private var _gameInfo = mutableStateOf(GameInfoConstant.gameInfoList[0])
+    val gameInfo get() = _gameInfo.value
+    
     // 更新描述
     private var _updateDescription by mutableStateOf("")
     val updateDescription get() = _updateDescription
@@ -67,11 +74,10 @@ class SettingViewModel(
 
     init {
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
             userPreferencesRepository.getPreferenceFlow("SELECTED_GAME", 0).collect {
-                _gameInfo = GameInfoConstant.gameInfoList[it]
+                _gameInfo.value = GameInfoConstant.gameInfoList[it]
             }
-
         }
         getGameInfo()
         getVersionName()
@@ -82,7 +88,7 @@ class SettingViewModel(
         gameInfoJob?.cancel()
         setDeleteBackupDialog(false)
         gameInfoJob = viewModelScope.launch(Dispatchers.IO) {
-            modRepository.getEnableMods(_gameInfo.packageName).collect {
+            modRepository.getEnableMods(_gameInfo.value.packageName).collect {
                 if (it.isNotEmpty()) {
                     // 如果有mod开启则提示
                     withContext(Dispatchers.Main) {
@@ -90,13 +96,13 @@ class SettingViewModel(
                     }
                     this@launch.cancel()
                 } else {
-                    val delBackupFile: Boolean = ModTools.deleteBackupFiles(_gameInfo)
+                    val delBackupFile: Boolean = ModTools.deleteBackupFiles(_gameInfo.value)
                     if (delBackupFile) {
-                        backupRepository.deleteByGamePackageName(_gameInfo.packageName)
+                        backupRepository.deleteByGamePackageName(_gameInfo.value.packageName)
                         withContext(Dispatchers.Main) {
                             ToastUtils.longCall(App.get().getString(
                                 R.string.toast_del_buckup_success,
-                                _gameInfo.gameName,
+                                _gameInfo.value.gameName,
                             ))
                         }
                     } else {
@@ -104,7 +110,7 @@ class SettingViewModel(
                             ToastUtils.longCall(
                                 App.get().getString(
                                     R.string.toast_del_buckup_filed,
-                                    _gameInfo.gameName,
+                                    _gameInfo.value.gameName,
                                 )
                             )
                         }
@@ -211,7 +217,27 @@ class SettingViewModel(
     }
 
     //设置游戏信息
-    fun setGameInfo(gameInfo: GameInfo) {
+    fun setGameInfo(gameInfo: GameInfo, isTips : Boolean = false) {
+        if (gameInfo.tips.isNotEmpty() && !isTips) {
+            _uiState.update {
+                it.copy(showGameTipsDialog = true)
+            }
+            _gameInfo.value = gameInfo
+        } else {
+            if (PermissionTools.checkPermission(gameInfo.gamePath) == PathType.NULL) {
+                _requestPermissionPath = PermissionTools.getRequestPermissionPath(gameInfo.gamePath)
+                _uiState.update {
+                    it.copy(openPermissionRequestDialog = true)
+                }
+                return
+            }
+            confirmGameInfo(gameInfo)
+        }
+        
+
+    }
+
+    private fun confirmGameInfo(gameInfo: GameInfo) {
         try {
             App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
             viewModelScope.launch(Dispatchers.IO) {
@@ -223,6 +249,12 @@ class SettingViewModel(
                     "SCAN_DIRECTORY_MODS",
                     false
                 )
+                SpecialGame.entries.forEach {
+                    if (gameInfo.packageName.contains(it.packageName)) {
+                        Log.d("SettingViewModel", "执行特殊选择: $it")
+                        it.baseSpecialGameTools.specialOperationSelectGame(gameInfo)
+                    }
+                }
                 withContext(Dispatchers.Main) {
                     ToastUtils.longCall(
                         App.get().getString(
@@ -246,7 +278,6 @@ class SettingViewModel(
 
             e.printStackTrace()
         }
-
     }
 
     fun flashGameConfig() {
@@ -327,6 +358,11 @@ class SettingViewModel(
             }
         }
     }
+    fun setShowGameTipsDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showGameTipsDialog = b)
+        }
+    }
 
     fun downloadGameConfig(downloadGameConfigBean: DownloadGameConfigBean) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -347,6 +383,24 @@ class SettingViewModel(
                 }
 
             }
+        }
+    }
+
+    fun requestShizukuPermission() {
+        if (PermissionTools.isShizukuAvailable) {
+            if (PermissionTools.hasShizukuPermission()) {
+                PermissionTools.checkShizukuPermission()
+            } else {
+                PermissionTools.requestShizukuPermission()
+            }
+        } else {
+            ToastUtils.longCall(R.string.toast_shizuku_not_available)
+        }
+    }
+
+    fun setOpenPermissionRequestDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(openPermissionRequestDialog = b)
         }
     }
 

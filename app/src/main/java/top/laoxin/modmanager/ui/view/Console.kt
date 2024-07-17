@@ -21,8 +21,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
@@ -44,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfo
-import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
@@ -55,11 +58,9 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
-fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp)) {
+fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel: ConsoleViewModel) {
     val context = LocalContext.current
-    val viewModel: ConsoleViewModel = viewModel(
-        factory = ConsoleViewModel.Factory
-    )
+
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
     DialogCommon(
@@ -246,9 +247,7 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
 
 // 配置选项卡
 @Composable
-fun ConfigurationCard(viewModel: ConsoleViewModel,
-                      uiState: ConsoleUiState
-) {
+fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
     //val uiState by viewModel.uiState.collectAsState()
 
     val context = LocalContext.current
@@ -353,13 +352,13 @@ fun ConfigurationCard(viewModel: ConsoleViewModel,
                 }
                 Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
             }
-        /*    Row(
+ /*           Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 TextButton(
-                    onClick = { ArchiveUtil.test() },
+                    onClick = { viewModel.startGameService() },
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
@@ -381,6 +380,9 @@ fun ConfigurationCard(viewModel: ConsoleViewModel,
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConsolePage() {
+    val viewModel: ConsoleViewModel = viewModel(
+        factory = ConsoleViewModel.Factory
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -394,11 +396,26 @@ fun ConsolePage() {
                         style = typography.titleLarge
 
                     )
+                },
+                actions = {
+                    IconButton(onClick = {
+                        // 在这里处理图标按钮的点击事件
+                        viewModel.startGame()
+                    }) {
+                        //Text(text = "启动游戏")
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow, // 使用信息图标
+                            contentDescription = "Info", // 为辅助功能提供描述
+                            tint = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    }
+
+                        // 添加更多的菜单项
                 }
             )
         },
     ) { innerPadding ->
-        ConsoleContent(innerPadding)
+        ConsoleContent(innerPadding,viewModel)
     }
 }
 

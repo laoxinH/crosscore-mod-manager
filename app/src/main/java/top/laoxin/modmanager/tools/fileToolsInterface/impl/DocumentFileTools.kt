@@ -46,10 +46,11 @@ object DocumentFileTools : BaseFileTools {
             if (destDocumentFile?.exists() == true) {
                 destDocumentFile.delete()
                 val parentFile = File(destPath).parentFile?.absolutePath
-                val parentDocumentFile = DocumentFile.fromTreeUri(app,pathToUri(parentFile!!))
-                parentDocumentFile?.createFile("application/octet-stream",File(destPath).name)?.let {
-                    destDocumentFile = it
-                }
+                val parentDocumentFile = DocumentFile.fromTreeUri(app, pathToUri(parentFile!!))
+                parentDocumentFile?.createFile("application/octet-stream", File(destPath).name)
+                    ?.let {
+                        destDocumentFile = it
+                    }
             }
 
 
@@ -178,5 +179,40 @@ object DocumentFileTools : BaseFileTools {
         }
     }
 
+    override fun isFileChanged(path: String): Long {
+        val file = DocumentFile.fromTreeUri(app, pathToUri(path))
+        return file?.lastModified() ?: 0
+    }
 
+    override fun changDictionaryName(path: String, name: String): Boolean {
+        try {
+            val file = DocumentFile.fromTreeUri(app, pathToUri(path))
+            return file?.renameTo(name) ?: false
+        } catch (e: Exception) {
+            Log.e(TAG, "changDictionaryName: $e")
+            return false
+        }
+
+    }
+
+    override fun createDictionary(path: String): Boolean {
+        try {
+            if (isFileExist(path)) {
+                return true
+            }
+            val absolutePath = File(path).parentFile?.absolutePath
+            val pathUri = pathToUri(absolutePath!!)
+            val documentFile = DocumentFile.fromTreeUri(app, pathUri)
+            val createDirectory = documentFile?.createDirectory(File(path).name)
+            if (createDirectory == null) {
+                Log.e(TAG, "createDictionary: 创建文件夹失败")
+                return false
+            } else {
+                return true
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "createDictionary: $e")
+            return false
+        }
+    }
 }

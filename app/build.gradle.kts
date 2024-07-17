@@ -3,11 +3,11 @@ import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
  object buildInfo {
-    val versionCode = 15
-    val versionName = "2.0.6 beta"
+    val versionCode = 16
+    val versionName = "2.0.7 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.修复一个预留的bug\n" +
-            "2.修复整合包不出预览图\n" +
+            "1.添加对尘白禁区的MOD支持\n" +
+            "2.优化代码\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册Gitee自行在设置页面前往Github下载最新版"

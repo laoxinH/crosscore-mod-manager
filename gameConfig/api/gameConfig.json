@@ -6,6 +6,12 @@
         "downloadUrl": ""
     },
     {
+        "gameName": "\u5c18\u767d\u7981\u533a",
+        "packageName": "com.dragonli.projectsnow.lhm",
+        "serviceName": "\u5b98\u670d2.0.0",
+        "downloadUrl": ""
+    },
+    {
         "gameName": "\u660e\u65e5\u65b9\u821f",
         "packageName": "com.hypergryph.arknights.bilibili",
         "serviceName": "B\u670d\uff1a\u914d\u7f6e\u7248\u672c2.0-\u8981\u6c42\u5b9e\u9a8c\u5ba4\u7248\u672c2.0.2\u53ca\u4ee5\u4e0a",
@@ -18,25 +24,25 @@
         "downloadUrl": ""
     },
     {
-        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "gameName": "\u851a\u84dd\u6863\u6848-by siranaine",
         "packageName": "com.nexon.bluearchive",
         "serviceName": "\u56fd\u9645\u670d",
         "downloadUrl": ""
     },
     {
-        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "gameName": "\u851a\u84dd\u6863\u6848-by siranaine",
         "packageName": "com.RoamingStar.BlueArchive.bilibili",
         "serviceName": "B\u670d",
         "downloadUrl": ""
     },
     {
-        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "gameName": "\u851a\u84dd\u6863\u6848-by siranaine",
         "packageName": "com.RoamingStar.BlueArchive",
         "serviceName": "\u5b98\u670d",
         "downloadUrl": ""
     },
     {
-        "gameName": "\u851a\u84dd\u6863\u6848-by Go Koumei",
+        "gameName": "\u851a\u84dd\u6863\u6848-by siranaine",
         "packageName": "com.YostarJP.BlueArchive",
         "serviceName": "\u65e5\u670d",
         "downloadUrl": ""

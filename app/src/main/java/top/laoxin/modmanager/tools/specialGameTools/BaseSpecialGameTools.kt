@@ -2,14 +2,25 @@ package top.laoxin.modmanager.tools.specialGameTools
 
 import android.util.Log
 import top.laoxin.modmanager.bean.BackupBean
+import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.bean.ModBeanTemp
 import top.laoxin.modmanager.tools.ArchiveUtil
 import java.io.InputStream
 import java.security.MessageDigest
 
 interface BaseSpecialGameTools {
     fun specialOperationEnable(mod: ModBean,packageName : String) : Boolean
-    fun specialOperationDisable(backup: List<BackupBean>,packageName : String) : Boolean
+    fun specialOperationDisable(backup: List<BackupBean>, packageName: String, modBean: ModBean) : Boolean
+
+    fun specialOperationStartGame(gameInfo: GameInfo) : Boolean
+    fun specialOperationCreateMods(gameInfo: GameInfo) : List<ModBeanTemp>
+    fun specialOperationScanMods(gameInfo: String, modFileName: String) : Boolean
+    fun specialOperationSelectGame(gameInfo: GameInfo) : Boolean
+
+
+
+
 
     fun calculateMD5(inputStream: InputStream): String? {
         try {

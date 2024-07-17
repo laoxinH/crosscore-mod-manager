@@ -1,6 +1,8 @@
 package top.laoxin.modmanager.ui.view
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,10 +48,13 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfo
 import top.laoxin.modmanager.bean.ThinksBean
+import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
+import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.viewmodel.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
+@RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingPage() {
@@ -87,7 +92,9 @@ fun SettingPage() {
             viewModel::showSwitchGame,
             viewModel::flashGameConfig,
             viewModel::checkUpdate,
-            viewModel::setShowDownloadGameConfig
+            viewModel::setShowDownloadGameConfig,
+            viewModel::requestShizukuPermission
+
         )
         ThinksDialogCommon(
             title = stringResource(R.string.setting_acknowledgments),
@@ -97,6 +104,11 @@ fun SettingPage() {
             openUrl = viewModel::openUrl,
             showDialog = uiState.showAcknowledgments
         )
+        if (viewModel.requestPermissionPath.isNotEmpty()) {
+            RequestUriPermission(path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog) {
+                viewModel.setOpenPermissionRequestDialog(false)
+            }
+        }
 
         DialogCommon(
             title = stringResource(id = R.string.console_upgrade_title),
@@ -109,6 +121,18 @@ fun SettingPage() {
                 viewModel.setShowUpgradeDialog(false)
             },
             showDialog = uiState.showUpdateDialog
+        )
+        DialogCommon(
+            title = stringResource(id = R.string.console_game_tips_title),
+            content = viewModel.gameInfo.tips,
+            onConfirm = {
+                viewModel.setGameInfo(viewModel.gameInfo,true)
+                viewModel.setShowGameTipsDialog(false)
+            },
+            onCancel = {
+                viewModel.setShowGameTipsDialog(false)
+            },
+            showDialog = uiState.showGameTipsDialog
         )
         SwitchGameDialog(
             gameInfoList = uiState.gameInfoList,
@@ -137,9 +161,10 @@ fun SettingContent(
     openUrl: (Context, String) -> Unit,
     showAcknowledgments: (Boolean) -> Unit,
     showSwitchGame: (Boolean) -> Unit,
-    flashGameConfig : () -> Unit,
-    checkUpdate : () -> Unit,
-    showDownloadGameConfig : (Boolean) -> Unit
+    flashGameConfig: () -> Unit,
+    checkUpdate: () -> Unit,
+    showDownloadGameConfig: (Boolean) -> Unit,
+    requestShizukuPermission: () -> Unit
 ) {
     val context = LocalContext.current
     DialogCommon(
@@ -184,6 +209,12 @@ fun SettingContent(
             name = stringResource(R.string.setting_page_app_flash_game_config),
             description = stringResource(R.string.setting_page_app_flash_game_config_descript),
             onClick = { flashGameConfig() }
+        )
+
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_swtch_permission_shizuku),
+            description = stringResource(R.string.setting_page_app_swtch_permission_shizuku_desc),
+            onClick = {  requestShizukuPermission() }
         )
         SettingItem(
             name = stringResource(R.string.setting_page_app_swtch_game),
@@ -242,6 +273,14 @@ fun SettingContent(
             icon = painterResource(id = R.drawable.qq_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.qq_url))
+            }
+        )
+        SettingItem(
+            name = stringResource(R.string.setting_page_more_discord),
+            description = stringResource(R.string.setting_page_more_discord_descript),
+            icon = painterResource(id = R.drawable.discord_icon),
+            onClick = {
+                openUrl(context, context.getString(R.string.disscord_url))
             }
         )
         SettingItem(
@@ -335,7 +374,7 @@ fun SettingTitle(
 @Composable
 fun SwitchGameDialog(
     gameInfoList: List<GameInfo>,
-    setGameInfo: (GameInfo) -> Unit,
+    setGameInfo: (GameInfo,Boolean) -> Unit,
     showSwitchGameInfo: (Boolean) -> Unit,
     showDialog: Boolean
 ) {
@@ -354,7 +393,7 @@ fun SwitchGameDialog(
                             description = gameInfo.packageName,
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
-                                setGameInfo(gameInfo)
+                                setGameInfo(gameInfo,false)
                                 showSwitchGameInfo(false)
                             }
                         )
