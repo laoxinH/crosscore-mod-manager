@@ -32,17 +32,14 @@ if(NOT LZ4_FOUND)
                 -DANDROID_PLATFORM=${ANDROID_PLATFORM}
                 -DBUILD_SHARED_LIBS=OFF
             INSTALL_COMMAND ""
-            LOG_DOWNLOAD ON
-            LOG_BUILD ON
     )
     ExternalProject_Get_Property( lz4 SOURCE_DIR BINARY_DIR )
-    set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
-    set( lz4_STATIC_LIB "${BINARY_DIR}/liblz4.a" )
+    set( LZ4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
+    set( LZ4_STATIC_LIB "${BINARY_DIR}/liblz4.a" )
 else()
     message("Found lz4 library: ${LZ4_LIBRARIES}")
     message("====================================")
 endif()
-
 
 find_package(LibLZMA)
 if(NOT LIBLZMA_FOUND)
@@ -59,22 +56,27 @@ if(NOT LIBLZMA_FOUND)
                 -DANDROID_PLATFORM=${ANDROID_PLATFORM}
                 -DBUILD_SHARED_LIBS=OFF
             INSTALL_COMMAND ""
-            LOG_DOWNLOAD ON
-            LOG_BUILD ON
     )
 
     ExternalProject_Get_Property(lzma SOURCE_DIR BINARY_DIR)
-    set(lzma_INCLUDE_DIR "${SOURCE_DIR}/src/liblzma/api/lzma.h")
-    set(lzma_STATIC_LIB "${BINARY_DIR}/liblzma.a")
+    set(LZMA_INCLUDE_DIR "${SOURCE_DIR}/src/liblzma/api")
+    set(LZMA_STATIC_LIB "${BINARY_DIR}/liblzma.a")
 else()
     message("Found liblzma library: ${LIBLZMA_LIBRARIES}")
     message("===========================================")
 endif()
 
-# ABRecompressor
-add_library(ABRecompressor STATIC src/ABRecompressor.cpp)
-add_dependencies(ABRecompressor lz4 lzma)
+add_library(${MODULE_NAME} STATIC 
+    src/ABRecompressor.cpp
+    src/BlocksAndDirectoryInfo.cpp
+    src/BundleFile.cpp
+    src/Compression.cpp
+    src/Header.cpp)
 
-target_compile_definitions(ABRecompressor PRIVATE ABRECOMPRESSOR_EXPORTS)
-target_include_directories(ABRecompressor PRIVATE ${LZ4_INCLUDE_DIR} ${LZMA_INCLUDE_DIR})
-target_link_libraries(ABRecompressor ${lz4_STATIC_LIB} ${lzma_STATIC_LIB})
+target_include_directories(${MODULE_NAME} PRIVATE ${LZ4_INCLUDE_DIR} ${LZMA_INCLUDE_DIR})
+
+add_dependencies(${MODULE_NAME} lz4 lzma)
+
+target_compile_definitions(${MODULE_NAME} PRIVATE ABRECOMPRESSOR_EXPORTS)
+
+target_link_libraries(ABRecompressor ${LZ4_STATIC_LIB} ${LZMA_STATIC_LIB})
