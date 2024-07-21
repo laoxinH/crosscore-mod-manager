@@ -27,8 +27,9 @@ uint Decompress(CompressionType compressionType, byte* compressedData, uint comp
         
         byte* fixedData = new byte[compressedSize + 8];
         byte* sizeLE = new byte[8];
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 4; i++) {
             sizeLE[i] = (decompressedSize >> (i * 8)) & 0xFF;
+            sizeLE[i + 4] = 0;
         }
         memcpy(fixedData, compressedData, 5);
         memcpy(fixedData + 5, sizeLE, 8);
@@ -70,7 +71,9 @@ uint Decompress(CompressionType compressionType, byte* compressedData, uint comp
 ByteArr* Compress(CompressionType compressionType, byte* tocompressData, uint tocompressSize){
     switch (compressionType){
     case CompressionType::None:{
-        return new ByteArr(tocompressData, tocompressSize);
+		ByteArr* result = new ByteArr(tocompressSize);
+		memcpy(result->GetData(), tocompressData, tocompressSize);
+        return result;
     }
     case CompressionType::Lzma:{
         lzma_stream strm = LZMA_STREAM_INIT;

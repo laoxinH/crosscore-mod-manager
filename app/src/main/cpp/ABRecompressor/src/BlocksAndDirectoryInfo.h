@@ -20,7 +20,6 @@ public:
     StorageBlockInfo* BlocksInfos;
     uint DirectoryInfoCount;
     DirectoryInfo* DirectoryInfos;
-    uint uncompressedSize;
 
     BlocksAndDirectoryInfo(Reader* reader, Header* header, bool* blocksInfoAtTheEnd);
     ~BlocksAndDirectoryInfo();
