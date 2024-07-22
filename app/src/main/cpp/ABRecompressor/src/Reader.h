@@ -52,15 +52,21 @@ public:
     }
 
     short ReadInt16(){
-        return (short)((Data[Position++] << 8) | Data[Position++]);
+        short ret = (short)((Data[Position] << 8) | Data[Position + 1]);
+        Position += 2;
+        return ret;
     }
 
     uint ReadUInt32(){
-        return ((uint)Data[Position++] << 24) | ((uint)Data[Position++] << 16) | ((uint)Data[Position++] << 8) | (uint)Data[Position++];
+        uint ret = (uint)((Data[Position] << 24) | (Data[Position + 1] << 16) | (Data[Position + 2] << 8) | Data[Position + 3]);
+        Position += 4;
+        return ret;
     }
     
     uint64_t ReadUInt64(){
-        return ((uint64_t)Data[Position++] << 56) | ((uint64_t)Data[Position++] << 48) | ((uint64_t)Data[Position++] << 40) | ((uint64_t)Data[Position++] << 32) | ((uint64_t)Data[Position++] << 24) | ((uint64_t)Data[Position++] << 16) | ((uint64_t)Data[Position++] << 8) | (uint64_t)Data[Position++];
+        uint64_t ret = ((uint64_t)Data[Position] << 56) | ((uint64_t)Data[Position + 1] << 48) | ((uint64_t)Data[Position + 2] << 40) | ((uint64_t)Data[Position + 3] << 32) | ((uint64_t)Data[Position + 4] << 24) | ((uint64_t)Data[Position + 5] << 16) | ((uint64_t)Data[Position + 6] << 8) | (uint64_t)Data[Position + 7];
+        Position += 8;
+        return ret;
     }    
 };
 

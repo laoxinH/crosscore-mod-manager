@@ -95,7 +95,6 @@ void BundleFile::ReadBlocks(Reader* reader){
     byte* p = data->GetData();
     mCompressionType = 0;
     for (int i = 0; i < mDataInfo->BlocksInfoCount; i++){
-        auto test = (mDataInfo->BlocksInfos[i].flags & StorageBlockFlags::BlockCompressionTypeMask);
         CompressionType compressionType = (CompressionType)(mDataInfo->BlocksInfos[i].flags & StorageBlockFlags::BlockCompressionTypeMask);
         if ((char)compressionType > mCompressionType){
             mCompressionType = (char)compressionType;
@@ -124,6 +123,7 @@ ByteArr* BundleFile::ToBytes(CompressionType compressionType){
     for (int i = 0; i < mDataInfo->BlocksInfoCount; i++){
         compressedData[i] = Compress(compressionType, data->GetData() + p, mDataInfo->BlocksInfos[i].uncompressedSize);
         mDataInfo->BlocksInfos[i].compressedSize = compressedData[i]->GetSize();
+        p += mDataInfo->BlocksInfos[i].uncompressedSize;
     }
     ByteArr* bDataInfo = mDataInfo->ToBytes(CompressionType::Lz4HC);
     mHeader->mCompressedBlocksInfoSize = bDataInfo->GetSize();
