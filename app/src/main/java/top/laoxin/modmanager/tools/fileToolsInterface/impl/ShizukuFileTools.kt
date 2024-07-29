@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.tools.fileToolsInterface.impl
 
 import android.util.Log
+import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import top.laoxin.modmanager.useservice.IFileExplorerService
@@ -24,8 +25,7 @@ object ShizukuFileTools : BaseFileTools {
             iFileExplorerService.copyFile(srcPath, destPath)
         } catch (e: Exception) {
             Log.e(TAG, "copyFile: $e")
-            ModTools.logRecord("ShizukuFileTools-copyFile: $e")
-
+            logRecord("ShizukuFileTools-copyFile: $e")
             false
         }
     }

@@ -9,24 +9,13 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.GameInfo
-import top.laoxin.modmanager.constant.PathType
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ModTools
-import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.ToastUtils
-import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
 
 class ProjectSnowStartService : Service() {
@@ -43,7 +32,7 @@ class ProjectSnowStartService : Service() {
         val channelId = getString(R.string.channel_id)
         val channelName = getString(R.string.channel_name)
         val importance = NotificationManager.IMPORTANCE_HIGH
-        val gameInfo: GameInfo = intent?.extras?.getParcelable("game_info")!!
+        val gameInfo: GameInfoBean = intent?.extras?.getParcelable("game_info")!!
 
         val checkFilepath =
             "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/${ProjectSnowTools.CHECK_FILENAME}"

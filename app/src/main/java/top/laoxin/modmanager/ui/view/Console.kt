@@ -2,6 +2,7 @@ package top.laoxin.modmanager.ui.view
 
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -47,13 +48,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
-import top.laoxin.modmanager.ui.viewmodel.ConsoleUiState
+import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -100,6 +101,20 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
             showDialog = uiState.showUpgradeDialog
         )
 
+        // 信息提示
+        DialogCommon(
+            title = stringResource(id = R.string.console_info_title),
+            content = uiState.infoBean.msg,
+            onConfirm = {
+                viewModel.setShowInfoDialog(false)
+            },
+            onCancel = {
+                viewModel.setShowInfoDialog(false)
+            },
+            showDialog = uiState.showInfoDialog
+        )
+        Log.d("ConsoleContent", "信息提示: ${uiState.infoBean}  ${uiState.showInfoDialog}")
+
 
         if (viewModel.requestPermissionPath.isNotEmpty()) {
             RequestUriPermission(path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog) {
@@ -124,7 +139,7 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
 @Composable
 fun GameInformationCard(
     viewModel: ConsoleViewModel,
-    gameInfo: GameInfo,
+    gameInfo: GameInfoBean,
     modifier: Modifier = Modifier
 ) {
     // 第一部分：一个卡片展示当前设置项目的一些信息

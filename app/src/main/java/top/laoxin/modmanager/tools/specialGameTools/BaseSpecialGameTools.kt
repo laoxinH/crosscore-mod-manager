@@ -2,21 +2,33 @@ package top.laoxin.modmanager.tools.specialGameTools
 
 import android.util.Log
 import top.laoxin.modmanager.bean.BackupBean
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
+import top.laoxin.modmanager.listener.ProgressUpdateListener
 import top.laoxin.modmanager.tools.ArchiveUtil
 import java.io.InputStream
 import java.security.MessageDigest
 
 interface BaseSpecialGameTools {
+
+    companion object {
+        var progressUpdateListener: ProgressUpdateListener? = null
+    }
+
+
     fun specialOperationEnable(mod: ModBean,packageName : String) : Boolean
     fun specialOperationDisable(backup: List<BackupBean>, packageName: String, modBean: ModBean) : Boolean
 
-    fun specialOperationStartGame(gameInfo: GameInfo) : Boolean
-    fun specialOperationCreateMods(gameInfo: GameInfo) : List<ModBeanTemp>
+    fun specialOperationStartGame(gameInfo: GameInfoBean) : Boolean
+    fun specialOperationCreateMods(gameInfo: GameInfoBean) : List<ModBeanTemp>
     fun specialOperationScanMods(gameInfo: String, modFileName: String) : Boolean
-    fun specialOperationSelectGame(gameInfo: GameInfo) : Boolean
+    fun specialOperationSelectGame(gameInfo: GameInfoBean) : Boolean
+
+    fun onProgressUpdate(progress: String) {
+        progressUpdateListener?.onProgressUpdate(progress)
+    }
+
 
 
 

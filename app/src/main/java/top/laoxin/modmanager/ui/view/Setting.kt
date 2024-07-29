@@ -46,12 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ThinksBean
-import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
-import top.laoxin.modmanager.ui.viewmodel.SettingUiState
+import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -92,6 +91,7 @@ fun SettingPage() {
             viewModel::showSwitchGame,
             viewModel::flashGameConfig,
             viewModel::checkUpdate,
+            viewModel::checkInformation,
             viewModel::setShowDownloadGameConfig,
             viewModel::requestShizukuPermission
 
@@ -134,6 +134,17 @@ fun SettingPage() {
             },
             showDialog = uiState.showGameTipsDialog
         )
+        DialogCommon(
+            title = stringResource(id = R.string.console_info_title),
+            content = uiState.infoBean.msg,
+            onConfirm = {
+                viewModel.setShowInfoDialog(false)
+            },
+            onCancel = {
+                viewModel.setShowInfoDialog(false)
+            },
+            showDialog = uiState.showNotificationDialog
+        )
         SwitchGameDialog(
             gameInfoList = uiState.gameInfoList,
             setGameInfo = viewModel::setGameInfo,
@@ -163,6 +174,7 @@ fun SettingContent(
     showSwitchGame: (Boolean) -> Unit,
     flashGameConfig: () -> Unit,
     checkUpdate: () -> Unit,
+    checkInformation: () -> Unit,
     showDownloadGameConfig: (Boolean) -> Unit,
     requestShizukuPermission: () -> Unit
 ) {
@@ -245,6 +257,14 @@ fun SettingContent(
             icon = painterResource(id = R.drawable.update_icon),
             onClick = {
                 checkUpdate()
+            }
+        )
+        SettingItem(
+            name = stringResource(R.string.setting_page_about_info),
+            description = stringResource(R.string.setting_page_about_info_descript),
+            icon = painterResource(id = R.drawable.notification_icon),
+            onClick = {
+                checkInformation()
             }
         )
         SettingTitle(
@@ -373,8 +393,8 @@ fun SettingTitle(
 // 切换游戏版本的弹窗
 @Composable
 fun SwitchGameDialog(
-    gameInfoList: List<GameInfo>,
-    setGameInfo: (GameInfo,Boolean) -> Unit,
+    gameInfoList: List<GameInfoBean>,
+    setGameInfo: (GameInfoBean, Boolean) -> Unit,
     showSwitchGameInfo: (Boolean) -> Unit,
     showDialog: Boolean
 ) {

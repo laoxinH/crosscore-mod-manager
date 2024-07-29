@@ -2,6 +2,8 @@ package top.laoxin.modmanager.bean
 
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
+import androidx.compose.ui.MotionDurationScale
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.zip.ZipFile
@@ -91,7 +93,7 @@ data class ModBean(
         }
     }
 
-/*    override fun equals(other: Any?): Boolean {
+ /*   override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
         val modBean = other as ModBean
@@ -141,7 +143,6 @@ data class ModBean(
 
     fun equalsIgnoreId(other: ModBean): Boolean {
         if (this === other) return true
-
         if (name != other.name) return false
         if (version != other.version) return false
         if (description != other.description) return false
@@ -162,5 +163,66 @@ data class ModBean(
         if (isZipFile != other.isZipFile) return false
 
         return true
+    }
+
+    fun isDelete(scanMods: List<ModBean>): ModBean? {
+        if (scanMods.none { it.path == path && it.name == name }){
+            return this
+        }
+        return null
+    }
+
+    fun isUpdate(scanMods: List<ModBean>): ModBean? {
+        for (mod in scanMods) {
+            if (mod.path == path && mod.name == name) {
+                if (mod.version != version ||
+                    mod.description != description ||
+                    mod.author != author ||
+                    mod.date != date ||
+                    mod.icon != icon ||
+                    mod.images != images ||
+                    mod.modFiles != modFiles ||
+                    mod.isEncrypted != isEncrypted ||
+                    mod.readmePath != readmePath ||
+                    mod.fileReadmePath != fileReadmePath ||
+                    mod.gameModPath != gameModPath ||
+                    mod.modType != modType ||
+                    mod.isZipFile != isZipFile
+                    ) {
+                    return this.copy(
+                        version = mod.version,
+                        description = mod.description,
+                        author = mod.author,
+                        date = mod.date,
+                        icon = mod.icon,
+                        images = mod.images,
+                        modFiles = mod.modFiles,
+                        isEncrypted = mod.isEncrypted,
+                        readmePath = mod.readmePath,
+                        fileReadmePath = mod.fileReadmePath,
+                        gameModPath = mod.gameModPath,
+                        modType = mod.modType,
+                        isZipFile = mod.isZipFile
+
+                    )
+                }
+
+                //if (mod.isEncrypted != isEncrypted) return true
+                //if (mod.password != password) return true
+                //if (mod.gamePackageName != gamePackageName) return true
+                //if (mod.isEnable != isEnable) return true
+
+            }
+        }
+        return null
+    }
+
+    fun isNew(mods: List<ModBean>): ModBean? {
+        Log.d("ModBean", "所有mod$mods")
+        if (mods.none{ it.path == path && it.name == name }) {
+            Log.d("ModBean", "新的: $name==$path")
+            return this
+        }
+        return null
     }
 }

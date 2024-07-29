@@ -36,7 +36,7 @@ import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.AntiHarmonyBean
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.PathType
@@ -45,10 +45,14 @@ import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.database.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
+import top.laoxin.modmanager.observer.FlashModsObserver
 import top.laoxin.modmanager.service.ProjectSnowStartService
+import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
+import top.laoxin.modmanager.ui.state.ConsoleUiState
+import top.laoxin.modmanager.ui.state.UserPreferencesState
 import java.io.File
 
 
@@ -72,6 +76,7 @@ class ConsoleViewModel(
     private var _updateContent by mutableStateOf("")
     val updateContent: String
         get() = _updateContent
+
 
 
     private val _uiState = MutableStateFlow<ConsoleUiState>(ConsoleUiState())
@@ -134,20 +139,14 @@ class ConsoleViewModel(
         scanDirectoryModsFlow,
         _uiState
     ) { values ->
-        ConsoleUiState(
+        (values[5] as ConsoleUiState).copy(
             scanQQDirectory = values[0] as Boolean,
             selectedDirectory = values[1] as String,
             scanDownload = values[2] as Boolean,
             openPermissionRequestDialog = values[3] as Boolean,
-            scanDirectoryMods = values[4] as Boolean,
-            gameInfo = (values[5] as ConsoleUiState).gameInfo,
-            modCount = (values[5] as ConsoleUiState).modCount,
-            enableModCount = (values[5] as ConsoleUiState).enableModCount,
-            canInstallMod = (values[5] as ConsoleUiState).canInstallMod,
-            showScanDirectoryModsDialog = (values[5] as ConsoleUiState).showScanDirectoryModsDialog,
-            antiHarmony = (values[5] as ConsoleUiState).antiHarmony,
-            showUpgradeDialog = (values[5] as ConsoleUiState).showUpgradeDialog
+            scanDirectoryMods = values[4] as Boolean
         )
+
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -156,18 +155,45 @@ class ConsoleViewModel(
 
     init {
         checkUpdate()
+        getNewInfo()
         ModTools.updateGameConfig()
         viewModelScope.launch {
             userPreferencesState.collectLatest{
+                updateLogTools(it)
                 updateGameInfo(it)
                 checkInstallMod()
                 updateModCount()
                 updateAntiHarmony()
                 updateEnableModCount()
                 openDictionaryObserver(it)
-
             }
         }
+    }
+
+    private fun getNewInfo() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                ModManagerApi.retrofitService.getInfo()
+            }.onFailure {
+                Log.e("ConsoleViewModel", "信息提示: $it")
+            }.onSuccess { info ->
+                Log.d("ConsoleViewModel", "信息提示: ${info}")
+                if (info.version > ModTools.getInfoVersion()) {
+                    _uiState.update {
+                        it.copy(infoBean = info)
+                    }
+                    setShowInfoDialog(true)
+                    ModTools.setInfoVersion(info.version)
+                }
+            }
+        }
+    }
+
+    fun setShowInfoDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showInfoDialog = b)
+        }
+
     }
 
     private fun updateAntiHarmony() {
@@ -199,25 +225,7 @@ class ConsoleViewModel(
     private fun openDictionaryObserver(userPreferencesState: UserPreferencesState) {
         fileObserver?.stopWatching()
 
-        fileObserver = object : FileObserver(
-            ModTools.ROOT_PATH + userPreferencesState.selectedDirectory,
-            ALL_EVENTS
-        ) {
-            override fun onEvent(event: Int, path: String?) {
-                when (event) {
-                    CREATE -> {
-                        onNewModScan(userPreferencesState, getGameInfo())
-                    }
-
-                    MOVED_TO -> {
-                        onNewModScan(userPreferencesState, getGameInfo())
-                    }
-                    // Add more cases if you want to handle more events
-                    else -> return
-                }
-            }
-
-        }
+        fileObserver = FlashModsObserver(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
         fileObserver?.startWatching()
     }
 
@@ -322,18 +330,6 @@ class ConsoleViewModel(
         }
     }
 
-    private fun onNewModScan(
-        it: UserPreferencesState,
-        gameInfo: GameInfo
-    ) {
-        Log.d("FileObserver", "onEvent: $it")
-        viewModelScope.launch {
-            ModTools.scanMods(
-                ModTools.ROOT_PATH + it.selectedDirectory,
-                gameInfo
-            )
-        }
-    }
 
     // 开启扫描QQ目录
     fun openScanQQDirectoryDialog(b: Boolean) {
@@ -492,12 +488,12 @@ class ConsoleViewModel(
     }
 
     // 获取游戏信息
-    private fun getGameInfo(): GameInfo {
+    private fun getGameInfo(): GameInfoBean {
         return _uiState.value.gameInfo
     }
 
     // 设置游戏信息
-    private fun setGameInfo(gameInfo: GameInfo) {
+    private fun setGameInfo(gameInfo: GameInfoBean) {
         _uiState.update {
             it.copy(gameInfo = gameInfo)
         }
@@ -553,6 +549,11 @@ class ConsoleViewModel(
         } else {
             ToastUtils.longCall(R.string.toast_game_not_found)
         }
+    }
+
+    // 更新日志工具
+    private fun updateLogTools(userPreferencesState: UserPreferencesState) {
+        LogTools.setLogPath(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
     }
 }
 

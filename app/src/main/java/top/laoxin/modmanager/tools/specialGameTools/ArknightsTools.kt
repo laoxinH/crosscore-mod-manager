@@ -5,10 +5,11 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.PathType
+import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
@@ -37,7 +38,6 @@ object ArknightsTools : BaseSpecialGameTools {
     )
     data class PersistentRes(
         val abInfos: MutableList<AbInfo> = mutableListOf(),
-
         )
 
     data class FullPack(
@@ -62,7 +62,14 @@ object ArknightsTools : BaseSpecialGameTools {
         CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
         val unZipPath = ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag : MutableList<Boolean> = mutableListOf()
-        for (modFile in  mod.modFiles!!){
+        if (!initialFileTools()) {
+            throw Exception("初始化文件工具失败")
+        }
+        if (!
+            moveCheckFileToAppPath()) {
+            throw Exception("复制校验文件失败")
+        }
+        mod.modFiles?.forEachIndexed{index: Int, modFile: String ->
             val modFilePath = if (mod.isZipFile) {
                 unZipPath + modFile
             } else {
@@ -77,56 +84,56 @@ object ArknightsTools : BaseSpecialGameTools {
             }
 
             // 读取文件大小
-            var fileSize = try {
-                File(modFilePath).length()
-            } catch (e: Exception) {
-                null
-            }
-            if (fileSize == null) {
-                getZipFileInputStream(zipFilePath = mod.path, fileName = modFile, password = mod.password!!)?.use {
-                    fileSize = getInputStreamSize(it)
-                }
-            }
+            val fileSize = File(modFilePath).length()
 
             val checkFileName = File(mod.gameModPath!!).name + "/" + File(modFilePath).name
             Log.d("ArknightsTools", "checkFileName: $checkFileName")
             Log.d("ArknightsTools", "md5: $md5")
             Log.d("ArknightsTools", "fileSize: $fileSize")
-            flag.add(modifyCheckFile(checkFileName, md5!!, fileSize!!))
+            flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
+            onProgressUpdate("${index + 1}/${mod.modFiles.size}")
         }
-        return flag.all { it }
+        return if (flag.all { it }) {
+            moveCheckFileToGamePath()
+        }else {
+            false
+        }
     }
 
     override fun specialOperationDisable(
-        backup: List<BackupBean>,
+        backups: List<BackupBean>,
         packageName: String,
         modBean: ModBean
     ): Boolean {
         CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
+        if (!initialFileTools()) {
+            throw Exception("初始化文件工具失败")
+        }
+        if (!moveCheckFileToAppPath()) {
+            throw Exception("复制校验文件失败")
+        }
         val flag : MutableList<Boolean> = mutableListOf()
-        for (backupBean in backup) {
+        backups.forEachIndexed{index, backupBean ->
             // 计算md5
             val md5 = calculateMD5(File(backupBean.backupPath!!).inputStream())
             // 读取文件大小
-            val fileSize = try {
-                File(backupBean.backupPath).length()
-            } catch (e: Exception) {
-                0
-            }
+            val fileSize = File(backupBean.backupPath).length()
             val checkFileName = (File(backupBean.backupPath).parentFile?.name ?: "") + "/" + backupBean.filename
-
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
-
+            onProgressUpdate("${index + 1}/${backups.size}")
         }
-        return flag.all { it }
-
+        return if (flag.all { it }) {
+            moveCheckFileToGamePath()
+        }else {
+            false
+        }
     }
 
-    override fun specialOperationStartGame(gameInfo: GameInfo): Boolean {
+    override fun specialOperationStartGame(gameInfo: GameInfoBean): Boolean {
         return true
     }
 
-    override fun specialOperationCreateMods(gameInfo: GameInfo): List<ModBeanTemp> {
+    override fun specialOperationCreateMods(gameInfo: GameInfoBean): List<ModBeanTemp> {
         TODO("Not yet implemented")
     }
 
@@ -134,7 +141,7 @@ object ArknightsTools : BaseSpecialGameTools {
         return false
     }
 
-    override fun specialOperationSelectGame(gameInfo: GameInfo): Boolean {
+    override fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean {
         return true
     }
 
@@ -142,40 +149,8 @@ object ArknightsTools : BaseSpecialGameTools {
     // 修改check文件
     private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long) : Boolean {
         try {
+
             val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
-            if (checkPermission == PathType.FILE) {
-                Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-                fileTools = FileTools
-
-            } else if (checkPermission == PathType.DOCUMENT) {
-                fileTools = DocumentFileTools
-            } else if (checkPermission == PathType.SHIZUKU) {
-                fileTools = ShizukuFileTools
-            } else {
-                Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-                return false
-            }
-            // 通过documentFile读取文件
-            if (checkPermission == PathType.DOCUMENT) {
-                fileTools.copyFileByDF(
-                    CHECK_FILEPATH + CHECK_FILENAME_1,
-                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
-                )
-                fileTools.copyFileByDF(
-                    CHECK_FILEPATH + CHECK_FILENAME_2,
-                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
-                )
-            } else {
-                fileTools.copyFile(
-                    CHECK_FILEPATH + CHECK_FILENAME_1,
-                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
-                )
-                fileTools.copyFile(
-                    CHECK_FILEPATH + CHECK_FILENAME_2,
-                    ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
-                )
-            }
-
             val checkFile1 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1)
             val checkFile2 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2)
 
@@ -217,18 +192,6 @@ object ArknightsTools : BaseSpecialGameTools {
                     checkFile1.delete()
                     checkFile1.createNewFile()
                     checkFile1.writeText(it)
-
-                    if (checkPermission == PathType.DOCUMENT) {
-                        fileTools.copyFileByFD(
-                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
-                            CHECK_FILEPATH + CHECK_FILENAME_1
-                        )
-                    } else {
-                        fileTools.copyFile(
-                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
-                            CHECK_FILEPATH + CHECK_FILENAME_1
-                        )
-                    }
                 }
             }
             gson.toJson(checkFile2Map, HotUpdate::class.java).let {
@@ -237,10 +200,7 @@ object ArknightsTools : BaseSpecialGameTools {
                     checkFile2.createNewFile()
                     checkFile2.writeText(it)
                     if (checkPermission == PathType.DOCUMENT) {
-                        fileTools.copyFileByFD(
-                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
-                            CHECK_FILEPATH + CHECK_FILENAME_2
-                        )
+
                     } else {
                         fileTools.copyFile(
                             ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
@@ -252,11 +212,75 @@ object ArknightsTools : BaseSpecialGameTools {
             }
             return true
         } catch (e: Exception) {
-            Log.e("ArknightsTools", "modifyCheckFile: ${e.message}")
-            ModTools.logRecord("ArknightsTools-modifyCheckFile: $e")
+            Log.e("ArknightsTools", "modifyCheckFile: $fileName")
+            e.printStackTrace()
+            logRecord("ArknightsTools-modifyCheckFile: $e")
             return false
         }
     }
+    private fun moveCheckFileToGamePath() : Boolean{
+        val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
+        return if (checkPermission == PathType.DOCUMENT) {
+            fileTools.copyFileByFD(
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
+                CHECK_FILEPATH + CHECK_FILENAME_1
+            )
+            fileTools.copyFileByFD(
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
+                CHECK_FILEPATH + CHECK_FILENAME_2
+            )
+        } else {
+            fileTools.copyFile(
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
+                CHECK_FILEPATH + CHECK_FILENAME_1
+            )
+            fileTools.copyFile(
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
+                CHECK_FILEPATH + CHECK_FILENAME_2
+            )
+        }
+    }
 
+    private fun moveCheckFileToAppPath() : Boolean{
+        val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
+        Log.d("ArknightsTools", "文件权限: $checkPermission")
+        // 通过documentFile读取文件
+        return if (checkPermission == PathType.DOCUMENT) {
+            fileTools.copyFileByDF(
+                CHECK_FILEPATH + CHECK_FILENAME_1,
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
+            )
+            fileTools.copyFileByDF(
+                CHECK_FILEPATH + CHECK_FILENAME_2,
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
+            )
+        } else {
+            fileTools.copyFile(
+                CHECK_FILEPATH + CHECK_FILENAME_1,
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
+            )
+            fileTools.copyFile(
+                CHECK_FILEPATH + CHECK_FILENAME_2,
+                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
+            )
+        }
+    }
 
+    private fun initialFileTools() : Boolean {
+        val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
+        return if (checkPermission == PathType.FILE) {
+            Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
+            fileTools = FileTools
+           true
+        } else if (checkPermission == PathType.DOCUMENT) {
+            fileTools = DocumentFileTools
+            true
+        } else if (checkPermission == PathType.SHIZUKU) {
+            fileTools = ShizukuFileTools
+            true
+        } else {
+            Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
+           false
+        }
+    }
 }

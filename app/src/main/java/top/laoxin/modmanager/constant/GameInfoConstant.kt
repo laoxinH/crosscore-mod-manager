@@ -1,10 +1,10 @@
 package top.laoxin.modmanager.constant
 
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ModTools
 
 object GameInfoConstant{
-    val CROSSCORE = GameInfo(
+    val CROSSCORE = GameInfoBean(
         "交错战线",
         "官服",
         "com.megagame.crosscore",
@@ -23,7 +23,7 @@ object GameInfoConstant{
         ),
         false
     )
-    val CROSSCOREB = GameInfo(
+    val CROSSCOREB = GameInfoBean(
         "交错战线",
         "B服",
         "com.megagame.crosscore.bilibili",
@@ -62,7 +62,7 @@ object GameInfoConstant{
         enableBackup = false,
         tips = "第一次选择尘白禁区游戏需要先清除游戏数据或者卸载重装再选择(清除或者卸载重装后先运行游戏到登录界面,然后回到这里选择游戏后再运行游戏下载游戏数据),否则无法开启MOD"
     )*/
-    val NO_GAME = GameInfo(
+    val NO_GAME = GameInfoBean(
         "请前往设置页面选择游戏",
         "请前往设置页面选择游戏",
         "",

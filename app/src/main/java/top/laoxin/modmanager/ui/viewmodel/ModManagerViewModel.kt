@@ -1,15 +1,10 @@
 package top.laoxin.modmanager.ui.viewmodel
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.LiveData
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import top.laoxin.modmanager.ui.state.ModManagerUiState
 
 class ModManagerViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ModManagerUiState())

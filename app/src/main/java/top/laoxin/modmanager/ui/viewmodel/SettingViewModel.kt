@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.SpecialGame
@@ -35,6 +35,7 @@ import top.laoxin.modmanager.network.ModManagerApi
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
+import top.laoxin.modmanager.ui.state.SettingUiState
 
 
 class SettingViewModel(
@@ -63,10 +64,11 @@ class SettingViewModel(
     val uiState = _uiState.asStateFlow()
     private var _gameInfo = mutableStateOf(GameInfoConstant.gameInfoList[0])
     val gameInfo get() = _gameInfo.value
-    
+
     // 更新描述
     private var _updateDescription by mutableStateOf("")
     val updateDescription get() = _updateDescription
+
     // 下载地址
     private var _downloadUrl by mutableStateOf("")
 
@@ -100,10 +102,12 @@ class SettingViewModel(
                     if (delBackupFile) {
                         backupRepository.deleteByGamePackageName(_gameInfo.value.packageName)
                         withContext(Dispatchers.Main) {
-                            ToastUtils.longCall(App.get().getString(
-                                R.string.toast_del_buckup_success,
-                                _gameInfo.value.gameName,
-                            ))
+                            ToastUtils.longCall(
+                                App.get().getString(
+                                    R.string.toast_del_buckup_success,
+                                    _gameInfo.value.gameName,
+                                )
+                            )
                         }
                     } else {
                         withContext(Dispatchers.Main) {
@@ -170,14 +174,14 @@ class SettingViewModel(
 
     fun showAcknowledgments(b: Boolean) {
         if (b) {
-            viewModelScope.launch (Dispatchers.IO){
+            viewModelScope.launch(Dispatchers.IO) {
                 kotlin.runCatching {
                     ModManagerApi.retrofitService.getThinksList()
                 }.onFailure {
                     Log.e("SettingViewModel", "showAcknowledgments: $it")
                     ToastUtils.longCall("获取感谢名单失败")
                 }.onSuccess {
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         _uiState.value = _uiState.value.copy(thinksList = it)
                         _uiState.value = _uiState.value.copy(showAcknowledgments = b)
                     }
@@ -207,7 +211,7 @@ class SettingViewModel(
     }
 
     // 设置gameInfoList
-    fun setGameInfoList(gameInfoList: List<GameInfo>) {
+    fun setGameInfoList(gameInfoList: List<GameInfoBean>) {
         _uiState.value = _uiState.value.copy(gameInfoList = gameInfoList)
     }
 
@@ -217,7 +221,7 @@ class SettingViewModel(
     }
 
     //设置游戏信息
-    fun setGameInfo(gameInfo: GameInfo, isTips : Boolean = false) {
+    fun setGameInfo(gameInfo: GameInfoBean, isTips: Boolean = false) {
         if (gameInfo.tips.isNotEmpty() && !isTips) {
             _uiState.update {
                 it.copy(showGameTipsDialog = true)
@@ -233,11 +237,11 @@ class SettingViewModel(
             }
             confirmGameInfo(gameInfo)
         }
-        
+
 
     }
 
-    private fun confirmGameInfo(gameInfo: GameInfo) {
+    private fun confirmGameInfo(gameInfo: GameInfoBean) {
         try {
             App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
             viewModelScope.launch(Dispatchers.IO) {
@@ -283,11 +287,14 @@ class SettingViewModel(
     fun flashGameConfig() {
         gameInfoJob?.cancel()
         gameInfoJob = viewModelScope.launch {
-             userPreferencesRepository.getPreferenceFlow("SELECTED_DIRECTORY", ModTools.DOWNLOAD_MOD_PATH).collectLatest{
-                 ModTools.readGameConfig(ModTools.ROOT_PATH + it)
-                 ModTools.updateGameConfig()
-                Log.d("设置测试","切换目录执行")
-                 gameInfoJob?.cancel()
+            userPreferencesRepository.getPreferenceFlow(
+                "SELECTED_DIRECTORY",
+                ModTools.DOWNLOAD_MOD_PATH
+            ).collectLatest {
+                ModTools.readGameConfig(ModTools.ROOT_PATH + it)
+                ModTools.updateGameConfig()
+                Log.d("设置测试", "切换目录执行")
+                gameInfoJob?.cancel()
             }
 
         }
@@ -326,6 +333,7 @@ class SettingViewModel(
             it.copy(versionName = versionName)
         }
     }
+
     // 获取版本号
     fun getVersionName() {
         viewModelScope.launch() {
@@ -333,21 +341,23 @@ class SettingViewModel(
         }
     }
 
-    fun setShowDownloadGameConfig(b : Boolean) {
+    fun setShowDownloadGameConfig(b: Boolean) {
         if (b) {
-            viewModelScope.launch (Dispatchers.IO){
+            viewModelScope.launch(Dispatchers.IO) {
                 kotlin.runCatching {
                     val gameConfigs = ModManagerApi.retrofitService.getGameConfigs()
                     Log.d("SettingViewModel", "getGameConfigs: $gameConfigs")
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         _uiState.update {
-                            it.copy(downloadGameConfigList = gameConfigs,
-                                showDownloadGameConfigDialog = b)
+                            it.copy(
+                                downloadGameConfigList = gameConfigs,
+                                showDownloadGameConfigDialog = b
+                            )
                         }
                     }
 
                 }.onFailure {
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         ToastUtils.longCall(R.string.toast_get_game_config_failed)
                     }
                 }
@@ -358,6 +368,7 @@ class SettingViewModel(
             }
         }
     }
+
     fun setShowGameTipsDialog(b: Boolean) {
         _uiState.update {
             it.copy(showGameTipsDialog = b)
@@ -369,7 +380,7 @@ class SettingViewModel(
             kotlin.runCatching {
                 val downloadGameConfig =
                     ModManagerApi.retrofitService.downloadGameConfig(downloadGameConfigBean.packageName)
-                    ModTools.writeGameConfigFile(downloadGameConfig)
+                ModTools.writeGameConfigFile(downloadGameConfig)
             }.onFailure {
                 Log.e("SettingViewModel", "downloadGameConfig: $it")
                 withContext(Dispatchers.Main) {
@@ -378,7 +389,7 @@ class SettingViewModel(
             }.onSuccess {
                 withContext(Dispatchers.Main) {
                     ToastUtils.longCall(R.string.toast_download_game_config_success)
-                   // flashGameConfig()
+                    // flashGameConfig()
                     ModTools.updateGameConfig()
                 }
 
@@ -401,6 +412,29 @@ class SettingViewModel(
     fun setOpenPermissionRequestDialog(b: Boolean) {
         _uiState.update {
             it.copy(openPermissionRequestDialog = b)
+        }
+    }
+
+    fun checkInformation() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                ModManagerApi.retrofitService.getInfo()
+            }.onFailure {
+                Log.e("SettingViewModel", "checkInformation: $it")
+            }.onSuccess {info->
+                _uiState.update {
+                    it.copy(infoBean = info)
+                }
+                setShowInfoDialog(true)
+            }
+        }
+
+    }
+
+    // 显示信息弹窗
+    fun setShowInfoDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showNotificationDialog = b)
         }
     }
 

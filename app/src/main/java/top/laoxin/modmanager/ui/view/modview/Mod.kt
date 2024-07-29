@@ -69,6 +69,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -107,6 +108,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.tools.PermissionTools
+import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.view.SettingItem
 import top.laoxin.modmanager.ui.view.commen.SelectPermissionDialog
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
@@ -178,7 +180,7 @@ fun ModPage() {
                         )
                     }
                     IconButton(onClick = {
-                        viewModel.flashMods(false)
+                        viewModel.flashMods(false, true)
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Refresh, // 使用刷新图标
@@ -300,6 +302,7 @@ fun ModPage() {
                                 text = uiState.tipsText,
                                 showTips = uiState.showTips,
                                 onDismiss = { viewModel.setShowTips(false) },
+                                uiState = uiState
                                 )
                         }
 
@@ -312,7 +315,7 @@ fun ModPage() {
                                 text = uiState.tipsText,
                                 showTips = uiState.showTips,
                                 onDismiss = { viewModel.setShowTips(false) },
-
+                                uiState = uiState
                                 )
                         }
 
@@ -324,7 +327,7 @@ fun ModPage() {
                                 text = uiState.tipsText,
                                 showTips = uiState.showTips,
                                 onDismiss = { viewModel.setShowTips(false) },
-
+                                uiState = uiState
                                 )
                         }
 
@@ -336,7 +339,7 @@ fun ModPage() {
                                 text = uiState.tipsText,
                                 showTips = uiState.showTips,
                                 onDismiss = { viewModel.setShowTips(false) },
-
+                                uiState = uiState
                                 )
                         }
                     }
@@ -439,13 +442,6 @@ fun createImageBitmapFromPath(path: String): ImageBitmap? {
 }
 
 
-fun onStoragePermissionResult(granted: Boolean, context: Context) {
-    if (granted) {
-        PermissionTools.checkShizukuPermission()
-    } else {
-
-    }
-}
 
 /**
  * @param hint: 空字符时的提示
@@ -578,12 +574,18 @@ fun Loading(
 @Composable
 fun Tips(
 
-    @StringRes text: Int,
+    text: String,
     showTips: Boolean,
     onDismiss: () -> Unit,
+    uiState: ModUiState,
     modifier: Modifier = Modifier
 ) {
     if (showTips) {
+        val tips = if (uiState.unzipProgress.isNotEmpty()) {
+            "$text : ${uiState.unzipProgress}"
+        } else {
+            text
+        }
         Snackbar(
             action = {
                 TextButton(onClick = { onDismiss() }) {
@@ -592,7 +594,8 @@ fun Tips(
             },
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(8.dp)
-        ) { Text(text = stringResource(id = text)) }
+
+        ) { Text(text = tips) }
     }
 }
 

@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.PathType
@@ -181,7 +181,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         return true
     }
 
-    override fun specialOperationStartGame(gameInfo: GameInfo): Boolean {
+    override fun specialOperationStartGame(gameInfo: GameInfoBean): Boolean {
         check_filename_mod_path =
             ModTools.GAME_CHECK_FILE_PATH + gameInfo.packageName + "/" + CHECK_FILENAME
         check_filepath = "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/"
@@ -249,7 +249,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         return true
     }
 
-    override fun specialOperationCreateMods(gameInfo: GameInfo): List<ModBeanTemp> {
+    override fun specialOperationCreateMods(gameInfo: GameInfoBean): List<ModBeanTemp> {
         TODO("Not yet implemented")
     }
 
@@ -257,7 +257,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         return modFileName.endsWith(".pak")
     }
 
-    override fun specialOperationSelectGame(gameInfo: GameInfo): Boolean {
+    override fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean {
         //Log.d("ProjectSnowTools", "特殊:$gameInfo ")
         if (checkPermission(gameInfo.gamePath)==PathType.NULL) return false
         val gameFilepath = "${ gameInfo.gamePath }/files/${gameInfo.version}"

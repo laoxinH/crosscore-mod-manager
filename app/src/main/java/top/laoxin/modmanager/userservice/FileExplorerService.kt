@@ -2,10 +2,9 @@ package top.laoxin.modmanager.userservice
 
 import android.os.RemoteException
 import android.util.Log
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ArchiveUtil
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
+import top.laoxin.modmanager.tools.LogTools
 
 import top.laoxin.modmanager.useservice.IFileExplorerService
 
@@ -119,14 +118,15 @@ class FileExplorerService : IFileExplorerService.Stub() {
         }
     }
 
-    override fun scanMods(sacnPath: String?, gameInfo: GameInfo?): Boolean {
+    override fun scanMods(sacnPath: String?, gameInfo: GameInfoBean?): Boolean {
         return try {
-            val files = File(sacnPath!!).listFiles()
+            if (sacnPath == null || gameInfo == null) return false
+            val files = File(sacnPath).listFiles()
             val gameFiles = mutableListOf<String>()
-            gameInfo?.gameFilePath?.forEach {
+            gameInfo.gameFilePath.forEach {
                 gameFiles.addAll(getFilesNames(it))
             }
-            Log.d(TAG, "游戏中的文件: ${gameFiles}")
+            Log.d(TAG, "游戏中的文件: $gameFiles")
             if (files != null) {
                 // 判断file是否为压缩文件
                 for (f in files) {
@@ -138,7 +138,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
                                 Log.d(TAG, "开始移动文件: ${f.name}==${modFileName}")
                                 moveFile(
                                     f.path,
-                                    Paths.get(gameInfo!!.modSavePath, f.name).toString()
+                                    Paths.get(gameInfo.modSavePath, f.name).toString()
                                 )
                                 return@forEach
                             }
@@ -148,6 +148,8 @@ class FileExplorerService : IFileExplorerService.Stub() {
             }
             true
         } catch (e: Exception) {
+            LogTools.logRecord("shuzuku扫描mod失败:$e")
+            Log.e(TAG, "scanMods: $e")
             false
         }
     }
@@ -204,6 +206,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
 
     override fun createDictionary(path: String?): Boolean {
         try {
+            if (path == null) return false
             val file = File(path)
             if (!file.exists()) {
                 file.mkdirs()

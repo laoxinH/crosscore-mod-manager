@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import top.laoxin.modmanager.App
+import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import java.io.File
@@ -48,7 +49,7 @@ object DocumentFileTools : BaseFileTools {
                 val parentFile = File(destPath).parentFile?.absolutePath
                 val parentDocumentFile = DocumentFile.fromTreeUri(app, pathToUri(parentFile!!))
                 parentDocumentFile?.createFile("application/octet-stream", File(destPath).name)
-                    ?.let {
+                    .let {
                         destDocumentFile = it
                     }
             }
@@ -67,6 +68,7 @@ object DocumentFileTools : BaseFileTools {
             true
         } catch (e: Exception) {
             Log.e(TAG, "copyFile失败: ${e}")
+            LogTools.logRecord("$TAG copyFile失败: ${e}")
             false
         }
     }

@@ -2,12 +2,15 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.util.Expando
 import java.security.MessageDigest
- object buildInfo {
-    val versionCode = 16
-    val versionName = "2.0.7 beta"
+
+object buildInfo {
+    val versionCode = 17
+    val versionName = "2.0.8 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.添加对尘白禁区的MOD支持\n" +
-            "2.优化代码\n" +
+            "1.添加进度提示\n" +
+            "2.添加自动扫描\n" +
+            "3.添加通知\n" +
+            "4.优化屎山代码\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册Gitee自行在设置页面前往Github下载最新版"
@@ -15,7 +18,7 @@ import java.security.MessageDigest
     val updatePath = "update"
     val updateInfoFilename = "update.json"
     val gameConfigPaht = "gameConfig"
-     val gameConfigFilename = "gameConfig.json"
+    val gameConfigFilename = "gameConfig.json"
 
 }
 
@@ -23,7 +26,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
-   // id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta01"
+    // id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta01"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 android {
@@ -34,9 +37,9 @@ android {
         compose = true
     }
 
-        //...
+    //...
     applicationVariants.all {
-        val ver = defaultConfig.versionName?.replace(" ","-")
+        val ver = defaultConfig.versionName?.replace(" ", "-")
         outputs.all {
 
             //val minSdk = defaultConfig.minSdk
@@ -109,7 +112,7 @@ android {
 
 dependencies {
 
-implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.rules)
     testImplementation("junit:junit:4.12")
     /*    implementation(libs.androidx.core.ktx)
@@ -175,16 +178,16 @@ implementation(libs.androidx.navigation.runtime.ktx)
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
 
     // 添加 documentfile 依赖
-    implementation ("androidx.documentfile:documentfile:1.0.1")
+    implementation("androidx.documentfile:documentfile:1.0.1")
     // 添加shizuku 依赖
-    implementation ("dev.rikka.shizuku:api:13.1.5")
-    implementation ("dev.rikka.shizuku:provider:13.1.5")
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
 
     // 添加datastore 依赖储存用户配置
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // 添加zip4j 依赖
-    implementation ("net.lingala.zip4j:zip4j:2.11.5")
+    implementation("net.lingala.zip4j:zip4j:2.11.5")
     //Room
     implementation("androidx.room:room-runtime:${rootProject.extra["room_version"]}")
     ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
@@ -209,21 +212,21 @@ implementation(libs.androidx.navigation.runtime.ktx)
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     // 解压库
     implementation("org.apache.commons:commons-compress:1.26.2")
-   implementation("org.tukaani:xz:1.9")
+    implementation("org.tukaani:xz:1.9")
     // 7z
-   //implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
+    //implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
     implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
 
 }
 
 // 计算apk的md5
-fun generateMD5(file : File) :String? {
+fun generateMD5(file: File): String? {
     println("generateMD5: $file")
     return file.name
 }
 
 
-fun generateUpdateInfo(apkName :String) {
+fun generateUpdateInfo(apkName: String) {
     println("------------------ Generating version info ------------------")
     println("------------------ 开始生成apk信息 ------------------")
     // 把apk文件从build目录复制到根项目的update文件夹下
@@ -235,7 +238,7 @@ fun generateUpdateInfo(apkName :String) {
 
     val toDir = rootProject.file(buildInfo.updatePath)
     val apkHash = generateMD5(apkFile)
-    val  updateJsonFile = File(toDir, buildInfo.updateInfoFilename)
+    val updateJsonFile = File(toDir, buildInfo.updateInfoFilename)
     var writeNewFile = true
 
     // 如果有以前的json文件，检查这次打包是否有改变
@@ -245,7 +248,7 @@ fun generateUpdateInfo(apkName :String) {
             if (buildInfo.versionCode <= oldUpdateInfo["code"] as Int && apkHash == oldUpdateInfo["md5"] as String) {
                 writeNewFile = false
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             writeNewFile = true
             e.printStackTrace()
             updateJsonFile.delete()
@@ -283,34 +286,38 @@ fun generateUpdateInfo(apkName :String) {
         updateJsonFile.writeText(outputJson)
     } else {
         // 不需要更新
-        println("This version is already released.\n" +
-                "VersionCode = ${buildInfo.versionCode}\n" +
-                "Skip generateUpdateInfo.")
+        println(
+            "This version is already released.\n" +
+                    "VersionCode = ${buildInfo.versionCode}\n" +
+                    "Skip generateUpdateInfo."
+        )
     }
     println("------------------ Finish Generating version info ------------------")
 }
- fun generateGameConfigApi(){
-     val gameConfigDir = rootProject.file(buildInfo.gameConfigPaht)
-     val gameConfigList : MutableList<Map<String,String>> = mutableListOf()
-     gameConfigDir.listFiles()?.forEach {
-         if (it.name.endsWith(".json")) {
-             try {
-                 val gameConfigMap = JsonSlurper().parse(it) as Map<*, *>
-                 val gameConfig = mutableMapOf(
-                     "gameName" to gameConfigMap["gameName"] as String,
-                     "packageName" to gameConfigMap["packageName"] as String,
-                     "serviceName" to gameConfigMap["serviceName"] as String,
-                     "downloadUrl" to "",
-                 )
-                 gameConfigList.add(gameConfig)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-             }
 
-         }
-     }
-     val gameConfigFile = rootProject.file(buildInfo.gameConfigPaht+"/api/"+buildInfo.gameConfigFilename)
-        val outputJson = JsonBuilder(gameConfigList).toPrettyString()
-        gameConfigFile.writeText(outputJson)
+fun generateGameConfigApi() {
+    val gameConfigDir = rootProject.file(buildInfo.gameConfigPaht)
+    val gameConfigList: MutableList<Map<String, String>> = mutableListOf()
+    gameConfigDir.listFiles()?.forEach {
+        if (it.name.endsWith(".json")) {
+            try {
+                val gameConfigMap = JsonSlurper().parse(it) as Map<*, *>
+                val gameConfig = mutableMapOf(
+                    "gameName" to gameConfigMap["gameName"] as String,
+                    "packageName" to gameConfigMap["packageName"] as String,
+                    "serviceName" to gameConfigMap["serviceName"] as String,
+                    "downloadUrl" to "",
+                )
+                gameConfigList.add(gameConfig)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
 
- }
+        }
+    }
+    val gameConfigFile =
+        rootProject.file(buildInfo.gameConfigPaht + "/api/" + buildInfo.gameConfigFilename)
+    val outputJson = JsonBuilder(gameConfigList).toPrettyString()
+    gameConfigFile.writeText(outputJson)
+
+}

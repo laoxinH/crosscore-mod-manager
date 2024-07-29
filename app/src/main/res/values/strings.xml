@@ -90,7 +90,7 @@
     <string name="toast_password_right">密码正确</string>
     <string name="toast_check_failed">校验密码失败</string>
     <string name="password_dialog_title">请输入密码后重新启用</string>
-    <string name="password_dialog_label">密码</string>
+    <string name="password_dialog_label">密码(ZIP压缩包不支持中文密码)</string>
     <string name="dialog_info_title">用户协议</string>
     <string name="dialog_info_message">1.实验室需要安装好游戏才能扫描\n2.Android 14需要shizuku授权\n3.Android 14用户若没有安装请前往设置页面下载shizuku\n4.授权后请点击刷新\n5.默认不会扫描QQ下载和系统download目录\n6.如有需要请前往控制台开启\n7.实验室会将扫描到的Mod自动移动到控制台配置的Mod目录\n8.新增Mod推荐放到控制台配置的Mod目录\n9.删除或添加Mod后如果实验室没有自动更新请点击刷新\n10.不能在任何官方相关渠道宣传实验室\n11.使用实验室造成的一切后果与开发者无关\n12.实验室与官方无关\n</string>
     <string name="dialog_button_info_permission">同意并继续</string>
@@ -183,6 +183,15 @@
     <string name="console_game_tips_title">特别注意!</string>
     <string name="setting_page_more_discord">Discord服务器</string>
     <string name="setting_page_more_discord_descript">这是一个各种游戏MOD分享交流的Discord服务器</string>
-    <string name="disscord_url">https://discord.com/invite/aKuCDEUWVU</string>
+    <string name="disscord_url">https://discord.gg/4UJsfDSxZ7</string>
+    <string name="mod_temp_bean_name_dictionary_desc">文件夹</string>
+    <string name="mod_bean_no_readme">无readme文件</string>
+    <string name="mod_bean_no_author">未知</string>
+    <string name="mod_bean_encrypted_version">已加密</string>
+    <string name="mod_bean_encrypted_desc">MOD文件已加密,请点击开关输入密码解密</string>
+    <string name="mod_page_mod_detail_dialog_detali_modNums">MOD文件数量: %1$s</string>
+    <string name="console_info_title">通知</string>
+    <string name="setting_page_about_info">查看通知</string>
+    <string name="setting_page_about_info_descript">查看MOD实验室的最新通知</string>
 
 </resources>

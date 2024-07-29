@@ -1,6 +1,6 @@
 {
   "gameName": "明日方舟",
-  "serviceName": "官服:配置版本2.0-要求实验室版本2.0及以上",
+  "serviceName": "官服",
   "packageName": "com.hypergryph.arknights",
   "version": "2.0.0",
   "gamePath": "Android/data/com.hypergryph.arknights/",
@@ -25,5 +25,5 @@
   "modSavePath": "",
   "isGameFileRepeat": true,
   "enableBackup" : true,
-  "tips" : ""
+  "tips" : "注意如果此前自行修改过游戏文件，可能会出现反检测失败导致无法正常使用MOD，建议先清除游戏数据重新下载游戏资源后再使用MOD。"
 }

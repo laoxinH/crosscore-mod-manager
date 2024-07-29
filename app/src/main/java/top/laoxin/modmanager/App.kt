@@ -13,6 +13,7 @@ import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.database.AppContainer
 import top.laoxin.modmanager.database.AppDataContainer
 import top.laoxin.modmanager.database.UserPreferencesRepository
+import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
 import java.io.File
 import java.io.FileOutputStream
@@ -40,7 +41,7 @@ class App : Application() {
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             // 这里处理全局异常
             Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
-            ModTools.logRecord("Uncaught exception in thread ${thread.name}: $throwable")
+            LogTools.logRecord("Uncaught exception in thread ${thread.name}: $throwable")
         }
 
     }

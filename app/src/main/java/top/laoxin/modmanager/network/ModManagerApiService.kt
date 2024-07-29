@@ -6,7 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.bean.GameInfo
+import top.laoxin.modmanager.bean.GameInfoBean
+import top.laoxin.modmanager.bean.InfoBean
 import top.laoxin.modmanager.bean.ThinksBean
 import top.laoxin.modmanager.bean.UpdateBean
 
@@ -37,10 +38,13 @@ interface ModManagerApiService {
 
     // 下载游戏配置
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/{name}.json")
-    suspend fun downloadGameConfig(@Path("name")name : String) : GameInfo
+    suspend fun downloadGameConfig(@Path("name")name : String) : GameInfoBean
     // 获取感谢名单
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/thinks.json")
     suspend fun getThinksList() : List<ThinksBean>
+
+    @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/information.json")
+    suspend fun getInfo() : InfoBean
 
 }
 

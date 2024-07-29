@@ -2,7 +2,7 @@
 package top.laoxin.modmanager.useservice;
 import top.laoxin.modmanager.bean.BeanFile;
 import top.laoxin.modmanager.bean.ModBean;
-import top.laoxin.modmanager.bean.GameInfo;
+import top.laoxin.modmanager.bean.GameInfoBean;
 // Declare any non-default types here with import statements
 
 interface IFileExplorerService {
@@ -13,7 +13,7 @@ interface IFileExplorerService {
     boolean fileExists(String path);
     boolean chmod(String path);
     boolean unZipFile(String zipPath,String unzipPath,String filename, String password);
-    boolean scanMods(String sacnPath, in GameInfo gameInfo);
+    boolean scanMods(String sacnPath, in GameInfoBean gameInfo);
     boolean moveFile(String srcPath, String destPath);
     boolean isFile(String path);
     // 文件是否发生变化

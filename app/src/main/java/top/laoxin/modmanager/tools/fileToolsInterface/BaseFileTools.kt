@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import top.laoxin.modmanager.App
+import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import java.io.File
@@ -62,19 +63,19 @@ interface BaseFileTools {
             true
         } catch (e: Exception) {
             Log.e("FileTools", "copyFileByDF: $e")
-            ModTools.logRecord("FileTools-copyFileByDF: $e")
+            logRecord("FileTools-copyFileByDF: $e")
             false
         }
     }
 
-    fun isFileType(filename: String): Boolean {
+    fun isExcludeFileType(filename: String): Boolean {
 
-        return (/*name.contains(".jpg", ignoreCase = true) ||
-                name.contains(".png", ignoreCase = true) ||
-                name.contains(".gif", ignoreCase = true) ||
-                name.contains(".jpeg", ignoreCase = true) ||
-                name.contains(".mp4", ignoreCase = true) ||
-                name.contains(".mp3", ignoreCase = true) ||*/
+        return (filename.contains(".jpg", ignoreCase = true) ||
+                filename.contains(".png", ignoreCase = true) ||
+                filename.contains(".gif", ignoreCase = true) ||
+                filename.contains(".jpeg", ignoreCase = true) ||
+                filename.contains(".mp4", ignoreCase = true) ||
+                filename.contains(".mp3", ignoreCase = true) ||
                 filename.contains(".apk", ignoreCase = true))
     }
 
@@ -130,7 +131,7 @@ interface BaseFileTools {
             true
         } catch (e: Exception) {
             e.printStackTrace()
-            ModTools.logRecord("FileTools-copyFileByFD: $e")
+            logRecord("FileTools-copyFileByFD: $e")
             false
         }
     }
