@@ -45,11 +45,7 @@ BlocksAndDirectoryInfo::BlocksAndDirectoryInfo(Reader* reader, Header* header, b
 }
 
 ByteArr* BlocksAndDirectoryInfo::ToBytes(){
-    uint64_t size = 16 + 4 + 4 + 10 * BlocksInfoCount;
-    for (uint i = 0; i < DirectoryInfoCount; i++){
-        size += DirectoryInfos[i].GetSize();
-    }
-    ByteArr* result = new ByteArr(size);
+    ByteArr* result = new ByteArr(GetRawSize());
     memcpy(result->GetData(), UncompressedDataHash->GetData(), 16);
     Writer writer = Writer(result, 16);
     writer.WriteUInt32(BlocksInfoCount);
@@ -95,4 +91,12 @@ uint64_t BlocksAndDirectoryInfo::DataSize(){
         return size1;
     }
     throw std::runtime_error("Data size mismatch, for blocks is " + std::to_string(size1) + " while for cab is " + std::to_string(size2));
+}
+
+uint64_t BlocksAndDirectoryInfo::GetRawSize(){
+    uint64_t size = 16 + 4 + 4 + 10 * BlocksInfoCount;
+    for (uint i = 0; i < DirectoryInfoCount; i++){
+        size += DirectoryInfos[i].GetSize();
+    }
+    return size;
 }

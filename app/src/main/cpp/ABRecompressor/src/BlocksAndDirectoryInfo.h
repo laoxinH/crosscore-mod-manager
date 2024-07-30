@@ -27,6 +27,7 @@ public:
     ByteArr* ToBytes();
     ByteArr* ToBytes(CompressionType compressionType);
     uint64_t DataSize();
+    uint64_t GetRawSize();
 };
 
 #endif // ABRECOMPRESSOR_BLOCKSANDDIRECTORYINFO_H

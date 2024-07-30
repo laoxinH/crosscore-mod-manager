@@ -79,6 +79,7 @@ ByteArr* Compress(CompressionType compressionType, byte* tocompressData, uint to
         lzma_stream strm = LZMA_STREAM_INIT;
         lzma_ret ret;
         lzma_options_lzma opt;
+        opt.dict_size = 0x200000;
         lzma_lzma_preset(&opt, LZMA_PRESET_EXTREME);
         ret = lzma_alone_encoder(&strm, &opt);
         if (ret != LZMA_OK) {
