@@ -1,6 +1,6 @@
 {
   "gameName": "明日方舟",
-  "serviceName": "官服",
+  "serviceName": "官服-配置2.0",
   "packageName": "com.hypergryph.arknights",
   "version": "2.0.0",
   "gamePath": "Android/data/com.hypergryph.arknights/",
@@ -10,9 +10,14 @@
     "Android/data/com.hypergryph.arknights/files/AB/Android/chararts/",
     "Android/data/com.hypergryph.arknights/files/AB/Android/skinpack/",
     "Android/data/com.hypergryph.arknights/files/AB/Android/arts/dynchars/",
-    "/Android/data/com.hypergryph.arknights/files/AB/Android/avg/characters/",
-    "/Android/data/com.hypergryph.arknights/files/AB/Android/avg/imgs/",
-    "/Android/data/com.hypergryph.arknights/files/AB/Android/spritepack/"
+    "Android/data/com.hypergryph.arknights/files/AB/Android/avg/characters/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/avg/imgs/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/spritepack/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/refs/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/ui/rglktopic/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/arts/ui/namecardskin/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/battle/prefabs/enemies/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/battle/prefabs/effects/"
   ],
   "modType": [
     "普通立绘",
@@ -20,7 +25,12 @@
     "动态皮肤",
     "剧情立绘",
     "剧情cg",
-    "道具贴图"
+    "肉鸽道具贴图",
+    "界面ui素材",
+    "肉鸽主题背景",
+    "个人名片背景",
+    "敌人修改",
+    "效果修改"
   ],
   "modSavePath": "",
   "isGameFileRepeat": true,
