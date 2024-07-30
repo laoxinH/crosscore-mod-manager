@@ -1,6 +1,11 @@
 {
-  "antiHarmonyContent": "",
+  "gameName": "明日方舟",
+  "serviceName": "B服-配置2.0",
+  "packageName": "com.hypergryph.arknights.bilibili",
+  "version": "2.0.0",
+  "gamePath": "Android/data/com.hypergryph.arknights.bilibili/",
   "antiHarmonyFile": "",
+  "antiHarmonyContent": "",
   "gameFilePath": [
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
@@ -27,9 +32,8 @@
     "敌人修改",
     "效果修改"
   ],
-  "packageName": "com.hypergryph.arknights.bilibili",
-  "serviceName": "B服-配置2.0",
-  "version": "2.0.0",
-  "enableBackup" : true,
-  "tips" : "注意如果此前自行修改过游戏文件，可能会出现反检测失败导致无法正常使用MOD，建议先清除游戏数据重新下载游戏资源后再使用MOD。"
+  "modSavePath": "",
+  "isGameFileRepeat": true,
+  "enableBackup": true,
+  "tips": "注意如果此前自行修改过游戏文件，可能会出现反检测失败导致无法正常使用MOD，建议先清除游戏数据重新下载游戏资源后再使用MOD。"
 }
