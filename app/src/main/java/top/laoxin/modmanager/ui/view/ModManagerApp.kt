@@ -1,4 +1,5 @@
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
@@ -25,16 +26,19 @@ import androidx.navigation.compose.rememberNavController
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ConsolePage
+import top.laoxin.modmanager.ui.view.ConsoleTopBar
 import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.SettingPage
-import top.laoxin.modmanager.ui.viewmodel.ModManagerViewModel
-
+import top.laoxin.modmanager.ui.view.SettingTopBar
+import top.laoxin.modmanager.ui.view.modview.ModTopBar
+import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
 
 // 导航栏索引
 enum class NavigationIndex(
     @StringRes val title: Int,
-    val icon: ImageVector
+    val icon: ImageVector,
 ) {
     CONSOLE(R.string.console, Icons.Filled.Dashboard),
     MOD(R.string.mod, Icons.Filled.ImagesearchRoller),
@@ -47,9 +51,13 @@ enum class NavigationIndex(
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun ModManagerApp() {
-    // 数据
-    val viewModel: ModManagerViewModel = viewModel()
+    val modViewModel: ModViewModel = viewModel(
+        factory = ModViewModel.Factory
+    )
 
+    val consoleViewModel : ConsoleViewModel = viewModel(
+        factory = ConsoleViewModel.Factory
+    )
     // 导航栏
     val navController = rememberNavController()
     // 获取当前导航
@@ -58,17 +66,18 @@ fun ModManagerApp() {
     val currentScreen = NavigationIndex.valueOf(
         currentEntry?.destination?.route ?: NavigationIndex.CONSOLE.name
     )
+    Log.d("ModManagerApp", "currentScreen: $currentScreen")
 
     Scaffold(
-
-
-        //modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        //topBar = { MediumTopAppBarExample(scrollBehavior) },
+        topBar = {
+            when (currentScreen) {
+                NavigationIndex.CONSOLE -> ConsoleTopBar(consoleViewModel)
+                NavigationIndex.MOD -> ModTopBar(modViewModel)
+                NavigationIndex.SETTINGS -> SettingTopBar()
+            }
+        },
         bottomBar = {
-            NavigationBar(
-               // containerColor = Color.White
-            ) {
-
+            NavigationBar{
                 NavigationIndex.entries.forEachIndexed { index, navigationItem ->
                     NavigationBarItem(
                         selected = currentScreen == navigationItem,
@@ -100,19 +109,17 @@ fun ModManagerApp() {
         }
     )
     { innerPadding ->
-
-
         NavHost(
             navController = navController,
             startDestination = NavigationIndex.CONSOLE.name,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = NavigationIndex.CONSOLE.name) {
-               ConsolePage()
+               ConsolePage(consoleViewModel)
             }
 
             composable(route = NavigationIndex.MOD.name) {
-                ModPage()
+                ModPage(modViewModel)
             }
             composable(route = NavigationIndex.SETTINGS.name) {
                 SettingPage()
@@ -144,6 +151,7 @@ fun ModManagerApp() {
 
     }
 }
+
 
 
 @Preview(showBackground = true)

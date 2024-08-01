@@ -9,10 +9,10 @@ import java.io.InputStream
 
 object ShizukuFileTools : BaseFileTools {
     private const val TAG = "ShizukuFileTools"
-    lateinit var iFileExplorerService: IFileExplorerService
+    var iFileExplorerService: IFileExplorerService? = null
     override fun deleteFile(path: String): Boolean {
         return try {
-            iFileExplorerService.deleteFile(path)
+            iFileExplorerService?.deleteFile(path)
             true
         } catch (e: Exception) {
             Log.e(TAG, "deleteFile: $e")
@@ -22,7 +22,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun copyFile(srcPath: String, destPath: String): Boolean {
         return try {
-            iFileExplorerService.copyFile(srcPath, destPath)
+            iFileExplorerService?.copyFile(srcPath, destPath) ?: false
         } catch (e: Exception) {
             Log.e(TAG, "copyFile: $e")
             logRecord("ShizukuFileTools-copyFile: $e")
@@ -32,7 +32,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun getFilesNames(path: String): MutableList<String> {
         return try {
-            iFileExplorerService.getFilesNames(path)
+            iFileExplorerService?.getFilesNames(path) ?: mutableListOf()
         } catch (e: Exception) {
             Log.e(TAG, "getFilesNames: $e")
             mutableListOf()
@@ -41,7 +41,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun writeFile(path: String, filename: String, content: String): Boolean {
         return try {
-            iFileExplorerService.writeFile(path, filename, content)
+            iFileExplorerService?.writeFile(path, filename, content) ?: false
         } catch (e: Exception) {
             Log.e(TAG, "writeFile: $e")
             false
@@ -50,7 +50,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun moveFile(srcPath: String, destPath: String): Boolean {
         return try {
-            iFileExplorerService.moveFile(srcPath, destPath)
+            iFileExplorerService?.moveFile(srcPath, destPath) ?: false
         } catch (e: Exception) {
             Log.e(TAG, "moveFile: $e")
             false
@@ -59,7 +59,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun isFileExist(path: String): Boolean {
         return try {
-            iFileExplorerService.fileExists(path)
+            iFileExplorerService?.fileExists(path) ?: false
         } catch (e: Exception) {
             Log.e(TAG, "isFileExist: $e")
             false
@@ -68,7 +68,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun isFile(filename: String): Boolean {
         return try {
-            iFileExplorerService.isFile(filename)
+            iFileExplorerService?.isFile(filename) ?: false
         } catch (e: Exception) {
             Log.e(TAG, "isFile: $e")
             false
@@ -85,7 +85,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun isFileChanged(path: String): Long {
         return try {
-            iFileExplorerService.isFileChanged(path)
+            iFileExplorerService?.isFileChanged(path) ?: 0
         } catch (e: Exception) {
             Log.e(TAG, "isFileChanged: $e")
             0
@@ -95,7 +95,7 @@ object ShizukuFileTools : BaseFileTools {
     override fun changDictionaryName(path: String, name: String) :Boolean {
         Log.d(TAG, "changDictionaryName: $path==$name")
        return try {
-            iFileExplorerService.changDictionaryName(path, name)
+            iFileExplorerService?.changDictionaryName(path, name) ?: false
         } catch (e: Exception) {
             Log.e(TAG, "changDictionaryName: $e")
            false
@@ -104,7 +104,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun createDictionary(path : String): Boolean {
         return try {
-            iFileExplorerService.createDictionary(path)
+            iFileExplorerService?.createDictionary(path) ?: false
         } catch (e: Exception) {
             Log.e(TAG, "createDictionary: $e")
             false

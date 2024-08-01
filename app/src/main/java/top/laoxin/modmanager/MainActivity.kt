@@ -1,9 +1,11 @@
 package top.laoxin.modmanager
 
 import ModManagerApp
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,6 +19,7 @@ import top.laoxin.modmanager.ui.theme.ModManagerTheme
 class MainActivity : ComponentActivity() {
 
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Shizuku.addRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
@@ -43,15 +46,6 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    // 储存权限检测
-    private fun checkStoragePermission(onDismiss: (flag: Boolean) -> Unit) {
-        if (PermissionTools.hasStoragePermission()) {
-            // loadPath(mPathCache, false)
-            //checkShizukuPermission()
-        } else {
-            onDismiss(true)
-        }
-    }
 
     // 读取文件路径
     /*    private fun loadPath(path: String?, isUserClicked: Boolean) {

@@ -63,107 +63,91 @@ fun SettingPage() {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-                title = {
-                    Text(
-                        stringResource(id = R.string.settings),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            )
-        },
-    ) { innerPadding ->
-        SettingContent(
-            innerPadding,
-            uiState,
-            viewModel::setDeleteBackupDialog,
-            viewModel::deleteAllBackups,
-            viewModel::deleteCache,
-            viewModel::deleteTemp,
-            viewModel::openUrl,
-            viewModel::showAcknowledgments,
-            viewModel::showSwitchGame,
-            viewModel::flashGameConfig,
-            viewModel::checkUpdate,
-            viewModel::checkInformation,
-            viewModel::setShowDownloadGameConfig,
-            viewModel::requestShizukuPermission
 
-        )
-        ThinksDialogCommon(
-            title = stringResource(R.string.setting_acknowledgments),
-            onConfirm = { viewModel.showAcknowledgments(false) },
-            onCancel = { viewModel.showAcknowledgments(false)  },
-            thinks = uiState.thinksList,
-            openUrl = viewModel::openUrl,
-            showDialog = uiState.showAcknowledgments
-        )
-        if (viewModel.requestPermissionPath.isNotEmpty()) {
-            RequestUriPermission(path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog) {
-                viewModel.setOpenPermissionRequestDialog(false)
-            }
+    SettingContent(
+        uiState,
+        viewModel::setDeleteBackupDialog,
+        viewModel::deleteAllBackups,
+        viewModel::deleteCache,
+        viewModel::deleteTemp,
+        viewModel::openUrl,
+        viewModel::showAcknowledgments,
+        viewModel::showSwitchGame,
+        viewModel::flashGameConfig,
+        viewModel::checkUpdate,
+        viewModel::checkInformation,
+        viewModel::setShowDownloadGameConfig,
+        viewModel::requestShizukuPermission
+
+    )
+    ThinksDialogCommon(
+        title = stringResource(R.string.setting_acknowledgments),
+        onConfirm = { viewModel.showAcknowledgments(false) },
+        onCancel = { viewModel.showAcknowledgments(false) },
+        thinks = uiState.thinksList,
+        openUrl = viewModel::openUrl,
+        showDialog = uiState.showAcknowledgments
+    )
+    if (viewModel.requestPermissionPath.isNotEmpty()) {
+        RequestUriPermission(
+            path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog
+        ) {
+            viewModel.setOpenPermissionRequestDialog(false)
         }
-
-        DialogCommon(
-            title = stringResource(id = R.string.console_upgrade_title),
-            content = viewModel.updateDescription,
-            onConfirm = {
-                viewModel.setShowUpgradeDialog(false)
-                viewModel.openUrl(context,viewModel.downloadUrl)
-            },
-            onCancel = {
-                viewModel.setShowUpgradeDialog(false)
-            },
-            showDialog = uiState.showUpdateDialog
-        )
-        DialogCommon(
-            title = stringResource(id = R.string.console_game_tips_title),
-            content = viewModel.gameInfo.tips,
-            onConfirm = {
-                viewModel.setGameInfo(viewModel.gameInfo,true)
-                viewModel.setShowGameTipsDialog(false)
-            },
-            onCancel = {
-                viewModel.setShowGameTipsDialog(false)
-            },
-            showDialog = uiState.showGameTipsDialog
-        )
-        DialogCommon(
-            title = stringResource(id = R.string.console_info_title),
-            content = uiState.infoBean.msg,
-            onConfirm = {
-                viewModel.setShowInfoDialog(false)
-            },
-            onCancel = {
-                viewModel.setShowInfoDialog(false)
-            },
-            showDialog = uiState.showNotificationDialog
-        )
-        SwitchGameDialog(
-            gameInfoList = uiState.gameInfoList,
-            setGameInfo = viewModel::setGameInfo,
-            showSwitchGameInfo = viewModel::showSwitchGame,
-            showDialog = uiState.showSwitchGame
-        )
-        DownloadGameConfigDialog(
-            gameInfoList = uiState.downloadGameConfigList,
-            downloadGameConfig = viewModel::downloadGameConfig,
-            showDownloadGameConfigDialog = viewModel::setShowDownloadGameConfig,
-            showDialog = uiState.showDownloadGameConfigDialog
-        )
     }
+
+    DialogCommon(
+        title = stringResource(id = R.string.console_upgrade_title),
+        content = viewModel.updateDescription,
+        onConfirm = {
+            viewModel.setShowUpgradeDialog(false)
+            viewModel.openUrl(context, viewModel.downloadUrl)
+        },
+        onCancel = {
+            viewModel.setShowUpgradeDialog(false)
+        },
+        showDialog = uiState.showUpdateDialog
+    )
+    DialogCommon(
+        title = stringResource(id = R.string.console_game_tips_title),
+        content = viewModel.gameInfo.tips,
+        onConfirm = {
+            viewModel.setGameInfo(viewModel.gameInfo, true)
+            viewModel.setShowGameTipsDialog(false)
+        },
+        onCancel = {
+            viewModel.setShowGameTipsDialog(false)
+        },
+        showDialog = uiState.showGameTipsDialog
+    )
+    DialogCommon(
+        title = stringResource(id = R.string.console_info_title),
+        content = uiState.infoBean.msg,
+        onConfirm = {
+            viewModel.setShowInfoDialog(false)
+        },
+        onCancel = {
+            viewModel.setShowInfoDialog(false)
+        },
+        showDialog = uiState.showNotificationDialog
+    )
+    SwitchGameDialog(
+        gameInfoList = uiState.gameInfoList,
+        setGameInfo = viewModel::setGameInfo,
+        showSwitchGameInfo = viewModel::showSwitchGame,
+        showDialog = uiState.showSwitchGame
+    )
+    DownloadGameConfigDialog(
+        gameInfoList = uiState.downloadGameConfigList,
+        downloadGameConfig = viewModel::downloadGameConfig,
+        showDownloadGameConfigDialog = viewModel::setShowDownloadGameConfig,
+        showDialog = uiState.showDownloadGameConfigDialog
+    )
 }
 
 
 @Composable
 fun SettingContent(
-    paddingValues: PaddingValues,
     uiState: SettingUiState,
     setDeleteBackupDialog: (Boolean) -> Unit,
     deleteAllBackups: () -> Unit,
@@ -188,146 +172,108 @@ fun SettingContent(
     )
     Column(
         modifier = Modifier
-            .padding(paddingValues)
             .padding(8.dp)
             .verticalScroll(rememberScrollState())
     ) {
         SettingTitle(
-            stringResource(R.string.setting_page_app_title),
-            Icons.Default.Settings
+            stringResource(R.string.setting_page_app_title), Icons.Default.Settings
         ) // 添加一个设置项
         // 添加一个设置项
-        SettingItem(
-            name = stringResource(R.string.setting_page_app_del_backup),
+        SettingItem(name = stringResource(R.string.setting_page_app_del_backup),
             description = stringResource(R.string.setting_page_app_del_descript),
-            onClick = { setDeleteBackupDialog(true) }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_app_clean_cache),
+            onClick = { setDeleteBackupDialog(true) })
+        SettingItem(name = stringResource(R.string.setting_page_app_clean_cache),
             description = stringResource(R.string.setting_page_app_clean_cache_descript),
-            onClick = { deleteCache() }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_app_clean_temp),
+            onClick = { deleteCache() })
+        SettingItem(name = stringResource(R.string.setting_page_app_clean_temp),
             description = stringResource(R.string.setting_page_app_clean_temp_descript),
-            onClick = { deleteTemp() }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_app_download_game_config),
+            onClick = { deleteTemp() })
+        SettingItem(name = stringResource(R.string.setting_page_app_download_game_config),
             description = stringResource(R.string.setting_page_app_download_game_config_descript),
-            onClick = { showDownloadGameConfig(true) }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_app_flash_game_config),
+            onClick = { showDownloadGameConfig(true) })
+        SettingItem(name = stringResource(R.string.setting_page_app_flash_game_config),
             description = stringResource(R.string.setting_page_app_flash_game_config_descript),
-            onClick = { flashGameConfig() }
-        )
+            onClick = { flashGameConfig() })
 
-        SettingItem(
-            name = stringResource(R.string.setting_page_app_swtch_permission_shizuku),
+        SettingItem(name = stringResource(R.string.setting_page_app_swtch_permission_shizuku),
             description = stringResource(R.string.setting_page_app_swtch_permission_shizuku_desc),
-            onClick = {  requestShizukuPermission() }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_app_swtch_game),
+            onClick = { requestShizukuPermission() })
+        SettingItem(name = stringResource(R.string.setting_page_app_swtch_game),
             description = stringResource(R.string.setting_page_app_swtch_game_descript),
-            onClick = { showSwitchGame(true) }
-        )
+            onClick = { showSwitchGame(true) })
 
         SettingTitle(stringResource(R.string.setting_page_about_title), Icons.Default.Info)
-        SettingItem(
-            name = stringResource(R.string.setting_page_about_author),
+        SettingItem(name = stringResource(R.string.setting_page_about_author),
             description = stringResource(R.string.setting_page_about_github),
             icon = painterResource(id = R.drawable.github_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.github_url))
-            }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_about_pay),
+            })
+        SettingItem(name = stringResource(R.string.setting_page_about_pay),
             description = stringResource(R.string.setting_page_about_pay_descript),
             icon = painterResource(id = R.drawable.alipay_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.alipay_url))
-            }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_about_update),
-            description = stringResource(R.string.setting_page_about_update_descript, uiState.versionName),
+            })
+        SettingItem(name = stringResource(R.string.setting_page_about_update),
+            description = stringResource(
+                R.string.setting_page_about_update_descript, uiState.versionName
+            ),
             icon = painterResource(id = R.drawable.update_icon),
             onClick = {
                 checkUpdate()
-            }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_about_info),
+            })
+        SettingItem(name = stringResource(R.string.setting_page_about_info),
             description = stringResource(R.string.setting_page_about_info_descript),
             icon = painterResource(id = R.drawable.notification_icon),
             onClick = {
                 checkInformation()
-            }
-        )
+            })
         SettingTitle(
-            stringResource(R.string.setting_page_app_other),
-            Icons.Default.MoreVert
+            stringResource(R.string.setting_page_app_other), Icons.Default.MoreVert
         )
-        SettingItem(
-            name = stringResource(R.string.setting_page_more_shizuku),
+        SettingItem(name = stringResource(R.string.setting_page_more_shizuku),
             description = stringResource(R.string.setting_page_more_shizuku_descript),
             icon = painterResource(id = R.drawable.shizuku_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.shzuiku_url))
-            }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_more_reference),
+            })
+        SettingItem(name = stringResource(R.string.setting_page_more_reference),
             description = stringResource(R.string.setting_page_more_reference_descript),
             icon = painterResource(id = R.drawable.book_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.reference_url))
-            }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_more_qq),
+            })
+        SettingItem(name = stringResource(R.string.setting_page_more_qq),
             description = stringResource(R.string.setting_page_more_qq_descript),
             icon = painterResource(id = R.drawable.qq_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.qq_url))
-            }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_more_discord),
+            })
+        SettingItem(name = stringResource(R.string.setting_page_more_discord),
             description = stringResource(R.string.setting_page_more_discord_descript),
             icon = painterResource(id = R.drawable.discord_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.disscord_url))
-            }
-        )
-        SettingItem(
-            name = stringResource(R.string.setting_page_more_acknowledgments),
+            })
+        SettingItem(name = stringResource(R.string.setting_page_more_acknowledgments),
             description = stringResource(R.string.setting_page_more_acknowledgments_descript),
             icon = painterResource(id = R.drawable.thank_icon),
             onClick = {
                 showAcknowledgments(true)
-            }
-        )
+            })
     }
 }
 
 
 @Composable
 fun SettingItem(
-    name: String,
-    description: String,
-    icon: Painter? = null,
-    onClick: () -> Unit = {}
+    name: String, description: String, icon: Painter? = null, onClick: () -> Unit = {}
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp)
-            .clickable { onClick() }
-    ) {
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 8.dp)
+        .clickable { onClick() }) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -343,13 +289,11 @@ fun SettingItem(
 
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleSmall // 更大的字体
+                    text = name, style = MaterialTheme.typography.titleSmall // 更大的字体
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall // 较小的字体
+                    text = description, style = MaterialTheme.typography.bodySmall // 较小的字体
                 )
             }
         }
@@ -360,8 +304,7 @@ fun SettingItem(
 
 @Composable
 fun SettingTitle(
-    title: String,
-    icon: ImageVector
+    title: String, icon: ImageVector
 ) {
 
     Row(
@@ -380,8 +323,7 @@ fun SettingTitle(
         )
 
         Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
+            text = title, style = MaterialTheme.typography.headlineSmall,
             // modifier = Modifier.align(Alignment.CenterStart),
             color = MaterialTheme.colorScheme.primary
         )
@@ -399,35 +341,29 @@ fun SwitchGameDialog(
     showDialog: Boolean
 ) {
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {showSwitchGameInfo(false)}, // 点击对话框外的区域时关闭对话框
-            title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) },
-            text = {
+        AlertDialog(onDismissRequest = { showSwitchGameInfo(false) }, // 点击对话框外的区域时关闭对话框
+            title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) }, text = {
                 val toMutableList = gameInfoList.toMutableList()
                 toMutableList.removeAt(0)
 
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->
-                        SettingItem(
-                            name = gameInfo.gameName + "(${gameInfo.serviceName})",
+                        SettingItem(name = gameInfo.gameName + "(${gameInfo.serviceName})",
                             description = gameInfo.packageName,
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
-                                setGameInfo(gameInfo,false)
+                                setGameInfo(gameInfo, false)
                                 showSwitchGameInfo(false)
-                            }
-                        )
+                            })
                     }
                 }
-            },
-            confirmButton = {
+            }, confirmButton = {
                 TextButton(onClick = {
                     showSwitchGameInfo(false)
                 }) {
                     Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
                 }
-            }
-        )
+            })
 
     }
 
@@ -441,39 +377,34 @@ fun DownloadGameConfigDialog(
     showDialog: Boolean
 ) {
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {showDownloadGameConfigDialog(false)}, // 点击对话框外的区域时关闭对话框
-            title = { Text(text = stringResource(R.string.switch_download_game_tiltle)) },
-            text = {
+        AlertDialog(onDismissRequest = { showDownloadGameConfigDialog(false) }, // 点击对话框外的区域时关闭对话框
+            title = { Text(text = stringResource(R.string.switch_download_game_tiltle)) }, text = {
                 val toMutableList = gameInfoList.toMutableList()
                 //toMutableList.removeAt(0)
 
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->
-                        SettingItem(
-                            name = gameInfo.gameName + "(${gameInfo.serviceName})",
+                        SettingItem(name = gameInfo.gameName + "(${gameInfo.serviceName})",
                             description = gameInfo.packageName,
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
                                 downloadGameConfig(gameInfo)
                                 showDownloadGameConfigDialog(false)
-                            }
-                        )
+                            })
                     }
                 }
-            },
-            confirmButton = {
+            }, confirmButton = {
                 TextButton(onClick = {
                     showDownloadGameConfigDialog(false)
                 }) {
                     Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
                 }
-            }
-        )
+            })
 
     }
 
 }
+
 @Composable
 fun ThinksDialogCommon(
     title: String,
@@ -482,46 +413,51 @@ fun ThinksDialogCommon(
     thinks: List<ThinksBean>,
     showDialog: Boolean = false,
     openUrl: (Context, String) -> Unit
-){
-    if (showDialog){
+) {
+    if (showDialog) {
         val context = LocalContext.current
-        AlertDialog(
-            onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
-            title = { Text(text = title) },
-            text = {
+        AlertDialog(onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
+            title = { Text(text = title) }, text = {
                 LazyColumn {
                     itemsIndexed(thinks) { index, think ->
-                        SettingItem(
-                            name = think.name + "(${think.job})",
+                        SettingItem(name = think.name + "(${think.job})",
                             description = context.getString(
-                                R.string.setting_thinks_link_desc,
-                                think.link
+                                R.string.setting_thinks_link_desc, think.link
                             ),
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
                                 openUrl(context, think.link)
-                            }
-                        )
+                            })
                     }
                 }
-            },
-            confirmButton = {
+            }, confirmButton = {
                 TextButton(onClick = {
                     onConfirm()
                 }) {
                     Text(stringResource(id = R.string.dialog_button_confirm))
                 }
-            },
-            dismissButton = {
+            }, dismissButton = {
                 TextButton(onClick = {
                     onCancel()
                 }) {
                     Text(stringResource(id = R.string.dialog_button_request_close))
                 }
-            }
-        )
+            })
 
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingTopBar() {
+    TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+        containerColor = MaterialTheme.colorScheme.primary,
+        titleContentColor = MaterialTheme.colorScheme.primaryContainer,
+    ), title = {
+        Text(
+            stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
+        )
+    })
 }
 
 @Preview

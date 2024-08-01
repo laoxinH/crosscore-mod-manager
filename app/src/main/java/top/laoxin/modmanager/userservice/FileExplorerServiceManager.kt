@@ -11,6 +11,7 @@ import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ToastUtils
+import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import top.laoxin.modmanager.useservice.IFileExplorerService
 
@@ -35,7 +36,7 @@ object FileExplorerServiceManager {
             Log.d(TAG, "onServiceDisconnected: ")
             isBind = false
             ModTools.iFileExplorerService = null
-            //FileTools.iFileExplorerService = null
+            ShizukuFileTools.iFileExplorerService = null
             ToastUtils.shortCall(R.string.toast_shizuku_disconnected)
         }
     }

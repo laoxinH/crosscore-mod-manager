@@ -52,8 +52,6 @@ class ProjectSnowStartService : Service() {
 
         startForeground(1, notification)
 
-
-
        serviceScope.launch {
 
             if (ProjectSnowTools.specialOperationStartGame(gameInfo)) {

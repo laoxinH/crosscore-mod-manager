@@ -3,6 +3,7 @@ package top.laoxin.modmanager.ui.state
 import androidx.annotation.StringRes
 import net.lingala.zip4j.util.UnzipUtil
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.ui.view.modview.NavigationIndex
 
 data class ModUiState(
     val modList: List<ModBean> = emptyList(),     // 所有mod列表
@@ -24,4 +25,5 @@ data class ModUiState(
     val delEnableModsList : List<ModBean> = emptyList(),     // mod列表
     val showDisEnableModsDialog : Boolean = false,   // 是否显示禁用mod对话框
     val unzipProgress: String = "",       // 解压进度
+    val modsView : NavigationIndex = NavigationIndex.ALL_MODS,   // mod视图
     )

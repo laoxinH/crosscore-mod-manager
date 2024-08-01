@@ -29,6 +29,8 @@ object ArknightsTools : BaseSpecialGameTools {
         .create()
     private val app = App.get()
     private lateinit var fileTools : BaseFileTools
+    private lateinit var hotUpdate : HotUpdate
+    private lateinit var persistentRes : PersistentRes
     data class HotUpdate(
         var fullPack: FullPack = FullPack(),
         var versionId: String = "",
@@ -65,9 +67,11 @@ object ArknightsTools : BaseSpecialGameTools {
         if (!initialFileTools()) {
             throw Exception("初始化文件工具失败")
         }
-        if (!
-            moveCheckFileToAppPath()) {
-            throw Exception("复制校验文件失败")
+        if (!moveCheckFileToAppPath()) {
+            throw Exception("复制校验JSON文件失败")
+        }
+        if (!loadCheckFile()) {
+            throw Exception("加载校验JSON文件失败")
         }
         mod.modFiles?.forEachIndexed{index: Int, modFile: String ->
             val modFilePath = if (mod.isZipFile) {
@@ -93,10 +97,57 @@ object ArknightsTools : BaseSpecialGameTools {
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
             onProgressUpdate("${index + 1}/${mod.modFiles.size}")
         }
+        if (!writeCheckFile()){
+            throw Exception("写入校验JSON失败")
+        }
         return if (flag.all { it }) {
             moveCheckFileToGamePath()
         }else {
             false
+        }
+    }
+
+    private fun writeCheckFile(): Boolean {
+        val checkFile1 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1)
+        val checkFile2 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2)
+        try {
+            gson.toJson(persistentRes, PersistentRes::class.java).let { it ->
+                if (checkFile1.exists()) {
+                    checkFile1.delete()
+                    checkFile1.createNewFile()
+                    checkFile1.writeText(it)
+                }
+            }
+            gson.toJson(hotUpdate, HotUpdate::class.java).let {
+                if (checkFile2.exists()) {
+                    checkFile2.delete()
+                    checkFile2.createNewFile()
+                    checkFile2.writeText(it)
+                }
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e("ArknightsTools", "writeCheckFile: $e")
+            logRecord("ArknightsTools-writeCheckFile: $e")
+            return false
+        }
+    }
+
+    private fun loadCheckFile(): Boolean {
+        try {
+            persistentRes = gson.fromJson(
+                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1).readText(),
+                PersistentRes::class.java
+            )
+            hotUpdate = gson.fromJson(
+                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2).readText(),
+                HotUpdate::class.java
+            )
+            return true
+        } catch (e: Exception) {
+            Log.e("ArknightsTools", "loadCheckFile: $e")
+            logRecord("ArknightsTools-loadCheckFile: $e")
+            return false
         }
     }
 
@@ -112,6 +163,9 @@ object ArknightsTools : BaseSpecialGameTools {
         if (!moveCheckFileToAppPath()) {
             throw Exception("复制校验文件失败")
         }
+        if (!loadCheckFile()) {
+            throw Exception("加载校验文件失败")
+        }
         val flag : MutableList<Boolean> = mutableListOf()
         backups.forEachIndexed{index, backupBean ->
             // 计算md5
@@ -121,6 +175,9 @@ object ArknightsTools : BaseSpecialGameTools {
             val checkFileName = (File(backupBean.backupPath).parentFile?.name ?: "") + "/" + backupBean.filename
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
             onProgressUpdate("${index + 1}/${backups.size}")
+        }
+        if (!writeCheckFile()){
+            throw Exception("写入校验JSON失败")
         }
         return if (flag.all { it }) {
             moveCheckFileToGamePath()
@@ -149,70 +206,30 @@ object ArknightsTools : BaseSpecialGameTools {
     // 修改check文件
     private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long) : Boolean {
         try {
-
-            val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
-            val checkFile1 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1)
-            val checkFile2 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2)
-
-            val checkFile1Map = gson.fromJson(
-                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1).readText(),
-                PersistentRes::class.java
-            )
-            val checkFile2Map = gson.fromJson(
-                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2).readText(),
-                HotUpdate::class.java
-            )
-            val abInfos1 = checkFile1Map.abInfos
-            val abInfos2 = checkFile2Map.abInfos
-            var index1 = -1
-            abInfos1.forEachIndexed job@{ index, mutableMap ->
-                if (mutableMap.name?.contains(fileName) == true) {
-                    index1 = index
-                    return@job
+            val abInfos1 = persistentRes.abInfos
+            val abInfos2 = hotUpdate.abInfos
+            abInfos1.replaceAll {
+                if (it.name?.contains(fileName) == true) {
+                    it.copy(
+                        md5 = md5,
+                        abSize = fileSize
+                    )
+                } else {
+                    it
                 }
             }
-            Log.d("ArknightsTools", "index1: $index1")
-            abInfos1[index1] = abInfos1[index1].copy(
-                md5 = md5,
-                abSize = fileSize
-            )
-            index1 = -1
-            abInfos2.forEachIndexed job@{ index, mutableMap ->
-                if (mutableMap.name?.contains(fileName) == true) {
-                    index1 = index
-                    return@job
-                }
-            }
-            abInfos2[index1] = abInfos2[index1].copy(
-                md5 = md5,
-                abSize = fileSize
-            )
-            gson.toJson(checkFile1Map, PersistentRes::class.java).let { it ->
-                if (checkFile1.exists()) {
-                    checkFile1.delete()
-                    checkFile1.createNewFile()
-                    checkFile1.writeText(it)
-                }
-            }
-            gson.toJson(checkFile2Map, HotUpdate::class.java).let {
-                if (checkFile2.exists()) {
-                    checkFile2.delete()
-                    checkFile2.createNewFile()
-                    checkFile2.writeText(it)
-                    if (checkPermission == PathType.DOCUMENT) {
-
-                    } else {
-                        fileTools.copyFile(
-                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
-                            CHECK_FILEPATH + CHECK_FILENAME_2
-                        )
-                    }
-
+            abInfos2.replaceAll {
+                if (it.name?.contains(fileName) == true) {
+                    it.copy(
+                        md5 = md5,
+                        abSize = fileSize
+                    )
+                } else {
+                    it
                 }
             }
             return true
         } catch (e: Exception) {
-            Log.e("ArknightsTools", "modifyCheckFile: $fileName")
             e.printStackTrace()
             logRecord("ArknightsTools-modifyCheckFile: $e")
             return false

@@ -4,13 +4,12 @@ import groovy.util.Expando
 import java.security.MessageDigest
 
 object buildInfo {
-    val versionCode = 17
-    val versionName = "2.0.8 beta"
+    val versionCode = 18
+    val versionName = "2.0.9 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.添加进度提示\n" +
-            "2.添加自动扫描\n" +
-            "3.添加通知\n" +
-            "4.优化屎山代码\n" +
+            "1.修复shuzuku在某些品牌掉授权的问题\n" +
+            "2.修复切完页面时顶栏闪烁问题\n" +
+            "3.优化多文件MOD整合包开关速度\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册Gitee自行在设置页面前往Github下载最新版"

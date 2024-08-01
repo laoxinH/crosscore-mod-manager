@@ -30,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,6 +55,8 @@ import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
+
+
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
@@ -394,44 +395,43 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
 @RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConsolePage() {
-    val viewModel: ConsoleViewModel = viewModel(
-        factory = ConsoleViewModel.Factory
-    )
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-                title = {
-                    Text(
-                        stringResource(id = R.string.console),
-                        style = typography.titleLarge
+fun ConsolePage(viewModel: ConsoleViewModel) {
 
-                    )
-                },
-                actions = {
-                    IconButton(onClick = {
-                        // 在这里处理图标按钮的点击事件
-                        viewModel.startGame()
-                    }) {
-                        //Text(text = "启动游戏")
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow, // 使用信息图标
-                            contentDescription = "Info", // 为辅助功能提供描述
-                            tint = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    }
+    ConsoleContent(viewModel = viewModel)
 
-                        // 添加更多的菜单项
-                }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun ConsoleTopBar(viewModel: ConsoleViewModel) {
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        title = {
+            Text(
+                stringResource(id = R.string.console),
+                style = typography.titleLarge
+
             )
         },
-    ) { innerPadding ->
-        ConsoleContent(innerPadding,viewModel)
-    }
+        actions = {
+            IconButton(onClick = {
+                // 在这里处理图标按钮的点击事件
+                viewModel.startGame()
+            }) {
+                //Text(text = "启动游戏")
+                Icon(
+                    imageVector = Icons.Default.PlayArrow, // 使用信息图标
+                    contentDescription = "Info", // 为辅助功能提供描述
+                    tint = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
+
+            // 添加更多的菜单项
+        }
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -439,7 +439,7 @@ fun ConsolePage() {
 @Composable
 fun PreviewBottomNavigationBar() {
     ModManagerTheme {
-        ConsolePage()
+
     }
 
 }

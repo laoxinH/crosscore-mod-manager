@@ -49,6 +49,7 @@ import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.specialGameTools.BaseSpecialGameTools
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.state.UserPreferencesState
+import top.laoxin.modmanager.ui.view.modview.NavigationIndex
 import java.io.File
 import kotlin.math.log
 
@@ -753,6 +754,12 @@ class ModViewModel(
 
     override fun onFlash() {
         flashMods(false, false)
+    }
+
+    fun setModsView(enableMods: NavigationIndex) {
+        _uiState.update {
+            it.copy(modsView = enableMods)
+        }
     }
 
 }

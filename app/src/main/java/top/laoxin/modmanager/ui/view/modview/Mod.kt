@@ -1,7 +1,6 @@
 package top.laoxin.modmanager.ui.view.modview
 
 import android.app.Activity
-import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.annotation.DrawableRes
@@ -47,13 +46,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.ImagesearchRoller
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -64,12 +60,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -78,11 +72,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -91,7 +83,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -102,251 +93,71 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.state.ModUiState
-import top.laoxin.modmanager.ui.view.SettingItem
 import top.laoxin.modmanager.ui.view.commen.SelectPermissionDialog
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
+//lateinit var viewModel: ModViewModel
 enum class NavigationIndex(
     @StringRes val title: Int,
-    val icon: ImageVector
+    val index: Int,
 ) {
-    ALL_MODS(R.string.mod_page_title_all_mods, Icons.Filled.Dashboard),
-    ENABLE_MODS(R.string.mod_page_title_enable_mods, Icons.Filled.ImagesearchRoller),
-    DISABLE_MODS(R.string.mod_page_title_disable_mods, Icons.Filled.Settings),
-    SEARCH_MODS(R.string.mod_page_title_search_mods, Icons.Filled.Settings)
+    ENABLE_MODS(R.string.mod_page_title_enable_mods, 1),
+    DISABLE_MODS(R.string.mod_page_title_disable_mods, 2),
+    SEARCH_MODS(R.string.mod_page_title_search_mods, 3),
+    ALL_MODS(R.string.mod_page_title_all_mods, 0)
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModPage() {
-    // 导航栏
-    val navController = rememberNavController()
-    val currentEntry by navController.currentBackStackEntryAsState()
-    // 当前导航索引
-    val currentScreen = NavigationIndex.valueOf(
-        currentEntry?.destination?.route ?: NavigationIndex.ALL_MODS.name
-    )
-
-    val viewModel: ModViewModel = viewModel(
-        factory = ModViewModel.Factory
-    )
+fun ModPage(viewModel: ModViewModel) {
     val uiState by viewModel.uiState.collectAsState()
-    var showMenu by remember { mutableStateOf(false) }
 
+    Box(/*modifier = if (uiState.showTips) Modifier.padding(innerPadding) else Modifier.fillMaxSize()*/) {
+        UserTipsDialog(
+            showDialog = uiState.showUserTipsDialog,
+            setUserTipsDialog = viewModel::setUserTipsDialog
+        )
+        DisEnableModsDialog(
+            showDialog = uiState.showDisEnableModsDialog,
+            mods = uiState.delEnableModsList,
+            switchMod = { mod, enable -> viewModel.switchMod(mod, enable, true) },
+            onConfirmRequest = {
+                viewModel.delMods()
+            }
+        )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-                title = {
-                    Text(
-                        stringResource(id = currentScreen.title),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                actions = {
-                    IconButton(onClick = {
-                        // 在这里处理图标按钮的点击事件
-                        viewModel.setUserTipsDialog(true)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Info, // 使用信息图标
-                            contentDescription = "Info", // 为辅助功能提供描述
-                            tint = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    }
-                    IconButton(onClick = {
-                        viewModel.setSearchBoxVisible(true)
-                        navController.navigate(NavigationIndex.SEARCH_MODS.name) {
-                            popUpTo(navController.graph.startDestinationId)
-                            launchSingleTop = true
-                        }
-
-                        // 请求焦点
-                    }, modifier = Modifier) {
-                        Icon(
-                            imageVector = Icons.Filled.Search, contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    }
-                    IconButton(onClick = {
-                        viewModel.flashMods(false, true)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh, // 使用刷新图标
-                            contentDescription = "Refresh", // 为辅助功能提供描述
-                            tint = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    }
-                    IconButton(onClick = { showMenu = true }, modifier = Modifier) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu, contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
-                            onClick = {
-                                navController.navigate(NavigationIndex.ENABLE_MODS.name) {
-                                    popUpTo(navController.graph.startDestinationId)
-                                    launchSingleTop = true
-                                }
-
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
-                            onClick = {
-                                navController.navigate(NavigationIndex.DISABLE_MODS.name) {
-                                    popUpTo(navController.graph.startDestinationId)
-                                    launchSingleTop = true
-                                }
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
-                            onClick = {
-                                navController.navigate(NavigationIndex.ALL_MODS.name) {
-                                    popUpTo(navController.graph.startDestinationId)
-                                    launchSingleTop = true
-                                }
-                            }
-                        )
-                        // 添加更多的菜单项
-                    }
-                }
+        if (viewModel.requestPermissionPath.isNotEmpty()) {
+            SelectPermissionDialog(
+                path = viewModel.requestPermissionPath,
+                onDismissRequest = { viewModel.setOpenPermissionRequestDialog(false) },
+                showDialog = uiState.openPermissionRequestDialog
             )
-            AnimatedVisibility(visible = uiState.searchBoxVisible) {
-
-                // 根据 MutableState 显示或隐藏搜索框
-
-                CustomEdit(
-                    text = viewModel.getSearchText(),
-                    onValueChange = {
-                        viewModel.setSearchText(it)
-                    },
-                    hint = stringResource(R.string.mod_page_search_hit),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 10.dp)
-                        .height(50.dp)
-                        .background(Color(0xBCE9E9E9), shape = MaterialTheme.shapes.medium)
-                        .padding(horizontal = 16.dp),
-                    textStyle = typography.bodyMedium,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    close = {
-                        viewModel.setSearchBoxVisible(false)
-                    }
-
+        }
+        if (uiState.isLoading) {
+            Loading(uiState.loadingPath)
+        } else {
+            uiState.modDetail?.let {
+                ModDetailDialog(
+                    showDialog = uiState.showModDetail,
+                    mod = it,
+                    onDismiss = { viewModel.setShowModDetail(false) }
+                )
+                PasswordInputDialog(
+                    showDialog = uiState.showPasswordDialog,
+                    mod = it,
+                    onDismiss = { viewModel.showPasswordDialog(false) },
+                    onPasswordSubmit = viewModel::checkPassword
                 )
             }
-        },
-    ) { innerPadding ->
-        Box(/*modifier = if (uiState.showTips) Modifier.padding(innerPadding) else Modifier.fillMaxSize()*/) {
-
-            UserTipsDialog(
-                showDialog = uiState.showUserTipsDialog,
-                setUserTipsDialog = viewModel::setUserTipsDialog
-            )
-            DisEnableModsDialog(
-                showDialog = uiState.showDisEnableModsDialog,
-                mods = uiState.delEnableModsList,
-                switchMod = { mod, enable -> viewModel.switchMod(mod, enable,true) },
-                onConfirmRequest = {
-                    viewModel.delMods()
-                }
+            AllModPage(viewModel, uiState)
+            Tips(
+                text = uiState.tipsText,
+                showTips = uiState.showTips,
+                onDismiss = { viewModel.setShowTips(false) },
+                uiState = uiState
             )
 
-            if (viewModel.requestPermissionPath.isNotEmpty()) {
-                SelectPermissionDialog(path = viewModel.requestPermissionPath, onDismissRequest = { viewModel.setOpenPermissionRequestDialog(false) }, showDialog = uiState.openPermissionRequestDialog)
-            }
-            if (uiState.isLoading) {
-                Loading(uiState.loadingPath)
-            } else {
-                uiState.modDetail?.let {
-                    ModDetailDialog(
-                        showDialog = uiState.showModDetail,
-                        mod = it,
-                        onDismiss = { viewModel.setShowModDetail(false) }
-                    )
-                    PasswordInputDialog(
-                        showDialog = uiState.showPasswordDialog,
-                        mod = it,
-                        onDismiss = { viewModel.showPasswordDialog(false) },
-                        onPasswordSubmit = viewModel::checkPassword
-                    )
-                }
-                NavHost(
-                    navController = navController,
-                    startDestination = NavigationIndex.ALL_MODS.name,
-                    modifier = Modifier.padding(innerPadding)
-                ) {
-                    composable(route = NavigationIndex.ALL_MODS.name) {
-                        Box {
-                            AllModPage(viewModel, uiState)
-                            Tips(
-                                text = uiState.tipsText,
-                                showTips = uiState.showTips,
-                                onDismiss = { viewModel.setShowTips(false) },
-                                uiState = uiState
-                                )
-                        }
-
-                    }
-
-                    composable(route = NavigationIndex.ENABLE_MODS.name) {
-                        Box {
-                            EnableModPage(viewModel, uiState)
-                            Tips(
-                                text = uiState.tipsText,
-                                showTips = uiState.showTips,
-                                onDismiss = { viewModel.setShowTips(false) },
-                                uiState = uiState
-                                )
-                        }
-
-                    }
-                    composable(route = NavigationIndex.DISABLE_MODS.name) {
-                        Box {
-                            DisableModPage(viewModel, uiState)
-                            Tips(
-                                text = uiState.tipsText,
-                                showTips = uiState.showTips,
-                                onDismiss = { viewModel.setShowTips(false) },
-                                uiState = uiState
-                                )
-                        }
-
-                    }
-                    composable(route = NavigationIndex.SEARCH_MODS.name) {
-                        Box {
-                            SearchModPage(viewModel, uiState)
-                            Tips(
-                                text = uiState.tipsText,
-                                showTips = uiState.showTips,
-                                onDismiss = { viewModel.setShowTips(false) },
-                                uiState = uiState
-                                )
-                        }
-                    }
-                }
-
-
-            }
         }
     }
 
@@ -398,21 +209,29 @@ fun UserTipsDialog(
 @Composable
 fun DisEnableModsDialog(
     showDialog: Boolean,
-    mods : List<ModBean>,
-    switchMod: (ModBean,Boolean) -> Unit,
+    mods: List<ModBean>,
+    switchMod: (ModBean, Boolean) -> Unit,
     onConfirmRequest: () -> Unit,
 ) {
     if (showDialog) {
         if (mods.isNotEmpty()) {
             AlertDialog(
                 onDismissRequest = {},
-                title = { Text(stringResource(id = R.string.dialog_dis_enable_mods_title),
-                    style = MaterialTheme.typography.titleSmall
-                    )},
+                title = {
+                    Text(
+                        stringResource(id = R.string.dialog_dis_enable_mods_title),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                },
                 text = {
                     LazyColumn {
                         itemsIndexed(mods) { _, mod ->
-                            ModListItem(mod = mod, modSwitchEnable = true, showDialog = { _, _ ->}, enableMod = switchMod)
+                            ModListItem(
+                                mod = mod,
+                                modSwitchEnable = true,
+                                showDialog = { _, _ -> },
+                                enableMod = switchMod
+                            )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
@@ -440,7 +259,6 @@ fun createImageBitmapFromPath(path: String): ImageBitmap? {
     val bitmap = BitmapFactory.decodeFile(path)
     return bitmap?.asImageBitmap()
 }
-
 
 
 /**
@@ -512,8 +330,9 @@ fun CustomEdit(
                 }
 
                 // 存在焦点 且 有输入内容时. 显示叉号
-                if (hasFocus && text.isNotEmpty()) {
+                if (hasFocus) {
                     Log.d("CustomEdit", "CustomEdit:失去焦点 ")
+                    close()
                     Icon(imageVector = Icons.Filled.Clear, // 清除图标
                         contentDescription = null,
                         // 点击就清空text
@@ -599,11 +418,117 @@ fun Tips(
     }
 }
 
-data class Hero(
-    @StringRes val nameRes: Int,
-    @StringRes val descriptionRes: Int,
-    @DrawableRes val imageRes: Int
-)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ModTopBar(viewModel: ModViewModel) {
+    // 导航栏
+    /*val viewModel: ModViewModel = viewModel(
+        factory = ModViewModel.Factory
+    )*/
+    val uiState by viewModel.uiState.collectAsState()
+    Log.d("ModTopBar", "ModTopBar: 启动了${uiState.modsView}")
+    var showMenu by remember { mutableStateOf(false) }
+
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        title = {
+            Text(
+                stringResource(id = uiState.modsView.title),
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        actions = {
+            IconButton(onClick = {
+                // 在这里处理图标按钮的点击事件
+                viewModel.setUserTipsDialog(true)
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Info, // 使用信息图标
+                    contentDescription = "Info", // 为辅助功能提供描述
+                    tint = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
+            IconButton(onClick = {
+                viewModel.setSearchBoxVisible(true)
+                viewModel.setModsView(NavigationIndex.SEARCH_MODS)
+                // 请求焦点
+            }, modifier = Modifier) {
+                Icon(
+                    imageVector = Icons.Filled.Search, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
+            IconButton(onClick = {
+                viewModel.flashMods(false, true)
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.Refresh, // 使用刷新图标
+                    contentDescription = "Refresh", // 为辅助功能提供描述
+                    tint = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
+            IconButton(onClick = { showMenu = true }, modifier = Modifier) {
+                Icon(
+                    imageVector = Icons.Filled.Menu, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
+                    onClick = {
+                        viewModel.setModsView(NavigationIndex.ENABLE_MODS)
+
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
+                    onClick = {
+                        viewModel.setModsView(NavigationIndex.DISABLE_MODS)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
+                    onClick = {
+                        viewModel.setModsView(NavigationIndex.ALL_MODS)
+                    }
+                )
+                // 添加更多的菜单项
+            }
+        }
+    )
+    AnimatedVisibility(visible = uiState.searchBoxVisible) {
+
+        // 根据 MutableState 显示或隐藏搜索框
+
+        CustomEdit(
+            text = viewModel.getSearchText(),
+            onValueChange = {
+                viewModel.setSearchText(it)
+            },
+            hint = stringResource(R.string.mod_page_search_hit),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 10.dp)
+                .height(50.dp)
+                .background(Color(0xBCE9E9E9), shape = MaterialTheme.shapes.medium)
+                .padding(horizontal = 16.dp),
+            textStyle = typography.bodyMedium,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            close = {
+                viewModel.setSearchBoxVisible(false)
+            }
+
+        )
+    }
+
+}
 
 @Preview("Heroes List")
 @Composable

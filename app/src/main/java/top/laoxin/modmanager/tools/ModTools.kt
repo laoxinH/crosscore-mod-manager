@@ -125,9 +125,7 @@ object ModTools {
     ): Boolean {
         val checkPermission = PermissionTools.checkPermission(gameModPath)
         setModsToolsSpecialPathReadType(checkPermission)
-
         val flags = mutableListOf<Boolean>()
-
             modBean.modFiles?.forEachIndexed{ index: Int, modFilePath: String ->
                 val modFile = File(unZipPath + modFilePath)
                 val gameFile = File(gameModPath + modFile.name)
