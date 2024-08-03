@@ -115,6 +115,18 @@ char BundleFile::GetCompressionType(){
 }
 
 ByteArr* BundleFile::ToBytes(CompressionType compressionType){
+    if (compressionType == CompressionType::Lzma){
+        uint64_t totalSize = data->GetSize();
+        mDataInfo->BlocksInfoCount = (totalSize / UINT32_MAX) + ((totalSize % UINT32_MAX) ? 1 : 0);
+        for (int i = 0; i < mDataInfo->BlocksInfoCount; i++){
+            if (i == mDataInfo->BlocksInfoCount - 1){
+                mDataInfo->BlocksInfos[i].uncompressedSize = totalSize % UINT32_MAX;
+            }else{
+                mDataInfo->BlocksInfos[i].uncompressedSize = UINT32_MAX;
+            }
+        }    
+    }
+
     for (int i = 0; i < mDataInfo->BlocksInfoCount; i++){
         mDataInfo->BlocksInfos[i].flags = (StorageBlockFlags)(mDataInfo->BlocksInfos[i].flags | compressionType);
     }
@@ -126,6 +138,7 @@ ByteArr* BundleFile::ToBytes(CompressionType compressionType){
         p += mDataInfo->BlocksInfos[i].uncompressedSize;
     }
     ByteArr* bDataInfo = mDataInfo->ToBytes(CompressionType::Lz4HC);
+    mHeader->mUncompressedBlocksInfoSize = mDataInfo->GetRawSize();
     mHeader->mCompressedBlocksInfoSize = bDataInfo->GetSize();
     uint64_t size = mHeader->GetSize();
     if (HeaderAligned){
