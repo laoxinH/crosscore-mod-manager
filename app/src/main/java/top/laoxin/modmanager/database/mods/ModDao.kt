@@ -72,6 +72,11 @@ interface ModDao {
     @Query("SELECT COUNT(*) FROM mods WHERE gamePackageName = :gamePackageName AND isEnable = 1")
     fun getModsEnableCountByGamePackageName(gamePackageName: String): Flow<Int>
 
-    // 通过gamePackageName查询已关闭的mods
+    // 用过ids查询mods
+    @Query("SELECT * from mods WHERE id IN (:ids)")
+    fun getModsByIds(ids: List<Int>): Flow<List<ModBean>>
 
+    // 通过modpath查询mod数量`
+    @Query("SELECT COUNT(*) FROM mods WHERE path = :path")
+    fun getModsCountByPath(path: String): Flow<Int>
 }

@@ -172,7 +172,7 @@ fun SettingContent(
     )
     Column(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(start = 8.dp, end = 8.dp)
             .verticalScroll(rememberScrollState())
     ) {
         SettingTitle(
@@ -451,8 +451,8 @@ fun ThinksDialogCommon(
 @Composable
 fun SettingTopBar() {
     TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.primary,
-        titleContentColor = MaterialTheme.colorScheme.primaryContainer,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     ), title = {
         Text(
             stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge

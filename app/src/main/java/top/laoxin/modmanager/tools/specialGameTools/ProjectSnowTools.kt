@@ -19,6 +19,9 @@ import java.io.File
 
 object ProjectSnowTools : BaseSpecialGameTools {
 
+    /***
+     * 当shizuku服务中执行代码时不能包含任何调用shizuku行为否则报错, 同时也无法访问上下文
+     */
     private var check_filepath = ""
     const val CHECK_FILENAME = "manifest.json"
     private var check_filename_mod_path = ""
@@ -28,9 +31,8 @@ object ProjectSnowTools : BaseSpecialGameTools {
         /*.disableHtmlEscaping()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
         .create()
-    private val app = App.get()
     private lateinit var fileTools: BaseFileTools
-    var checkPermission = PermissionTools.checkPermission(check_filepath)
+   // var checkPermission = PermissionTools.checkPermission(check_filepath)
 
     data class MainIFest(
         var version: String,
@@ -61,6 +63,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
             if (backupCheckFile.parentFile?.exists() == false) {
                 backupCheckFile.parentFile?.mkdirs()
             }
+            val checkPermission = PermissionTools.checkPermission(check_filepath)
             when (checkPermission) {
                 PathType.FILE -> {
                     fileTools.copyFile(check_filepath, check_filename_backup_path)
@@ -187,7 +190,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         check_filepath = "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/"
 
         if (checkPermission(check_filepath) == PathType.NULL) return false
-
+        val checkPermission = PermissionTools.checkPermission(check_filepath)
         // 通过documentFile读取文件
         if (checkPermission == PathType.DOCUMENT) {
             fileTools.copyFileByDF(
@@ -217,28 +220,16 @@ object ProjectSnowTools : BaseSpecialGameTools {
                 mainIFest.paks.add(0,modPak)
             }
         }
-       // mainIFest.paks.addAll(0,modPaks)
+        val mainIFestJson = gson.toJson(mainIFest, MainIFest::class.java)
+        // mainIFest.paks.addAll(0,modPaks)
         val startTime = System.currentTimeMillis()
         while (true){
             Log.d("ProjectSnowTools", "specialOperationStartGame: 开始执行注入")
-            gson.toJson(mainIFest, MainIFest::class.java).let {
-                if (checkFile.exists()) {
-                    checkFile.delete()
-                    checkFile.createNewFile()
-                    checkFile.writeText(it)
-                    if (checkPermission == PathType.DOCUMENT) {
-                        fileTools.copyFileByFD(
-                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME,
-                            check_filepath + CHECK_FILENAME
-                        )
-                    } else {
-                        fileTools.copyFile(
-                            ModTools.MODS_UNZIP_PATH + CHECK_FILENAME,
-                            check_filepath + CHECK_FILENAME
-                        )
-                    }
-                }
-            }
+            fileTools.writeFile(
+                check_filepath,
+                CHECK_FILENAME,
+                mainIFestJson
+            )
            // Thread.sleep(50)
             val elapsedTime = System.currentTimeMillis() - startTime
             if (elapsedTime > 40000) {
@@ -276,7 +267,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
     }
 
     private fun checkPermission(path : String): Int {
-        checkPermission = PermissionTools.checkPermission(path)
+        val checkPermission = PermissionTools.checkPermission(check_filepath)
         //Log.d("ArknightsTools", "权限类型: $checkPermission--$path")
         if (checkPermission == PathType.FILE) {
             //Log.e("ArknightsTools", "modifyCheckFile: 没有权限")

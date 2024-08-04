@@ -108,6 +108,7 @@ enum class NavigationIndex(
     SEARCH_MODS(R.string.mod_page_title_search_mods, 3),
     ALL_MODS(R.string.mod_page_title_all_mods, 0)
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModPage(viewModel: ModViewModel) {
@@ -138,9 +139,15 @@ fun ModPage(viewModel: ModViewModel) {
             Loading(uiState.loadingPath)
         } else {
             uiState.modDetail?.let {
-                ModDetailDialog(
+                /*  ModDetailDialog(
+                      showDialog = uiState.showModDetail,
+                      mod = it,
+                      onDismiss = { viewModel.setShowModDetail(false) }
+                  )*/
+                ModDetailPartialBottomSheet(
                     showDialog = uiState.showModDetail,
                     mod = it,
+                    viewModel = viewModel,
                     onDismiss = { viewModel.setShowModDetail(false) }
                 )
                 PasswordInputDialog(
@@ -151,12 +158,7 @@ fun ModPage(viewModel: ModViewModel) {
                 )
             }
             AllModPage(viewModel, uiState)
-            Tips(
-                text = uiState.tipsText,
-                showTips = uiState.showTips,
-                onDismiss = { viewModel.setShowTips(false) },
-                uiState = uiState
-            )
+
 
         }
     }
@@ -229,15 +231,18 @@ fun DisEnableModsDialog(
                             ModListItem(
                                 mod = mod,
                                 modSwitchEnable = true,
-                                showDialog = { _, _ -> },
-                                enableMod = switchMod
+                                openModDetail = { _, _ -> },
+                                enableMod = switchMod,
+                                isMultiSelect = false,
+                                onLongClick = { },
+                                onMultiSelectClick = { }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 },
                 confirmButton = {
-                    Button(onClick = {
+                    TextButton(onClick = {
                         onConfirmRequest()
                     }) {
                         Text(stringResource(id = R.string.dialog_button_confirm))
@@ -293,9 +298,7 @@ fun CustomEdit(
         modifier = modifier
             .focusRequester(focusRequester)
             .onFocusChanged {
-                Log.d("CustomEdit", "CustomEdit:改变后焦点${it.isFocused}, 该斌前:$hasFocus ")
                 if (!it.isFocused && hasFocus) {
-                    Log.d("CustomEdit", "CustomEdit:失去焦点 ")
                     // 组件失去焦点
                     close()
                 }
@@ -330,18 +333,26 @@ fun CustomEdit(
                 }
 
                 // 存在焦点 且 有输入内容时. 显示叉号
-                if (hasFocus) {
+                if (hasFocus && text.isNotEmpty()) {
                     Log.d("CustomEdit", "CustomEdit:失去焦点 ")
-                    close()
+
                     Icon(imageVector = Icons.Filled.Clear, // 清除图标
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primaryContainer,
                         // 点击就清空text
-                        modifier = Modifier.clickable { onValueChange.invoke("") })
+                        modifier = Modifier.clickable {
+                            onValueChange.invoke("")
+                        })
                 }
                 Icon(
                     imageVector = Icons.Filled.Search,
                     contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primaryContainer,
+
                     modifier = Modifier
+                        .clickable {
+                            close()
+                        }
                         .padding(start = 10.dp)
                 )
             }
@@ -355,18 +366,7 @@ fun CustomEdit(
 
 
 // 创建一个占据全屏的居中文本, 提示没有mod
-@Composable
-fun NoMod() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(id = R.string.mod_page_no_mod),
-            style = MaterialTheme.typography.titleMedium
-        )
-    }
-}
+
 
 // 创建一个全屏的加载动画
 @Composable
@@ -390,145 +390,6 @@ fun Loading(
     }
 }
 
-@Composable
-fun Tips(
-
-    text: String,
-    showTips: Boolean,
-    onDismiss: () -> Unit,
-    uiState: ModUiState,
-    modifier: Modifier = Modifier
-) {
-    if (showTips) {
-        val tips = if (uiState.unzipProgress.isNotEmpty()) {
-            "$text : ${uiState.unzipProgress}"
-        } else {
-            text
-        }
-        Snackbar(
-            action = {
-                TextButton(onClick = { onDismiss() }) {
-                    Text(stringResource(R.string.tips_btn_close))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(8.dp)
-
-        ) { Text(text = tips) }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ModTopBar(viewModel: ModViewModel) {
-    // 导航栏
-    /*val viewModel: ModViewModel = viewModel(
-        factory = ModViewModel.Factory
-    )*/
-    val uiState by viewModel.uiState.collectAsState()
-    Log.d("ModTopBar", "ModTopBar: 启动了${uiState.modsView}")
-    var showMenu by remember { mutableStateOf(false) }
-
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-        title = {
-            Text(
-                stringResource(id = uiState.modsView.title),
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        actions = {
-            IconButton(onClick = {
-                // 在这里处理图标按钮的点击事件
-                viewModel.setUserTipsDialog(true)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Info, // 使用信息图标
-                    contentDescription = "Info", // 为辅助功能提供描述
-                    tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = {
-                viewModel.setSearchBoxVisible(true)
-                viewModel.setModsView(NavigationIndex.SEARCH_MODS)
-                // 请求焦点
-            }, modifier = Modifier) {
-                Icon(
-                    imageVector = Icons.Filled.Search, contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = {
-                viewModel.flashMods(false, true)
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Refresh, // 使用刷新图标
-                    contentDescription = "Refresh", // 为辅助功能提供描述
-                    tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = { showMenu = true }, modifier = Modifier) {
-                Icon(
-                    imageVector = Icons.Filled.Menu, contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
-                    onClick = {
-                        viewModel.setModsView(NavigationIndex.ENABLE_MODS)
-
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
-                    onClick = {
-                        viewModel.setModsView(NavigationIndex.DISABLE_MODS)
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
-                    onClick = {
-                        viewModel.setModsView(NavigationIndex.ALL_MODS)
-                    }
-                )
-                // 添加更多的菜单项
-            }
-        }
-    )
-    AnimatedVisibility(visible = uiState.searchBoxVisible) {
-
-        // 根据 MutableState 显示或隐藏搜索框
-
-        CustomEdit(
-            text = viewModel.getSearchText(),
-            onValueChange = {
-                viewModel.setSearchText(it)
-            },
-            hint = stringResource(R.string.mod_page_search_hit),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 10.dp)
-                .height(50.dp)
-                .background(Color(0xBCE9E9E9), shape = MaterialTheme.shapes.medium)
-                .padding(horizontal = 16.dp),
-            textStyle = typography.bodyMedium,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            close = {
-                viewModel.setSearchBoxVisible(false)
-            }
-
-        )
-    }
-
-}
 
 @Preview("Heroes List")
 @Composable

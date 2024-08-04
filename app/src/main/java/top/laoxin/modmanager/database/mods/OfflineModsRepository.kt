@@ -71,5 +71,13 @@ class OfflineModsRepository(private val modDao: ModDao) : ModRepository {
         return modDao.getModsEnableCountByGamePackageName(gamePackageName)
     }
 
+    override fun getModsByIds(ids: List<Int>): Flow<List<ModBean>> {
+        return modDao.getModsByIds(ids)
+    }
+
+    override fun getModsCountByPath(path: String): Flow<Int> {
+        return modDao.getModsCountByPath(path)
+    }
+
 
 }

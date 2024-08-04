@@ -532,6 +532,7 @@ class ConsoleViewModel(
                 putParcelable("game_info", getGameInfo())
             }
         )
+        App.get().stopService(intent)
         App.get().startForegroundService(intent)
     }
 
@@ -541,7 +542,7 @@ class ConsoleViewModel(
         val intent = App.get().packageManager.getLaunchIntentForPackage(gameInfo.packageName)
         if (intent != null) {
             for (entry in SpecialGame.entries) {
-                if (gameInfo.packageName.contains(entry.packageName)) {
+                if (gameInfo.packageName.contains(entry.packageName) && entry.needGameService) {
                     startGameService()
                 }
             }

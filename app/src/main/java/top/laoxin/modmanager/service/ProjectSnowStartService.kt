@@ -1,13 +1,18 @@
 package top.laoxin.modmanager.service
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,9 +34,8 @@ class ProjectSnowStartService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        val channelId = getString(R.string.channel_id)
-        val channelName = getString(R.string.channel_name)
-        val importance = NotificationManager.IMPORTANCE_HIGH
+
+
         val gameInfo: GameInfoBean = intent?.extras?.getParcelable("game_info")!!
 
         val checkFilepath =
@@ -39,16 +43,16 @@ class ProjectSnowStartService : Service() {
         Log.d("TestService", "onStartCommand: $checkFilepath")
 
 
-        val notificationChannel = NotificationChannel(channelId, channelName, importance)
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(notificationChannel)
-
 
         val notification: Notification = Notification.Builder(this, getString(R.string.channel_id))
             .setContentTitle(getString(R.string.channel_tiile))
             .setContentText(getString(R.string.channel_content))
             .setSmallIcon(R.drawable.app_icon)
+            .setPriority(Notification.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setOngoing(true)
             .build()
+        // 显示通知
 
         startForeground(1, notification)
 

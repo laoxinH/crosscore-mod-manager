@@ -3,6 +3,7 @@ package top.laoxin.modmanager.userservice
 import android.os.RemoteException
 import android.util.Log
 import top.laoxin.modmanager.bean.GameInfoBean
+import top.laoxin.modmanager.constant.SpecialGame
 import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
 
@@ -134,7 +135,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
                     if (ArchiveUtil.isArchive(f.absolutePath)) {
                         ArchiveUtil.listInArchiveFiles(f.absolutePath).forEach {
                             val modFileName = File(it).name
-                            if (gameFiles.contains(modFileName)) {
+                            if (gameFiles.contains(modFileName) || specialOperationScanMods(gameInfo.packageName, modFileName)) {
                                 Log.d(TAG, "开始移动文件: ${f.name}==${modFileName}")
                                 moveFile(
                                     f.path,
@@ -230,7 +231,17 @@ class FileExplorerService : IFileExplorerService.Stub() {
                 name.contains(".mp3", ignoreCase = true) ||*/
                 name.contains(".apk", ignoreCase = true))
     }
-
+    fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
+        for (specialGame in SpecialGame.entries) {
+            if (packageName.contains(specialGame.packageName)) {
+                return  specialGame.baseSpecialGameTools.specialOperationScanMods(
+                    packageName,
+                    modFileName
+                )
+            }
+        }
+        return false
+    }
     companion object {
         private const val TAG = "FileExplorerService"
     }

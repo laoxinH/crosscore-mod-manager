@@ -249,10 +249,6 @@ class SettingViewModel(
                     "SELECTED_GAME",
                     GameInfoConstant.gameInfoList.indexOf(gameInfo)
                 )
-                userPreferencesRepository.savePreference(
-                    "SCAN_DIRECTORY_MODS",
-                    false
-                )
                 SpecialGame.entries.forEach {
                     if (gameInfo.packageName.contains(it.packageName)) {
                         Log.d("SettingViewModel", "执行特殊选择: $it")

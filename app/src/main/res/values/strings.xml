@@ -155,7 +155,7 @@
     <string name="toast_game_config_del">游戏配置文件已被删除</string>
     <string name="console_setting_info_configuration_can_install">是</string>
     <string name="console_setting_info_configuration_not_install">否</string>
-    <string name="dialog_dis_enable_mods_title">以下MOD已被删除是否关闭?</string>
+    <string name="dialog_dis_enable_mods_title">以下MOD已被删除是否关闭? 如果不关闭将会一直生效!</string>
     <string name="console_upgrade_title">更新</string>
     <string name="setting_page_about_update">检测更新</string>
     <string name="setting_page_about_update_descript">当前版本 : %1$s</string>
@@ -193,5 +193,15 @@
     <string name="console_info_title">通知</string>
     <string name="setting_page_about_info">查看通知</string>
     <string name="setting_page_about_info_descript">查看MOD实验室的最新通知</string>
+    <string name="mod_page_mod_detail_dialog_detali_imgs">预览图数量: %s</string>
+    <string name="mod_page_mod_detail_dialog_detali_create_time">创建时间: %s</string>
+    <string name="toast_swtch_mods_result">成功: %1$s 失败: %2$s</string>
+    <string name="toast_del_mods_success">删除成功: %s</string>
+    <string name="dialog_del_selected_mods_content">这将会删除所选MOD, 不可恢复! 若所选MOD压缩包中包含多个MOD将会跳过, 需到MOD详情页面单独删除!</string>
+    <string name="dialog_del_selected_mods_title">警告!</string>
+    <string name="dialog_del_mod_title">警告!</string>
+    <string name="dialog_del_mod_content">删除后文件不可恢复! 如果对应压缩包含多个MOD也将会一并删除!</string>
+    <string name="dialog_reqest_notification_title">请求通知权限</string>
+    <string name="dialog_reqest_notification_message">MOD实验室启动某些游戏(例如尘白禁区)的MOD注入服务需要保留后台服务, 为防止系统关闭后台需要显示通知!</string>
 
 </resources>

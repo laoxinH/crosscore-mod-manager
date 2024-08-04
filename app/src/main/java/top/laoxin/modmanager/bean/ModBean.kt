@@ -173,6 +173,7 @@ data class ModBean(
     }
 
     fun isUpdate(scanMods: List<ModBean>): ModBean? {
+        if (isEncrypted) return null
         for (mod in scanMods) {
             if (mod.path == path && mod.name == name) {
                 if (mod.version != version ||
@@ -182,7 +183,6 @@ data class ModBean(
                     mod.icon != icon ||
                     mod.images != images ||
                     mod.modFiles != modFiles ||
-                    mod.isEncrypted != isEncrypted ||
                     mod.readmePath != readmePath ||
                     mod.fileReadmePath != fileReadmePath ||
                     mod.gameModPath != gameModPath ||
@@ -191,9 +191,9 @@ data class ModBean(
                     ) {
                     return this.copy(
                         version = mod.version,
-                        description = mod.description,
+                        description =  mod.description,
                         author = mod.author,
-                        date = mod.date,
+                        date =  mod.date,
                         icon = mod.icon,
                         images = mod.images,
                         modFiles = mod.modFiles,
@@ -203,7 +203,6 @@ data class ModBean(
                         gameModPath = mod.gameModPath,
                         modType = mod.modType,
                         isZipFile = mod.isZipFile
-
                     )
                 }
 

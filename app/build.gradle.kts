@@ -4,12 +4,13 @@ import groovy.util.Expando
 import java.security.MessageDigest
 
 object buildInfo {
-    val versionCode = 18
-    val versionName = "2.0.9 beta"
+    val versionCode = 19
+    val versionName = "2.1.0 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.修复shuzuku在某些品牌掉授权的问题\n" +
-            "2.修复切完页面时顶栏闪烁问题\n" +
-            "3.优化多文件MOD整合包开关速度\n" +
+            "1.更加友好的UI界面\n" +
+            "2.添加批量操作\n" +
+            "3.优化尘白MOD启动注入服务\n" +
+            "4.优化MOD详情页\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册Gitee自行在设置页面前往Github下载最新版"
@@ -215,6 +216,10 @@ dependencies {
     // 7z
     //implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
     implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
+
+    // 系统UI控制库，实现沉浸式状态栏
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
+
 
 }
 

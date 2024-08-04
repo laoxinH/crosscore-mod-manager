@@ -54,6 +54,7 @@ import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.state.ConsoleUiState
+import top.laoxin.modmanager.ui.view.commen.RequestNotificationPermission
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
 
@@ -88,6 +89,8 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
 
         // 权限提示框
        RequestStoragePermission()
+        // 请求通知权限
+        RequestNotificationPermission()
         // 升级提示
         DialogCommon(
             title = stringResource(id = R.string.console_upgrade_title),
@@ -406,8 +409,9 @@ fun ConsolePage(viewModel: ConsoleViewModel) {
 fun ConsoleTopBar(viewModel: ConsoleViewModel) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
         title = {
             Text(
@@ -417,6 +421,7 @@ fun ConsoleTopBar(viewModel: ConsoleViewModel) {
             )
         },
         actions = {
+            Text(text = "启动游戏")
             IconButton(onClick = {
                 // 在这里处理图标按钮的点击事件
                 viewModel.startGame()
@@ -424,8 +429,8 @@ fun ConsoleTopBar(viewModel: ConsoleViewModel) {
                 //Text(text = "启动游戏")
                 Icon(
                     imageVector = Icons.Default.PlayArrow, // 使用信息图标
-                    contentDescription = "Info", // 为辅助功能提供描述
-                    tint = MaterialTheme.colorScheme.primaryContainer
+                    contentDescription = "Start", // 为辅助功能提供描述
+                    //tint = MaterialTheme.colorScheme.primaryContainer
                 )
             }
 

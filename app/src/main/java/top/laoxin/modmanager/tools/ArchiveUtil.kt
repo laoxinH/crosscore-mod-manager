@@ -250,7 +250,7 @@ object ArchiveUtil {
         overwrite: Boolean
     ): Boolean {
         try {
-            if (File(destDir, files[0]).exists() && !overwrite) return true
+            if (files.map { File(destDir, it) }.all { it.exists() } && !overwrite) return true
             var zipFile = ZipFile(srcFile)
             zipFile.charset = Charset.forName("UTF-8")
 
@@ -437,7 +437,7 @@ object ArchiveUtil {
         password: String?,
         overwrite: Boolean
     ): Boolean {
-        if (File(destDir, files[0]).exists() && !overwrite) return true
+        if (files.map { File(destDir, it) }.all { it.exists() } && !overwrite) return true
         var extractPath = destDir
         if (!destDir.endsWith("/") && !destDir.endsWith("\\")) {
             extractPath += File.separator
@@ -501,7 +501,6 @@ object ArchiveUtil {
                             } catch (e: IOException) {
                                 Log.e(TAG, "IOException while extracting")
                             }
-
                             data.size
                         }
                     }

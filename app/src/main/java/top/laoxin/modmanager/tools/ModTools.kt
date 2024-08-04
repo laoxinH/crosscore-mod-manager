@@ -84,7 +84,7 @@ object ModTools {
         val checkPermission = PermissionTools.checkPermission(gameModPath)
         setModsToolsSpecialPathReadType(checkPermission)
         Log.d(TAG, "游戏mod路径: ${modBean.modFiles}")
-        modBean.modFiles?.forEachIndexed{index: Int, it: String ->
+        modBean.modFiles?.forEachIndexed { index: Int, it: String ->
             val file = File(it)
             val backupPath =
                 BACKUP_PATH + gameBackupPath + File(modBean.gameModPath!!).name + "/" + file.name
@@ -108,7 +108,7 @@ object ModTools {
                                 modName = modBean.name
                             )
                         )
-                        progressUpdateListener?.onProgressUpdate("${index+1}/${modBean.modFiles.size}")
+                        progressUpdateListener?.onProgressUpdate("${index + 1}/${modBean.modFiles.size}")
                     }
                 }
             }
@@ -126,20 +126,20 @@ object ModTools {
         val checkPermission = PermissionTools.checkPermission(gameModPath)
         setModsToolsSpecialPathReadType(checkPermission)
         val flags = mutableListOf<Boolean>()
-            modBean.modFiles?.forEachIndexed{ index: Int, modFilePath: String ->
-                val modFile = File(unZipPath + modFilePath)
-                val gameFile = File(gameModPath + modFile.name)
-                var flag = false
-                flag = if (specialPathReadType == PathType.DOCUMENT) {
-                    fileTools?.copyFileByFD(modFile.absolutePath, gameFile.absolutePath)
-                        ?: false
+        modBean.modFiles?.forEachIndexed { index: Int, modFilePath: String ->
+            val modFile = File(unZipPath + modFilePath)
+            val gameFile = File(gameModPath + modFile.name)
+            var flag = false
+            flag = if (specialPathReadType == PathType.DOCUMENT) {
+                fileTools?.copyFileByFD(modFile.absolutePath, gameFile.absolutePath)
+                    ?: false
 
-                } else {
-                    fileTools?.copyFile(modFile.absolutePath, gameFile.absolutePath) ?: false
+            } else {
+                fileTools?.copyFile(modFile.absolutePath, gameFile.absolutePath) ?: false
 
-                }
-                flags.add(flag)
-                progressUpdateListener?.onProgressUpdate("${index + 1}/${modBean.modFiles.size}")
+            }
+            flags.add(flag)
+            progressUpdateListener?.onProgressUpdate("${index + 1}/${modBean.modFiles.size}")
         }
         if (!flags.all { it }) {
             throw IOException(App.get().getString(R.string.toast_copy_failed))
@@ -152,7 +152,7 @@ object ModTools {
         val checkPermission = PermissionTools.checkPermission(backups[0]?.gameFilePath ?: "")
         setModsToolsSpecialPathReadType(checkPermission)
         val flags = mutableListOf<Boolean>()
-        backups.forEachIndexed{ index, backup ->
+        backups.forEachIndexed { index, backup ->
             if (checkPermission == PathType.DOCUMENT && backup != null) {
                 flags.add(
                     fileTools?.copyFileByFD(
@@ -193,8 +193,21 @@ object ModTools {
         } else {
             true
         }
-
     }
+
+    suspend fun deleteMods(mods: List<ModBean>): Boolean {
+        return try {
+            setModsToolsSpecialPathReadType(PathType.FILE)
+            mods.forEach {
+                fileTools?.deleteFile(it.path!!) ?: false
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
 
     // 删除缓存文件
     suspend fun deleteCache(): Boolean {
@@ -287,13 +300,17 @@ object ModTools {
 
 
     // 通过shizuku扫描mods
-    private fun scanModsByShizuku(
+    private suspend fun scanModsByShizuku(
         scanPath: String, gameInfo: GameInfoBean
     ): Boolean {
         return try {
             iFileExplorerService?.scanMods(scanPath, gameInfo) ?: false
         } catch (e: RemoteException) {
-            ToastUtils.longCall(R.string.toast_shizuku_load_file_failed)
+            withContext(Dispatchers.Main) {
+                Log.e(TAG, "扫描文件失败: $e")
+                ToastUtils.longCall(R.string.toast_shizuku_load_file_failed)
+            }
+
             e.printStackTrace()
             false
         }
@@ -597,8 +614,9 @@ object ModTools {
                         ArchiveUtil.extractSpecificFile(
                             archiveFile.absolutePath,
                             modBeanTemp.images,
-                            MODS_IMAGE_PATH + archiveFile.nameWithoutExtension
-                        )
+                            MODS_IMAGE_PATH + archiveFile.nameWithoutExtension,
+
+                            )
                         icon =
                             MODS_IMAGE_PATH + archiveFile.nameWithoutExtension + "/" + icon
                         images = modBeanTemp.images.map {
@@ -1042,14 +1060,16 @@ object ModTools {
         }
     }
 
-    private fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
-        var flag = false
-        SpecialGame.entries.forEach {
-            if (packageName.contains(it.packageName)) {
-                flag = it.baseSpecialGameTools.specialOperationScanMods(packageName, modFileName)
+    fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
+        for (specialGame in SpecialGame.entries) {
+            if (packageName.contains(specialGame.packageName)) {
+                return  specialGame.baseSpecialGameTools.specialOperationScanMods(
+                    packageName,
+                    modFileName
+                )
             }
         }
-        return flag
+        return false
     }
 
     // 判断是否为待扫描的文件

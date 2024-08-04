@@ -2,7 +2,6 @@ package top.laoxin.modmanager.ui.viewmodel
 
 import android.os.FileObserver
 import android.util.Log
-import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,6 +17,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,7 +27,6 @@ import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.BackupBean
-import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.ScanModPath
@@ -51,7 +50,6 @@ import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.state.UserPreferencesState
 import top.laoxin.modmanager.ui.view.modview.NavigationIndex
 import java.io.File
-import kotlin.math.log
 
 class ModViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
@@ -382,15 +380,16 @@ class ModViewModel(
     // 开启或关闭mod
     fun switchMod(modBean: ModBean, b: Boolean, isDel: Boolean = false) {
         setUnzipProgress("")
+        setMultitaskingProgress("")
         kotlin.runCatching {
             checkPermission(modBean.gameModPath!!)
             checkPermission(ModTools.MY_APP_PATH)
         }.onSuccess {
             Log.d("ModViewModel", "enableMod called with: modBean = $modBean, b = $b")
             if (b) {
-                enableMod(modBean)
+                enableMod(listOf(modBean))
             } else {
-                disableMod(modBean, isDel)
+                disableMod(listOf(modBean), isDel)
             }
         }.onFailure {
             ToastUtils.longCall(it.message.toString())
@@ -404,7 +403,8 @@ class ModViewModel(
 
 
     // 开启mod
-    private fun enableMod(modBean: ModBean) {
+    private fun enableMod(mods: List<ModBean>) {
+        val modBean = mods[0]
         // 判断modbean是否包含密码
         if (modBean.isEncrypted && modBean.password == null) {
             // 如果包含密码，弹出密码输入框
@@ -412,110 +412,144 @@ class ModViewModel(
             showPasswordDialog(true)
             return
         }
-        // 设置modSwitchEnable为false
+        // 成功开启的mod数量
+        var successCount = 0
+        // 开启失败的mod数量
+        var failCount = 0
 
         Log.d("ModViewModel", "enableMod: 开始执行开启 : $modBean")
         viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                setModSwitchEnable(false)
-                setTipsText(App.get().getString(R.string.tips_open_mod))
-                setShowTips(true)
-                val gameModPath = modBean.gameModPath!!
-                // 备份游戏文件
-                if (_gameInfo.enableBackup) {
-                    setTipsText(App.get().getString(R.string.tips_backups_game_files))
-                    val backups = ModTools.backupGameFiles(
-                        gameModPath, modBean, _gameInfo.packageName + "/"
-                    )
-                    backupRepository.insertAll(backups)
-                }
-                // 解压mod压缩包
-                setTipsText("${App.get().getString(R.string.tips_unzip_mod)} ${modBean.name}")
-                var unZipPath: String = ""
-                if (modBean.isZipFile) {
-
-                    val decompression = ArchiveUtil.decompression(
-                        modBean.path!!,
-                        ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path).nameWithoutExtension + "/",
-                        modBean.password,
-                    )
-                    if (decompression) {
-                        unZipPath = ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(
-                            modBean.path
-                        ).nameWithoutExtension + "/"
-                    } else {
-                        throw Exception(
-                            App.get().getString(R.string.toast_decompression_failed)
+            setModSwitchEnable(false)
+            setTipsText(App.get().getString(R.string.tips_open_mod))
+            setShowTips(true)
+            setMultitaskingProgress("0/${mods.size}")
+            mods.forEachIndexed { index, modBean ->
+                kotlin.runCatching {
+                    val gameModPath = modBean.gameModPath!!
+                    // 备份游戏文件
+                    if (_gameInfo.enableBackup) {
+                        setTipsText(App.get().getString(R.string.tips_backups_game_files))
+                        val backups = ModTools.backupGameFiles(
+                            gameModPath, modBean, _gameInfo.packageName + "/"
                         )
+                        backupRepository.insertAll(backups)
                     }
-                }
-                // 执行特殊操作
-                setTipsText(App.get().getString(R.string.tips_special_operation))
-                ModTools.specialOperationEnable(modBean, _gameInfo.packageName)
-                // 复制mod文件
-                setTipsText(App.get().getString(R.string.tips_copy_mod_to_game))
-                ModTools.copyModFiles(modBean, gameModPath, unZipPath)
-                modRepository.updateMod(modBean.copy(isEnable = true))
-                withContext(Dispatchers.Main) {
-                    setShowTips(false)
-                    setModSwitchEnable(true)
-                    ToastUtils.longCall(R.string.toast_mod_open_success)
-                }
+                    // 解压mod压缩包
+                    setTipsText("${App.get().getString(R.string.tips_unzip_mod)} ${modBean.name}")
+                    var unZipPath: String = ""
+                    if (modBean.isZipFile) {
 
-            }.onFailure {
-                withContext(Dispatchers.Main) {
-                    setShowTips(false)
-                    setModSwitchEnable(true)
-                    ToastUtils.longCall(it.message)
+                        val decompression = ArchiveUtil.decompression(
+                            modBean.path!!,
+                            ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path).nameWithoutExtension + "/",
+                            modBean.password,
+                        )
+                        if (decompression) {
+                            unZipPath =
+                                ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(
+                                    modBean.path
+                                ).nameWithoutExtension + "/"
+                        } else {
+                            throw Exception(
+                                App.get().getString(R.string.toast_decompression_failed)
+                            )
+                        }
+                    }
+                    // 执行特殊操作
+                    setTipsText(App.get().getString(R.string.tips_special_operation))
+                    ModTools.specialOperationEnable(modBean, _gameInfo.packageName)
+                    // 复制mod文件
+                    setTipsText(App.get().getString(R.string.tips_copy_mod_to_game))
+                    ModTools.copyModFiles(modBean, gameModPath, unZipPath)
+                    modRepository.updateMod(modBean.copy(isEnable = true))
+                    setMultitaskingProgress("${index + 1}/${mods.size}")
+                    successCount++
+
+
+
+                }.onFailure {
+                    failCount++
+                    withContext(Dispatchers.Main) {
+                        ToastUtils.longCall(it.message)
+                    }
+                    ModTools.deleteTempFile()
+                    LogTools.logRecord("开启mod失败:${modBean.name}--$it")
                 }
-                ModTools.deleteTempFile()
-                LogTools.logRecord("开启mod失败:${modBean.name}--$it")
             }
+            withContext(Dispatchers.Main) {
+                setShowTips(false)
+                setModSwitchEnable(true)
+                ToastUtils.longCall(
+                    App.get().getString(
+                        R.string.toast_swtch_mods_result,
+                        successCount.toString(),
+                        failCount.toString()
+                    ))
+            }
+
         }
     }
 
     // 关闭mod
-    private fun disableMod(modBean: ModBean, isDel: Boolean) {
+    private fun disableMod(mods: List<ModBean>, isDel: Boolean) {
         enableJob?.cancel()
         enableJob = viewModelScope.launch(Dispatchers.IO) {
             setModSwitchEnable(false)
             setTipsText(App.get().getString(R.string.tips_close_mod))
             setShowTips(true)
-            backupRepository.getByModNameAndGamePackageName(modBean.name!!, _gameInfo.packageName)
-                .collect { backupBeans ->
-                    Log.d("ModViewModel", "disableMod: 开始执行关闭")
-                    kotlin.runCatching {
-                        setTipsText(App.get().getString(R.string.tips_special_operation))
-                        // 特殊游戏操作
-                        ModTools.specialOperationDisable(
-                            backupBeans, _gameInfo.packageName, modBean
-                        )
-                        // 还原游戏文件
-                        setTipsText(App.get().getString(R.string.tips_restore_game_files))
-                        ModTools.restoreGameFiles(backupBeans)
-                        modRepository.updateMod(modBean.copy(isEnable = false))
-                        withContext(Dispatchers.Main) {
-                            ToastUtils.longCall(R.string.toast_mod_close_success)
-                        }
-                        setShowTips(false)
-                        setModSwitchEnable(true)
-                        if (isDel) {
-                            _uiState.update { it ->
-                                it.copy(delEnableModsList = it.delEnableModsList.filter { it.path != modBean.path })
-                            }
-                        }
-                        enableJob?.cancel()
-                    }.onFailure {
-                        withContext(Dispatchers.Main) {
-                            setShowTips(false)
-                            setModSwitchEnable(true)
-                            ToastUtils.longCall(it.message.toString())
-                        }
-                        LogTools.logRecord("关闭mod失败:${modBean.name}--$it")
-                        it.printStackTrace()
-                        enableJob?.cancel()
+            // 成功开启的mod数量
+            var successCount = 0
+            // 开启失败的mod数量
+            var failCount = 0
+            setMultitaskingProgress("0/${mods.size}")
+            mods.forEachIndexed { index, modBean ->
+                val backupBeans = backupRepository.getByModNameAndGamePackageName(
+                    modBean.name!!,
+                    _gameInfo.packageName
+                ).first()
+                Log.d("ModViewModel", "disableMod: 开始执行关闭$backupBeans")
+                kotlin.runCatching {
+                    setTipsText(App.get().getString(R.string.tips_special_operation))
+                    // 特殊游戏操作
+                    ModTools.specialOperationDisable(
+                        backupBeans, _gameInfo.packageName, modBean
+                    )
+                    // 还原游戏文件
+                    setTipsText(App.get().getString(R.string.tips_restore_game_files))
+                    ModTools.restoreGameFiles(backupBeans)
+                    modRepository.updateMod(modBean.copy(isEnable = false))
+                    withContext(Dispatchers.Main) {
+                        ToastUtils.longCall(R.string.toast_mod_close_success)
                     }
+                    setMultitaskingProgress("${index + 1}/${mods.size}")
+                    if (isDel) {
+                        _uiState.update { it ->
+                            it.copy(delEnableModsList = it.delEnableModsList.filter { it.path != modBean.path })
+                        }
+                    }
+                    successCount++
+                }.onFailure {
+                    failCount++
+                    withContext(Dispatchers.Main) {
+                        ToastUtils.longCall(it.message.toString())
+                    }
+                    LogTools.logRecord("关闭mod失败:${modBean.name}--$it")
+                    it.printStackTrace()
                 }
+
+            }
+            setShowTips(false)
+            setModSwitchEnable(true)
+            withContext(Dispatchers.Main) {
+                ToastUtils.longCall(
+                    App.get().getString(
+                        R.string.toast_swtch_mods_result,
+                        successCount.toString(),
+                        failCount.toString()
+                    )
+                )
+            }
+
         }
     }
 
@@ -747,6 +781,14 @@ class ModViewModel(
 
     }
 
+    // 设置总进度
+    private fun setMultitaskingProgress(progress: String) {
+        viewModelScope.launch(Dispatchers.Main) {
+            _uiState.value = _uiState.value.copy(multitaskingProgress = progress)
+        }
+
+    }
+
     override fun onProgressUpdate(progress: String) {
         Log.d("ModViewModel", "onProgressUpdate: $progress")
         setUnzipProgress(progress)
@@ -759,6 +801,149 @@ class ModViewModel(
     fun setModsView(enableMods: NavigationIndex) {
         _uiState.update {
             it.copy(modsView = enableMods)
+        }
+    }
+
+    fun modLongClick(modBean: ModBean) {
+        Log.d("ModViewModel", "长按事件: $modBean")
+        if (!_uiState.value.isMultiSelect) {
+            val modsSelected = _uiState.value.modsSelected.toMutableList()
+            modsSelected.add(modBean.id)
+            _uiState.update {
+                it.copy(isMultiSelect = true, modsSelected = modsSelected)
+            }
+        }
+    }
+
+    fun modMultiSelectClick(modBean: ModBean) {
+        val modsSelected = _uiState.value.modsSelected.toMutableList()
+        if (modsSelected.contains(modBean.id)) {
+            modsSelected.remove(modBean.id)
+        } else {
+            modsSelected.add(modBean.id)
+        }
+        _uiState.update {
+            it.copy(modsSelected = modsSelected)
+        }
+    }
+
+    fun switchSelectMod(modList: List<ModBean>, b: Boolean) {
+        if (_uiState.value.modsSelected.isEmpty()) return
+        val modsSelected = modList.filter {
+            uiState.value.modsSelected.contains(it.id)
+                    && it.isEnable != b
+                    && (!it.isEncrypted || !it.password.isNullOrEmpty())
+        }
+        if (modsSelected.isEmpty()) return
+        setUnzipProgress("")
+        setMultitaskingProgress("")
+        kotlin.runCatching {
+            checkPermission(modsSelected[0].gameModPath!!)
+            checkPermission(ModTools.MY_APP_PATH)
+        }.onSuccess {
+            if (b) {
+                enableMod(modsSelected)
+            } else {
+                disableMod(modsSelected, false)
+            }
+        }.onFailure {
+            ToastUtils.longCall(it.message.toString())
+        }
+    }
+
+    fun exitSelect() {
+        _uiState.update {
+            it.copy(isMultiSelect = false, modsSelected = emptyList())
+        }
+    }
+
+    fun allSelect(modList: List<ModBean>) {
+        _uiState.update { it ->
+            it.copy(modsSelected = modList.map { it.id })
+        }
+    }
+
+    fun deselect() {
+        _uiState.update {
+            it.copy(modsSelected = emptyList())
+        }
+    }
+
+    fun delSelectedMods() {
+        if (_uiState.value.modsSelected.isEmpty()) return
+        if (!_uiState.value.showDelSelectModsDialog) {
+            setShowDelSelectModsDialog(true)
+        } else {
+            setShowDelSelectModsDialog(false)
+            viewModelScope.launch(Dispatchers.IO) {
+                fileObserver?.stopWatching()
+                val delMods = modRepository.getModsByIds(_uiState.value.modsSelected).first()
+                // 排除包含多个mod文件的压缩包
+                val singleFileMods = delMods.filter { modRepository.getModsCountByPath(it.path!!).first() == 1 }
+                val singleFileDisableMods = singleFileMods.filter { !it.isEnable }
+                val enableMods = singleFileMods.filter { it.isEnable }
+                ModTools.deleteMods(singleFileMods)
+                modRepository.deleteAll(singleFileDisableMods)
+                if (enableMods.isNotEmpty()) {
+                    delModsList = enableMods
+
+                    _uiState.update {
+                        it.copy(delEnableModsList = enableMods)
+                    }
+                    setShowDisEnableModsDialog(true)
+                }
+                withContext(Dispatchers.Main) {
+                    ToastUtils.longCall(App.get().getString(R.string.toast_del_mods_success, singleFileMods.size.toString()))
+                }
+                fileObserver?.startWatching()
+
+            }
+        }
+
+
+    }
+
+    fun setShowDelSelectModsDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showDelSelectModsDialog = b)
+        }
+    }
+
+    fun deleteMod() {
+        if (_uiState.value.modDetail == null) return
+        if (!_uiState.value.showDelModDialog) {
+            setShowDelModDialog(true)
+        } else {
+            setShowDelModDialog(false)
+            setShowModDetail(false)
+            val delMod = _uiState.value.modDetail!!
+            viewModelScope.launch(Dispatchers.IO) {
+                fileObserver?.stopWatching()
+                val delMods = modRepository.getModsByPathAndGamePackageName(delMod.path!!, delMod.gamePackageName!!).first()
+                // 排除包含多个mod文件的压缩包
+                val disableMods = delMods.filter { !it.isEnable }
+                val enableMods = delMods.filter { it.isEnable }
+                ModTools.deleteMods(delMods)
+                modRepository.deleteAll(disableMods)
+                if (enableMods.isNotEmpty()) {
+                    delModsList = enableMods
+                    _uiState.update {
+                        it.copy(delEnableModsList = enableMods)
+                    }
+                    setShowDisEnableModsDialog(true)
+                }
+                withContext(Dispatchers.Main) {
+                    ToastUtils.longCall(App.get().getString(R.string.toast_del_mods_success, delMods.size.toString()))
+                }
+                fileObserver?.startWatching()
+
+            }
+        }
+    }
+
+    fun setShowDelModDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showDelModDialog = b)
         }
     }
 

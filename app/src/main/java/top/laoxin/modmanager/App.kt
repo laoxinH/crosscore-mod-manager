@@ -37,7 +37,7 @@ class App : Application() {
         sApp = this
         checkOsVersion()
         createFile()
-       // registerNotificationService()
+        registerNotificationService()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             // 这里处理全局异常
             Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
@@ -90,16 +90,12 @@ class App : Application() {
     }
 
     // 注册系统通知服务
-private fun registerNotificationService() {
-        val name = getString(R.string.channel_name)
-        val descriptionText = getString(R.string.channel_description)
+    private fun registerNotificationService() {
+        val channelId = getString(R.string.channel_id)
+        val channelName = getString(R.string.channel_name)
         val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val CHANNEL_ID = getString(R.string.channel_id)
-        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-            description = descriptionText
-        }
-        val notificationManager: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(channelId, channelName, importance)
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 

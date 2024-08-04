@@ -1,10 +1,13 @@
 package top.laoxin.modmanager.ui.view.modview
 
+import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,9 +50,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,15 +66,28 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.ModBean
-
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.CardColors
+import androidx.compose.runtime.remember
+import androidx.compose.ui.composed
 @Composable
 fun ModList(
     modifier: Modifier = Modifier,
     mods: List<ModBean>,
+    modsSelected: List<Int>,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modSwitchEnable : Boolean,
+    isMultiSelect: Boolean,
     showDialog: (ModBean, Boolean) -> Unit,
-    enableMod: (ModBean, Boolean) -> Unit
+    enableMod: (ModBean, Boolean) -> Unit,
+    // 长按
+    onLongClick: (ModBean) -> Unit,  // 长按
+    // 多选点击
+    onMultiSelectClick: (ModBean) -> Unit, // 多选状态下的点击
 ) {
     LazyColumn(
         // state = state,
@@ -85,21 +103,30 @@ fun ModList(
                 mod = mod,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                 modSwitchEnable = modSwitchEnable,
-                showDialog = showDialog,
-                enableMod = enableMod
+                openModDetail = showDialog,
+                enableMod = enableMod,
+                isSelected = modsSelected.contains(mod.id),
+                onLongClick = onLongClick,
+                onMultiSelectClick = onMultiSelectClick,
+                isMultiSelect = isMultiSelect
             )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ModListItem(
-    mod: ModBean,
     modifier: Modifier = Modifier,
+    mod: ModBean,
+    isSelected: Boolean = false,
+    // 长按回调
+    onLongClick: (ModBean) -> Unit,  // 长按
+    onMultiSelectClick: (ModBean) -> Unit, // 多选状态下的点击
+    isMultiSelect: Boolean = false, // 是否多选状态
     modSwitchEnable : Boolean,
-    showDialog: (ModBean, Boolean) -> Unit,
+    openModDetail: (ModBean, Boolean) -> Unit,
     enableMod: (ModBean, Boolean) -> Unit,
-
 ) {
     val coroutineScope = rememberCoroutineScope()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -120,14 +147,30 @@ fun ModListItem(
 
 
     Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = modifier.clickable { showDialog(mod, true) },
+        elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(0.dp),
+        modifier = modifier.combinedClickable(
+            onClick = {
+                if (isMultiSelect) {
+                    onMultiSelectClick(mod)
+                } else {
+                    openModDetail(mod, true)
+                }
+            },
+            onLongClick = {
+                onLongClick(mod)
+            }
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (!isSelected) CardDefaults.cardColors().containerColor else MaterialTheme.colorScheme.secondaryContainer,
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .sizeIn(minHeight = 30.dp)
+                .sizeIn(minHeight = 30.dp, maxHeight = 80.dp)
+
+
         ) {
             Box(
                 modifier = Modifier
@@ -135,13 +178,14 @@ fun ModListItem(
                     .clip(RoundedCornerShape(8.dp))
                     .align(Alignment.CenterVertically)
 
+
             ) {
                 if (imageBitmap != null) {
                     Image(
                         imageBitmap!!, // 从路径获取图片
                         contentDescription = null,
                         alignment = Alignment.TopCenter,
-                        contentScale = ContentScale.FillWidth
+                        contentScale = ContentScale.Crop
                     )
                 } else {
                     Image(
@@ -185,115 +229,6 @@ fun ModListItem(
                 Switch(checked = mod.isEnable, onCheckedChange = { enableMod(mod, it) }, enabled = modSwitchEnable)
             }
         }
-    }
-}
-
-
-@Composable
-fun ModDetailDialog(
-    showDialog: Boolean,
-    mod: ModBean,
-    onDismiss: () -> Unit
-) {
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = onDismiss, // 点击对话框外的区域时关闭对话框
-            title = { Text(text = mod.name ?: "", style = MaterialTheme.typography.titleMedium) },
-            text = {
-                Column {
-                    // 文本标签
-                    AssistChip(
-                        onClick = { },
-                        label = { Text(stringResource(R.string.mod_page_mod_detail_dialog_detali_title)) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Filled.Settings,
-                                contentDescription = "Localized description",
-                                Modifier.size(AssistChipDefaults.IconSize)
-                            )
-                        }
-                    )
-                    Card {
-                        Column(Modifier.padding(16.dp)) {
-
-
-                            Text(
-                                text = stringResource(
-                                    R.string.mod_page_mod_detail_dialog_detali_descript,
-                                    mod.description ?: ""
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.mod_page_mod_detail_dialog_detali_version,
-                                    mod.version ?: ""
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.mod_page_mod_detail_dialog_detali_path,
-                                    mod.path ?: ""
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.mod_page_mod_detail_dialog_detali_modType,
-                                    mod.modType ?: ""
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.mod_page_mod_detail_dialog_detali_modNums,
-                                    mod.modFiles?.size ?: ""
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.mod_page_mod_detail_dialog_detali_author,
-                                    mod.author ?: ""
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                    // 垂直分割
-                    Spacer(modifier = Modifier.height(8.dp))
-                    // 预览图
-                    if ((!mod.images.isNullOrEmpty() || !mod.isEncrypted) || (mod.password != null && !mod.images.isNullOrEmpty())) {
-                        AssistChip(
-                            onClick = { },
-                            label = { Text(stringResource(R.string.mod_page_mod_detail_dialog_detali_perview)) },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Filled.Image,
-                                    contentDescription = "Localized description",
-                                    Modifier.size(AssistChipDefaults.IconSize)
-                                )
-                            }
-                        )
-
-                        Column(Modifier.padding(16.dp)) {
-                            val imageBitmaps = mod.images?.mapNotNull { path ->
-                                createImageBitmapFromPath(path)
-                            }
-                            ImagePager(images = imageBitmaps!!)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    onDismiss()
-                }) {
-                    Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
-                }
-            }
-        )
     }
 }
 
@@ -353,6 +288,5 @@ fun ImagePager(images: List<ImageBitmap>) {
             modifier = Modifier.clip(RoundedCornerShape(8.dp)) // 设置图片的圆角
         )
     }
-
-
 }
+

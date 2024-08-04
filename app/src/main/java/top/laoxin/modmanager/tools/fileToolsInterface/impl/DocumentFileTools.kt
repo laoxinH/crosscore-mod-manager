@@ -91,10 +91,12 @@ object DocumentFileTools : BaseFileTools {
         val pathUri = pathToUri(path)
         val documentFile = DocumentFile.fromTreeUri(app, pathUri)
         val existingFile = documentFile?.findFile(filename)
+
         if (existingFile?.exists() == true) {
             existingFile.delete()
         }
-        val file = documentFile?.createFile("text/plain", filename)
+        var file = documentFile?.createFile("application/octet-stream", filename)
+
         return try {
             file?.let {
                 app.contentResolver.openOutputStream(it.uri)?.use { outputStream ->

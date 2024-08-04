@@ -48,6 +48,13 @@ interface ModRepository {
     //通过包名查询已开启的mods数量
     fun getEnableModsCountByGamePackageName(gamePackageName: String): Flow<Int>
 
+    // 通过ids查询mods
+    fun getModsByIds(ids: List<Int>): Flow<List<ModBean>>
+
+
+    // 通过path查询mod数量
+    fun getModsCountByPath(path: String): Flow<Int>
+
 
 
 }

@@ -27,7 +27,6 @@ object ArknightsTools : BaseSpecialGameTools {
         /*.disableHtmlEscaping()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
         .create()
-    private val app = App.get()
     private lateinit var fileTools : BaseFileTools
     private lateinit var hotUpdate : HotUpdate
     private lateinit var persistentRes : PersistentRes

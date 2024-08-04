@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.documentfile.provider.DocumentFile
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -147,7 +149,6 @@ fun RequestStoragePermission(
 
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun RequestUriPermission(path: String,showDialog: Boolean, onDismissRequest: () -> Unit) {
@@ -256,6 +257,92 @@ fun SelectPermissionDialog(
                 }
             }
         )
+
+    }
+
+
+
+
+}
+
+// 请求通知权限
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun RequestNotificationPermission() {
+    val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(true) }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permissionState = rememberPermissionState(
+            permission = Manifest.permission.POST_NOTIFICATIONS
+        )
+        when (permissionState.status) {
+            PermissionStatus.Granted -> {
+                showDialog = false
+            }
+            is PermissionStatus.Denied -> {
+                Column {
+                    val textToShow =
+                        if ((permissionState.status as PermissionStatus.Denied).shouldShowRationale) {
+                            val startForResult =
+                                rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+                                    if (result.resultCode == Activity.RESULT_OK) {
+                                        ToastUtils.longCall(R.string.toast_permission_granted)
+                                        showDialog = false
+                                    } else {
+                                        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                                            ToastUtils.longCall(R.string.toast_permission_not_granted)
+                                        } else {
+                                            ModTools.makeModsDirs()
+                                            ToastUtils.longCall(R.string.toast_permission_granted)
+                                            showDialog = false
+                                        }
+                                    }
+                                }
+                            //如果用户拒绝了该权限但可以显示理由，那么请温和地解释为什么应用程序需要此权限(拒绝权限)
+                            DialogCommon(
+                                title = stringResource(id = R.string.dialog_reqest_notification_title),
+                                content = stringResource(id = R.string.dialog_reqest_notification_message),
+                                onConfirm = {
+                                    val intent = Intent().apply {
+                                        action = "android.settings.APP_NOTIFICATION_SETTINGS"
+
+                                        // for Android 5-7
+                                        putExtra("app_package", context.packageName)
+                                        putExtra("app_uid", context.applicationInfo.uid)
+
+                                        // for Android 8 and above
+                                        putExtra("android.provider.extra.APP_PACKAGE", context.packageName)
+                                    }
+                                    startForResult.launch(intent)
+                                },
+                                onCancel = {
+                                    // 直接关闭应用
+                                    showDialog = false
+                                },
+                                showDialog = showDialog
+                            )
+
+                        } else {
+
+                            //如果这是用户第一次登陆此功能，或者用户不想再次被要求获得此权限，请说明该权限是必需的(用��选择拒绝且不再询问)
+                            DialogCommon(
+                                title = stringResource(id = R.string.dialog_reqest_notification_title),
+                                content = stringResource(id = R.string.dialog_reqest_notification_message),
+                                onConfirm = {
+                                    Log.d("RequestNotificationPermission", "第一次执行通知请求: ")
+                                    permissionState.launchPermissionRequest()
+                                },
+                                onCancel = {
+                                    // 直接关闭应用
+                                    showDialog = false
+                                },
+                                showDialog = showDialog
+                            )
+                        }
+                }
+            }
+        }
 
     }
 
