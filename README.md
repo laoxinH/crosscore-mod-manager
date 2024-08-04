@@ -23,12 +23,13 @@
 7. [X] 支持任意的Mod打包方式，例如多级目录，不在局限于单一形式（详见[Mod打包部分](#MOD打包)）
 8. [X] 支持一个压缩文件中打包多个不同Mod（详见[Mod打包部分](#MOD打包)）
 9. [X] 支持自定义游戏配置文件（详见[自定义游戏部分](#添加自定义游戏)）
-9. [X] **Mod目前仅支持Zip格式压缩
+10. [X] 支持常见压缩包格式如7z、rar、zip
+11. [X] 支持批量管理MOD
 
     > **关于特殊游戏打包说明，例如明日方舟、碧蓝航线等游戏（当游戏中多个目录存在同名文件时打包方式有所变化，见[特殊MOD打包说明](#特殊MOD打包说明)）**
     >
 
-    **
+     **
 
 ## 软件使用说明
 
@@ -49,11 +50,11 @@
 
 ## MOD打包
 
-**注意打包MOD目前仅支持ZIP格式**
+**注意打包MOD如果使用ZIP格式压缩请不要使用中文密码，RAR和7z无所谓**
 
-**主意打包MOD目前仅支持ZIP格式**
+**注意打包MOD如果使用ZIP格式压缩请不要使用中文密码，RAR和7z无所谓**
 
-**主意打包MOD目前仅支持ZIP格式**
+**注意打包MOD如果使用ZIP格式压缩请不要使用中文密码，RAR和7z无所谓**
 
 - [X] **MOD压缩文件推荐结构**
 
@@ -105,26 +106,49 @@
 
 ```json
 {
-  "gameName" : "碧蓝航线",  // 必须填一个名字
-  "serviceName" : "官服",  // 必须填一个服务器名字
-  "packageName": "com.bilibili.azurlane", // 游戏包名必须正确
-  "version" : "1.0.0",  // 配置文件版本
-  "gamePath" : "Android/data/com.bilibili.azurlane/", // 游戏的data目录
-  "antiHarmonyFile" : "Android/data/com.bilibili.azurlane/files/localization.txt", // 反和谐文件路径
-  "antiHarmonyContent" : "Localization = true\nLocalization_skin = true",  // 写入到反和谐文件中的内容,换行使用\n ，这两个反和谐配置没有则留空即可()空字符串"")
+  "gameName": "明日方舟",   // 必须填一个名字
+  "serviceName": "B服-配置2.0",  // 必须填一个服务器名字
+  "packageName": "com.hypergryph.arknights.bilibili",
+  "version": "2.0.0", // 配置文件版本
+  "gamePath": "Android/data/com.hypergryph.arknights.bilibili/", // 游戏的data目录
+  "antiHarmonyFile": "",   // 反和谐文件路径，没有就不填
+  "antiHarmonyContent": "", // 写入到反和谐文件中的内容,换行使用\n ，这两个反和谐配置没有则留空即可()空字符串"")没有不填
   // 用于替换mod文件的目录
-  "gameFilePath" : [
-    "Android/data/com.bilibili.azurlane/files/AssetBundles/shipyardicon/",
-    "Android/data/com.bilibili.azurlane/files/AssetBundles/paintingface/",
-    "Android/data/com.bilibili.azurlane/files/AssetBundles/painting/"
+  "gameFilePath": [
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/dynchars/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/avg/characters/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/avg/imgs/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/spritepack/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/refs/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/ui/rglktopic/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/ui/namecardskin/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/enemies/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/effects/"
   ],
-  "modType" : ["shipyardicon","paintingface","painting"], // mod类型类必须和gameFilePath中的目录一一对应,可以是中文
-  "modSavePath" : "", // 随便填,可为空
-  "isGameFileRepeat" : true  // gameFilePath中设置的游戏目录如果存在同名文件,必须设置为true
-  // 注意当"isGameFileRepeat"为true时,压缩包内mod文件必须放到gameFilePath最后的路径
-  // 比如"Android/data/com.bilibili.azurlane/files/AssetBundles/shipyardicon/",这个gameFilePath中要想扫描到mod
-  // 必须在压缩包内存在"shipyardico"文件夹,将用于替换这个游戏路径内的mod文件放入其中
+  // mod类型类必须和gameFilePath中的目录一一对应,可以是中文
+  "modType": [
+    "普通立绘",
+    "静态皮肤",
+    "动态皮肤",
+    "剧情立绘",
+    "剧情cg",
+    "肉鸽道具贴图",
+    "界面ui素材",
+    "肉鸽主题背景",
+    "个人名片背景",
+    "敌人修改",
+    "效果修改"
+  ],
+  "modSavePath": "",
+  "isGameFileRepeat": true,
+  "enableBackup": true,
+  "tips": "注意如果此前自行修改过游戏文件，可能会出现反检测失败导致无法正常使用MOD，建议先清除游戏数据重新下载游戏资源后再使用MOD，如果出现反检测失败无论此前更改过游戏文件都需要重新下载游戏资源！"
 }
+// 注意当"isGameFileRepeat"为true时,压缩包内mod文件必须放到gameFilePath最后的路径
+// 比如"Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/refs/",这个gameFilePath中要想扫描到mod
+// 必须在压缩包内存在"refs"文件夹,将用于替换这个游戏路径内的mod文件放入其中
 ```
 
 > 命名为*`xxx.json`*放入MOD实验 `配置的MOD目录`里的 `GameConfig`文件夹，再到设置中点击 `读取游戏配置`，然后点击 `选择游戏`即可出
