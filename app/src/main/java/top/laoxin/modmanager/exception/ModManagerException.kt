@@ -12,4 +12,5 @@ class SpecialOperationFailedException(message : String) : Exception(message)
 // 密码错误异常
 class PasswordErrorException(message : String) : Exception(message)
 
-
+// 流复制失败异常
+class CopyStreamFailedException(message : String) : Exception(message)

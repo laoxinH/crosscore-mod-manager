@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.ui.view
 
 import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,6 +40,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ModTools
@@ -79,16 +83,29 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
         showDialog = uiState.showScanDirectoryModsDialog
     )
 
+    DialogCommon(
+        title = stringResource(id = R.string.console_scan_directory_mods),
+        content = stringResource(id = R.string.console_del_unzip_dictionary_content),
+        onConfirm = {
+            viewModel.openDelUnzipDialog(true)
+            viewModel.setShowDelUnzipDialog(false)
+        },
+        onCancel = {
+            viewModel.setShowDelUnzipDialog(false)
+        },
+        showDialog = uiState.showDeleteUnzipDialog
+    )
+
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp)
             .padding(innerPadding)
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
 
         // 权限提示框
-       RequestStoragePermission()
+        RequestStoragePermission()
         // 请求通知权限
         RequestNotificationPermission()
         // 升级提示
@@ -125,7 +142,7 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
                 viewModel.setOpenPermissionRequestDialog(false)
             }
         }
-
+        Spacer(modifier = Modifier.height(16.dp))
         GameInformationCard(viewModel,uiState.gameInfo, Modifier.align(Alignment.CenterHorizontally))
         // 添加一些间距
         Spacer(modifier = Modifier.height(16.dp))
@@ -147,11 +164,12 @@ fun GameInformationCard(
     modifier: Modifier = Modifier
 ) {
     // 第一部分：一个卡片展示当前设置项目的一些信息
-    Box(
+
+    Card(
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 第一个区域：添加一个圆角图片
@@ -359,6 +377,19 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Text(
+                    text = stringResource(id = R.string.console_configuration_del_unzip),
+                    style = typography.titleMedium
+                )
+                Switch(checked = uiState.delUnzipDictionary, onCheckedChange = {
+                    viewModel.openDelUnzipDialog(it)
+                })
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 TextButton(
                     onClick = { openDirectoryLauncher.launch(null) },
                     contentPadding = PaddingValues(0.dp)
@@ -407,11 +438,16 @@ fun ConsolePage(viewModel: ConsoleViewModel) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ConsoleTopBar(viewModel: ConsoleViewModel) {
+    val context = LocalContext.current
+    var needOpenVpn by
+    remember {
+        mutableStateOf(false)
+    }
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         title = {
             Text(

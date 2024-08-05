@@ -95,7 +95,7 @@ object DocumentFileTools : BaseFileTools {
         if (existingFile?.exists() == true) {
             existingFile.delete()
         }
-        var file = documentFile?.createFile("application/octet-stream", filename)
+        val file = documentFile?.createFile("application/octet-stream", filename)
 
         return try {
             file?.let {

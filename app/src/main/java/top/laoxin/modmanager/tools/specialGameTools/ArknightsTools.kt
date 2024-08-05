@@ -201,6 +201,10 @@ object ArknightsTools : BaseSpecialGameTools {
         return true
     }
 
+    override fun specialOperationNeedOpenVpn(): Boolean {
+        return false
+    }
+
 
     // 修改check文件
     private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long) : Boolean {

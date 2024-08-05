@@ -4,13 +4,15 @@ import groovy.util.Expando
 import java.security.MessageDigest
 
 object buildInfo {
-    val versionCode = 19
-    val versionName = "2.1.0 beta"
+    val versionCode = 20
+    val versionName = "2.1.1 beta"
     val versionDes = versionName + " 更新\n" +
-            "1.更加友好的UI界面\n" +
-            "2.添加批量操作\n" +
-            "3.优化尘白MOD启动注入服务\n" +
-            "4.优化MOD详情页\n" +
+            "1.修复shizuku授权下某些压缩包解压后无法复制文件的BUG\n" +
+            "2.添加MOD开启失败后回滚\n" +
+            "3.更新APP图标(感谢@昏睡猫猫头 提供App图标)\n" +
+            "4.添加始终删除解压文件的开关\n" +
+            "5.调整UI界面\n" +
+            "6.更新感谢名单\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册Gitee自行在设置页面前往Github下载最新版"
@@ -114,6 +116,7 @@ dependencies {
 
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.rules)
+    implementation(libs.androidx.camera.core)
     testImplementation("junit:junit:4.12")
     /*    implementation(libs.androidx.core.ktx)
        implementation(libs.androidx.lifecycle.runtime.ktx)

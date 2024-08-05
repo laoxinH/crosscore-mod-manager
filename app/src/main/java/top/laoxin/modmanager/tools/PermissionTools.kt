@@ -16,7 +16,7 @@ import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.RequestCode
 import top.laoxin.modmanager.tools.ModTools.ROOT_PATH
-import top.laoxin.modmanager.userservice.FileExplorerServiceManager
+import top.laoxin.modmanager.userservice.shizuku.FileExplorerServiceManager
 
 
 object PermissionTools {

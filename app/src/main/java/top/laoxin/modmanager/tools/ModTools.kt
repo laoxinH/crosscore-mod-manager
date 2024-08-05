@@ -20,6 +20,7 @@ import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.SpecialGame
+import top.laoxin.modmanager.exception.CopyStreamFailedException
 import top.laoxin.modmanager.listener.ProgressUpdateListener
 import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
@@ -141,10 +142,8 @@ object ModTools {
             flags.add(flag)
             progressUpdateListener?.onProgressUpdate("${index + 1}/${modBean.modFiles.size}")
         }
-        if (!flags.all { it }) {
-            throw IOException(App.get().getString(R.string.toast_copy_failed))
-        }
-        return true
+       return flags.all { it }
+
     }
 
     suspend fun restoreGameFiles(backups: List<BackupBean?>) {
@@ -499,7 +498,11 @@ object ModTools {
         } catch (e: RemoteException) {
             flags.add(false)
         }
-        return flags.all { it }
+        if (!flags.all { it }) {
+            // 抛出流复制失败异常
+            throw CopyStreamFailedException(App.get().getString(R.string.toast_copy_failed))
+        }
+        return true
     }
 
 
@@ -646,11 +649,11 @@ object ModTools {
         gameModPath: String,
         modFiles: List<String>,
         password: String?,
-        pathType: Int
+
     ): Boolean {
         val checkPermission = PermissionTools.checkPermission(gameModPath)
-        setModsToolsSpecialPathReadType(checkPermission)
-        when (pathType) {
+        Log.d(TAG, "copyModsByStream: $checkPermission")
+        when (checkPermission) {
             PathType.SHIZUKU -> {
                 return copyModStreamByShizuku(path, gameModPath, modFiles, password)
             }
@@ -662,7 +665,6 @@ object ModTools {
             PathType.FILE -> {
                 return copyModStreamByFile(path, gameModPath, modFiles, password)
             }
-
             else -> {
                 return false
             }
@@ -684,7 +686,11 @@ object ModTools {
         } catch (e: RemoteException) {
             flags.add(false)
         }
-        return flags.all { it }
+        if (!flags.all { it }) {
+            // 抛出流复制失败异常
+            throw CopyStreamFailedException(App.get().getString(R.string.toast_copy_failed))
+        }
+        return true
 
     }
 
@@ -700,7 +706,11 @@ object ModTools {
         } catch (e: RemoteException) {
             flags.add(false)
         }
-        return flags.all { it }
+        if (!flags.all { it }) {
+            // 抛出流复制失败异常
+            throw CopyStreamFailedException(App.get().getString(R.string.toast_copy_failed))
+        }
+        return true
 
     }
 

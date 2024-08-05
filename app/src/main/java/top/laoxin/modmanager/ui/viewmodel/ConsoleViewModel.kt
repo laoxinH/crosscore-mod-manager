@@ -46,7 +46,7 @@ import top.laoxin.modmanager.database.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
 import top.laoxin.modmanager.observer.FlashModsObserver
-import top.laoxin.modmanager.service.ProjectSnowStartService
+import top.laoxin.modmanager.userservice.gamestart.ProjectSnowStartService
 import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
@@ -76,7 +76,6 @@ class ConsoleViewModel(
     private var _updateContent by mutableStateOf("")
     val updateContent: String
         get() = _updateContent
-
 
 
     private val _uiState = MutableStateFlow<ConsoleUiState>(ConsoleUiState())
@@ -116,6 +115,8 @@ class ConsoleViewModel(
         userPreferencesRepository.getPreferenceFlow("OPEN_PERMISSION_REQUEST_DIALOG", false)
     private val scanDirectoryModsFlow =
         userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", false)
+    private val delUnzipDictionaryFlow =
+        userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
     private val userPreferencesState = combine(
         selectedGameFlow,
         selectedDirectoryFlow
@@ -137,14 +138,16 @@ class ConsoleViewModel(
         scanDownloadFlow,
         openPermissionRequestDialogFlow,
         scanDirectoryModsFlow,
+        delUnzipDictionaryFlow,
         _uiState
     ) { values ->
-        (values[5] as ConsoleUiState).copy(
+        (values[6] as ConsoleUiState).copy(
             scanQQDirectory = values[0] as Boolean,
             selectedDirectory = values[1] as String,
             scanDownload = values[2] as Boolean,
             openPermissionRequestDialog = values[3] as Boolean,
-            scanDirectoryMods = values[4] as Boolean
+            scanDirectoryMods = values[4] as Boolean,
+            delUnzipDictionary = values[5] as Boolean,
         )
 
     }.stateIn(
@@ -158,7 +161,7 @@ class ConsoleViewModel(
         getNewInfo()
         ModTools.updateGameConfig()
         viewModelScope.launch {
-            userPreferencesState.collectLatest{
+            userPreferencesState.collectLatest {
                 updateLogTools(it)
                 updateGameInfo(it)
                 checkInstallMod()
@@ -225,7 +228,8 @@ class ConsoleViewModel(
     private fun openDictionaryObserver(userPreferencesState: UserPreferencesState) {
         fileObserver?.stopWatching()
 
-        fileObserver = FlashModsObserver(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
+        fileObserver =
+            FlashModsObserver(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
         fileObserver?.startWatching()
     }
 
@@ -252,7 +256,7 @@ class ConsoleViewModel(
                     file.mkdirs()
                     userPreferencesRepository.savePreference(
                         "SELECTED_DIRECTORY",
-                        "/$selectedDirectory/".replace("tree","").replace("//", "/")
+                        "/$selectedDirectory/".replace("tree", "").replace("//", "/")
                     )
                 } else {
                     ToastUtils.longCall(R.string.toast_this_dir_has_no_prim_android)
@@ -282,7 +286,6 @@ class ConsoleViewModel(
             )
         }
     }
-
 
 
     // 设置扫描文件夹中的Mods
@@ -555,6 +558,22 @@ class ConsoleViewModel(
     // 更新日志工具
     private fun updateLogTools(userPreferencesState: UserPreferencesState) {
         LogTools.setLogPath(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
+    }
+
+    fun setShowDelUnzipDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showDeleteUnzipDialog = b)
+        }
+    }
+
+    fun openDelUnzipDialog(it: Boolean) {
+        if (it && !_uiState.value.showDeleteUnzipDialog) {
+            setShowDelUnzipDialog(true)
+        } else {
+            viewModelScope.launch {
+                userPreferencesRepository.savePreference("DELETE_UNZIP_DIRECTORY", it)
+            }
+        }
     }
 }
 

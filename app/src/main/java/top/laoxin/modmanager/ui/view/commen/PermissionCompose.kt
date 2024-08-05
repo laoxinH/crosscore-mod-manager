@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,7 +53,7 @@ import top.laoxin.modmanager.ui.view.SettingItem
 fun RequestStoragePermission(
 ) {
     when (App.osVersion) {
-        OSVersion.OS_13, OSVersion.OS_11,OSVersion.OS_14 -> {
+        OSVersion.OS_13, OSVersion.OS_11, OSVersion.OS_14 -> {
             if (!Environment.isExternalStorageManager()) {
                 var showDialog by remember { mutableStateOf(true) }
                 val context = LocalContext.current
@@ -71,12 +73,14 @@ fun RequestStoragePermission(
                         }
                     }
 
-                val intent: Intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                    .setData(Uri.parse("package:" + context.packageName))
+                val intent: Intent =
+                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).setData(
+                            Uri.parse("package:" + context.packageName)
+                        )
 
                 DialogCommon(
-                    title = stringResource(id =R.string.dialog_storage_title),
-                    content = stringResource(id =R.string.dialog_storage_message),
+                    title = stringResource(id = R.string.dialog_storage_title),
+                    content = stringResource(id = R.string.dialog_storage_message),
                     onConfirm = {
                         startForResult.launch(intent)
                     },
@@ -107,8 +111,8 @@ fun RequestStoragePermission(
                             if ((permissionState.status as PermissionStatus.Denied).shouldShowRationale) {
                                 //如果用户拒绝了该权限但可以显示理由，那么请温和地解释为什么应用程序需要此权限(拒绝权限)
                                 DialogCommon(
-                                    title = stringResource(id =R.string.dialog_storage_title),
-                                    content = stringResource(id =R.string.dialog_storage_message_a6),
+                                    title = stringResource(id = R.string.dialog_storage_title),
+                                    content = stringResource(id = R.string.dialog_storage_message_a6),
                                     onConfirm = {
                                         permissionState.launchPermissionRequest()
                                     },
@@ -123,8 +127,8 @@ fun RequestStoragePermission(
                             } else {
                                 //如果这是用户第一次登陆此功能，或者用户不想再次被要求获得此权限，请说明该权限是必需的(用户选择拒绝且不再询问)
                                 DialogCommon(
-                                    title = stringResource(id =R.string.dialog_storage_title),
-                                    content = stringResource(id =R.string.dialog_storage_message_a6),
+                                    title = stringResource(id = R.string.dialog_storage_title),
+                                    content = stringResource(id = R.string.dialog_storage_message_a6),
                                     onConfirm = {
                                         permissionState.launchPermissionRequest()
                                     },
@@ -151,23 +155,17 @@ fun RequestStoragePermission(
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
-fun RequestUriPermission(path: String,showDialog: Boolean, onDismissRequest: () -> Unit) {
+fun RequestUriPermission(path: String, showDialog: Boolean, onDismissRequest: () -> Unit) {
 
     SelectPermissionDialog(
-        path = path,
-        onDismissRequest = { onDismissRequest() },
-        showDialog = showDialog
+        path = path, onDismissRequest = { onDismissRequest() }, showDialog = showDialog
     )
 }
 
 
-
-
 @Composable
 fun SelectPermissionDialog(
-    path : String,
-    onDismissRequest: () -> Unit,
-    showDialog: Boolean
+    path: String, onDismissRequest: () -> Unit, showDialog: Boolean
 ) {
     Log.d("SelectPermissionDialog", "SelectPermissionDialog: $path")
     val requestPermissionPath = PermissionTools.getRequestPermissionPath(path)
@@ -180,8 +178,8 @@ fun SelectPermissionDialog(
                 if (result.resultCode == Activity.RESULT_OK) {
                     ToastUtils.longCall(R.string.toast_permission_granted)
 
-                    val  uri = result.data?.data
-                    if (uri != null){
+                    val uri = result.data?.data
+                    if (uri != null) {
                         Log.d("SelectPermissionDialog", "SelectPermissionDialog: $uri")
                         App.get().contentResolver.takePersistableUriPermission(
                             uri,
@@ -196,8 +194,7 @@ fun SelectPermissionDialog(
             }
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         intent.setFlags(
-            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
-                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
         )
 
         val treeUri = FileTools.pathToUri(requestPermissionPath)
@@ -210,28 +207,23 @@ fun SelectPermissionDialog(
 
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, df.uri)
         }
-        AlertDialog(
-            onDismissRequest = {}, // 点击对话框外的区域时关闭对话框
-            title = { Text(stringResource(R.string.choose_method_title)) },
-            text = {
+        AlertDialog(onDismissRequest = {}, // 点击对话框外的区域时关闭对话框
+            title = { Text(stringResource(R.string.choose_method_title)) }, text = {
                 Column {
                     Text(stringResource(R.string.select_permission_dialog_descript))
                     Spacer(modifier = Modifier.height(10.dp))
                     if (App.osVersion == OSVersion.OS_11 || App.osVersion == OSVersion.OS_13) {
 
-                        SettingItem(
-                            name = stringResource(R.string.select_permission_dialog_by_file),
+                        SettingItem(name = stringResource(R.string.select_permission_dialog_by_file),
                             description = stringResource(R.string.select_permission_dialog_by_file_descript),
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
                                 //onDismissRequest()
                                 startForResult.launch(intent)
-                            }
-                        )
+                            })
 
                     }
-                    SettingItem(
-                        name = stringResource(R.string.select_permission_dialog_by_shizuku),
+                    SettingItem(name = stringResource(R.string.select_permission_dialog_by_shizuku),
                         description = stringResource(R.string.select_permission_dialog_by_shizuku_descript),
                         //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                         onClick = {
@@ -245,22 +237,17 @@ fun SelectPermissionDialog(
                             } else {
                                 ToastUtils.longCall(R.string.toast_shizuku_not_available)
                             }
-                        }
-                    )
+                        })
                 }
-            },
-            confirmButton = {
+            }, confirmButton = {
                 TextButton(onClick = {
                     onDismissRequest()
                 }) {
                     Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
                 }
-            }
-        )
+            })
 
     }
-
-
 
 
 }
@@ -280,6 +267,7 @@ fun RequestNotificationPermission() {
             PermissionStatus.Granted -> {
                 showDialog = false
             }
+
             is PermissionStatus.Denied -> {
                 Column {
                     val textToShow =
@@ -290,10 +278,11 @@ fun RequestNotificationPermission() {
                                         ToastUtils.longCall(R.string.toast_permission_granted)
                                         showDialog = false
                                     } else {
-                                        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                                        if (!NotificationManagerCompat.from(context)
+                                                .areNotificationsEnabled()
+                                        ) {
                                             ToastUtils.longCall(R.string.toast_permission_not_granted)
                                         } else {
-                                            ModTools.makeModsDirs()
                                             ToastUtils.longCall(R.string.toast_permission_granted)
                                             showDialog = false
                                         }
@@ -312,7 +301,10 @@ fun RequestNotificationPermission() {
                                         putExtra("app_uid", context.applicationInfo.uid)
 
                                         // for Android 8 and above
-                                        putExtra("android.provider.extra.APP_PACKAGE", context.packageName)
+                                        putExtra(
+                                            "android.provider.extra.APP_PACKAGE",
+                                            context.packageName
+                                        )
                                     }
                                     startForResult.launch(intent)
                                 },
@@ -347,4 +339,3 @@ fun RequestNotificationPermission() {
     }
 
 }
-

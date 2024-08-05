@@ -39,6 +39,8 @@ class UserPreferencesRepository(
             "SELECTED_GAME" to intPreferencesKey("SELECTED_GAME"),
             // 扫描文件夹中的Mods
             "SCAN_DIRECTORY_MODS" to booleanPreferencesKey("SCAN_DIRECTORY_MODS"),
+            // 删除解压目录
+            "DELETE_UNZIP_DIRECTORY" to booleanPreferencesKey("DELETE_UNZIP_DIRECTORY"),
         )
         const val TAG = "UserPreferencesRepo"
     }

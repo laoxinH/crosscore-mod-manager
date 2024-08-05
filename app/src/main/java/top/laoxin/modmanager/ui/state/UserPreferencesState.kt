@@ -8,4 +8,5 @@ data class UserPreferencesState (
     val gameService : String = "",
     val selectedGameIndex : Int = 0,
     val scanDirectoryMods : Boolean = false,
+    val delUnzipDictionary: Boolean = false,
 )

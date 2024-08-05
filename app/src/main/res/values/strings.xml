@@ -167,7 +167,7 @@
     <string name="toast_get_game_config_failed">获取游戏配置失败</string>
     <string name="toast_special_operation_failed">防检测失败</string>
     <string name="switch_download_game_tiltle">下载游戏配置文件</string>
-    <string name="setting_thinks_link_desc">个人主页: %1$s</string>
+    <string name="setting_thinks_link_desc">JOB: %1$s</string>
     <string name="test1">未授权</string>
     <string name="tips_special_operation">执行特殊游戏操作</string>
     <string name="toast_decompression_failed">解压失败</string>
@@ -203,5 +203,9 @@
     <string name="dialog_del_mod_content">删除后文件不可恢复! 如果对应压缩包含多个MOD也将会一并删除!</string>
     <string name="dialog_reqest_notification_title">请求通知权限</string>
     <string name="dialog_reqest_notification_message">MOD实验室启动某些游戏(例如尘白禁区)的MOD注入服务需要保留后台服务, 为防止系统关闭后台需要显示通知!</string>
+    <string name="open_mod_failed_dialog_title">开启失败</string>
+    <string name="open_mod_failed_dialog_desc">%1$s个MOD开启失败, 是否执行回滚(只会回滚开启失败的MOD)</string>
+    <string name="console_configuration_del_unzip">始终删除解压文件</string>
+    <string name="console_del_unzip_dictionary_content">将会在开启MOD后始终删除解压文件,可以节省空间,但下次开启同样的MOD会再次解压导致二次开启速度变慢!</string>
 
 </resources>

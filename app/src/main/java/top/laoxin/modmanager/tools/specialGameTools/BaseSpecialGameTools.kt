@@ -24,6 +24,7 @@ interface BaseSpecialGameTools {
     fun specialOperationCreateMods(gameInfo: GameInfoBean) : List<ModBeanTemp>
     fun specialOperationScanMods(gameInfo: String, modFileName: String) : Boolean
     fun specialOperationSelectGame(gameInfo: GameInfoBean) : Boolean
+    fun specialOperationNeedOpenVpn() : Boolean
 
     fun onProgressUpdate(progress: String) {
         progressUpdateListener?.onProgressUpdate(progress)

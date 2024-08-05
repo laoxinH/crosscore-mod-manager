@@ -75,6 +75,8 @@ class ModViewModel(
     private var delModsList = emptyList<ModBean>()
 
 
+
+
     // mod列表
 
 
@@ -123,21 +125,24 @@ class ModViewModel(
     private val scanDirectoryMods =
         userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", false)
 
-
+    private val delUnzipDictionaryFlow =
+        userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
     // 生成用户配置对象
     private val userPreferences: StateFlow<UserPreferencesState> = combine(
         scanQQDirectoryFlow,
         selectedDirectoryFlow,
         scanDownloadFlow,
         selectedGame,
-        scanDirectoryMods
-    ) { scanQQDirectory, selectedDirectory, scanDownload, selectedGame, scanDirectoryMods ->
+        scanDirectoryMods,
+        delUnzipDictionaryFlow
+    ) { values ->
         UserPreferencesState(
-            scanQQDirectory = scanQQDirectory,
-            selectedDirectory = selectedDirectory,
-            scanDownload = scanDownload,
-            selectedGameIndex = selectedGame,
-            scanDirectoryMods = scanDirectoryMods
+            scanQQDirectory = values[0] as Boolean,
+            selectedDirectory = values[1] as String,
+            scanDownload = values[2] as Boolean,
+            selectedGameIndex =  values[3] as Int,
+            scanDirectoryMods = values[4] as Boolean,
+            delUnzipDictionary = values[5] as Boolean
         )
     }.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesState()
@@ -388,6 +393,7 @@ class ModViewModel(
             Log.d("ModViewModel", "enableMod called with: modBean = $modBean, b = $b")
             if (b) {
                 enableMod(listOf(modBean))
+
             } else {
                 disableMod(listOf(modBean), isDel)
             }
@@ -416,7 +422,8 @@ class ModViewModel(
         var successCount = 0
         // 开启失败的mod数量
         var failCount = 0
-
+        // 开启失败的mods
+        val enableFailedMods = mutableListOf<ModBean>()
         Log.d("ModViewModel", "enableMod: 开始执行开启 : $modBean")
         viewModelScope.launch(Dispatchers.IO) {
             setModSwitchEnable(false)
@@ -460,15 +467,20 @@ class ModViewModel(
                     ModTools.specialOperationEnable(modBean, _gameInfo.packageName)
                     // 复制mod文件
                     setTipsText(App.get().getString(R.string.tips_copy_mod_to_game))
-                    ModTools.copyModFiles(modBean, gameModPath, unZipPath)
+                    if (!ModTools.copyModFiles(modBean, gameModPath, unZipPath)) {
+                        setTipsText(App.get().getString(R.string.tips_copy_mod_failed))
+                        ModTools.copyModsByStream(
+                            modBean.path!!, gameModPath, modBean.modFiles!!, modBean.password
+                        )
+                    }
                     modRepository.updateMod(modBean.copy(isEnable = true))
                     setMultitaskingProgress("${index + 1}/${mods.size}")
                     successCount++
 
 
-
                 }.onFailure {
                     failCount++
+                    enableFailedMods.add(modBean)
                     withContext(Dispatchers.Main) {
                         ToastUtils.longCall(it.message)
                     }
@@ -476,9 +488,16 @@ class ModViewModel(
                     LogTools.logRecord("开启mod失败:${modBean.name}--$it")
                 }
             }
+            if (userPreferences.value.delUnzipDictionary) {
+                ModTools.deleteTempFile()
+            }
             withContext(Dispatchers.Main) {
                 setShowTips(false)
                 setModSwitchEnable(true)
+                if (enableFailedMods.isNotEmpty()) {
+                    setEnableFailedMods(enableFailedMods)
+                    setShowOpenFailedDialog(true)
+                }
                 ToastUtils.longCall(
                     App.get().getString(
                         R.string.toast_swtch_mods_result,
@@ -490,8 +509,14 @@ class ModViewModel(
         }
     }
 
+    fun setShowOpenFailedDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showOpenFailedDialog = b)
+        }
+    }
+
     // 关闭mod
-    private fun disableMod(mods: List<ModBean>, isDel: Boolean) {
+    fun disableMod(mods: List<ModBean>, isDel: Boolean) {
         enableJob?.cancel()
         enableJob = viewModelScope.launch(Dispatchers.IO) {
             setModSwitchEnable(false)
@@ -518,9 +543,6 @@ class ModViewModel(
                     setTipsText(App.get().getString(R.string.tips_restore_game_files))
                     ModTools.restoreGameFiles(backupBeans)
                     modRepository.updateMod(modBean.copy(isEnable = false))
-                    withContext(Dispatchers.Main) {
-                        ToastUtils.longCall(R.string.toast_mod_close_success)
-                    }
                     setMultitaskingProgress("${index + 1}/${mods.size}")
                     if (isDel) {
                         _uiState.update { it ->
@@ -572,9 +594,7 @@ class ModViewModel(
                         )
                         val unZipPath =
                             ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path!!).nameWithoutExtension + "/"
-                        var decompression = false
-
-                        decompression = ArchiveUtil.decompression(
+                        val decompression = ArchiveUtil.decompression(
                             modBean.path, unZipPath, password, true
                         )
                         if (!decompression) throw PasswordErrorException(
@@ -944,6 +964,13 @@ class ModViewModel(
     fun setShowDelModDialog(b: Boolean) {
         _uiState.update {
             it.copy(showDelModDialog = b)
+        }
+    }
+
+    // 设置开启失败的mods
+    fun setEnableFailedMods(enableFailedMods: List<ModBean>) {
+        _uiState.update {
+            it.copy(openFailedMods = enableFailedMods)
         }
     }
 

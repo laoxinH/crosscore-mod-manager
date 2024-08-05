@@ -98,7 +98,9 @@ fun ModManagerApp() {
 
         },
         bottomBar = {
-            NavigationBar{
+            NavigationBar(
+                containerColor = Color.Transparent,
+            ){
                 NavigationIndex.entries.forEachIndexed { index, navigationItem ->
                     NavigationBarItem(
                         selected = currentScreen == navigationItem,

@@ -113,10 +113,9 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
     }
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         title = {
             Box(contentAlignment = Alignment.CenterStart){
@@ -142,7 +141,7 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                         Text(
                             text = "统计：$total",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
+                           // color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Start,
                         )
                     }
@@ -246,10 +245,9 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         title = {
             Box(contentAlignment = Alignment.CenterStart){

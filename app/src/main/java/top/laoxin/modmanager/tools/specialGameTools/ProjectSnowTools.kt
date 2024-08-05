@@ -266,6 +266,10 @@ object ProjectSnowTools : BaseSpecialGameTools {
         return true
     }
 
+    override fun specialOperationNeedOpenVpn(): Boolean {
+        return true
+    }
+
     private fun checkPermission(path : String): Int {
         val checkPermission = PermissionTools.checkPermission(check_filepath)
         //Log.d("ArknightsTools", "权限类型: $checkPermission--$path")

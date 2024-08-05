@@ -420,9 +420,9 @@ fun ThinksDialogCommon(
             title = { Text(text = title) }, text = {
                 LazyColumn {
                     itemsIndexed(thinks) { index, think ->
-                        SettingItem(name = think.name + "(${think.job})",
+                        SettingItem(name = think.name,
                             description = context.getString(
-                                R.string.setting_thinks_link_desc, think.link
+                                R.string.setting_thinks_link_desc, think.job
                             ),
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
@@ -451,9 +451,11 @@ fun ThinksDialogCommon(
 @Composable
 fun SettingTopBar() {
     TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    ), title = {
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    ),
+        title = {
         Text(
             stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
         )

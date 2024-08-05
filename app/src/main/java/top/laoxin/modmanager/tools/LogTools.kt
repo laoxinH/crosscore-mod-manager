@@ -9,7 +9,7 @@ import android.icu.util.Calendar
 import java.util.Locale
 
 object LogTools {
-    private lateinit var logPah: String
+     private var logPah: String? = null
 
     fun setLogPath(path: String) {
         logPah = path
@@ -18,7 +18,7 @@ object LogTools {
 
     fun logRecord(log: String) {
         try {
-            if (logPah.isEmpty()) {
+            if (logPah?.isEmpty() == true) {
                 Log.i(TAG, "日志路径为空")
                 return
             }

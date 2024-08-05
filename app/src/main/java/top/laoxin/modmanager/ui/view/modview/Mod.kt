@@ -95,6 +95,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.ui.state.ModUiState
+import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.SelectPermissionDialog
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
@@ -126,6 +127,19 @@ fun ModPage(viewModel: ModViewModel) {
             onConfirmRequest = {
                 viewModel.delMods()
             }
+        )
+        DialogCommon(
+            title = stringResource(R.string.open_mod_failed_dialog_title),
+            content = stringResource(
+                R.string.open_mod_failed_dialog_desc,
+                uiState.openFailedMods.size
+            ),
+            onConfirm = {
+                viewModel.setShowOpenFailedDialog(false)
+                viewModel.disableMod(uiState.openFailedMods, false)
+            },
+            onCancel = { viewModel.setShowOpenFailedDialog(false) },
+            showDialog = uiState.showOpenFailedDialog
         )
 
         if (viewModel.requestPermissionPath.isNotEmpty()) {
