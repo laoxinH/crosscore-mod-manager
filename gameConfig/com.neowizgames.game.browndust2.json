@@ -1,0 +1,18 @@
+{
+    "gameName": "棕色尘埃2",
+    "serviceName": "国际服",
+    "packageName": "com.neowizgames.game.browndust2",
+    "version": "1.0.0",
+    "gamePath": "Android/data/com.neowizgames.game.browndust2/",
+    "antiHarmonyFile": "",
+    "antiHarmonyContent": "",
+    "gameFilePath": [
+        "Android/data/com.neowizgames.game.browndust2/files/UnityCache/Shared/"
+    ],
+    "modType": [ "Shared" ],
+    "modSavePath": "",
+    "isGameFileRepeat": false,
+    "enableBackup" : true,
+    "tips" : "此游戏配置未经验证，谨慎使用！"
+
+}
