@@ -9,6 +9,7 @@ import android.os.Environment
 import android.util.Log
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
+import rikka.sui.Sui
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.ScanModPath
@@ -53,7 +54,6 @@ object PermissionTools {
     // 检查Shizuku权限 并重新绑定权限
     fun checkShizukuPermission() : Boolean {
         // 安卓11以下不需要Shizuku，使用File接口就能浏览/sdcard全部文件
-
         return if (isShizukuAvailable) {
             if (hasShizukuPermission()) {
                 ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
@@ -66,19 +66,25 @@ object PermissionTools {
         } else {
             false
         }
-
     }
-    // 是否已安装shizuku
+
+    // 是否已安装shizuku/Sui
     private val isShizukuInstalled: Boolean
         get() {
             try {
-                App.get().packageManager?.getPackageInfo(SHIZUKU_PACKAGE_NAME, 0)
-                return true
+                // 添加对Sui的检测
+                if (Sui.init(App.get().packageName)) {
+                    return true
+                }else{
+                    App.get().packageManager?.getPackageInfo(SHIZUKU_PACKAGE_NAME, 0)
+                    return true
+                }
             } catch (e: PackageManager.NameNotFoundException) {
-                Log.e("PermissionTools", "Shizuku not installed")
+                Log.e("PermissionTools", "Shizuku/Sui not installed")
             }
             return false
         }
+
     val isShizukuAvailable: Boolean
         get() = isShizukuInstalled && Shizuku.pingBinder()
 
