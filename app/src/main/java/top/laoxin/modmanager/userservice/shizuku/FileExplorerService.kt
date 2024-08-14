@@ -70,6 +70,10 @@ class FileExplorerService : IFileExplorerService.Stub() {
         //return false
         return try {
             val file = File(srcPath, name)
+            if (file.exists()) {
+                file.delete()
+                //file.createNewFile()
+            }
             file.writeText(content!!)
             true
         } catch (e: IOException) {

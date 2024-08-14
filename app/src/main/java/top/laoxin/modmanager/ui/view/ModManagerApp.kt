@@ -146,7 +146,7 @@ fun ModManagerApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = NavigationIndex.CONSOLE.name) {
-               ConsolePage(consoleViewModel)
+                ConsolePage(consoleViewModel)
             }
 
             composable(route = NavigationIndex.MOD.name) {
@@ -156,29 +156,6 @@ fun ModManagerApp() {
                 SettingPage()
             }
         }
-        /*               when (uiState.currentNavigationIndex) {
-                            0 -> {
-                                ConsolePage()
-                            }
-                            1 -> {
-                                LazyColumn(
-                                    //state = lazyListState,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(16.dp)
-                                ) {
-                                    items(100) {
-                                        Text(
-                                            text = "Itecem $it",
-                                            modifier = Modifier.padding(16.dp)
-                                        )
-                                    }
-                                }
-                               // ModPage()
-                            }
-                            2 -> {
-                                Text(text = "Settings")
-                            }
-                        }*/
 
     }
 }

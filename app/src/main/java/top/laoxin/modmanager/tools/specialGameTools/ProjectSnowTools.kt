@@ -54,10 +54,9 @@ object ProjectSnowTools : BaseSpecialGameTools {
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
         check_filename_mod_path = ModTools.GAME_CHECK_FILE_PATH + packageName + "/" + CHECK_FILENAME
-        check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
+       /* check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
         check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
         val backupCheckFile = File(check_filename_backup_path)
-        val checkFile = File(check_filepath)
         if (checkPermission(check_filepath) == PathType.NULL) return false
         if (!backupCheckFile.exists()) {
             if (backupCheckFile.parentFile?.exists() == false) {
@@ -75,7 +74,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
                     fileTools.copyFile(check_filepath, check_filename_backup_path)
                 }
             }
-        }
+        }*/
 
 
         val unZipPath =
@@ -146,7 +145,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         modBean: ModBean
     ): Boolean {
         check_filename_mod_path = ModTools.GAME_CHECK_FILE_PATH + packageName + "/" + CHECK_FILENAME
-        check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
+/*        check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
         check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
         val backupCheckFile = File(check_filename_backup_path)
 
@@ -163,7 +162,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
                 }
                 else -> return  false
             }
-        }
+        }*/
 
         val mainIFest = gson.fromJson(
             File(check_filename_mod_path).readText(),
@@ -204,7 +203,6 @@ object ProjectSnowTools : BaseSpecialGameTools {
                 ModTools.MODS_UNZIP_PATH + CHECK_FILENAME
             )
         }
-        val checkFile = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME)
         val modPaks = gson.fromJson(
             File(check_filename_mod_path).readText(),
             MainIFest::class.java

@@ -28,7 +28,9 @@ object FileExplorerServiceManager {
             isBind = true
             ModTools.iFileExplorerService = IFileExplorerService.Stub.asInterface(service)
             ShizukuFileTools.iFileExplorerService = IFileExplorerService.Stub.asInterface(service)
-            ToastUtils.shortCall(R.string.toast_shizuku_connected)
+            if (!isBind) {
+                ToastUtils.shortCall(R.string.toast_shizuku_connected)
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -42,9 +44,7 @@ object FileExplorerServiceManager {
 
     fun bindService() {
         Log.d(TAG, "bindService: isBind = " + isBind)
-        if (!isBind) {
-            Shizuku.bindUserService(USER_SERVICE_ARGS, SERVICE_CONNECTION)
-        }
+        Shizuku.bindUserService(USER_SERVICE_ARGS, SERVICE_CONNECTION)
     }
 }
 

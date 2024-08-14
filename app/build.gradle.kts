@@ -2,15 +2,13 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 object buildInfo {
-    val versionCode = 20
-    val versionName = "2.1.1 beta"
+    val versionCode = 21
+    val versionName = "3.0.0"
     val versionDes = versionName + " 更新\n" +
-            "1.修复shizuku授权下某些压缩包解压后无法复制文件的BUG\n" +
-            "2.添加MOD开启失败后回滚\n" +
-            "3.更新APP图标(感谢@昏睡猫猫头 提供App图标)\n" +
-            "4.添加始终删除解压文件的开关\n" +
-            "5.调整UI界面\n" +
-            "6.更新感谢名单\n" +
+            "1.再次修复shizuku授权bug\n" +
+            "2.提高尘白MOD开启成功率\n" +
+            "3.添加对sui的支持\n" +
+            "4.正式版本移除beta标识\n" +
             "下载的更新包如果是以zip结尾请自行修改成apk\n" +
             "默认通过Gitee服务器下载,可能需要登录\n" +
             "如果不想注册Gitee自行在设置页面前往Github下载最新版"
@@ -60,11 +58,10 @@ android {
                 generateGameConfigApi()
             }
         }
-
     }
 
     defaultConfig {
-        applicationId = "top.com.modmanager"
+        applicationId = "com.mod.manager"
         minSdk = 30
         targetSdk = 34
         versionCode = buildInfo.versionCode
@@ -196,7 +193,6 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.26.2")
     implementation("org.tukaani:xz:1.9")
     // 7z
-    //implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
     implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
 
     // 系统UI控制库，实现沉浸式状态栏
