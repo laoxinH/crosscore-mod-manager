@@ -47,12 +47,12 @@ android {
             //val minSdk = defaultConfig.minSdk
             //val abi = filters.find{it.filterType == "ABI"}?.identifier ?:"all"
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "ModManager-release-$ver.apk";
+                "ModManager-release.apk";
         }
 
         if (this.buildType.name == "release") {
             this.assembleProvider.get().doLast {
-                generateUpdateInfo("ModManager-release-$ver.apk")
+                generateUpdateInfo("ModManager-release.apk")
                 generateGameConfigApi()
             }
         }
