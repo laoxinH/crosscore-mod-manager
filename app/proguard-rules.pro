@@ -1,5 +1,8 @@
 # 项目特定的 ProGuard 规则
 
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
 # 保留枚举类的值和 valueOf 方法
 -keepclassmembers enum * {
     public static **[] values();
