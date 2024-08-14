@@ -27,7 +27,6 @@ import top.laoxin.modmanager.ui.theme.ModManagerTheme
 class MainActivity : ComponentActivity() {
 
     private val VPN_REQUEST_CODE = 0
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Shizuku.addRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
@@ -100,7 +99,6 @@ class MainActivity : ComponentActivity() {
 
 
 
-@RequiresApi(Build.VERSION_CODES.R)
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {

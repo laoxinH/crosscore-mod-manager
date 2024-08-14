@@ -1,7 +1,5 @@
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import groovy.util.Expando
-import java.security.MessageDigest
 
 object buildInfo {
     val versionCode = 20
@@ -66,7 +64,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "top.laoxin.modmanager"
+        applicationId = "top.com.modmanager"
         minSdk = 30
         targetSdk = 34
         versionCode = buildInfo.versionCode
@@ -116,25 +114,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.rules)
     implementation(libs.androidx.camera.core)
-    testImplementation("junit:junit:4.12")
-    /*    implementation(libs.androidx.core.ktx)
-       implementation(libs.androidx.lifecycle.runtime.ktx)
-       implementation(libs.androidx.activity.compose)
-       //implementation(platform(libs.androidx.compose.bom))
-       implementation(libs.androidx.ui)
-       implementation(libs.androidx.ui.graphics)
-      // implementation(libs.androidx.ui.tooling.preview)
-       implementation(libs.androidx.material3)
-
-
-      testImplementation(libs.junit)
-       androidTestImplementation(libs.androidx.junit)
-       androidTestImplementation(libs.androidx.espresso.core)
-      // androidTestImplementation(platform(libs.androidx.compose.bom))
-       androidTestImplementation(libs.androidx.ui.test.junit4)
-       //debugImplementation(libs.androidx.ui.tooling)
-       debugImplementation(libs.androidx.ui.test.manifest)*/
-
+    testImplementation("junit:junit:4.13.2")
 
     val composeBom = platform("androidx.compose:compose-bom:2024.04.01")
     implementation(composeBom)
