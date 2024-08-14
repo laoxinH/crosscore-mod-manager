@@ -100,6 +100,7 @@ class MainActivity : ComponentActivity() {
 
 
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {

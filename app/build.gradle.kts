@@ -41,11 +41,7 @@ android {
 
     //...
     applicationVariants.all {
-        val ver = defaultConfig.versionName?.replace(" ", "-")
         outputs.all {
-
-            //val minSdk = defaultConfig.minSdk
-            //val abi = filters.find{it.filterType == "ABI"}?.identifier ?:"all"
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
                 "ModManager-release.apk";
         }
@@ -67,7 +63,7 @@ android {
     }
     defaultConfig {
         applicationId = "top.laoxin.modmanager"
-        minSdk = 26
+        minSdk = 30
         targetSdk = 34
         versionCode = buildInfo.versionCode
         versionName = buildInfo.versionName
@@ -90,11 +86,11 @@ android {
 
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
