@@ -28,10 +28,21 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
-    // id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta01"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
+
 android {
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("${projectDir}/keystore/androidkey.jks")
+            storePassword = "000000"
+            keyAlias = "key0"
+            keyPassword = "000000"
+            enableV3Signing = true
+            enableV4Signing = true
+        }
+    }
 
     namespace = "top.laoxin.modmanager"
     compileSdk = 34
@@ -39,7 +50,6 @@ android {
         compose = true
     }
 
-    //...
     applicationVariants.all {
         outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
@@ -55,12 +65,6 @@ android {
 
     }
 
-
-    //...
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
-    }
     defaultConfig {
         applicationId = "top.laoxin.modmanager"
         minSdk = 30
@@ -76,12 +80,13 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
 
     }
@@ -97,15 +102,13 @@ android {
         aidl = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
-
 }
 
 dependencies {
@@ -207,7 +210,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     // Retrofit
-// Retrofit with Scalar Converter
+    // Retrofit with Scalar Converter
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     // 解压库
     implementation("org.apache.commons:commons-compress:1.26.2")
