@@ -27,7 +27,7 @@ object buildInfo {
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
+    id("com.google.devtools.ksp") version "1.9.23-1.0.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 

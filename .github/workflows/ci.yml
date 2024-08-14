@@ -27,8 +27,14 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Upload APK
+      - name: Upload release apk
         uses: actions/upload-artifact@v3
         with:
-          name: app-release.apk
+          name: app-release
+          path: app/build/outputs/apk/release/ModManager-release.apk
+
+      - name: Upload debug apk
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug
           path: app/build/outputs/apk/debug/ModManager-release.apk

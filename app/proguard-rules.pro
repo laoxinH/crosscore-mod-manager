@@ -19,3 +19,28 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+
+-dontwarn org.conscrypt.Conscrypt
+
+-dontwarn androidx.window.extensions.**
+-dontwarn androidx.window.sidecar.Sidecar*
+
+-keepattributes LineNumberTable
+
+-allowaccessmodification
+-repackageclasses
