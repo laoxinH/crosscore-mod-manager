@@ -1,10 +1,10 @@
 {
     "code": 20,
     "name": "2.1.1 beta",
-    "filename": "ModManager-release-2.1.1-beta.apk",
-    "url": "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/ModManager-release-2.1.1-beta.apk",
-    "time": 1722871828843,
+    "filename": "ModManager-release.apk",
+    "url": "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/ModManager-release.apk",
+    "time": 1723634122746,
     "des": "2.1.1 beta \u66f4\u65b0\n1.\u4fee\u590dshizuku\u6388\u6743\u4e0b\u67d0\u4e9b\u538b\u7f29\u5305\u89e3\u538b\u540e\u65e0\u6cd5\u590d\u5236\u6587\u4ef6\u7684BUG\n2.\u6dfb\u52a0MOD\u5f00\u542f\u5931\u8d25\u540e\u56de\u6eda\n3.\u66f4\u65b0APP\u56fe\u6807(\u611f\u8c22@\u660f\u7761\u732b\u732b\u5934 \u63d0\u4f9bApp\u56fe\u6807)\n4.\u6dfb\u52a0\u59cb\u7ec8\u5220\u9664\u89e3\u538b\u6587\u4ef6\u7684\u5f00\u5173\n5.\u8c03\u6574UI\u754c\u9762\n6.\u66f4\u65b0\u611f\u8c22\u540d\u5355\n\u4e0b\u8f7d\u7684\u66f4\u65b0\u5305\u5982\u679c\u662f\u4ee5zip\u7ed3\u5c3e\u8bf7\u81ea\u884c\u4fee\u6539\u6210apk\n\u9ed8\u8ba4\u901a\u8fc7Gitee\u670d\u52a1\u5668\u4e0b\u8f7d,\u53ef\u80fd\u9700\u8981\u767b\u5f55\n\u5982\u679c\u4e0d\u60f3\u6ce8\u518cGitee\u81ea\u884c\u5728\u8bbe\u7f6e\u9875\u9762\u524d\u5f80Github\u4e0b\u8f7d\u6700\u65b0\u7248",
-    "size": 25453181,
-    "md5": "ModManager-release-2.1.1-beta.apk"
+    "size": 25191489,
+    "md5": "ModManager-release.apk"
 }

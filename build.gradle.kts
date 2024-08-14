@@ -2,9 +2,7 @@
 plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
-
    // id("com.android.library") version "8.1.4" apply false
-
 }
 
 buildscript {
@@ -17,7 +15,7 @@ buildscript {
         classpath ("org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version")
     }*/
     dependencies {
-        classpath("com.squareup.okhttp3:okhttp:4.9.0")
+        classpath(libs.okhttp3.okhttp)
     }
     repositories{
         maven { url = uri("https://jitpack.io") }
