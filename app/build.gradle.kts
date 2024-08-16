@@ -52,7 +52,7 @@ android {
 
         if (this.buildType.name == "release") {
             this.assembleProvider.get().doLast {
-                generateUpdateInfo("ModManager-release${buildInfo.versionCode}.apk")
+                generateUpdateInfo("ModManager-release-${buildInfo.versionCode}.apk")
                 generateGameConfigApi()
             }
         }
