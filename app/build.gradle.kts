@@ -7,6 +7,7 @@ object buildInfo {
     val versionDes = versionName + " 更新\n" +
             "1.调整最低安卓版本为安卓9\n" +
             "2.修改更新渠道为github\n" +
+            "3.微调大屏设备横屏布局\n" +
             "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n" +
             "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n"
     val updateBaseUrl = "https://github.com/laoxinH/crosscore-mod-manager/releases/download/$versionName/"
@@ -46,12 +47,12 @@ android {
     applicationVariants.all {
         outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "ModManager-release-${buildInfo.versionName}.apk"
+                "ModManager-release.apk"
         }
 
         if (this.buildType.name == "release") {
             this.assembleProvider.get().doLast {
-                generateUpdateInfo("ModManager-release-${buildInfo.versionName}.apk")
+                generateUpdateInfo("ModManager-release.apk")
                 generateGameConfigApi()
             }
         }
