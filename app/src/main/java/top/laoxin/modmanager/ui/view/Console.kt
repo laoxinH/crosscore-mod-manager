@@ -1,15 +1,11 @@
 package top.laoxin.modmanager.ui.view
 
 import android.net.Uri
-import android.net.VpnService
-import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,9 +35,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,17 +45,15 @@ import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
+import top.laoxin.modmanager.ui.view.commen.RequestNotificationPermission
 import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
-import top.laoxin.modmanager.ui.state.ConsoleUiState
-import top.laoxin.modmanager.ui.view.commen.RequestNotificationPermission
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
 
-
-@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel: ConsoleViewModel) {
     val context = LocalContext.current
@@ -114,7 +104,7 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
             content = viewModel.updateContent,
             onConfirm = {
                 viewModel.setShowUpgradeDialog(false)
-                viewModel.openUrl(context,viewModel.downloadUrl)
+                viewModel.openUrl(context, viewModel.downloadUrl)
             },
             onCancel = {
                 viewModel.setShowUpgradeDialog(false)
@@ -138,20 +128,27 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
 
 
         if (viewModel.requestPermissionPath.isNotEmpty()) {
-            RequestUriPermission(path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog) {
+            RequestUriPermission(
+                path = viewModel.requestPermissionPath,
+                uiState.openPermissionRequestDialog
+            ) {
                 viewModel.setOpenPermissionRequestDialog(false)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        GameInformationCard(viewModel,uiState.gameInfo, Modifier.align(Alignment.CenterHorizontally))
+        GameInformationCard(
+            viewModel,
+            uiState.gameInfo,
+            Modifier.align(Alignment.CenterHorizontally)
+        )
         // 添加一些间距
         Spacer(modifier = Modifier.height(16.dp))
 
         // 第二部分：包含两个卡片用于展示其他信息
-        SettingInformationCard(viewModel, uiState)
+        SettingInformationCard(uiState)
         Spacer(modifier = Modifier.height(16.dp))
 
-        ConfigurationCard(viewModel,uiState)
+        ConfigurationCard(viewModel, uiState)
 
     }
 }
@@ -169,7 +166,9 @@ fun GameInformationCard(
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 第一个区域：添加一个圆角图片
@@ -216,7 +215,7 @@ fun GameInformationCard(
 // 设置信息选项卡
 
 @Composable
-fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
+fun SettingInformationCard(uiState: ConsoleUiState) {
 
     Row(
         modifier = Modifier.fillMaxWidth()
@@ -286,15 +285,13 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
 @Composable
 fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
     //val uiState by viewModel.uiState.collectAsState()
-
-    val context = LocalContext.current
     val openDirectoryLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
             // 这里的uri就是用户选择的目录
             // 你可以在这里处理用户选择的目录
             if (uri != null) {
                 // 使用uri
-                val path = uri.path?.split(":")?.last()?.replace(ModTools.ROOT_PATH + "/","")
+                val path = uri.path?.split(":")?.last()?.replace(ModTools.ROOT_PATH + "/", "")
 
                 viewModel.setSelectedDirectory(
                     path ?: (ModTools.ROOT_PATH + "/" + ModTools.DOWNLOAD_MOD_PATH)
@@ -402,23 +399,23 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 }
                 Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
             }
- /*           Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TextButton(
-                    onClick = { viewModel.startGameService() },
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        text = "测试",
-                        modifier = Modifier.padding(0.dp),
-                        style = typography.titleMedium
-                    )
-                }
-                Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
-            }*/
+            /*           Row(
+                           verticalAlignment = Alignment.CenterVertically,
+                           horizontalArrangement = Arrangement.SpaceBetween,
+                           modifier = Modifier.fillMaxWidth()
+                       ) {
+                           TextButton(
+                               onClick = { viewModel.startGameService() },
+                               contentPadding = PaddingValues(0.dp)
+                           ) {
+                               Text(
+                                   text = "测试",
+                                   modifier = Modifier.padding(0.dp),
+                                   style = typography.titleMedium
+                               )
+                           }
+                           Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
+                       }*/
             // 添加一个按钮，用户点击按钮后，打开文件选择器
 
         }
@@ -426,8 +423,6 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
 }
 
 
-@RequiresApi(Build.VERSION_CODES.R)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConsolePage(viewModel: ConsoleViewModel) {
 
@@ -438,11 +433,6 @@ fun ConsolePage(viewModel: ConsoleViewModel) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ConsoleTopBar(viewModel: ConsoleViewModel) {
-    val context = LocalContext.current
-    var needOpenVpn by
-    remember {
-        mutableStateOf(false)
-    }
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -475,7 +465,6 @@ fun ConsoleTopBar(viewModel: ConsoleViewModel) {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.R)
 @Preview(showBackground = true)
 @Composable
 fun PreviewBottomNavigationBar() {

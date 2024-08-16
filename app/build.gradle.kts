@@ -61,7 +61,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.mod.manager"
+        applicationId = "com.mod.manager.test"
         minSdk = 30
         targetSdk = 34
         versionCode = buildInfo.versionCode
@@ -111,6 +111,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.rules)
     implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.benchmark.macro)
     testImplementation("junit:junit:4.13.2")
 
     val composeBom = platform("androidx.compose:compose-bom:2024.04.01")
