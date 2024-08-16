@@ -53,8 +53,6 @@ import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
-@RequiresApi(Build.VERSION_CODES.R)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingPage() {
     val viewModel: SettingViewModel = viewModel(
