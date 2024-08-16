@@ -2,13 +2,10 @@ package top.laoxin.modmanager.ui.view
 
 import android.content.res.Configuration
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
@@ -22,12 +19,13 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -38,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.modview.ModTopBar
+import top.laoxin.modmanager.ui.view.modview.Tips
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
@@ -62,11 +61,19 @@ fun ModManagerApp() {
     val currentScreen = NavigationIndex.valueOf(
         currentEntry?.destination?.route ?: NavigationIndex.CONSOLE.name
     )
-
     val configuration = LocalConfiguration.current
 
-    if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-        // 手机布局：显示底部导航栏
+    Row {
+        // 侧边栏
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            NavigationRail(
+                navController = navController,
+                currentScreen = currentScreen,
+                modViewModel = modViewModel,
+            )
+        }
+
+        // 主内容区域
         Scaffold(
             topBar = {
                 when (currentScreen) {
@@ -74,6 +81,13 @@ fun ModManagerApp() {
                     NavigationIndex.MOD -> ModTopBar(modViewModel)
                     NavigationIndex.SETTINGS -> SettingTopBar()
                 }
+                val uiState by modViewModel.uiState.collectAsState()
+                Tips(
+                    text = uiState.tipsText,
+                    showTips = uiState.showTips,
+                    onDismiss = { modViewModel.setShowTips(false) },
+                    uiState = uiState
+                )
             },
             bottomBar = {
                 NavigationBar(
@@ -90,40 +104,6 @@ fun ModManagerApp() {
                 modifier = Modifier.padding(innerPadding)
             )
         }
-    } else {
-        Row {
-            // 侧边栏
-            NavigationRail(
-                navController = navController,
-                currentScreen = currentScreen,
-                modViewModel = modViewModel,
-            )
-            // 主内容区域
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                // 顶部栏
-                when (currentScreen) {
-                    NavigationIndex.CONSOLE -> ConsoleTopBar(consoleViewModel)
-                    NavigationIndex.MOD -> ModTopBar(modViewModel)
-                    NavigationIndex.SETTINGS -> SettingTopBar()
-                }
-                // 内容区域
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    NavigationHost(
-                        navController = navController,
-                        modViewModel = modViewModel,
-                        consoleViewModel = consoleViewModel,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -134,9 +114,11 @@ fun NavigationRail(
     currentScreen: NavigationIndex,
     modViewModel: ModViewModel
 ) {
+    Modifier.defaultMinSize(100.dp)
     NavigationRail {
         Spacer(Modifier.weight(1f))
         NavigationIndex.entries.forEach { navigationItem ->
+            Spacer(Modifier.height(16.dp))
             NavigationRailItem(
                 selected = currentScreen == navigationItem,
                 onClick = {
@@ -152,7 +134,10 @@ fun NavigationRail(
                 label = {
                     Text(text = stringResource(id = navigationItem.title))
                 }
+
             )
+            Spacer(Modifier.height(16.dp))
+
         }
         Spacer(Modifier.weight(1f))
     }
