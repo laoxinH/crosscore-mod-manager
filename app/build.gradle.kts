@@ -49,7 +49,7 @@ android {
     applicationVariants.all {
         outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "ModManager-release.apk";
+                "ModManager-release.apk"
         }
 
         if (this.buildType.name == "release") {
@@ -62,7 +62,7 @@ android {
 
     defaultConfig {
         applicationId = "com.mod.manager"
-        minSdk = 30
+        minSdk = 28
         targetSdk = 34
         versionCode = buildInfo.versionCode
         versionName = buildInfo.versionName
@@ -110,8 +110,7 @@ dependencies {
 
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.rules)
-    implementation(libs.androidx.camera.core)
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
 
     val composeBom = platform("androidx.compose:compose-bom:2024.04.01")
     implementation(composeBom)
@@ -196,9 +195,7 @@ dependencies {
     implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
 
     // 系统UI控制库，实现沉浸式状态栏
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
-
-
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
 }
 
 // 计算apk的md5
