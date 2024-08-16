@@ -1,5 +1,4 @@
-name: Create Release
-
+name: Release
 
 on:
   push:
@@ -12,34 +11,61 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Get tag name
-        id: get_tag_name
-        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-      - name: Get build file name
-        id: get_filename
-        run: echo "::set-output name=filename::$(ls update/*.apk | head -n 1)"
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-      - name: Create Release
-        id: create_release
+      - name: assembleRelease with Gradle
+        run: ./gradlew assembleRelease
+
+      - name: assembleDebug with Gradle
+        run: ./gradlew assembleDebug
+
+      - name: Upload release apk
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: app/build/outputs/apk/release/ModManager-release.apk
+
+      - name: Upload debug apk
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug
+          path: app/build/outputs/apk/debug/ModManager-release.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download release apk
+        uses: actions/download-artifact@v3
+        with:
+          name: release
+
+      - name: Create GitHub Release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.MOD_TEST }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Release ${{ env.TAG_NAME }}
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            Automated release for version ${{ github.ref_name }}.
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
-        id: upload_release_asset
+      - name: Upload APK to Release
         uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.MOD_TEST }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.get_filename.outputs.filename }}
-          asset_name: ${{ steps.get_filename.outputs.filename }}
-          asset_content_type: application/octet-stream
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: app/build/outputs/apk/release/ModManager-release.apk
+          asset_name: ModManager-release.apk
+          asset_content_type: application/vnd.android.package-archive
