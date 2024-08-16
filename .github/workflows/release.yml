@@ -41,4 +41,4 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            app/build/outputs/apk/release/ModManager-release-${{ github.ref_name }}.apk
+            app/build/outputs/apk/release/ModManager-release.apk
