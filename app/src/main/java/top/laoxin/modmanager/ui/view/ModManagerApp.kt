@@ -1,8 +1,11 @@
 package top.laoxin.modmanager.ui.view
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -87,11 +90,7 @@ fun ModManagerApp() {
             )
         }
     } else {
-        // 平板布局：显示侧边栏
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxHeight()
-        ) {
+        Row {
             // 侧边栏
             NavigationRail(
                 navController = navController,
@@ -99,24 +98,29 @@ fun ModManagerApp() {
                 modViewModel = modViewModel,
             )
             // 主内容区域
-            Scaffold(
-                topBar = {
-                    when (currentScreen) {
-                        NavigationIndex.CONSOLE -> ConsoleTopBar(consoleViewModel)
-                        NavigationIndex.MOD -> ModTopBar(modViewModel)
-                        NavigationIndex.SETTINGS -> SettingTopBar()
-                    }
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // 顶部栏
+                when (currentScreen) {
+                    NavigationIndex.CONSOLE -> ConsoleTopBar(consoleViewModel)
+                    NavigationIndex.MOD -> ModTopBar(modViewModel)
+                    NavigationIndex.SETTINGS -> SettingTopBar()
                 }
-            ) { innerPadding ->
-                NavigationHost(
-                    navController = navController,
-                    modViewModel = modViewModel,
-                    consoleViewModel = consoleViewModel,
+                // 内容区域
+                Box(
                     modifier = Modifier
-                        .padding(innerPadding)
+                        .weight(1f)
                         .fillMaxWidth()
-                        .fillMaxHeight()
-                )
+                ) {
+                    NavigationHost(
+                        navController = navController,
+                        modViewModel = modViewModel,
+                        consoleViewModel = consoleViewModel,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
             }
         }
     }

@@ -61,7 +61,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.mod.manager"
+        applicationId = "com.mod.manager.test"
         minSdk = 30
         targetSdk = 34
         versionCode = buildInfo.versionCode
