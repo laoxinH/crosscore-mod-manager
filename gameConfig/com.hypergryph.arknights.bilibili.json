@@ -17,7 +17,9 @@
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/ui/rglktopic/",
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/ui/namecardskin/",
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/enemies/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/effects/"
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/effects/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_cn"
   ],
   "modType": [
     "普通立绘",
@@ -30,7 +32,9 @@
     "肉鸽主题背景",
     "个人名片背景",
     "敌人修改",
-    "效果修改"
+    "效果修改",
+    "角色语音",
+    "中文语音"
   ],
   "modSavePath": "",
   "isGameFileRepeat": true,
