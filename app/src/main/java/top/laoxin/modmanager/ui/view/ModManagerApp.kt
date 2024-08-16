@@ -135,23 +135,25 @@ fun NavigationRail(
     currentScreen: NavigationIndex,
     modViewModel: ModViewModel
 ) {
-    NavigationIndex.entries.forEach { navigationItem ->
-        NavigationRailItem(
-            selected = currentScreen == navigationItem,
-            onClick = {
-                modViewModel.exitSelect()
-                navController.navigate(navigationItem.name) {
-                    popUpTo(navController.graph.startDestinationId)
-                    launchSingleTop = true
+    NavigationRail {
+        NavigationIndex.entries.forEach { navigationItem ->
+            NavigationRailItem(
+                selected = currentScreen == navigationItem,
+                onClick = {
+                    modViewModel.exitSelect()
+                    navController.navigate(navigationItem.name) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                },
+                icon = {
+                    Icon(imageVector = navigationItem.icon, contentDescription = null)
+                },
+                label = {
+                    Text(text = stringResource(id = navigationItem.title))
                 }
-            },
-            icon = {
-                Icon(imageVector = navigationItem.icon, contentDescription = null)
-            },
-            label = {
-                Text(text = stringResource(id = navigationItem.title))
-            }
-        )
+            )
+        }
     }
 }
 
