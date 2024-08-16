@@ -37,10 +37,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release
-          path: app/build/outputs/apk/release/ModManager-release-${{ evn.TAG_NAME }}.apk
+          path: app/build/outputs/apk/release/ModManager-release-${{ env.TAG_NAME }}.apk
 
       - name: Upload debug apk
         uses: actions/upload-artifact@v3
         with:
           name: debug
-          path: app/build/outputs/apk/debug/ModManager-release-${{ evn.TAG_NAME }}.apk
+          path: app/build/outputs/apk/debug/ModManager-release-${{ env.TAG_NAME }}.apk
