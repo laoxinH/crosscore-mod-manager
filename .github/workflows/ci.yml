@@ -30,14 +30,17 @@ jobs:
       - name: assembleDebug with Gradle
         run: ./gradlew assembleDebug
 
+      - name: Get tag name
+        run: echo "TAG_NAME=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
       - name: Upload release apk
         uses: actions/upload-artifact@v3
         with:
           name: release
-          path: app/build/outputs/apk/release/ModManager-release-${{ github.ref_name }}.apk
+          path: app/build/outputs/apk/release/ModManager-release-${{ evn.TAG_NAME }}.apk
 
       - name: Upload debug apk
         uses: actions/upload-artifact@v3
         with:
           name: debug
-          path: app/build/outputs/apk/debug/ModManager-release-${{ github.ref_name }}.apk
+          path: app/build/outputs/apk/debug/ModManager-release-${{ evn.TAG_NAME }}.apk
