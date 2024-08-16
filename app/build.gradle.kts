@@ -47,12 +47,12 @@ android {
     applicationVariants.all {
         outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "ModManager-release-${buildInfo.versionName}.apk"
+                "ModManager-release.apk"
         }
 
         if (this.buildType.name == "release") {
             this.assembleProvider.get().doLast {
-                generateUpdateInfo("ModManager-release-${buildInfo.versionName}.apk")
+                generateUpdateInfo("ModManager-release.apk")
                 generateGameConfigApi()
             }
         }
@@ -81,6 +81,7 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
         }
+
 
     }
     compileOptions {
