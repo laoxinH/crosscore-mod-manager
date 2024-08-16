@@ -62,7 +62,7 @@ fun SettingPage() {
     )
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-
+    Modifier.padding(0.dp);
 
     SettingContent(
         uiState,
@@ -456,10 +456,10 @@ fun SettingTopBar() {
         navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ),
         title = {
-        Text(
-            stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
-        )
-    })
+            Text(
+                stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
+            )
+        })
 }
 
 @Preview

@@ -1,15 +1,24 @@
 package top.laoxin.modmanager
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import rikka.shizuku.Shizuku
 import top.laoxin.modmanager.tools.PermissionTools
@@ -18,36 +27,43 @@ import top.laoxin.modmanager.ui.view.ModManagerApp
 
 class MainActivity : ComponentActivity() {
 
-    private val VPN_REQUEST_CODE = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 添加 Shizuku 权限请求监听
         Shizuku.addRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
+
+        // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             ModManagerTheme {
-                // A surface container using the 'background' color from the theme
-                //enableEdgeToEdge()
                 val systemUiController = rememberSystemUiController()
                 val colors = MaterialTheme.colorScheme
 
                 SideEffect {
                     systemUiController.setStatusBarColor(
-                        color = colors.secondaryContainer
+                        color = Color.Transparent,
+                        darkIcons = true
                     )
                     systemUiController.setNavigationBarColor(
-                        color = colors.background
+                        color = colors.background,
+                        darkIcons = true
                     )
                 }
+
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(0.dp),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     ModManagerApp()
                 }
             }
         }
-
-
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -56,7 +72,6 @@ class MainActivity : ComponentActivity() {
             Shizuku.removeRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
         }
     }
-
 
 
     // 读取文件路径
@@ -86,9 +101,6 @@ class MainActivity : ComponentActivity() {
     }*/
 
 }
-
-
-
 
 
 @Preview(showBackground = true)

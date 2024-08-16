@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -75,6 +76,7 @@ fun ModManagerApp() {
 
         // 主内容区域
         Scaffold(
+            //顶栏
             topBar = {
                 when (currentScreen) {
                     NavigationIndex.CONSOLE -> ConsoleTopBar(consoleViewModel)
@@ -89,12 +91,15 @@ fun ModManagerApp() {
                     uiState = uiState
                 )
             },
+            //底栏
             bottomBar = {
-                NavigationBar(
-                    navController = navController,
-                    currentScreen = currentScreen,
-                    modViewModel = modViewModel
-                )
+                if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    NavigationBar(
+                        navController = navController,
+                        currentScreen = currentScreen,
+                        modViewModel = modViewModel
+                    )
+                }
             }
         ) { innerPadding ->
             NavigationHost(
@@ -114,9 +119,13 @@ fun NavigationRail(
     currentScreen: NavigationIndex,
     modViewModel: ModViewModel
 ) {
-    Modifier.defaultMinSize(100.dp)
-    NavigationRail {
-        Spacer(Modifier.weight(1f))
+    NavigationRail(
+        modifier = Modifier
+            .defaultMinSize(minWidth = 100.dp)
+            .fillMaxHeight()
+            .padding(0.dp)
+    ) {
+        Spacer(Modifier.weight(1f)) // 用于将内容垂直居中
         NavigationIndex.entries.forEach { navigationItem ->
             Spacer(Modifier.height(16.dp))
             NavigationRailItem(
@@ -134,10 +143,8 @@ fun NavigationRail(
                 label = {
                     Text(text = stringResource(id = navigationItem.title))
                 }
-
             )
             Spacer(Modifier.height(16.dp))
-
         }
         Spacer(Modifier.weight(1f))
     }

@@ -89,7 +89,7 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
     Column(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp)
-            .padding(innerPadding)
+            .padding(0.dp)
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
