@@ -33,11 +33,11 @@ jobs:
       - name: Upload release apk
         uses: actions/upload-artifact@v3
         with:
-          name: app-release
+          name: release
           path: app/build/outputs/apk/release/ModManager-release.apk
 
       - name: Upload debug apk
         uses: actions/upload-artifact@v3
         with:
-          name: app-debug
+          name: debug
           path: app/build/outputs/apk/debug/ModManager-release.apk
