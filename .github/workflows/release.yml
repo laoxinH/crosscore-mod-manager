@@ -9,12 +9,15 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
@@ -25,37 +28,17 @@ jobs:
       - name: Assemble Release with Gradle
         run: ./gradlew assembleRelease
 
-      - name: Assemble Debug with Gradle
-        run: ./gradlew assembleDebug
-
       - name: List APK files
         run: ls -R app/build/outputs/apk/
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release and Upload Release Asset
+        uses: softprops/action-gh-release@v2.0.8
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          body: |
-            Automated release for version ${{ github.ref_name }}.
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          body: Automated release for version ${{ github.ref }}.
           draft: false
           prerelease: false
-
-      - name: Upload Release APK to GitHub Release
-        uses: actions/upload-release-asset@v2
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: app/build/outputs/apk/release/ModManager-release.apk
-          asset_name: ModManager-release.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload Debug APK to GitHub Release
-        uses: actions/upload-release-asset@v2
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: app/build/outputs/apk/debug/ModManager-release.apk
-          asset_name: ModManager-debug.apk
-          asset_content_type: application/vnd.android.package-archive
+          files: |
+            app/build/outputs/apk/release/ModManager-release.apk
