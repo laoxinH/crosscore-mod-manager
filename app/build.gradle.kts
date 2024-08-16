@@ -2,19 +2,14 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 object buildInfo {
-    val versionCode = 21
-    val versionName = "3.0.0"
+    val versionCode = 22
+    val versionName = "3.0.1"
     val versionDes = versionName + " 更新\n" +
-            "1.再次修复shizuku授权bug\n" +
-            "2.提高尘白MOD开启成功率\n" +
-            "3.添加对sui的支持\n" +
-            "4.正式版本移除beta标识\n" +
-            "注意!!正式版本修改了包名,安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n" +
-            "注意!!正式版本修改了包名,安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n" +
-            "下载的更新包如果是以zip结尾请自行修改成apk\n" +
-            "默认通过Gitee服务器下载,可能需要登录\n" +
-            "如果不想注册Gitee自行在设置页面前往Github下载最新版"
-    val updateBaseUrl = "https://gitee.com/laoxinH/Mod_Manager/raw/main/update/"
+            "1.调整最低安卓版本为安卓9\n" +
+            "2.修改更新渠道为github\n" +
+            "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n" +
+            "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n"
+    val updateBaseUrl = "https://github.com/laoxinH/crosscore-mod-manager/releases/download/$versionName/"
     val updatePath = "update"
     val updateInfoFilename = "update.json"
     val gameConfigPaht = "gameConfig"
@@ -51,12 +46,12 @@ android {
     applicationVariants.all {
         outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "ModManager-release.apk"
+                "ModManager-release-${buildInfo.versionName}.apk"
         }
 
         if (this.buildType.name == "release") {
             this.assembleProvider.get().doLast {
-                generateUpdateInfo("ModManager-release.apk")
+                generateUpdateInfo("ModManager-release-${buildInfo.versionName}.apk")
                 generateGameConfigApi()
             }
         }
