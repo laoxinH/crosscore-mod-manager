@@ -34,10 +34,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release
-          path: app/build/outputs/apk/release/ModManager-release.apk
+          path: app/build/outputs/apk/release/ModManager-release-${{ github.ref_name }}.apk
 
       - name: Upload debug apk
         uses: actions/upload-artifact@v3
         with:
           name: debug
-          path: app/build/outputs/apk/debug/ModManager-release.apk
+          path: app/build/outputs/apk/debug/ModManager-release-${{ github.ref_name }}.apk

@@ -37,8 +37,8 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body: Automated release for version ${{ github.ref_name }}.
+          body: ${{ github.event.head_commit.message }}.
           draft: false
           prerelease: false
           files: |
-            app/build/outputs/apk/release/ModManager-release.apk
+            app/build/outputs/apk/release/ModManager-release-${{ github.ref_name }}.apk
