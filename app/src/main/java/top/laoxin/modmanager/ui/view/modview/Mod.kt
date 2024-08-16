@@ -114,6 +114,7 @@ enum class NavigationIndex(
 @Composable
 fun ModPage(viewModel: ModViewModel) {
     val uiState by viewModel.uiState.collectAsState()
+    Modifier.padding(0.dp)
 
     Box(/*modifier = if (uiState.showTips) Modifier.padding(innerPadding) else Modifier.fillMaxSize()*/) {
         UserTipsDialog(
@@ -153,11 +154,6 @@ fun ModPage(viewModel: ModViewModel) {
             Loading(uiState.loadingPath)
         } else {
             uiState.modDetail?.let {
-                /*  ModDetailDialog(
-                      showDialog = uiState.showModDetail,
-                      mod = it,
-                      onDismiss = { viewModel.setShowModDetail(false) }
-                  )*/
                 ModDetailPartialBottomSheet(
                     showDialog = uiState.showModDetail,
                     mod = it,

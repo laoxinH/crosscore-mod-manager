@@ -1,5 +1,4 @@
-name: Create Release
-
+name: Release
 
 on:
   push:
@@ -7,39 +6,39 @@ on:
       - '*'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Get tag name
-        id: get_tag_name
-        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-      - name: Get build file name
-        id: get_filename
-        run: echo "::set-output name=filename::$(ls update/*.apk | head -n 1)"
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Assemble Release with Gradle
+        run: ./gradlew assembleRelease
+
+      - name: List APK files
+        run: ls -R app/build/outputs/apk/
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.MOD_TEST }}
+        uses: softprops/action-gh-release@v2.0.8
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Release ${{ env.TAG_NAME }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: Automated release for version ${{ github.ref_name }}.
           draft: false
           prerelease: false
-
-      - name: Upload Release Asset
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.MOD_TEST }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.get_filename.outputs.filename }}
-          asset_name: ${{ steps.get_filename.outputs.filename }}
-          asset_content_type: application/octet-stream
+          files: |
+            app/build/outputs/apk/release/ModManager-release.apk
