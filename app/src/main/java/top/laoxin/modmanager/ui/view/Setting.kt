@@ -53,8 +53,6 @@ import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
-@RequiresApi(Build.VERSION_CODES.R)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingPage() {
     val viewModel: SettingViewModel = viewModel(
@@ -62,7 +60,7 @@ fun SettingPage() {
     )
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-
+    Modifier.padding(0.dp);
 
     SettingContent(
         uiState,
@@ -456,10 +454,10 @@ fun SettingTopBar() {
         navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ),
         title = {
-        Text(
-            stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
-        )
-    })
+            Text(
+                stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
+            )
+        })
 }
 
 @Preview
