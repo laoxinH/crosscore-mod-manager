@@ -1,9 +1,11 @@
 package top.laoxin.modmanager.ui.view
 
+import android.content.res.Configuration
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -62,9 +64,8 @@ fun ModManagerApp() {
     )
 
     val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
 
-    if (screenWidthDp < 600) {
+    if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
         // 手机布局：显示底部导航栏
         Scaffold(
             topBar = {
@@ -134,6 +135,7 @@ fun NavigationRail(
     modViewModel: ModViewModel
 ) {
     NavigationRail {
+        Spacer(Modifier.weight(1f))
         NavigationIndex.entries.forEach { navigationItem ->
             NavigationRailItem(
                 selected = currentScreen == navigationItem,
@@ -152,6 +154,7 @@ fun NavigationRail(
                 }
             )
         }
+        Spacer(Modifier.weight(1f))
     }
 }
 
