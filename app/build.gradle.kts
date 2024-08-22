@@ -2,8 +2,8 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 object buildInfo {
-    val versionCode = 22
-    val versionName = "3.0.1"
+    val versionCode = 23
+    val versionName = "3.0.2 test"
     val versionDes = versionName + " 更新\n" +
             "1.调整最低安卓版本为安卓9\n" +
             "2.修改更新渠道为github\n" +
