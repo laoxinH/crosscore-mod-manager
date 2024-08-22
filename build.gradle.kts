@@ -8,7 +8,7 @@ plugins {
 buildscript {
 
     extra.apply {
-        set("room_version", "2.6.0")
+        set("room_version", "2.6.1")
     }
    /* dependencies {
         val kotlin_version
