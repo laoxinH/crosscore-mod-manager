@@ -12,10 +12,10 @@ import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
 import rikka.sui.Sui
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.RequestCode
+import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.tools.ModTools.ROOT_PATH
 import top.laoxin.modmanager.userservice.shizuku.FileExplorerServiceManager
 

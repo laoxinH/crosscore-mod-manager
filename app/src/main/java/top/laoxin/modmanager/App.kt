@@ -14,7 +14,6 @@ import top.laoxin.modmanager.database.AppContainer
 import top.laoxin.modmanager.database.AppDataContainer
 import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.tools.LogTools
-import top.laoxin.modmanager.tools.ModTools
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Objects

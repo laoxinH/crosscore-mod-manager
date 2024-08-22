@@ -1,16 +1,12 @@
 package top.laoxin.modmanager.tools.fileToolsInterface.impl
 
-import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.tools.LogTools
-import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import java.io.File
 import java.io.InputStream
-import java.io.RandomAccessFile
 
 object DocumentFileTools : BaseFileTools {
     private const val TAG = "DocumentFileTools"

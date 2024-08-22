@@ -1,24 +1,9 @@
 package top.laoxin.modmanager
 
-import android.util.Log
-import com.google.gson.*
-import com.google.gson.reflect.TypeToken
-import net.sf.sevenzipjbinding.ArchiveFormat
-import net.sf.sevenzipjbinding.IArchiveOpenCallback
-import net.sf.sevenzipjbinding.IInArchive
-import net.sf.sevenzipjbinding.PropID
-import net.sf.sevenzipjbinding.SevenZip
-import net.sf.sevenzipjbinding.SevenZipException
-import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream
-import org.junit.Assert.*
-import org.junit.Test
 import top.laoxin.modmanager.constant.FileType
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.RandomAccessFile
-import java.text.DecimalFormat
 
 
 /**

@@ -1,8 +1,6 @@
 package top.laoxin.modmanager
 
 import android.util.Log
-import net.lingala.zip4j.ZipFile
-import net.lingala.zip4j.exception.ZipException
 import net.sf.sevenzipjbinding.ExtractAskMode
 import net.sf.sevenzipjbinding.ExtractOperationResult
 import net.sf.sevenzipjbinding.IArchiveExtractCallback

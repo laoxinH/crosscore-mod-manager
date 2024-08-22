@@ -29,11 +29,11 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.database.mods.ModRepository
+import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.database.backups.BackupRepository
+import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.exception.NoSelectedGameException
 import top.laoxin.modmanager.exception.PasswordErrorException
 import top.laoxin.modmanager.exception.PermissionsException

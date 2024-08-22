@@ -1,7 +1,7 @@
 package top.laoxin.modmanager.database.antiHarmony
 
-import top.laoxin.modmanager.bean.AntiHarmonyBean
 import kotlinx.coroutines.flow.Flow
+import top.laoxin.modmanager.bean.AntiHarmonyBean
 
 interface AntiHarmonyRepository {
     // 通过gamePackageName更新数据

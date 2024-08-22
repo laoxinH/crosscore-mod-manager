@@ -1,11 +1,10 @@
 package top.laoxin.modmanager.tools
 
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.util.Log
 import java.io.File
 import java.io.FileWriter
-import java.util.Date
-import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
 import java.util.Locale
 
 object LogTools {

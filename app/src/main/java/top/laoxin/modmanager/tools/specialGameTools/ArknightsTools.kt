@@ -3,7 +3,6 @@ package top.laoxin.modmanager.tools.specialGameTools
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean

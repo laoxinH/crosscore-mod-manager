@@ -1,9 +1,11 @@
 package top.laoxin.modmanager.ui.view
 
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,6 +56,7 @@ import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel: ConsoleViewModel) {
     val context = LocalContext.current
@@ -423,6 +426,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
 }
 
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun ConsolePage(viewModel: ConsoleViewModel) {
 
