@@ -188,7 +188,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
     // 解压库
     implementation("org.apache.commons:commons-compress:1.27.1")
-    implementation("org.tukaani:xz:1.9")
+    implementation("org.tukaani:xz:1.10")
     // 7z
     implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
 
