@@ -160,7 +160,7 @@ dependencies {
     implementation("dev.rikka.shizuku:provider:13.1.5")
 
     // 添加datastore 依赖储存用户配置
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // 添加zip4j 依赖
     implementation("net.lingala.zip4j:zip4j:2.11.5")
