@@ -193,7 +193,7 @@ dependencies {
     implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
 
     // 系统UI控制库，实现沉浸式状态栏
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
 }
 
 // 计算apk的md5
