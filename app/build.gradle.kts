@@ -172,7 +172,7 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
     // gson
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
     //添加 documentfile 依赖（SDK自带的那个版本有问题）：
     implementation("androidx.documentfile:documentfile:1.0.1")
 
