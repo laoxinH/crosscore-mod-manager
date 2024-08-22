@@ -74,6 +74,6 @@ androidx-roomcompiler = { group = "androidx.room", name = "room-compiler", versi
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.0.0-1.0.23" }
+ksp = { id = "com.google.devtools.ksp", version = "2.0.20-1.0.24" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.0.20" }
 
