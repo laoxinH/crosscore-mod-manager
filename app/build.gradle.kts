@@ -27,9 +27,7 @@ plugins {
     alias(libs.plugins.serialization)
 }
 
-
 android {
-
     signingConfigs {
         create("release") {
             storeFile = file("${projectDir}/keystore/androidkey.jks")
@@ -41,22 +39,17 @@ android {
         }
     }
 
-    namespace = "top.laoxin.modmanager"
-    compileSdk = 34
-
-    applicationVariants.all {
-        outputs.all {
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "ModManager-release.apk"
-        }
-
-        if (this.buildType.name == "release") {
-            this.assembleProvider.get().doLast {
-                generateUpdateInfo("ModManager-release.apk")
-                generateGameConfigApi()
-            }
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
         }
     }
+
+    namespace = "top.laoxin.modmanager"
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.mod.manager"
@@ -101,6 +94,17 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) {
+        it.packaging.resources.excludes.addAll(
+            "/META-INF/**",
+            "/kotlin/**",
+            "**.txt",
+            "**.bin",
+        )
     }
 }
 
