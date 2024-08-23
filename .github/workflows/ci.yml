@@ -27,17 +27,9 @@ jobs:
       - name: assembleRelease with Gradle
         run: ./gradlew assembleRelease
 
-      - name: assembleDebug with Gradle
-        run: ./gradlew assembleDebug
-
-      - name: Upload release apk
+      - name: Upload release APKs
         uses: actions/upload-artifact@v4
         with:
           name: release
-          path: app/build/outputs/apk/release/*.apk
-
-      - name: Upload debug apk
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            app/build/outputs/apk/release/*.apk
