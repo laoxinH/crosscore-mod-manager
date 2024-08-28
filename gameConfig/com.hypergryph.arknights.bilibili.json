@@ -1,8 +1,8 @@
 {
   "gameName": "明日方舟",
-  "serviceName": "B服-配置2.1",
+  "serviceName": "B服-配置2.2",
   "packageName": "com.hypergryph.arknights.bilibili",
-  "version": "2.0.0",
+  "version": "2.2",
   "gamePath": "Android/data/com.hypergryph.arknights.bilibili/",
   "antiHarmonyFile": "",
   "antiHarmonyContent": "",
@@ -19,7 +19,8 @@
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/enemies/",
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/effects/",
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_cn"
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_cn",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/ui/homebackground/wrapper"
   ],
   "modType": [
     "普通立绘",
@@ -34,7 +35,8 @@
     "敌人修改",
     "效果修改",
     "角色语音",
-    "中文语音"
+    "中文语音",
+    "主页背景"
   ],
   "modSavePath": "",
   "isGameFileRepeat": true,
