@@ -1,13 +1,13 @@
 {
     "gameName": "尘白禁区",
-    "serviceName": "官服2.0.0",
+    "serviceName": "官服2.1.0",
     "packageName": "com.dragonli.projectsnow.lhm",
     "version": "2.1.0",
     "gamePath": "Android/data/com.dragonli.projectsnow.lhm/",
     "antiHarmonyFile": "",
     "antiHarmonyContent": "",
     "gameFilePath": [
-        "Android/data/com.dragonli.projectsnow.lhm/files/2.0.0/"
+        "Android/data/com.dragonli.projectsnow.lhm/files/2.1.0/"
     ],
     "modType": [ "人物模型" ],
     "modSavePath": "",
