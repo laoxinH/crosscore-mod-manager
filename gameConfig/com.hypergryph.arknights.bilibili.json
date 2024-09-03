@@ -1,8 +1,8 @@
 {
   "gameName": "明日方舟",
-  "serviceName": "B服-配置2.2",
+  "serviceName": "B服-配置2.3",
   "packageName": "com.hypergryph.arknights.bilibili",
-  "version": "2.2",
+  "version": "2.3",
   "gamePath": "Android/data/com.hypergryph.arknights.bilibili/",
   "antiHarmonyFile": "",
   "antiHarmonyContent": "",
@@ -19,8 +19,12 @@
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/enemies/",
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/effects/",
     "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_cn",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/ui/homebackground/wrapper"
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_cn/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_en/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_kr/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/audio/sound_beta_2/voice_custom/",
+    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/ui/homebackground/wrapper/"
   ],
   "modType": [
     "普通立绘",
@@ -33,9 +37,13 @@
     "肉鸽主题背景",
     "个人名片背景",
     "敌人修改",
-    "效果修改",
+    "特效修改",
     "角色语音",
+    "日文语音",
     "中文语音",
+    "英文语音",
+    "韩文语音",
+    "方言语音",
     "主页背景"
   ],
   "modSavePath": "",
