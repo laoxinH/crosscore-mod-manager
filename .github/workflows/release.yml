@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -28,8 +28,26 @@ jobs:
       - name: Assemble Release with Gradle
         run: ./gradlew assembleRelease
 
-      - name: List APK files
+      - name: List APK files before renaming
         run: ls -R app/build/outputs/apk/
+
+      - name: Rename APK files
+        run: |
+          cd app/build/outputs/apk/release
+          tag_name="${GITHUB_REF_NAME}"
+          for apk in app-*-release.apk; do
+            # Extract ABI from the filename
+            abi="${apk#app-}"
+            abi="${abi%-release.apk}"
+            # Create new filename
+            new_name="ModManager-${tag_name}-${abi}.apk"
+            mv "$apk" "$new_name"
+          done
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+
+      - name: List APK files after renaming
+        run: ls -R app/build/outputs/apk/release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.8
@@ -41,4 +59,4 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            app/build/outputs/apk/release/ModManager-release.apk
+            app/build/outputs/apk/release/*.apk

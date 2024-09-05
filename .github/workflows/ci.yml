@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -27,17 +27,32 @@ jobs:
       - name: assembleRelease with Gradle
         run: ./gradlew assembleRelease
 
-      - name: assembleDebug with Gradle
-        run: ./gradlew assembleDebug
-
-      - name: Upload release apk
-        uses: actions/upload-artifact@v3
+      - name: Upload ARM64
+        uses: actions/upload-artifact@v4
         with:
-          name: release
-          path: app/build/outputs/apk/release/ModManager-release.apk
+          name: arm64-v8a
+          path: app/build/outputs/apk/release/app-arm64-v8a-release.apk
 
-      - name: Upload debug apk
-        uses: actions/upload-artifact@v3
+      - name: Upload ARM32
+        uses: actions/upload-artifact@v4
         with:
-          name: debug
-          path: app/build/outputs/apk/debug/ModManager-release.apk
+          name: armeabi-v7a
+          path: app/build/outputs/apk/release/app-armeabi-v7a-release.apk
+
+      - name: Upload x86
+        uses: actions/upload-artifact@v4
+        with:
+          name: x86
+          path: app/build/outputs/apk/release/app-x86-release.apk
+
+      - name: Upload x86_64
+        uses: actions/upload-artifact@v4
+        with:
+          name: x86_64
+          path: app/build/outputs/apk/release/app-x86_64-release.apk
+
+      - name: Upload universal
+        uses: actions/upload-artifact@v4
+        with:
+          name: universal
+          path: app/build/outputs/apk/release/app-universal-release.apk
