@@ -10,7 +10,8 @@ object buildInfo {
             "3.微调大屏设备横屏布局\n" +
             "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n" +
             "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n"
-    val updateBaseUrl = "https://github.com/laoxinH/crosscore-mod-manager/releases/download/$versionName/"
+    val updateBaseUrl =
+        "https://github.com/laoxinH/crosscore-mod-manager/releases/download/$versionName/"
     val updatePath = "update"
     val updateInfoFilename = "update.json"
     val gameConfigPaht = "gameConfig"
@@ -21,12 +22,12 @@ object buildInfo {
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.devtools.ksp") version "1.9.23-1.0.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.serialization)
 }
 
 android {
-
     signingConfigs {
         create("release") {
             storeFile = file("${projectDir}/keystore/androidkey.jks")
@@ -38,30 +39,22 @@ android {
         }
     }
 
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     namespace = "top.laoxin.modmanager"
     compileSdk = 34
-    buildFeatures {
-        compose = true
-    }
-
-    applicationVariants.all {
-        outputs.all {
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "ModManager-release.apk"
-        }
-
-        if (this.buildType.name == "release") {
-            this.assembleProvider.get().doLast {
-                generateUpdateInfo("ModManager-release.apk")
-                generateGameConfigApi()
-            }
-        }
-    }
 
     defaultConfig {
         applicationId = "com.mod.manager"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
         versionCode = buildInfo.versionCode
         versionName = buildInfo.versionName
 
@@ -69,6 +62,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        signingConfig = signingConfigs.getByName("release")
     }
 
     buildTypes {
@@ -84,18 +78,18 @@ android {
 
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
         aidl = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
+        kotlinCompilerExtensionVersion = "2.0.0"
     }
     packaging {
         resources {
@@ -104,96 +98,94 @@ android {
     }
 }
 
+androidComponents {
+    onVariants(selector().withBuildType("release")) {
+        it.packaging.resources.excludes.addAll(
+            "/META-INF/**",
+            "/kotlin/**",
+            "**.txt",
+            "**.bin",
+        )
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.rules)
     testImplementation(libs.junit)
-
-    val composeBom = platform("androidx.compose:compose-bom:2024.04.01")
-    implementation(composeBom)
-    androidTestImplementation(composeBom)
-
+    implementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
     // Choose one of the following:
     // Material Design 3
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material")
+    implementation(libs.material3)
+    implementation(libs.material)
     // or Material Design 2
     //implementation("androidx.compose.material:material")
     // or skip Material Design and build directly on top of foundational components
     //implementation("androidx.compose.foundation:foundation")
     // or only import the main APIs for the underlying toolkit systems,
     // such as input and measurement/layout
-    implementation("androidx.compose.ui:ui")
-
+    implementation(libs.androidx.compose.ui.ui)
     // Android Studio Preview support
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-
+    implementation(libs.androidx.compose.ui.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.ui.tooling)
     // UI Tests
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-
+    androidTestImplementation(libs.ui.test.junit4)
+    debugImplementation(libs.ui.test.manifest)
     // Optional - Included automatically by material, only add when you need
     // the icons but not the material library (e.g. when using Material3 or a
     // custom design system based on Foundation)
-    implementation("androidx.compose.material:material-icons-core")
+    implementation(libs.androidx.material.icons.core)
     // Optional - Add full set of material icons
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material.icons.extended)
     // Optional - Add window size utils
-    implementation("androidx.compose.material3:material3-window-size-class")
-
+    implementation(libs.androidx.material3.window.size)
     // Optional - Integration with activities
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation(libs.androidx.activity.compose)
     // Optional - Integration with ViewModels
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     // Optional - Integration with LiveData
-    implementation("androidx.compose.runtime:runtime-livedata")
+    implementation(libs.androidx.runtime.livedata)
     // Optional - Integration with RxJava
-    implementation("androidx.compose.runtime:runtime-rxjava2")
-    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
-
+    implementation(libs.androidx.runtime.rxjava2)
+    implementation(libs.accompanist.permissions)
     // 添加 documentfile 依赖
-    implementation("androidx.documentfile:documentfile:1.0.1")
+    implementation(libs.androidx.documentfile)
     // 添加shizuku 依赖
-    implementation("dev.rikka.shizuku:api:13.1.5")
-    implementation("dev.rikka.shizuku:provider:13.1.5")
-
+    implementation(libs.api)
+    implementation(libs.provider)
     // 添加datastore 依赖储存用户配置
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-
+    implementation(libs.androidx.datastore.preferences)
     // 添加zip4j 依赖
-    implementation("net.lingala.zip4j:zip4j:2.11.5")
+    implementation(libs.zip4j)
     //Room
-    implementation("androidx.room:room-runtime:${rootProject.extra["room_version"]}")
-    ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
-    implementation("androidx.room:room-ktx:${rootProject.extra["room_version"]}")
-
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.roomcompiler)
+    implementation(libs.androidx.room.ktx)
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation(libs.androidx.navigation.compose)
     // gson
-    implementation("com.google.code.gson:gson:2.10.1")
-    //添加 documentfile 依赖（SDK自带的那个版本有问题）：
-    implementation("androidx.documentfile:documentfile:1.0.1")
-
+    implementation(libs.gson)
+    //添加 documentfile 依赖 (SDK自带的那个版本有问题):
+    implementation(libs.androidx.documentfile)
     // Retrofit
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.converter.gson)
+    implementation(libs.retrofit)
+    implementation(libs.okhttp3.okhttp)
+    implementation(libs.coil.compose)
+    implementation(libs.kotlinx.serialization.json)
     // Retrofit
     // Retrofit with Scalar Converter
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation(libs.converter.scalars)
     // 解压库
-    implementation("org.apache.commons:commons-compress:1.26.2")
-    implementation("org.tukaani:xz:1.9")
+    implementation(libs.commons.compress)
+    implementation(libs.xz)
     // 7z
-    implementation("com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02")
-
+    implementation(libs.x.zip.jbinding.xandroid)
     // 系统UI控制库，实现沉浸式状态栏
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation(libs.accompanist.systemuicontroller)
 }
 
 // 计算apk的md5
