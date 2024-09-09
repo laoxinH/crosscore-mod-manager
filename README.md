@@ -108,46 +108,25 @@
 
 ```json
 {
-  "gameName": "明日方舟",   // 必须填一个名字
-  "serviceName": "B服-配置2.0",  // 必须填一个服务器名字
-  "packageName": "com.hypergryph.arknights.bilibili",
-  "version": "2.0.0", // 配置文件版本
-  "gamePath": "Android/data/com.hypergryph.arknights.bilibili/", // 游戏的data目录
-  "antiHarmonyFile": "",   // 反和谐文件路径，没有就不填
-  "antiHarmonyContent": "", // 写入到反和谐文件中的内容,换行使用\n ，这两个反和谐配置没有则留空即可()空字符串"")没有不填
-  // 用于替换mod文件的目录
-  "gameFilePath": [
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/chararts/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/skinpack/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/dynchars/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/avg/characters/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/avg/imgs/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/spritepack/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/refs/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/ui/rglktopic/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/arts/ui/namecardskin/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/enemies/",
-    "Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/battle/prefabs/effects/"
-  ],
-  // mod类型类必须和gameFilePath中的目录一一对应,可以是中文
-  "modType": [
-    "普通立绘",
-    "静态皮肤",
-    "动态皮肤",
-    "剧情立绘",
-    "剧情cg",
-    "肉鸽道具贴图",
-    "界面ui素材",
-    "肉鸽主题背景",
-    "个人名片背景",
-    "敌人修改",
-    "效果修改"
-  ],
-  "modSavePath": "",
-  "isGameFileRepeat": true,
-  "enableBackup": true,
-  "tips": "注意如果此前自行修改过游戏文件，可能会出现反检测失败导致无法正常使用MOD，建议先清除游戏数据重新下载游戏资源后再使用MOD，如果出现反检测失败无论此前更改过游戏文件都需要重新下载游戏资源！"
+    "gameName": "尘白禁区",  // 必须填一个名字
+    "serviceName": "官服2.0.0",  // 必须填一个服务器名字
+    "packageName": "com.dragonli.projectsnow.lhm",  // 游戏包名
+    "version": "2.0.0",  // 配置文件版本
+    "gamePath": "Android/data/com.dragonli.projectsnow.lhm/",  // 游戏的data目录
+    "antiHarmonyFile": "",  // 反和谐文件路径，没有就不填
+    "antiHarmonyContent": "",  // 写入到反和谐文件中的内容,换行使用\n ，这两个反和谐配置没有则留空即可()空字符串"")没有不填
+// 用于替换mod文件的目录
+    "gameFilePath": [
+        "Android/data/com.dragonli.projectsnow.lhm/files/2.0.0/"
+    ],
+ // mod类型类必须和gameFilePath中的目录一一对应,可以是中文
+    "modType": [ "人物模型" ],
+    "modSavePath": "",
+    "isGameFileRepeat": false,
+    "enableBackup" : false,
+    "tips" : "第一次选择尘白禁区游戏需要先清除游戏数据或者卸载重装再选择(清除或者卸载重装后先运行游戏到登录界面,然后回到这里选择游戏后再运行游戏下载游戏数据),否则会提示MOD文件复制失败,后续有大更新也需要再次操作\n\n同时启动游戏需要在实验室控制台启动才能生效,在启动过程中推荐点击屏幕跳过切换账号5秒的等待, 若游戏提示下载资源失败点击重试即可\n\n若游戏有小资源更新建议先正常启动一次游戏再从实验室启动注入MOD"
 }
+
 // 注意当"isGameFileRepeat"为true时,压缩包内mod文件必须放到gameFilePath最后的路径
 // 比如"Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/refs/",这个gameFilePath中要想扫描到mod
 // 必须在压缩包内存在"refs"文件夹,将用于替换这个游戏路径内的mod文件放入其中
