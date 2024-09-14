@@ -3,6 +3,7 @@
     <string name="console">控制台</string>
     <string name="mod">Mod</string>
     <string name="settings">设置</string>
+    <string name="permission">访问权限状态: %s</string>
     <string name="toast_shizuku_load_file_failed">shizuku读取文件失败,请重新授权</string>
     <string name="toast_shizuku_connected">shizuku 已连接</string>
     <string name="toast_shizuku_disconnected">shizuku 未连接</string>

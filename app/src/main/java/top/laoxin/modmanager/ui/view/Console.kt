@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.ui.view
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -44,7 +45,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfoBean
+import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
@@ -53,7 +56,7 @@ import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
-
+@SuppressLint("NewApi")
 @Composable
 fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel: ConsoleViewModel) {
     val context = LocalContext.current
@@ -136,22 +139,51 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+        //权限信息
+        PermissionInformationCard()
+
+        Spacer(modifier = Modifier.height(16.dp))
+        // 游戏信息
         GameInformationCard(
             viewModel,
             uiState.gameInfo,
             Modifier.align(Alignment.CenterHorizontally)
         )
+
         // 添加一些间距
         Spacer(modifier = Modifier.height(16.dp))
-
         // 第二部分：包含两个卡片用于展示其他信息
         SettingInformationCard(uiState)
-        Spacer(modifier = Modifier.height(16.dp))
 
+        Spacer(modifier = Modifier.height(16.dp))
         ConfigurationCard(viewModel, uiState)
 
     }
 }
+
+// 授权信息
+@Composable
+fun PermissionInformationCard() {
+    Card {
+        Column(
+            Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                when (PermissionTools.checkPermission(ScanModPath.ANDROID_DATA)) {
+                    0 -> stringResource(id = R.string.permission, "FILE")
+                    1 -> stringResource(id = R.string.permission, "DOCUMENT")
+                    2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
+                    3 -> stringResource(id = R.string.permission, "SHIZUKU")
+                    else -> stringResource(id = R.string.permission, "无权限")
+                },
+                style = typography.titleMedium
+            )
+        }
+    }
+}
+
 
 // 游戏信息选项卡
 @Composable
@@ -213,7 +245,6 @@ fun GameInformationCard(
 }
 
 // 设置信息选项卡
-
 @Composable
 fun SettingInformationCard(uiState: ConsoleUiState) {
 
@@ -421,7 +452,6 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
         }
     }
 }
-
 
 @Composable
 fun ConsolePage(viewModel: ConsoleViewModel) {
