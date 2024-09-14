@@ -49,7 +49,7 @@ android {
     }
 
     namespace = "top.laoxin.modmanager"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.mod.manager"

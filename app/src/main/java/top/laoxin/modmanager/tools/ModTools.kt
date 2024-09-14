@@ -1004,7 +1004,7 @@ object ModTools {
         }
     }
 
-    fun getVersionName(): String {
+    fun getVersionName(): String? {
         return try {
             val context = App.get()
             context.packageManager.getPackageInfo(context.packageName, 0).versionName

@@ -333,7 +333,7 @@ class SettingViewModel(
     // 获取版本号
     fun getVersionName() {
         viewModelScope.launch() {
-            setVersionName(ModTools.getVersionName())
+            ModTools.getVersionName()?.let { setVersionName(it) }
         }
     }
 
