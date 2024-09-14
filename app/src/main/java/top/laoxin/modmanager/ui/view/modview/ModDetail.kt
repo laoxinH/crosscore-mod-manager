@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Settings
@@ -39,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
@@ -68,11 +69,13 @@ fun ModDetailPartialBottomSheet(
     onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    DialogCommon(title = stringResource(id = R.string.dialog_del_mod_title),
+    DialogCommon(
+        title = stringResource(id = R.string.dialog_del_mod_title),
         content = stringResource(id = R.string.dialog_del_mod_content),
-        onConfirm = { viewModel.deleteMod()},
+        onConfirm = { viewModel.deleteMod() },
         onCancel = { viewModel.setShowDelModDialog(false) },
-        showDialog = uiState.showDelModDialog)
+        showDialog = uiState.showDelModDialog
+    )
 
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
@@ -103,23 +106,41 @@ fun ModDetailPartialBottomSheet(
                 Spacer(modifier = Modifier.height(16.dp))
                 // 预览图
                 if ((!mod.images.isNullOrEmpty() && !mod.isEncrypted) || (mod.password != null && !mod.images.isNullOrEmpty())) {
-                    showButton =false
+                    showButton = false
+                    val context = LocalContext.current
                     LabelAndIconButtonGroup(
                         label = R.string.mod_page_mod_detail_dialog_detali_perview,
                         icon = Icons.Filled.Image,
                         showButton = true,
                         viewModel = viewModel
                     )
-                    val imageBitmaps = mod.images.mapNotNull { path ->
-                        createImageBitmapFromPath(path)
-                    }
-                    ImageCarouselWithIndicator(imageBitmaps)
 
+                    // 使用 Glide 异步加载图片
+                    val imageBitmaps = remember { mutableStateListOf<ImageBitmap>() }
+
+                    LaunchedEffect(mod.images) {
+                        imageBitmaps.clear()
+                        mod.images.mapNotNull { path ->
+                            loadImageBitmapFromPath(context, path, 1024, 1024)  //保持图片的比例压缩
+                        }.also { loadedBitmaps ->
+                            imageBitmaps.addAll(loadedBitmaps)
+                        }
+                    }
+
+
+                    // 显示图片轮播
+                    ImageCarouselWithIndicator(imageBitmaps)
                 }
 
-                LabelAndIconButtonGroup(label = R.string.mod_page_mod_detail_dialog_detali_title, icon = Icons.Filled.Settings, showButton = showButton, viewModel = viewModel)
-                // 文本标签
 
+
+                LabelAndIconButtonGroup(
+                    label = R.string.mod_page_mod_detail_dialog_detali_title,
+                    icon = Icons.Filled.Settings,
+                    showButton = showButton,
+                    viewModel = viewModel
+                )
+                // 文本标签
                 Card {
                     Column(Modifier.padding(16.dp)) {
                         Text(
@@ -271,11 +292,15 @@ fun LabelAndIconButtonGroup(
                 //.padding(40.dp),
                 //horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-               /* IconButton(onClick = { *//* Handle click *//* }) {
+                /* IconButton(onClick = { *//* Handle click *//* }) {
                     Icon(Icons.Filled.Add, contentDescription = "Add")
                 }*/
                 IconButton(onClick = { viewModel.deleteMod() }) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
 
                 }
                 // Add more icons as needed...

@@ -8,6 +8,7 @@ converterGson = "2.11.0"
 converterScalars = "2.11.0"
 datastorePreferences = "1.1.1"
 documentfile = "1.0.1"
+glide = "4.16.0"
 gson = "2.11.0"
 kotlin = "2.0.20"
 junit = "4.13.2"
@@ -54,6 +55,7 @@ compose-bom = { module = "androidx.compose:compose-bom", version = "2024.09.01" 
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterScalars" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }

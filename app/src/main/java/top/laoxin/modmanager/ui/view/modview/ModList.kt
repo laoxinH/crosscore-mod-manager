@@ -1,13 +1,9 @@
 package top.laoxin.modmanager.ui.view.modview
 
-import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,22 +21,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,37 +38,25 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.ModBean
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.CardColors
-import androidx.compose.runtime.remember
-import androidx.compose.ui.composed
+
 @Composable
 fun ModList(
     modifier: Modifier = Modifier,
     mods: List<ModBean>,
     modsSelected: List<Int>,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    modSwitchEnable : Boolean,
+    modSwitchEnable: Boolean,
     isMultiSelect: Boolean,
     showDialog: (ModBean, Boolean) -> Unit,
     enableMod: (ModBean, Boolean) -> Unit,
@@ -124,30 +100,29 @@ fun ModListItem(
     onLongClick: (ModBean) -> Unit,  // 长按
     onMultiSelectClick: (ModBean) -> Unit, // 多选状态下的点击
     isMultiSelect: Boolean = false, // 是否多选状态
-    modSwitchEnable : Boolean,
+    modSwitchEnable: Boolean,
     openModDetail: (ModBean, Boolean) -> Unit,
     enableMod: (ModBean, Boolean) -> Unit,
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     val path = mod.icon
     LaunchedEffect(path) {
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                val bitmap = BitmapFactory.decodeFile(path)
-                val composeImageBitmap = bitmap?.asImageBitmap()
-                withContext(Dispatchers.Main) {
-                    imageBitmap = composeImageBitmap
-                }
+                imageBitmap =
+                    path?.let { loadImageBitmapFromPath(context, it, 1024, 1024) }  // 使用 Glide 加载图片
             } catch (e: Exception) {
-                Log.e("ModListItem", "ModListItem: ", e)
+                e.printStackTrace()
             }
         }
     }
 
-
     Card(
-        elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(0.dp),
+        elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(
+            0.dp
+        ),
         modifier = modifier.combinedClickable(
             onClick = {
                 if (isMultiSelect) {
@@ -226,7 +201,11 @@ fun ModListItem(
                     .align(Alignment.CenterVertically)
 
             ) {
-                Switch(checked = mod.isEnable, onCheckedChange = { enableMod(mod, it) }, enabled = modSwitchEnable)
+                Switch(
+                    checked = mod.isEnable,
+                    onCheckedChange = { enableMod(mod, it) },
+                    enabled = modSwitchEnable
+                )
             }
         }
     }
@@ -236,7 +215,7 @@ fun ModListItem(
 @Composable
 fun PasswordInputDialog(
     showDialog: Boolean,
-    mod : ModBean,
+    mod: ModBean,
     onDismiss: () -> Unit,
     onPasswordSubmit: (String) -> Unit
 ) {
@@ -245,9 +224,12 @@ fun PasswordInputDialog(
 
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text(text = stringResource(R.string.password_dialog_title),
-                style = MaterialTheme.typography.titleLarge)
-                    },
+            title = {
+                Text(
+                    text = stringResource(R.string.password_dialog_title),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
 
             text = {
                 OutlinedTextField(
@@ -262,19 +244,17 @@ fun PasswordInputDialog(
                     onPasswordSubmit(password)
                     onDismiss()
                 }) {
-                    Text(text = stringResource(id =R.string.dialog_button_confirm))
+                    Text(text = stringResource(id = R.string.dialog_button_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismiss) {
-                    Text(text = stringResource(id =R.string.dialog_button_request_close))
+                    Text(text = stringResource(id = R.string.dialog_button_request_close))
                 }
             }
         )
     }
 }
-
-
 
 
 @OptIn(ExperimentalFoundationApi::class)
