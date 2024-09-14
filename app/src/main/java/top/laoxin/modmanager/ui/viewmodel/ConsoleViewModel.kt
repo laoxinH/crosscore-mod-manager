@@ -405,7 +405,7 @@ class ConsoleViewModel(
     fun getGameIcon(packageName: String): ImageBitmap {
         try {
             val packageInfo = App.get().packageManager.getPackageInfo(packageName, 0)
-            var drawable = packageInfo.applicationInfo.loadIcon(App.get().packageManager)
+            var drawable = packageInfo.applicationInfo?.loadIcon(App.get().packageManager)
             val bitmap = when (drawable) {
                 is BitmapDrawable -> drawable.bitmap
                 is AdaptiveIconDrawable -> {
