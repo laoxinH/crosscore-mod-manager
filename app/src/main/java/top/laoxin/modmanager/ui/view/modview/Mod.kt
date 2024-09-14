@@ -264,7 +264,6 @@ suspend fun loadImageBitmapFromPath(context: Context, path: String, reqWidth: In
                 .asBitmap()
                 .load(path)
                 .apply(RequestOptions().override(reqWidth, reqHeight))  // 指定最大宽度和高度，保持图片比例
-                .thumbnail(0.1f)
                 .submit()
                 .get()
             bitmap.asImageBitmap()

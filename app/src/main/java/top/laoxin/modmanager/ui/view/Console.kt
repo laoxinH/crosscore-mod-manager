@@ -139,8 +139,8 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        //权限信息
-        PermissionInformationCard()
+        // 权限信息
+        // PermissionInformationCard()
 
         Spacer(modifier = Modifier.height(16.dp))
         // 游戏信息
@@ -162,27 +162,27 @@ fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel:
 }
 
 // 授权信息
-@Composable
-fun PermissionInformationCard() {
-    Card {
-        Column(
-            Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                when (PermissionTools.checkPermission(ScanModPath.ANDROID_DATA)) {
-                    0 -> stringResource(id = R.string.permission, "FILE")
-                    1 -> stringResource(id = R.string.permission, "DOCUMENT")
-                    2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
-                    3 -> stringResource(id = R.string.permission, "SHIZUKU")
-                    else -> stringResource(id = R.string.permission, "无权限")
-                },
-                style = typography.titleMedium
-            )
-        }
-    }
-}
+//@Composable
+//fun PermissionInformationCard() {
+//    Card {
+//        Column(
+//            Modifier
+//                .padding(16.dp)
+//                .fillMaxWidth()
+//        ) {
+//            Text(
+//                when (PermissionTools.checkPermission(ScanModPath.ANDROID_DATA)) {
+//                    0 -> stringResource(id = R.string.permission, "FILE")
+//                    1 -> stringResource(id = R.string.permission, "DOCUMENT")
+//                    2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
+//                    3 -> stringResource(id = R.string.permission, "SHIZUKU")
+//                    else -> stringResource(id = R.string.permission, "无权限")
+//                },
+//                style = typography.titleMedium
+//            )
+//        }
+//    }
+//}
 
 
 // 游戏信息选项卡
@@ -291,12 +291,14 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
-                    stringResource(
-                        id = R.string.console_setting_info_configuration_anti_harmony,
-                        if (uiState.antiHarmony) stringResource(R.string.console_setting_info_configuration_anti_harmony_enable) else stringResource(
-                            R.string.console_setting_info_configuration_anti_harmony_disable
-                        )
-                    ), style = typography.labelLarge
+                    when (PermissionTools.checkPermission(ScanModPath.ANDROID_DATA)) {
+                        0 -> stringResource(id = R.string.permission, "FILE")
+                        1 -> stringResource(id = R.string.permission, "DOCUMENT")
+                        2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
+                        3 -> stringResource(id = R.string.permission, "SHIZUKU")
+                        else -> stringResource(id = R.string.permission, "无权限")
+                    },
+                    style = typography.labelLarge
                 )
                 Text(
                     stringResource(

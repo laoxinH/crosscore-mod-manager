@@ -72,7 +72,7 @@ fun ModList(
             .fillMaxSize()
             .padding(contentPadding)
     ) {
-        Log.d("ModList", "ModList: ${mods}")
+        Log.d("ModList", "ModList: $mods")
         itemsIndexed(mods) { index, mod ->
 
             ModListItem(
