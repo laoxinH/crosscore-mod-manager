@@ -27,15 +27,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.sharp.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,17 +47,13 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.laoxin.modmanager.ui.state.ModUiState
-import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -93,29 +89,31 @@ fun ModPartialBottomSheet() {
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(text = "添加")
-                        
+
                     }
 
                 }
 
 
                 CustomEdit(
-                text = searchText,
-                onValueChange = {
-                    searchText = it
-                },
-                hint = "搜索应用",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 10.dp)
-                    .height(50.dp)
-                    .background(Color(0xBCE9E9E9), shape = MaterialTheme.shapes.medium)
-                    .padding(horizontal = 16.dp),
-                textStyle = typography.bodyMedium,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            )
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(16.dp)) {
+                    text = searchText,
+                    onValueChange = {
+                        searchText = it
+                    },
+                    hint = "搜索应用",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 10.dp)
+                        .height(50.dp)
+                        .background(Color(0xBCE9E9E9), shape = MaterialTheme.shapes.medium)
+                        .padding(horizontal = 16.dp),
+                    textStyle = typography.bodyMedium,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     FilterChipExample()
                     FilterChipExample()
                     FilterChipExample()

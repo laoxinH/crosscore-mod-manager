@@ -18,7 +18,7 @@ interface ModRepository {
     fun getAllIModsStream(): Flow<List<ModBean>>
 
     // 通过gamePackageName和名字模糊查询
-    fun search(name: String, gamePackageName : String): Flow<List<ModBean>>
+    fun search(name: String, gamePackageName: String): Flow<List<ModBean>>
 
     // 通过List<ModBean>插入数据
     suspend fun insertAll(mods: List<ModBean>)
@@ -54,7 +54,6 @@ interface ModRepository {
 
     // 通过path查询mod数量
     fun getModsCountByPath(path: String): Flow<Int>
-
 
 
 }

@@ -3,8 +3,9 @@ package top.laoxin.modmanager.database.antiHarmony
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
-import top.laoxin.modmanager.bean.AntiHarmonyBean
 import kotlinx.coroutines.flow.Flow
+import top.laoxin.modmanager.bean.AntiHarmonyBean
+
 @Dao
 interface AntiHarmonyDao {
     // 插入数据

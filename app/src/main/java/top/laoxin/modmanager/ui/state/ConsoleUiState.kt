@@ -4,7 +4,7 @@ import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.InfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 
-data class ConsoleUiState (
+data class ConsoleUiState(
     var antiHarmony: Boolean = false,
     var scanQQDirectory: Boolean = false,
     var selectedDirectory: String = "未选择",
@@ -15,7 +15,7 @@ data class ConsoleUiState (
     // 已开启mod数量
     val enableModCount: Int = 0,
     // 扫描文件夹中的Mods
-    val scanDirectoryMods : Boolean = false,
+    val scanDirectoryMods: Boolean = false,
     // 游戏信息
     val gameInfo: GameInfoBean = GameInfoConstant.gameInfoList[0],
     // 是否可以安装mod
@@ -30,6 +30,4 @@ data class ConsoleUiState (
     // 显示删除解压目录弹窗
     val showDeleteUnzipDialog: Boolean = false,
     val delUnzipDictionary: Boolean = false,
-    ) {
-
-}
+)

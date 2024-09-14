@@ -3,7 +3,6 @@ package top.laoxin.modmanager.tools.specialGameTools
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean
@@ -27,42 +26,46 @@ object ArknightsTools : BaseSpecialGameTools {
         /*.disableHtmlEscaping()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
         .create()
-    private lateinit var fileTools : BaseFileTools
-    private lateinit var hotUpdate : HotUpdate
-    private lateinit var persistentRes : PersistentRes
+    private lateinit var fileTools: BaseFileTools
+    private lateinit var hotUpdate: HotUpdate
+    private lateinit var persistentRes: PersistentRes
+
     data class HotUpdate(
         var fullPack: FullPack = FullPack(),
         var versionId: String = "",
         var abInfos: MutableList<AbInfo> = mutableListOf(),
-        var countOfTypedRes : String = "",
-        var packInfos : MutableList<AbInfo> = mutableListOf()
+        var countOfTypedRes: String = "",
+        var packInfos: MutableList<AbInfo> = mutableListOf()
     )
+
     data class PersistentRes(
         val abInfos: MutableList<AbInfo> = mutableListOf(),
-        )
+    )
 
     data class FullPack(
         val totalSize: Long = 0,
-        val abSize : Long = 0,
-        val type : String = "",
-        val cid : Int = -1,
+        val abSize: Long = 0,
+        val type: String = "",
+        val cid: Int = -1,
     )
 
     data class AbInfo(
-        val name : String? ,
-        val hash : String? ,
-        val md5 : String?,
-        val totalSize : Long?,
-        val abSize : Long?,
-        val thash : String?,
-        val type : String?,
-        val pid : String?,
-        val cid : Int?,
-        )
-    override fun specialOperationEnable(mod: ModBean, packageName: String) : Boolean{
+        val name: String?,
+        val hash: String?,
+        val md5: String?,
+        val totalSize: Long?,
+        val abSize: Long?,
+        val thash: String?,
+        val type: String?,
+        val pid: String?,
+        val cid: Int?,
+    )
+
+    override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
         CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
-        val unZipPath = ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
-        val flag : MutableList<Boolean> = mutableListOf()
+        val unZipPath =
+            ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
+        val flag: MutableList<Boolean> = mutableListOf()
         if (!initialFileTools()) {
             throw Exception("初始化文件工具失败")
         }
@@ -72,7 +75,7 @@ object ArknightsTools : BaseSpecialGameTools {
         if (!loadCheckFile()) {
             throw Exception("加载校验JSON文件失败")
         }
-        mod.modFiles?.forEachIndexed{index: Int, modFile: String ->
+        mod.modFiles?.forEachIndexed { index: Int, modFile: String ->
             val modFilePath = if (mod.isZipFile) {
                 unZipPath + modFile
             } else {
@@ -80,8 +83,12 @@ object ArknightsTools : BaseSpecialGameTools {
             }
             // 计算md5
             var md5 = calculateMD5(File(modFilePath).inputStream())
-            if (md5 == null){
-                getZipFileInputStream(zipFilePath =  mod.path,fileName = modFile, password = mod.password!!)?.use {
+            if (md5 == null) {
+                getZipFileInputStream(
+                    zipFilePath = mod.path,
+                    fileName = modFile,
+                    password = mod.password!!
+                )?.use {
                     md5 = calculateMD5(it)
                 }
             }
@@ -96,12 +103,12 @@ object ArknightsTools : BaseSpecialGameTools {
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
             onProgressUpdate("${index + 1}/${mod.modFiles.size}")
         }
-        if (!writeCheckFile()){
+        if (!writeCheckFile()) {
             throw Exception("写入校验JSON失败")
         }
         return if (flag.all { it }) {
             moveCheckFileToGamePath()
-        }else {
+        } else {
             false
         }
     }
@@ -165,22 +172,23 @@ object ArknightsTools : BaseSpecialGameTools {
         if (!loadCheckFile()) {
             throw Exception("加载校验文件失败")
         }
-        val flag : MutableList<Boolean> = mutableListOf()
-        backups.forEachIndexed{index, backupBean ->
+        val flag: MutableList<Boolean> = mutableListOf()
+        backups.forEachIndexed { index, backupBean ->
             // 计算md5
             val md5 = calculateMD5(File(backupBean.backupPath!!).inputStream())
             // 读取文件大小
             val fileSize = File(backupBean.backupPath).length()
-            val checkFileName = (File(backupBean.backupPath).parentFile?.name ?: "") + "/" + backupBean.filename
+            val checkFileName =
+                (File(backupBean.backupPath).parentFile?.name ?: "") + "/" + backupBean.filename
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
             onProgressUpdate("${index + 1}/${backups.size}")
         }
-        if (!writeCheckFile()){
+        if (!writeCheckFile()) {
             throw Exception("写入校验JSON失败")
         }
         return if (flag.all { it }) {
             moveCheckFileToGamePath()
-        }else {
+        } else {
             false
         }
     }
@@ -207,7 +215,7 @@ object ArknightsTools : BaseSpecialGameTools {
 
 
     // 修改check文件
-    private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long) : Boolean {
+    private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long): Boolean {
         try {
             val abInfos1 = persistentRes.abInfos
             val abInfos2 = hotUpdate.abInfos
@@ -238,7 +246,8 @@ object ArknightsTools : BaseSpecialGameTools {
             return false
         }
     }
-    private fun moveCheckFileToGamePath() : Boolean{
+
+    private fun moveCheckFileToGamePath(): Boolean {
         val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
         return if (checkPermission == PathType.DOCUMENT) {
             fileTools.copyFileByFD(
@@ -261,7 +270,7 @@ object ArknightsTools : BaseSpecialGameTools {
         }
     }
 
-    private fun moveCheckFileToAppPath() : Boolean{
+    private fun moveCheckFileToAppPath(): Boolean {
         val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
         Log.d("ArknightsTools", "文件权限: $checkPermission")
         // 通过documentFile读取文件
@@ -286,12 +295,12 @@ object ArknightsTools : BaseSpecialGameTools {
         }
     }
 
-    private fun initialFileTools() : Boolean {
+    private fun initialFileTools(): Boolean {
         val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
         return if (checkPermission == PathType.FILE) {
             Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
             fileTools = FileTools
-           true
+            true
         } else if (checkPermission == PathType.DOCUMENT) {
             fileTools = DocumentFileTools
             true
@@ -300,7 +309,7 @@ object ArknightsTools : BaseSpecialGameTools {
             true
         } else {
             Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-           false
+            false
         }
     }
 }

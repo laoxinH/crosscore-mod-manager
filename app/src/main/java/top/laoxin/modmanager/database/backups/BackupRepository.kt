@@ -9,8 +9,6 @@ interface BackupRepository {
     suspend fun insert(backupBean: BackupBean)
 
 
-
-
     // 通过modPath查询
     suspend fun getByModPath(modPath: String): Flow<List<BackupBean>>
 
@@ -23,6 +21,9 @@ interface BackupRepository {
     suspend fun deleteByGamePackageName(gamePackageName: String)
 
     // 通过modName和gamePackageName查询backups
-    fun getByModNameAndGamePackageName(modName: String, gamePackageName: String): Flow<List<BackupBean>>
+    fun getByModNameAndGamePackageName(
+        modName: String,
+        gamePackageName: String
+    ): Flow<List<BackupBean>>
 
 }

@@ -28,7 +28,6 @@ interface BackupDao {
     fun deleteAll()
 
 
-
     //通过gamePackageName删除
     @androidx.room.Query("DELETE FROM backups WHERE gamePackageName = :gamePackageName")
     fun deleteByGamePackageName(gamePackageName: String)
@@ -36,9 +35,10 @@ interface BackupDao {
 
     // 通过modName和gamePackageName查询backups
     @androidx.room.Query("SELECT * from backups WHERE modName = :modName AND gamePackageName = :gamePackageName")
-    fun getByModNameAndGamePackageName(modName: String, gamePackageName: String): Flow<List<BackupBean>>
-
-
+    fun getByModNameAndGamePackageName(
+        modName: String,
+        gamePackageName: String
+    ): Flow<List<BackupBean>>
 
 
 }

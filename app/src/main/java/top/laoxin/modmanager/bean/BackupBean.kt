@@ -13,8 +13,8 @@ data class BackupBean(
     val id: Int = 0,
     val filename: String?,
     val gamePath: String?,
-    val gameFilePath : String?,
+    val gameFilePath: String?,
     val backupPath: String?,
     val gamePackageName: String?,
-    val modName : String?,
+    val modName: String?,
 )

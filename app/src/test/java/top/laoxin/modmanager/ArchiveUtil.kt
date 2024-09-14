@@ -1,8 +1,6 @@
 package top.laoxin.modmanager
 
 import android.util.Log
-import net.lingala.zip4j.ZipFile
-import net.lingala.zip4j.exception.ZipException
 import net.sf.sevenzipjbinding.ExtractAskMode
 import net.sf.sevenzipjbinding.ExtractOperationResult
 import net.sf.sevenzipjbinding.IArchiveExtractCallback
@@ -58,7 +56,12 @@ object ArchiveUtil {
     }
 
     @Throws(SevenZipException::class)
-    fun extractSpecificFile(srcFile: String, files: List<String>, destDir: String, password: String?) {
+    fun extractSpecificFile(
+        srcFile: String,
+        files: List<String>,
+        destDir: String,
+        password: String?
+    ) {
         var extractPath = destDir
         if (!destDir.endsWith("/") && !destDir.endsWith("\\")) {
             extractPath += File.separator
@@ -68,7 +71,8 @@ object ArchiveUtil {
 
         try {
             randomAccessFile = RandomAccessFile(File(srcFile), "r")
-            inArchive = SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile),password)
+            inArchive =
+                SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile), password)
 
             val indices = IntArray(files.size)
             for (i in 0 until inArchive.numberOfItems) {
@@ -111,6 +115,7 @@ object ArchiveUtil {
     fun extractSpecificFile(srcFile: String, files: List<String>, destDir: String) {
         extractSpecificFile(srcFile, files, destDir, null)
     }
+
     private class ExtractCallback(inArchive: IInArchive?, extractPath: String) :
         IArchiveExtractCallback {
         private val inArchive: IInArchive?

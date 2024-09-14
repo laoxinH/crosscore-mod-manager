@@ -62,7 +62,7 @@ object ArchiveUtil {
     /**
      * 无需密码解压文件
      */
-    fun decompression(srcFile: String, destDir: String, overwrite :Boolean =  false): Boolean {
+    fun decompression(srcFile: String, destDir: String, overwrite: Boolean = false): Boolean {
         // 判断压缩包类型
         return decompression(srcFile, destDir, null, overwrite)
     }
@@ -70,18 +70,23 @@ object ArchiveUtil {
     /**
      * 带密码解压
      */
-    fun decompression(srcFile: String, destDir: String, password: String?,overwrite : Boolean = false): Boolean {
+    fun decompression(
+        srcFile: String,
+        destDir: String,
+        password: String?,
+        overwrite: Boolean = false
+    ): Boolean {
         return when (getFileType(File(srcFile))) {
             FileType.ZIP -> {
-                extractZip(srcFile, destDir, password,overwrite)
+                extractZip(srcFile, destDir, password, overwrite)
             }
 
             FileType._7z -> {
-                decompressionBy7z(srcFile, destDir, password,overwrite)
+                decompressionBy7z(srcFile, destDir, password, overwrite)
             }
 
             FileType.RAR -> {
-                decompressionBy7z(srcFile, destDir, password,overwrite)
+                decompressionBy7z(srcFile, destDir, password, overwrite)
             }
 
             else -> false
@@ -92,9 +97,14 @@ object ArchiveUtil {
     /**
      * 无密码解压指定文件
      */
-    fun extractSpecificFile(srcFile: String, files: List<String>, destDir: String,overwrite : Boolean = false): Boolean {
+    fun extractSpecificFile(
+        srcFile: String,
+        files: List<String>,
+        destDir: String,
+        overwrite: Boolean = false
+    ): Boolean {
         // 判断压缩文件类型`
-        return extractSpecificFile(srcFile, files, destDir, null,overwrite)
+        return extractSpecificFile(srcFile, files, destDir, null, overwrite)
     }
 
     /**
@@ -105,15 +115,15 @@ object ArchiveUtil {
         files: List<String>,
         destDir: String,
         password: String?,
-        overwrite : Boolean = false
+        overwrite: Boolean = false
     ): Boolean {
         return when (getFileType(File(srcFile))) {
             FileType.ZIP -> {
-                extractSpecificZipFile(srcFile, files, destDir, password,overwrite)
+                extractSpecificZipFile(srcFile, files, destDir, password, overwrite)
             }
 
             FileType._7z -> {
-                extractSpecificFileBy7z(srcFile, files, destDir, password,overwrite)
+                extractSpecificFileBy7z(srcFile, files, destDir, password, overwrite)
             }
 
             FileType.RAR -> {
@@ -190,7 +200,12 @@ object ArchiveUtil {
      * @param password 密码
      * @param charset  编码格式
      */
-    private fun extractZip(srcFile: String, destDir: String, password: String?, overwrite: Boolean): Boolean {
+    private fun extractZip(
+        srcFile: String,
+        destDir: String,
+        password: String?,
+        overwrite: Boolean
+    ): Boolean {
         Log.i(TAG, "解压文件: $srcFile---$destDir---$password")
         try {
             if (File(destDir).exists() && !overwrite) return true
@@ -205,7 +220,7 @@ object ArchiveUtil {
             password?.let {
                 zipFile.setPassword(it.toCharArray())
             }
-            zipFile.isRunInThread = true;
+            zipFile.isRunInThread = true
             zipFile.extractAll(destDir)
             val progressMonitor = zipFile.progressMonitor
             while (true) {
@@ -265,7 +280,7 @@ object ArchiveUtil {
             for (file in files) {
                 zipFile.extractFile(file, destDir)
             }
-           return true
+            return true
 
         } catch (e: Exception) {
             Log.e(TAG, e.message!!)
@@ -388,7 +403,7 @@ object ArchiveUtil {
             } else {
                 0.0
             }
-            progressUpdateListener?.onProgressUpdate("${ progress.toInt() }%")
+            progressUpdateListener?.onProgressUpdate("${progress.toInt()}%")
         }
 
         @Throws(SevenZipException::class)

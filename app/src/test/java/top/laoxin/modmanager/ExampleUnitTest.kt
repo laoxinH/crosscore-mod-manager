@@ -1,24 +1,9 @@
 package top.laoxin.modmanager
 
-import android.util.Log
-import com.google.gson.*
-import com.google.gson.reflect.TypeToken
-import net.sf.sevenzipjbinding.ArchiveFormat
-import net.sf.sevenzipjbinding.IArchiveOpenCallback
-import net.sf.sevenzipjbinding.IInArchive
-import net.sf.sevenzipjbinding.PropID
-import net.sf.sevenzipjbinding.SevenZip
-import net.sf.sevenzipjbinding.SevenZipException
-import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream
-import org.junit.Assert.*
-import org.junit.Test
 import top.laoxin.modmanager.constant.FileType
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.RandomAccessFile
-import java.text.DecimalFormat
 
 
 /**
@@ -32,34 +17,35 @@ class ExampleUnitTest {
         var fullPack: FullPack = FullPack(),
         var versionId: String = "",
         var abInfos: MutableList<AbInfo> = mutableListOf(),
-        var countOfTypedRes : String = "",
-        var packInfos : MutableList<AbInfo> = mutableListOf()
+        var countOfTypedRes: String = "",
+        var packInfos: MutableList<AbInfo> = mutableListOf()
     )
+
     data class PersistentRes(
         val abInfos: MutableList<AbInfo> = mutableListOf(),
 
-    )
+        )
 
     data class FullPack(
         val totalSize: Long = 0,
-        val abSize : Long = 0,
-        val type : String = "",
-        val cid : Int = -1,
-        )
+        val abSize: Long = 0,
+        val type: String = "",
+        val cid: Int = -1,
+    )
 
     data class AbInfo(
-        val name : String? ,
-        val hash : String? ,
-        val md5 : String?,
-        val totalSize : Long?,
-        val abSize : Long?,
-        val thash : String?,
-        val type : String?,
-        val pid : String?,
-        val cid : Int?,
+        val name: String?,
+        val hash: String?,
+        val md5: String?,
+        val totalSize: Long?,
+        val abSize: Long?,
+        val thash: String?,
+        val type: String?,
+        val pid: String?,
+        val cid: Int?,
 
 
-    )
+        )
 //    @Test
 //    fun addition_isCorrect() {
 //

@@ -30,6 +30,4 @@ data class SettingUiState(
     val showNotificationDialog: Boolean = false,
     // 通知
     val infoBean: InfoBean = InfoBean(0.0, "")
-) {
-
-}
+)

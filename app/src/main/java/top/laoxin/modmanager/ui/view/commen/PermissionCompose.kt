@@ -71,8 +71,8 @@ fun RequestStoragePermission(
 
                 val intent: Intent =
                     Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).setData(
-                            Uri.parse("package:" + context.packageName)
-                        )
+                        Uri.parse("package:" + context.packageName)
+                    )
 
                 DialogCommon(
                     title = stringResource(id = R.string.dialog_storage_title),
@@ -103,39 +103,38 @@ fun RequestStoragePermission(
 
                 is PermissionStatus.Denied -> {
                     Column {
-                        val textToShow =
-                            if ((permissionState.status as PermissionStatus.Denied).shouldShowRationale) {
-                                //如果用户拒绝了该权限但可以显示理由，那么请温和地解释为什么应用程序需要此权限(拒绝权限)
-                                DialogCommon(
-                                    title = stringResource(id = R.string.dialog_storage_title),
-                                    content = stringResource(id = R.string.dialog_storage_message_a6),
-                                    onConfirm = {
-                                        permissionState.launchPermissionRequest()
-                                    },
-                                    onCancel = {
-                                        // 直接关闭应用
-                                        if (context is Activity) {
-                                            context.finish()
-                                        }
-                                    },
-                                    showDialog = showDialog
-                                )
-                            } else {
-                                //如果这是用户第一次登陆此功能，或者用户不想再次被要求获得此权限，请说明该权限是必需的(用户选择拒绝且不再询问)
-                                DialogCommon(
-                                    title = stringResource(id = R.string.dialog_storage_title),
-                                    content = stringResource(id = R.string.dialog_storage_message_a6),
-                                    onConfirm = {
-                                        permissionState.launchPermissionRequest()
-                                    },
-                                    onCancel = {
-                                        if (context is Activity) {
-                                            context.finish()
-                                        }
-                                    },
-                                    showDialog = showDialog
-                                )
-                            }
+                        if ((permissionState.status as PermissionStatus.Denied).shouldShowRationale) {
+                            //如果用户拒绝了该权限但可以显示理由，那么请温和地解释为什么应用程序需要此权限(拒绝权限)
+                            DialogCommon(
+                                title = stringResource(id = R.string.dialog_storage_title),
+                                content = stringResource(id = R.string.dialog_storage_message_a6),
+                                onConfirm = {
+                                    permissionState.launchPermissionRequest()
+                                },
+                                onCancel = {
+                                    // 直接关闭应用
+                                    if (context is Activity) {
+                                        context.finish()
+                                    }
+                                },
+                                showDialog = showDialog
+                            )
+                        } else {
+                            //如果这是用户第一次登陆此功能，或者用户不想再次被要求获得此权限，请说明该权限是必需的(用户选择拒绝且不再询问)
+                            DialogCommon(
+                                title = stringResource(id = R.string.dialog_storage_title),
+                                content = stringResource(id = R.string.dialog_storage_message_a6),
+                                onConfirm = {
+                                    permissionState.launchPermissionRequest()
+                                },
+                                onCancel = {
+                                    if (context is Activity) {
+                                        context.finish()
+                                    }
+                                },
+                                showDialog = showDialog
+                            )
+                        }
                     }
                 }
 
@@ -265,68 +264,67 @@ fun RequestNotificationPermission() {
 
             is PermissionStatus.Denied -> {
                 Column {
-                    val textToShow =
-                        if ((permissionState.status as PermissionStatus.Denied).shouldShowRationale) {
-                            val startForResult =
-                                rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-                                    if (result.resultCode == Activity.RESULT_OK) {
+                    if ((permissionState.status as PermissionStatus.Denied).shouldShowRationale) {
+                        val startForResult =
+                            rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+                                if (result.resultCode == Activity.RESULT_OK) {
+                                    ToastUtils.longCall(R.string.toast_permission_granted)
+                                    showDialog = false
+                                } else {
+                                    if (!NotificationManagerCompat.from(context)
+                                            .areNotificationsEnabled()
+                                    ) {
+                                        ToastUtils.longCall(R.string.toast_permission_not_granted)
+                                    } else {
                                         ToastUtils.longCall(R.string.toast_permission_granted)
                                         showDialog = false
-                                    } else {
-                                        if (!NotificationManagerCompat.from(context)
-                                                .areNotificationsEnabled()
-                                        ) {
-                                            ToastUtils.longCall(R.string.toast_permission_not_granted)
-                                        } else {
-                                            ToastUtils.longCall(R.string.toast_permission_granted)
-                                            showDialog = false
-                                        }
                                     }
                                 }
-                            //如果用户拒绝了该权限但可以显示理由，那么请温和地解释为什么应用程序需要此权限(拒绝权限)
-                            DialogCommon(
-                                title = stringResource(id = R.string.dialog_reqest_notification_title),
-                                content = stringResource(id = R.string.dialog_reqest_notification_message),
-                                onConfirm = {
-                                    val intent = Intent().apply {
-                                        action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                            }
+                        //如果用户拒绝了该权限但可以显示理由，那么请温和地解释为什么应用程序需要此权限(拒绝权限)
+                        DialogCommon(
+                            title = stringResource(id = R.string.dialog_reqest_notification_title),
+                            content = stringResource(id = R.string.dialog_reqest_notification_message),
+                            onConfirm = {
+                                val intent = Intent().apply {
+                                    action = "android.settings.APP_NOTIFICATION_SETTINGS"
 
-                                        // for Android 5-7
-                                        putExtra("app_package", context.packageName)
-                                        putExtra("app_uid", context.applicationInfo.uid)
+                                    // for Android 5-7
+                                    putExtra("app_package", context.packageName)
+                                    putExtra("app_uid", context.applicationInfo.uid)
 
-                                        // for Android 8 and above
-                                        putExtra(
-                                            "android.provider.extra.APP_PACKAGE",
-                                            context.packageName
-                                        )
-                                    }
-                                    startForResult.launch(intent)
-                                },
-                                onCancel = {
-                                    // 直接关闭应用
-                                    showDialog = false
-                                },
-                                showDialog = showDialog
-                            )
+                                    // for Android 8 and above
+                                    putExtra(
+                                        "android.provider.extra.APP_PACKAGE",
+                                        context.packageName
+                                    )
+                                }
+                                startForResult.launch(intent)
+                            },
+                            onCancel = {
+                                // 直接关闭应用
+                                showDialog = false
+                            },
+                            showDialog = showDialog
+                        )
 
-                        } else {
+                    } else {
 
-                            //如果这是用户第一次登陆此功能，或者用户不想再次被要求获得此权限，请说明该权限是必需的(用��选择拒绝且不再询问)
-                            DialogCommon(
-                                title = stringResource(id = R.string.dialog_reqest_notification_title),
-                                content = stringResource(id = R.string.dialog_reqest_notification_message),
-                                onConfirm = {
-                                    Log.d("RequestNotificationPermission", "第一次执行通知请求: ")
-                                    permissionState.launchPermissionRequest()
-                                },
-                                onCancel = {
-                                    // 直接关闭应用
-                                    showDialog = false
-                                },
-                                showDialog = showDialog
-                            )
-                        }
+                        //如果这是用户第一次登陆此功能，或者用户不想再次被要求获得此权限，请说明该权限是必需的(用��选择拒绝且不再询问)
+                        DialogCommon(
+                            title = stringResource(id = R.string.dialog_reqest_notification_title),
+                            content = stringResource(id = R.string.dialog_reqest_notification_message),
+                            onConfirm = {
+                                Log.d("RequestNotificationPermission", "第一次执行通知请求: ")
+                                permissionState.launchPermissionRequest()
+                            },
+                            onCancel = {
+                                // 直接关闭应用
+                                showDialog = false
+                            },
+                            showDialog = showDialog
+                        )
+                    }
                 }
             }
         }

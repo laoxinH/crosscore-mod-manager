@@ -14,7 +14,7 @@ interface AppContainer {
     val antiHarmonyRepository: AntiHarmonyRepository
 }
 
-class AppDataContainer (private val context: Context): AppContainer {
+class AppDataContainer(private val context: Context) : AppContainer {
     override val modRepository: ModRepository by lazy {
         OfflineModsRepository(ModManagerDatabase.getDatabase(context).modDao())
 

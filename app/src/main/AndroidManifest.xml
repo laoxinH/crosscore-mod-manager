@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-<!--    安卓6之前读写文件-->
+    <!--    安卓6之前读写文件-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-<!--    安卓11+读写sdcard-->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+    <!--    安卓11+读写sdcard-->
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
-<!--    联网权限-->
+    <!--    联网权限-->
     <uses-permission android:name="android.permission.INTERNET" />
     <!--    后台权限-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-<!--    shizuku权限-->
+    <!--    shizuku权限-->
     <uses-sdk tools:overrideLibrary="rikka.shizuku.api, rikka.shizuku.provider, rikka.shizuku.shared, rikka.shizuku.aidl" />
     <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
-<!--    通知权限-->
+    <!--    通知权限-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
 
 
     <application
@@ -28,13 +28,13 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ModManager"
-        tools:targetApi="31"
 
 
-        android:requestLegacyExternalStorage="true"><!--安卓10读写文件-->
+        tools:targetApi="31"><!--安卓10读写文件-->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -51,8 +51,7 @@
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="dataSync"
-            android:permission="android.permission.INTERNET">
-        </service>
+            android:permission="android.permission.INTERNET"></service>
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
             android:authorities="${applicationId}.shizuku"

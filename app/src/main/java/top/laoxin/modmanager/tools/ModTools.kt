@@ -93,9 +93,9 @@ object ModTools {
             if (!File(backupPath).exists()) {
                 withContext(Dispatchers.IO) {
                     if (if (specialPathReadType == PathType.DOCUMENT) {
-                            fileTools?.copyFileByDF(gamePath, backupPath) ?: false
+                            fileTools?.copyFileByDF(gamePath, backupPath) == true
                         } else {
-                            fileTools?.copyFile(gamePath, backupPath) ?: false
+                            fileTools?.copyFile(gamePath, backupPath) == true
                         } && fileTools?.isFileExist(backupPath) == true
                     ) {
                         list.add(
@@ -132,17 +132,16 @@ object ModTools {
             val gameFile = File(gameModPath + modFile.name)
             var flag = false
             flag = if (specialPathReadType == PathType.DOCUMENT) {
-                fileTools?.copyFileByFD(modFile.absolutePath, gameFile.absolutePath)
-                    ?: false
+                fileTools?.copyFileByFD(modFile.absolutePath, gameFile.absolutePath) == true
 
             } else {
-                fileTools?.copyFile(modFile.absolutePath, gameFile.absolutePath) ?: false
+                fileTools?.copyFile(modFile.absolutePath, gameFile.absolutePath) == true
 
             }
             flags.add(flag)
             progressUpdateListener?.onProgressUpdate("${index + 1}/${modBean.modFiles.size}")
         }
-       return flags.all { it }
+        return flags.all { it }
 
     }
 
@@ -156,13 +155,13 @@ object ModTools {
                 flags.add(
                     fileTools?.copyFileByFD(
                         backup.backupPath!!, backup.gameFilePath!!
-                    ) ?: false
+                    ) == true
                 )
             } else if (backup != null) {
                 flags.add(
                     fileTools?.copyFile(
                         backup.backupPath!!, backup.gameFilePath!!
-                    ) ?: false
+                    ) == true
                 )
             }
             progressUpdateListener?.onProgressUpdate("${index}/${backups.size}")
@@ -176,7 +175,7 @@ object ModTools {
     suspend fun deleteTempFile(): Boolean {
         return if (File(MODS_TEMP_PATH).exists()) {
             setModsToolsSpecialPathReadType(PathType.FILE)
-            fileTools?.deleteFile(MODS_TEMP_PATH) ?: false
+            fileTools?.deleteFile(MODS_TEMP_PATH) == true
         } else {
             true
         }
@@ -198,7 +197,7 @@ object ModTools {
         return try {
             setModsToolsSpecialPathReadType(PathType.FILE)
             mods.forEach {
-                fileTools?.deleteFile(it.path!!) ?: false
+                fileTools?.deleteFile(it.path!!) == true
             }
             true
         } catch (e: Exception) {
@@ -303,7 +302,7 @@ object ModTools {
         scanPath: String, gameInfo: GameInfoBean
     ): Boolean {
         return try {
-            iFileExplorerService?.scanMods(scanPath, gameInfo) ?: false
+            iFileExplorerService?.scanMods(scanPath, gameInfo) == true
         } catch (e: RemoteException) {
             withContext(Dispatchers.Main) {
                 Log.e(TAG, "扫描文件失败: $e")
@@ -490,8 +489,7 @@ object ModTools {
         try {
             files.forEach {
                 flags.add(
-                    iFileExplorerService?.unZipFile(modTempPath, gameModPath, it, password)
-                        ?: false
+                    iFileExplorerService?.unZipFile(modTempPath, gameModPath, it, password) == true
                 )
             }
 
@@ -509,7 +507,7 @@ object ModTools {
     // 修改文件权限
     fun chmod(path: String?): Boolean {
         return try {
-            iFileExplorerService?.chmod(path) ?: false
+            iFileExplorerService?.chmod(path) == true
         } catch (e: RemoteException) {
             e.printStackTrace()
             false
@@ -650,7 +648,7 @@ object ModTools {
         modFiles: List<String>,
         password: String?,
 
-    ): Boolean {
+        ): Boolean {
         val checkPermission = PermissionTools.checkPermission(gameModPath)
         Log.d(TAG, "copyModsByStream: $checkPermission")
         when (checkPermission) {
@@ -665,6 +663,7 @@ object ModTools {
             PathType.FILE -> {
                 return copyModStreamByFile(path, gameModPath, modFiles, password)
             }
+
             else -> {
                 return false
             }
@@ -1073,7 +1072,7 @@ object ModTools {
     fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
         for (specialGame in SpecialGame.entries) {
             if (packageName.contains(specialGame.packageName)) {
-                return  specialGame.baseSpecialGameTools.specialOperationScanMods(
+                return specialGame.baseSpecialGameTools.specialOperationScanMods(
                     packageName,
                     modFileName
                 )

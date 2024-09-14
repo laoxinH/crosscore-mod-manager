@@ -8,7 +8,6 @@ import androidx.documentfile.provider.DocumentFile
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.ModTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import java.io.File
 import java.io.InputStream
 
@@ -24,7 +23,7 @@ interface BaseFileTools {
     fun getFilesNames(path: String): MutableList<String>
 
     // 写入文件
-    fun writeFile(path: String,filename : String, content: String): Boolean
+    fun writeFile(path: String, filename: String, content: String): Boolean
 
     // 移动文件
     fun moveFile(srcPath: String, destPath: String): Boolean
@@ -45,7 +44,7 @@ interface BaseFileTools {
     fun copyFileByDF(srcPath: String, destPath: String): Boolean {
         return try {
             val app = App.get()
-            val srcPathUri = DocumentFileTools.pathToUri(srcPath)
+            val srcPathUri = pathToUri(srcPath)
             val inputStream = app.contentResolver.openInputStream(srcPathUri)
             val file = File(destPath)
             if (file.parentFile?.exists() == false) file.parentFile?.mkdirs()
@@ -97,11 +96,11 @@ interface BaseFileTools {
         return uriBuilder.build()
     }
 
-    fun copyFileByFD(srcPath: String, destPath: String): Boolean{
+    fun copyFileByFD(srcPath: String, destPath: String): Boolean {
         if (!File(srcPath).exists()) return false
         return try {
             val app = App.get()
-            val destPathUri = DocumentFileTools.pathToUri(destPath)
+            val destPathUri = pathToUri(destPath)
             var destDocumentFile = DocumentFile.fromTreeUri(app, destPathUri)
 
             if (destDocumentFile?.exists() == true) {
@@ -113,8 +112,8 @@ interface BaseFileTools {
                 pathToUri(parentFile!!)
             )
             Log.d("FileTools", "copyFileByFD: 开始创建文件")
-           
-            parentDocumentFile!!.createFile("application/octet-stream",File(destPath).name)!!.let {
+
+            parentDocumentFile!!.createFile("application/octet-stream", File(destPath).name)!!.let {
                 Log.d("FileTools", "copyFileByFD: 开始创建文件")
 
                 destDocumentFile = it
@@ -152,8 +151,8 @@ interface BaseFileTools {
         return path.contains("${ModTools.ROOT_PATH}/Android/obb/")
     }
 
-    abstract fun changDictionaryName(path: String, name: String) : Boolean
-    abstract fun createDictionary(path: String): Boolean
+    fun changDictionaryName(path: String, name: String): Boolean
+    fun createDictionary(path: String): Boolean
 
     /**
      * 如果字符串是应用包名，返回字符串，反之返回null

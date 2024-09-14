@@ -11,7 +11,6 @@ class ModManagerViewModel : ViewModel() {
     val uiState: StateFlow<ModManagerUiState> = _uiState.asStateFlow()
 
 
-
     // 设置当前导航栏索引
     fun setCurrentNavigationIndex(index: Int) {
         _uiState.value = _uiState.value.copy(currentNavigationIndex = index)

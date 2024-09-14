@@ -21,6 +21,7 @@ class ProjectSnowStartService : Service() {
     companion object {
         const val TAG = "ProjectSnowStartService"
     }
+
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
     // 添加一个无参数的构造函数
     // 声明一个 GameInfo 变量
@@ -29,13 +30,11 @@ class ProjectSnowStartService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
 
-
         val gameInfo: GameInfoBean = intent?.extras?.getParcelable("game_info")!!
 
         val checkFilepath =
             "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/${ProjectSnowTools.CHECK_FILENAME}"
         Log.d("TestService", "onStartCommand: $checkFilepath")
-
 
 
         val notification: Notification = Notification.Builder(this, getString(R.string.channel_id))
@@ -50,7 +49,7 @@ class ProjectSnowStartService : Service() {
 
         startForeground(1, notification)
 
-       serviceScope.launch {
+        serviceScope.launch {
 
             if (ProjectSnowTools.specialOperationStartGame(gameInfo)) {
                 stopService()

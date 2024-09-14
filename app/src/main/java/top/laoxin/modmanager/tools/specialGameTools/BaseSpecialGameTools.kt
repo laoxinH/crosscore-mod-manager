@@ -17,22 +17,22 @@ interface BaseSpecialGameTools {
     }
 
 
-    fun specialOperationEnable(mod: ModBean,packageName : String) : Boolean
-    fun specialOperationDisable(backup: List<BackupBean>, packageName: String, modBean: ModBean) : Boolean
+    fun specialOperationEnable(mod: ModBean, packageName: String): Boolean
+    fun specialOperationDisable(
+        backup: List<BackupBean>,
+        packageName: String,
+        modBean: ModBean
+    ): Boolean
 
-    fun specialOperationStartGame(gameInfo: GameInfoBean) : Boolean
-    fun specialOperationCreateMods(gameInfo: GameInfoBean) : List<ModBeanTemp>
-    fun specialOperationScanMods(gameInfo: String, modFileName: String) : Boolean
-    fun specialOperationSelectGame(gameInfo: GameInfoBean) : Boolean
-    fun specialOperationNeedOpenVpn() : Boolean
+    fun specialOperationStartGame(gameInfo: GameInfoBean): Boolean
+    fun specialOperationCreateMods(gameInfo: GameInfoBean): List<ModBeanTemp>
+    fun specialOperationScanMods(gameInfo: String, modFileName: String): Boolean
+    fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean
+    fun specialOperationNeedOpenVpn(): Boolean
 
     fun onProgressUpdate(progress: String) {
         progressUpdateListener?.onProgressUpdate(progress)
     }
-
-
-
-
 
 
     fun calculateMD5(inputStream: InputStream): String? {
