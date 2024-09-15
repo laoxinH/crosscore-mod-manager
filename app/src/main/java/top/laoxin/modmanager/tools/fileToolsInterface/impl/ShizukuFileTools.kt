@@ -2,7 +2,6 @@ package top.laoxin.modmanager.tools.fileToolsInterface.impl
 
 import android.util.Log
 import top.laoxin.modmanager.tools.LogTools.logRecord
-import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import top.laoxin.modmanager.useservice.IFileExplorerService
 import java.io.InputStream
@@ -22,7 +21,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun copyFile(srcPath: String, destPath: String): Boolean {
         return try {
-            iFileExplorerService?.copyFile(srcPath, destPath) ?: false
+            iFileExplorerService?.copyFile(srcPath, destPath) == true
         } catch (e: Exception) {
             Log.e(TAG, "copyFile: $e")
             logRecord("ShizukuFileTools-copyFile: $e")
@@ -41,7 +40,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun writeFile(path: String, filename: String, content: String): Boolean {
         return try {
-            iFileExplorerService?.writeFile(path, filename, content) ?: false
+            iFileExplorerService?.writeFile(path, filename, content) == true
         } catch (e: Exception) {
             Log.e(TAG, "writeFile: $e")
             false
@@ -50,7 +49,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun moveFile(srcPath: String, destPath: String): Boolean {
         return try {
-            iFileExplorerService?.moveFile(srcPath, destPath) ?: false
+            iFileExplorerService?.moveFile(srcPath, destPath) == true
         } catch (e: Exception) {
             Log.e(TAG, "moveFile: $e")
             false
@@ -59,7 +58,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun isFileExist(path: String): Boolean {
         return try {
-            iFileExplorerService?.fileExists(path) ?: false
+            iFileExplorerService?.fileExists(path) == true
         } catch (e: Exception) {
             Log.e(TAG, "isFileExist: $e")
             false
@@ -68,7 +67,7 @@ object ShizukuFileTools : BaseFileTools {
 
     override fun isFile(filename: String): Boolean {
         return try {
-            iFileExplorerService?.isFile(filename) ?: false
+            iFileExplorerService?.isFile(filename) == true
         } catch (e: Exception) {
             Log.e(TAG, "isFile: $e")
             false
@@ -92,19 +91,19 @@ object ShizukuFileTools : BaseFileTools {
         }
     }
 
-    override fun changDictionaryName(path: String, name: String) :Boolean {
+    override fun changDictionaryName(path: String, name: String): Boolean {
         Log.d(TAG, "changDictionaryName: $path==$name")
-       return try {
-            iFileExplorerService?.changDictionaryName(path, name) ?: false
+        return try {
+            iFileExplorerService?.changDictionaryName(path, name) == true
         } catch (e: Exception) {
             Log.e(TAG, "changDictionaryName: $e")
-           false
+            false
         }
     }
 
-    override fun createDictionary(path : String): Boolean {
+    override fun createDictionary(path: String): Boolean {
         return try {
-            iFileExplorerService?.createDictionary(path) ?: false
+            iFileExplorerService?.createDictionary(path) == true
         } catch (e: Exception) {
             Log.e(TAG, "createDictionary: $e")
             false

@@ -100,11 +100,11 @@ class FileExplorerService : IFileExplorerService.Stub() {
             val command = "chmod 777 " + path
             Log.i(TAG, "command = $command g = $g h = $h")
             val runtime = Runtime.getRuntime()
-            val proc = runtime.exec(command)
+            runtime.exec(command)
             true
         } catch (e: IOException) {
-            Log.i("TAG", "chmod fail!!!!");
-            e.printStackTrace();
+            Log.i("TAG", "chmod fail!!!!")
+            e.printStackTrace()
             false
         }
     }
@@ -124,7 +124,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
             }
             file.createNewFile()
             archiveItemInputStream.use { inputStream ->
-                file.outputStream().use {outputStream->
+                file.outputStream().use { outputStream ->
                     inputStream?.copyTo(outputStream)
                 }
             }
@@ -151,7 +151,11 @@ class FileExplorerService : IFileExplorerService.Stub() {
                     if (ArchiveUtil.isArchive(f.absolutePath)) {
                         ArchiveUtil.listInArchiveFiles(f.absolutePath).forEach {
                             val modFileName = File(it).name
-                            if (gameFiles.contains(modFileName) || specialOperationScanMods(gameInfo.packageName, modFileName)) {
+                            if (gameFiles.contains(modFileName) || specialOperationScanMods(
+                                    gameInfo.packageName,
+                                    modFileName
+                                )
+                            ) {
                                 Log.d(TAG, "开始移动文件: ${f.name}==${modFileName}")
                                 moveFile(
                                     f.path,
@@ -247,10 +251,11 @@ class FileExplorerService : IFileExplorerService.Stub() {
                 name.contains(".mp3", ignoreCase = true) ||*/
                 name.contains(".apk", ignoreCase = true))
     }
+
     fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
         for (specialGame in SpecialGame.entries) {
             if (packageName.contains(specialGame.packageName)) {
-                return  specialGame.baseSpecialGameTools.specialOperationScanMods(
+                return specialGame.baseSpecialGameTools.specialOperationScanMods(
                     packageName,
                     modFileName
                 )
@@ -258,6 +263,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
         }
         return false
     }
+
     companion object {
         private const val TAG = "FileExplorerService"
     }

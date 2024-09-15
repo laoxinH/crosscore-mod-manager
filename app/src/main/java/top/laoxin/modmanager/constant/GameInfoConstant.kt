@@ -3,7 +3,7 @@ package top.laoxin.modmanager.constant
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ModTools
 
-object GameInfoConstant{
+object GameInfoConstant {
     val CROSSCORE = GameInfoBean(
         "交错战线",
         "官服",
@@ -43,25 +43,25 @@ object GameInfoConstant{
         false
     )
 
-/*    val PROJECTSNOW = GameInfo(
-        "尘白禁区",
-        "官服",
-        "com.dragonli.projectsnow.lhm",
-        ModTools.ROOT_PATH + "/Android/data/com.dragonli.projectsnow.lhm/",
-        "",
-        "",
-        "",
-        mutableListOf(
-            ModTools.ROOT_PATH + "/Android/data/com.dragonli.projectsnow.lhm/files/2.0.0/",
-        ),
-        "2.0.0",
-        mutableListOf(
-            "游戏模型",
-        ),
-        isGameFileRepeat = false,
-        enableBackup = false,
-        tips = "第一次选择尘白禁区游戏需要先清除游戏数据或者卸载重装再选择(清除或者卸载重装后先运行游戏到登录界面,然后回到这里选择游戏后再运行游戏下载游戏数据),否则无法开启MOD"
-    )*/
+    /*    val PROJECTSNOW = GameInfo(
+            "尘白禁区",
+            "官服",
+            "com.dragonli.projectsnow.lhm",
+            ModTools.ROOT_PATH + "/Android/data/com.dragonli.projectsnow.lhm/",
+            "",
+            "",
+            "",
+            mutableListOf(
+                ModTools.ROOT_PATH + "/Android/data/com.dragonli.projectsnow.lhm/files/2.0.0/",
+            ),
+            "2.0.0",
+            mutableListOf(
+                "游戏模型",
+            ),
+            isGameFileRepeat = false,
+            enableBackup = false,
+            tips = "第一次选择尘白禁区游戏需要先清除游戏数据或者卸载重装再选择(清除或者卸载重装后先运行游戏到登录界面,然后回到这里选择游戏后再运行游戏下载游戏数据),否则无法开启MOD"
+        )*/
     val NO_GAME = GameInfoBean(
         "请前往设置页面选择游戏",
         "请前往设置页面选择游戏",
@@ -75,5 +75,5 @@ object GameInfoConstant{
         mutableListOf(),
         true
     )
-    val gameInfoList = mutableListOf(NO_GAME,CROSSCORE,CROSSCOREB)
+    val gameInfoList = mutableListOf(NO_GAME, CROSSCORE, CROSSCOREB)
 }

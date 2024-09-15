@@ -34,17 +34,18 @@ interface ModManagerApiService {
     suspend fun getUpdate(): UpdateBean
 
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/gameConfig.json")
-    suspend fun getGameConfigs() : List<DownloadGameConfigBean>
+    suspend fun getGameConfigs(): List<DownloadGameConfigBean>
 
     // 下载游戏配置
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/{name}.json")
-    suspend fun downloadGameConfig(@Path("name")name : String) : GameInfoBean
+    suspend fun downloadGameConfig(@Path("name") name: String): GameInfoBean
+
     // 获取感谢名单
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/thinks.json")
-    suspend fun getThinksList() : List<ThinksBean>
+    suspend fun getThinksList(): List<ThinksBean>
 
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/information.json")
-    suspend fun getInfo() : InfoBean
+    suspend fun getInfo(): InfoBean
 
 }
 

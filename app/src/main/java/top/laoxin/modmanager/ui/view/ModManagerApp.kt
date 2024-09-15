@@ -131,10 +131,12 @@ fun NavigationRail(
             NavigationRailItem(
                 selected = currentScreen == navigationItem,
                 onClick = {
-                    modViewModel.exitSelect()
-                    navController.navigate(navigationItem.name) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+                    if (currentScreen != navigationItem) {
+                        modViewModel.exitSelect()
+                        navController.navigate(navigationItem.name) {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
                     }
                 },
                 icon = {
@@ -163,10 +165,12 @@ fun NavigationBar(
             NavigationBarItem(
                 selected = currentScreen == navigationItem,
                 onClick = {
-                    modViewModel.exitSelect()
-                    navController.navigate(navigationItem.name) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+                    if (currentScreen != navigationItem) {
+                        modViewModel.exitSelect()
+                        navController.navigate(navigationItem.name) {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
                     }
                 },
                 icon = {

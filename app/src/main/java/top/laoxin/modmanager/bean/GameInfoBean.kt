@@ -11,14 +11,14 @@ data class GameInfoBean(
     val packageName: String,
     val gamePath: String,
     val modSavePath: String = "",
-    val antiHarmonyFile : String = "",
-    val antiHarmonyContent : String = "",
-    val gameFilePath : List<String>,
-    val version : String,
-    val modType : List<String>,
-    val isGameFileRepeat : Boolean = true,
-    val enableBackup :  Boolean = true,
-    val tips : String = ""
+    val antiHarmonyFile: String = "",
+    val antiHarmonyContent: String = "",
+    val gameFilePath: List<String>,
+    val version: String,
+    val modType: List<String>,
+    val isGameFileRepeat: Boolean = true,
+    val enableBackup: Boolean = true,
+    val tips: String = ""
 
 ) : Parcelable {
     constructor(parcel: Parcel) : this(

@@ -7,5 +7,5 @@ data class DownloadGameConfigBean(
     val gameName: String,
     val packageName: String,
     val serviceName: String,
-    val downloadUrl : String,
+    val downloadUrl: String,
 )

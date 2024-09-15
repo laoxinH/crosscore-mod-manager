@@ -11,6 +11,6 @@ data class ModBeanTemp(
     val gamePackageName: String,
     val modType: String,
     val gameModPath: String,
-    val modPath : String,
-    val isZip : Boolean = true,
+    val modPath: String,
+    val isZip: Boolean = true,
 )

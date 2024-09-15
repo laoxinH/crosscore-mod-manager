@@ -9,7 +9,7 @@ class OfflineModsRepository(private val modDao: ModDao) : ModRepository {
     }
 
     override fun search(name: String, gamePackageName: String): Flow<List<ModBean>> {
-        return modDao.getModsByGamePackageNameAndName(gamePackageName,name)
+        return modDao.getModsByGamePackageNameAndName(gamePackageName, name)
     }
 
 
@@ -26,9 +26,6 @@ class OfflineModsRepository(private val modDao: ModDao) : ModRepository {
     }
 
 
-
-
-
     override suspend fun insertAll(mods: List<ModBean>) {
         modDao.insertAll(mods)
     }
@@ -40,7 +37,6 @@ class OfflineModsRepository(private val modDao: ModDao) : ModRepository {
     override suspend fun deleteAll(mods: List<ModBean>) {
         modDao.deleteMods(mods)
     }
-
 
 
     override suspend fun updateAll(mods: List<ModBean>) {
@@ -64,7 +60,7 @@ class OfflineModsRepository(private val modDao: ModDao) : ModRepository {
         path: String,
         gamePackageName: String
     ): Flow<List<ModBean>> {
-        return modDao.getModsByPathAndGamePackageName(path,gamePackageName)
+        return modDao.getModsByPathAndGamePackageName(path, gamePackageName)
     }
 
     override fun getEnableModsCountByGamePackageName(gamePackageName: String): Flow<Int> {

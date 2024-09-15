@@ -34,7 +34,7 @@ class UserPreferencesRepository(
             // 游戏服务器
             "GAME_SERVICE" to stringPreferencesKey("GAME_SERVICE"),
             // 用户提示
-             "USER_TIPS" to booleanPreferencesKey("USER_TIPS"),
+            "USER_TIPS" to booleanPreferencesKey("USER_TIPS"),
             // 选择的游戏
             "SELECTED_GAME" to intPreferencesKey("SELECTED_GAME"),
             // 扫描文件夹中的Mods
@@ -66,8 +66,8 @@ class UserPreferencesRepository(
                     throw it
                 }
             }.map { preferences ->
-                    preferences[preferenceKey as Preferences.Key<T>] ?: defaultValue
-                }
+                preferences[preferenceKey as Preferences.Key<T>] ?: defaultValue
+            }
         } else {
             flowOf(defaultValue)
         }

@@ -3,12 +3,7 @@ package top.laoxin.modmanager.database.backups
 import kotlinx.coroutines.flow.Flow
 import top.laoxin.modmanager.bean.BackupBean
 
-class OfflineBackupRepository (private val backupDao: BackupDao): BackupRepository{
-
-
-
-
-
+class OfflineBackupRepository(private val backupDao: BackupDao) : BackupRepository {
 
 
     override suspend fun getByModPath(modPath: String): Flow<List<BackupBean>> {

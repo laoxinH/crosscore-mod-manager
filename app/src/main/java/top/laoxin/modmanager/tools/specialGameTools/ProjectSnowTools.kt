@@ -3,7 +3,6 @@ package top.laoxin.modmanager.tools.specialGameTools
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import top.laoxin.modmanager.App
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean
@@ -32,7 +31,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
         .create()
     private lateinit var fileTools: BaseFileTools
-   // var checkPermission = PermissionTools.checkPermission(check_filepath)
+    // var checkPermission = PermissionTools.checkPermission(check_filepath)
 
     data class MainIFest(
         var version: String,
@@ -54,27 +53,27 @@ object ProjectSnowTools : BaseSpecialGameTools {
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
         check_filename_mod_path = ModTools.GAME_CHECK_FILE_PATH + packageName + "/" + CHECK_FILENAME
-       /* check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
-        check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
-        val backupCheckFile = File(check_filename_backup_path)
-        if (checkPermission(check_filepath) == PathType.NULL) return false
-        if (!backupCheckFile.exists()) {
-            if (backupCheckFile.parentFile?.exists() == false) {
-                backupCheckFile.parentFile?.mkdirs()
-            }
-            val checkPermission = PermissionTools.checkPermission(check_filepath)
-            when (checkPermission) {
-                PathType.FILE -> {
-                    fileTools.copyFile(check_filepath, check_filename_backup_path)
-                }
-                PathType.DOCUMENT -> {
-                    fileTools.copyFileByDF(check_filepath, check_filename_backup_path)
-                }
-                PathType.SHIZUKU -> {
-                    fileTools.copyFile(check_filepath, check_filename_backup_path)
-                }
-            }
-        }*/
+        /* check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
+         check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
+         val backupCheckFile = File(check_filename_backup_path)
+         if (checkPermission(check_filepath) == PathType.NULL) return false
+         if (!backupCheckFile.exists()) {
+             if (backupCheckFile.parentFile?.exists() == false) {
+                 backupCheckFile.parentFile?.mkdirs()
+             }
+             val checkPermission = PermissionTools.checkPermission(check_filepath)
+             when (checkPermission) {
+                 PathType.FILE -> {
+                     fileTools.copyFile(check_filepath, check_filename_backup_path)
+                 }
+                 PathType.DOCUMENT -> {
+                     fileTools.copyFileByDF(check_filepath, check_filename_backup_path)
+                 }
+                 PathType.SHIZUKU -> {
+                     fileTools.copyFile(check_filepath, check_filename_backup_path)
+                 }
+             }
+         }*/
 
 
         val unZipPath =
@@ -145,24 +144,24 @@ object ProjectSnowTools : BaseSpecialGameTools {
         modBean: ModBean
     ): Boolean {
         check_filename_mod_path = ModTools.GAME_CHECK_FILE_PATH + packageName + "/" + CHECK_FILENAME
-/*        check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
-        check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
-        val backupCheckFile = File(check_filename_backup_path)
+        /*        check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
+                check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
+                val backupCheckFile = File(check_filename_backup_path)
 
-        if (backupCheckFile.exists()) {
-            when (checkPermission(check_filepath)) {
-                PathType.FILE -> {
-                    fileTools.copyFile(check_filename_backup_path, check_filepath)
-                }
-                PathType.DOCUMENT -> {
-                    fileTools.copyFileByFD(check_filename_backup_path, check_filepath)
-                }
-                PathType.SHIZUKU -> {
-                    fileTools.copyFile(check_filename_backup_path, check_filepath)
-                }
-                else -> return  false
-            }
-        }*/
+                if (backupCheckFile.exists()) {
+                    when (checkPermission(check_filepath)) {
+                        PathType.FILE -> {
+                            fileTools.copyFile(check_filename_backup_path, check_filepath)
+                        }
+                        PathType.DOCUMENT -> {
+                            fileTools.copyFileByFD(check_filename_backup_path, check_filepath)
+                        }
+                        PathType.SHIZUKU -> {
+                            fileTools.copyFile(check_filename_backup_path, check_filepath)
+                        }
+                        else -> return  false
+                    }
+                }*/
 
         val mainIFest = gson.fromJson(
             File(check_filename_mod_path).readText(),
@@ -170,7 +169,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         )
 
         val iterator = mainIFest.paks.iterator()
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             val pak = iterator.next()
             modBean.modFiles?.forEach {
                 if (pak.name == File(it).name) {
@@ -215,20 +214,20 @@ object ProjectSnowTools : BaseSpecialGameTools {
 
         for (modPak in modPaks) {
             if (modPak !in mainIFest.paks) {
-                mainIFest.paks.add(0,modPak)
+                mainIFest.paks.add(0, modPak)
             }
         }
         val mainIFestJson = gson.toJson(mainIFest, MainIFest::class.java)
         // mainIFest.paks.addAll(0,modPaks)
         val startTime = System.currentTimeMillis()
-        while (true){
+        while (true) {
             Log.d("ProjectSnowTools", "specialOperationStartGame: 开始执行注入")
             fileTools.writeFile(
                 check_filepath,
                 CHECK_FILENAME,
                 mainIFestJson
             )
-           // Thread.sleep(50)
+            // Thread.sleep(50)
             val elapsedTime = System.currentTimeMillis() - startTime
             if (elapsedTime > 40000) {
                 break
@@ -248,12 +247,12 @@ object ProjectSnowTools : BaseSpecialGameTools {
 
     override fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean {
         //Log.d("ProjectSnowTools", "特殊:$gameInfo ")
-        if (checkPermission(gameInfo.gamePath)==PathType.NULL) return false
-        val gameFilepath = "${ gameInfo.gamePath }/files/${gameInfo.version}"
+        if (checkPermission(gameInfo.gamePath) == PathType.NULL) return false
+        val gameFilepath = "${gameInfo.gamePath}/files/${gameInfo.version}"
         val name = gameInfo.version
         //Log.d("ProjectSnowTools", "特殊: $gameFilepath--$name")
-        if (!fileTools.createDictionary("$gameFilepath/test")){
-            fileTools.changDictionaryName(gameFilepath,name + "1")
+        if (!fileTools.createDictionary("$gameFilepath/test")) {
+            fileTools.changDictionaryName(gameFilepath, name + "1")
             File(gameFilepath).parentFile?.parentFile?.let { fileTools.createDictionary(it.absolutePath) }
             File(gameFilepath).parentFile?.let { fileTools.createDictionary(it.absolutePath) }
             fileTools.createDictionary(gameFilepath)
@@ -268,7 +267,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         return true
     }
 
-    private fun checkPermission(path : String): Int {
+    private fun checkPermission(path: String): Int {
         val checkPermission = PermissionTools.checkPermission(check_filepath)
         //Log.d("ArknightsTools", "权限类型: $checkPermission--$path")
         if (checkPermission == PathType.FILE) {

@@ -3,10 +3,8 @@ package top.laoxin.modmanager.bean
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
-import androidx.compose.ui.MotionDurationScale
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.zip.ZipFile
 
 /**
  * mod实体类
@@ -93,53 +91,53 @@ data class ModBean(
         }
     }
 
- /*   override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        val modBean = other as ModBean
-        if (name != modBean.name) return false
-        if (path != modBean.path) return false
-        //if (id != modBean.id) return false
-        if (isEncrypted != modBean.isEncrypted) return false
-        //if (isEnable != modBean.isEnable) return false
-        if (isZipFile != modBean.isZipFile) return false
-        if (version != modBean.version) return false
-        if (description != modBean.description) return false
-        if (author != modBean.author) return false
-        if (date != modBean.date) return false
-        if (icon != modBean.icon) return false
-        if (images != modBean.images) return false
-        if (modFiles != modBean.modFiles) return false
-        if (password != modBean.password) return false
-        if (readmePath != modBean.readmePath) return false
-        if (fileReadmePath != modBean.fileReadmePath) return false
-        if (gamePackageName != modBean.gamePackageName) return false
-        if (gameModPath != modBean.gameModPath) return false
-        if (modType != modBean.modType) return false
-        return true
-    }
+    /*   override fun equals(other: Any?): Boolean {
+           if (this === other) return true
+           if (javaClass != other?.javaClass) return false
+           val modBean = other as ModBean
+           if (name != modBean.name) return false
+           if (path != modBean.path) return false
+           //if (id != modBean.id) return false
+           if (isEncrypted != modBean.isEncrypted) return false
+           //if (isEnable != modBean.isEnable) return false
+           if (isZipFile != modBean.isZipFile) return false
+           if (version != modBean.version) return false
+           if (description != modBean.description) return false
+           if (author != modBean.author) return false
+           if (date != modBean.date) return false
+           if (icon != modBean.icon) return false
+           if (images != modBean.images) return false
+           if (modFiles != modBean.modFiles) return false
+           if (password != modBean.password) return false
+           if (readmePath != modBean.readmePath) return false
+           if (fileReadmePath != modBean.fileReadmePath) return false
+           if (gamePackageName != modBean.gamePackageName) return false
+           if (gameModPath != modBean.gameModPath) return false
+           if (modType != modBean.modType) return false
+           return true
+       }
 
-    override fun hashCode(): Int {
-        var result = name?.hashCode() ?: 0
-        result = 31 * result + (version?.hashCode() ?: 0)
-        result = 31 * result + (description?.hashCode() ?: 0)
-        result = 31 * result + (author?.hashCode() ?: 0)
-        result = 31 * result + date.hashCode()
-        result = 31 * result + (path?.hashCode() ?: 0)
-        result = 31 * result + (icon?.hashCode() ?: 0)
-        result = 31 * result + (images?.hashCode() ?: 0)
-        result = 31 * result + (modFiles?.hashCode() ?: 0)
-       // result = 31 * result + isEncrypted.hashCode()
-        result = 31 * result + (password?.hashCode() ?: 0)
-        result = 31 * result + (readmePath?.hashCode() ?: 0)
-        result = 31 * result + (fileReadmePath?.hashCode() ?: 0)
-        result = 31 * result + (gamePackageName?.hashCode() ?: 0)
-        result = 31 * result + (gameModPath?.hashCode() ?: 0)
-        result = 31 * result + (modType?.hashCode() ?: 0)
-        result = 31 * result + isEnable.hashCode()
-        result = 31 * result + isZipFile.hashCode()
-        return result
-    }*/
+       override fun hashCode(): Int {
+           var result = name?.hashCode() ?: 0
+           result = 31 * result + (version?.hashCode() ?: 0)
+           result = 31 * result + (description?.hashCode() ?: 0)
+           result = 31 * result + (author?.hashCode() ?: 0)
+           result = 31 * result + date.hashCode()
+           result = 31 * result + (path?.hashCode() ?: 0)
+           result = 31 * result + (icon?.hashCode() ?: 0)
+           result = 31 * result + (images?.hashCode() ?: 0)
+           result = 31 * result + (modFiles?.hashCode() ?: 0)
+          // result = 31 * result + isEncrypted.hashCode()
+           result = 31 * result + (password?.hashCode() ?: 0)
+           result = 31 * result + (readmePath?.hashCode() ?: 0)
+           result = 31 * result + (fileReadmePath?.hashCode() ?: 0)
+           result = 31 * result + (gamePackageName?.hashCode() ?: 0)
+           result = 31 * result + (gameModPath?.hashCode() ?: 0)
+           result = 31 * result + (modType?.hashCode() ?: 0)
+           result = 31 * result + isEnable.hashCode()
+           result = 31 * result + isZipFile.hashCode()
+           return result
+       }*/
 
     fun equalsIgnoreId(other: ModBean): Boolean {
         if (this === other) return true
@@ -166,7 +164,7 @@ data class ModBean(
     }
 
     fun isDelete(scanMods: List<ModBean>): ModBean? {
-        if (scanMods.none { it.path == path && it.name == name }){
+        if (scanMods.none { it.path == path && it.name == name }) {
             return this
         }
         return null
@@ -188,12 +186,12 @@ data class ModBean(
                     mod.gameModPath != gameModPath ||
                     mod.modType != modType ||
                     mod.isZipFile != isZipFile
-                    ) {
+                ) {
                     return this.copy(
                         version = mod.version,
-                        description =  mod.description,
+                        description = mod.description,
                         author = mod.author,
-                        date =  mod.date,
+                        date = mod.date,
                         icon = mod.icon,
                         images = mod.images,
                         modFiles = mod.modFiles,
@@ -218,7 +216,7 @@ data class ModBean(
 
     fun isNew(mods: List<ModBean>): ModBean? {
         Log.d("ModBean", "所有mod$mods")
-        if (mods.none{ it.path == path && it.name == name }) {
+        if (mods.none { it.path == path && it.name == name }) {
             Log.d("ModBean", "新的: $name==$path")
             return this
         }

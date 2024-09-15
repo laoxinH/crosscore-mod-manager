@@ -14,7 +14,6 @@ import top.laoxin.modmanager.database.AppContainer
 import top.laoxin.modmanager.database.AppDataContainer
 import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.tools.LogTools
-import top.laoxin.modmanager.tools.ModTools
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Objects
@@ -71,12 +70,12 @@ class App : Application() {
     }
 
     private fun checkOsVersion() {
-        val sdkVersion = android.os.Build.VERSION.SDK_INT
+        val sdkVersion = Build.VERSION.SDK_INT
         osVersion = when {
-            sdkVersion >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> OSVersion.OS_14
-            sdkVersion >= android.os.Build.VERSION_CODES.TIRAMISU -> OSVersion.OS_13
-            sdkVersion >= android.os.Build.VERSION_CODES.R -> OSVersion.OS_11
-            sdkVersion >= android.os.Build.VERSION_CODES.M -> OSVersion.OS_6
+            sdkVersion >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> OSVersion.OS_14
+            sdkVersion >= Build.VERSION_CODES.TIRAMISU -> OSVersion.OS_13
+            sdkVersion >= Build.VERSION_CODES.R -> OSVersion.OS_11
+            sdkVersion >= Build.VERSION_CODES.M -> OSVersion.OS_6
             else -> OSVersion.OS_5
         }
         // 鸿蒙4.0

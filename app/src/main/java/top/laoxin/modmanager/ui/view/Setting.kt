@@ -1,11 +1,8 @@
 package top.laoxin.modmanager.ui.view
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +23,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -48,9 +44,9 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ThinksBean
+import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
-import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @Composable

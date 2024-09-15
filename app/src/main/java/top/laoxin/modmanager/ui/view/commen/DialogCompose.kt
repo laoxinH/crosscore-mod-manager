@@ -6,20 +6,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.tools.ToastUtils
 
 @Composable
-/**
- * 通用对话框
- */
+        /**
+         * 通用对话框
+         */
 fun DialogCommon(
     title: String,
     content: String,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
     showDialog: Boolean = false
-){
-    if (showDialog){
+) {
+    if (showDialog) {
         AlertDialog(
             onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
             title = { Text(text = title) },

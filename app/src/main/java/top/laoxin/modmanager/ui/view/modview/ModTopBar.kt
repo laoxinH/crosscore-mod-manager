@@ -71,7 +71,10 @@ fun Tips(
             action = {
                 TextButton(onClick = { onDismiss() }) {
 
-                    Text(stringResource(R.string.tips_btn_close), color = MaterialTheme.colorScheme.onSecondary)
+                    Text(
+                        stringResource(R.string.tips_btn_close),
+                        color = MaterialTheme.colorScheme.onSecondary
+                    )
 
                 }
             },
@@ -90,14 +93,16 @@ fun Tips(
 fun ModTopBar(viewModel: ModViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     if (uiState.isMultiSelect) {
-        DialogCommon(title = stringResource(R.string.dialog_del_selected_mods_title),
+        DialogCommon(
+            title = stringResource(R.string.dialog_del_selected_mods_title),
             content = stringResource(R.string.dialog_del_selected_mods_content),
             onConfirm = { viewModel.delSelectedMods() },
             onCancel = { viewModel.setShowDelSelectModsDialog(false) },
-            showDialog = uiState.showDelSelectModsDialog)
-        MultiSelectTopBar(viewModel,uiState)
+            showDialog = uiState.showDelSelectModsDialog
+        )
+        MultiSelectTopBar(viewModel, uiState)
     } else {
-        GeneralTopBar(viewModel,uiState)
+        GeneralTopBar(viewModel, uiState)
     }
 
 }
@@ -118,30 +123,32 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         title = {
-            Box(contentAlignment = Alignment.CenterStart){
+            Box(contentAlignment = Alignment.CenterStart) {
                 Text(
                     stringResource(id = uiState.modsView.title),
                     style = MaterialTheme.typography.titleLarge
                 )
-                Box(modifier = Modifier.align(Alignment.CenterEnd) ) {
-                    Row(modifier = Modifier.padding( top = 40.dp),
+                Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                    Row(
+                        modifier = Modifier.padding(top = 40.dp),
                     ) {
 
-                       /* if (uiState.modsSelected.isNotEmpty()){
-                            Text(
-                                text = "已选：${uiState.modsSelected.size}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                textAlign = TextAlign.Start,
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }*/
-                        val total = if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
+                        /* if (uiState.modsSelected.isNotEmpty()){
+                             Text(
+                                 text = "已选：${uiState.modsSelected.size}",
+                                 style = MaterialTheme.typography.labelMedium,
+                                 color = MaterialTheme.colorScheme.onPrimary,
+                                 textAlign = TextAlign.Start,
+                             )
+                             Spacer(modifier = Modifier.width(8.dp))
+                         }*/
+                        val total =
+                            if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
 
                         Text(
                             text = "统计：$total",
                             style = MaterialTheme.typography.labelMedium,
-                           // color = MaterialTheme.colorScheme.onPrimary,
+                            // color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Start,
                         )
                     }
@@ -176,7 +183,7 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             }
             IconButton(onClick = {
                 // 在这里处理图标按钮的点击事件
-                viewModel.switchSelectMod(modList,true)
+                viewModel.switchSelectMod(modList, true)
             }) {
                 Icon(
                     imageVector = Icons.Default.FlashOn, // 使用信息图标
@@ -185,7 +192,7 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                 )
             }
             IconButton(onClick = {
-                viewModel.switchSelectMod(modList,false)
+                viewModel.switchSelectMod(modList, false)
 
                 // 请求焦点
             }, modifier = Modifier) {
@@ -250,13 +257,14 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         title = {
-            Box(contentAlignment = Alignment.CenterStart){
+            Box(contentAlignment = Alignment.CenterStart) {
                 Text(
                     stringResource(id = uiState.modsView.title),
                     style = MaterialTheme.typography.titleLarge
                 )
-                Box( ) {
-                    Row(modifier = Modifier.padding( top = 40.dp),
+                Box {
+                    Row(
+                        modifier = Modifier.padding(top = 40.dp),
                     ) {
                         val modList = when (uiState.modsView) {
                             NavigationIndex.ALL_MODS -> uiState.modList
@@ -264,7 +272,8 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                             NavigationIndex.DISABLE_MODS -> uiState.disableModList
                             NavigationIndex.SEARCH_MODS -> uiState.searchModList
                         }
-                        val total = if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
+                        val total =
+                            if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
 
                         Text(
                             text = "统计：$total",
@@ -297,7 +306,7 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             }, modifier = Modifier) {
                 Icon(
                     imageVector = Icons.Filled.Search, contentDescription = null,
-                   // tint = MaterialTheme.colorScheme.primaryContainer
+                    // tint = MaterialTheme.colorScheme.primaryContainer
                 )
             }
             IconButton(onClick = {
@@ -312,7 +321,7 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             IconButton(onClick = { showMenu = true }, modifier = Modifier) {
                 Icon(
                     imageVector = Icons.Filled.Menu, contentDescription = null,
-                   // tint = MaterialTheme.colorScheme.primaryContainer
+                    // tint = MaterialTheme.colorScheme.primaryContainer
                 )
             }
             DropdownMenu(

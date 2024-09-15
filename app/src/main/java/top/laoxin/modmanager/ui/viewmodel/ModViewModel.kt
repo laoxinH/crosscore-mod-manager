@@ -29,11 +29,11 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.database.mods.ModRepository
+import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.database.backups.BackupRepository
+import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.exception.NoSelectedGameException
 import top.laoxin.modmanager.exception.PasswordErrorException
 import top.laoxin.modmanager.exception.PermissionsException
@@ -73,8 +73,6 @@ class ModViewModel(
 
     // 删除的mods
     private var delModsList = emptyList<ModBean>()
-
-
 
 
     // mod列表
@@ -127,6 +125,7 @@ class ModViewModel(
 
     private val delUnzipDictionaryFlow =
         userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
+
     // 生成用户配置对象
     private val userPreferences: StateFlow<UserPreferencesState> = combine(
         scanQQDirectoryFlow,
@@ -140,7 +139,7 @@ class ModViewModel(
             scanQQDirectory = values[0] as Boolean,
             selectedDirectory = values[1] as String,
             scanDownload = values[2] as Boolean,
-            selectedGameIndex =  values[3] as Int,
+            selectedGameIndex = values[3] as Int,
             scanDirectoryMods = values[4] as Boolean,
             delUnzipDictionary = values[5] as Boolean
         )
@@ -503,7 +502,8 @@ class ModViewModel(
                         R.string.toast_swtch_mods_result,
                         successCount.toString(),
                         failCount.toString()
-                    ))
+                    )
+                )
             }
 
         }
@@ -899,7 +899,8 @@ class ModViewModel(
                 fileObserver?.stopWatching()
                 val delMods = modRepository.getModsByIds(_uiState.value.modsSelected).first()
                 // 排除包含多个mod文件的压缩包
-                val singleFileMods = delMods.filter { modRepository.getModsCountByPath(it.path!!).first() == 1 }
+                val singleFileMods =
+                    delMods.filter { modRepository.getModsCountByPath(it.path!!).first() == 1 }
                 val singleFileDisableMods = singleFileMods.filter { !it.isEnable }
                 val enableMods = singleFileMods.filter { it.isEnable }
                 ModTools.deleteMods(singleFileMods)
@@ -913,7 +914,12 @@ class ModViewModel(
                     setShowDisEnableModsDialog(true)
                 }
                 withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(App.get().getString(R.string.toast_del_mods_success, singleFileMods.size.toString()))
+                    ToastUtils.longCall(
+                        App.get().getString(
+                            R.string.toast_del_mods_success,
+                            singleFileMods.size.toString()
+                        )
+                    )
                 }
                 fileObserver?.startWatching()
 
@@ -939,7 +945,10 @@ class ModViewModel(
             val delMod = _uiState.value.modDetail!!
             viewModelScope.launch(Dispatchers.IO) {
                 fileObserver?.stopWatching()
-                val delMods = modRepository.getModsByPathAndGamePackageName(delMod.path!!, delMod.gamePackageName!!).first()
+                val delMods = modRepository.getModsByPathAndGamePackageName(
+                    delMod.path!!,
+                    delMod.gamePackageName!!
+                ).first()
                 // 排除包含多个mod文件的压缩包
                 val disableMods = delMods.filter { !it.isEnable }
                 val enableMods = delMods.filter { it.isEnable }
@@ -953,7 +962,10 @@ class ModViewModel(
                     setShowDisEnableModsDialog(true)
                 }
                 withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(App.get().getString(R.string.toast_del_mods_success, delMods.size.toString()))
+                    ToastUtils.longCall(
+                        App.get()
+                            .getString(R.string.toast_del_mods_success, delMods.size.toString())
+                    )
                 }
                 fileObserver?.startWatching()
 

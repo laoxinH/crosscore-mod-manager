@@ -332,7 +332,7 @@ class SettingViewModel(
 
     // 获取版本号
     fun getVersionName() {
-        viewModelScope.launch() {
+        viewModelScope.launch {
             ModTools.getVersionName()?.let { setVersionName(it) }
         }
     }
@@ -417,7 +417,7 @@ class SettingViewModel(
                 ModManagerApi.retrofitService.getInfo()
             }.onFailure {
                 Log.e("SettingViewModel", "checkInformation: $it")
-            }.onSuccess {info->
+            }.onSuccess { info ->
                 _uiState.update {
                     it.copy(infoBean = info)
                 }
