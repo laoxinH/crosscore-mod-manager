@@ -20,11 +20,9 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -37,6 +35,8 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.modview.ModTopBar
@@ -116,14 +116,7 @@ fun NavigationRail(
     pagerState: PagerState,
     modViewModel: ModViewModel
 ) {
-    val selectedIndex = remember { mutableIntStateOf(pagerState.currentPage) }
-
-    // 使用 LaunchedEffect 来处理页面滚动
-    LaunchedEffect(selectedIndex.intValue) {
-        if (selectedIndex.intValue != pagerState.currentPage) {
-            pagerState.animateScrollToPage(selectedIndex.intValue)
-        }
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     NavigationRail(
         modifier = Modifier
@@ -138,7 +131,10 @@ fun NavigationRail(
                 selected = pagerState.currentPage == index,
                 onClick = {
                     modViewModel.exitSelect()
-                    selectedIndex.intValue = index
+                    // 使用 coroutineScope 启动协程去更新页面状态
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
                 },
                 icon = {
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
@@ -158,14 +154,7 @@ fun NavigationBar(
     pagerState: PagerState,
     modViewModel: ModViewModel
 ) {
-    val selectedIndex = remember { mutableIntStateOf(pagerState.currentPage) }
-
-    // 使用 LaunchedEffect 来处理页面滚动
-    LaunchedEffect(selectedIndex.intValue) {
-        if (selectedIndex.intValue != pagerState.currentPage) {
-            pagerState.animateScrollToPage(selectedIndex.intValue)
-        }
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
@@ -173,7 +162,10 @@ fun NavigationBar(
                 selected = pagerState.currentPage == index,
                 onClick = {
                     modViewModel.exitSelect()
-                    selectedIndex.intValue = index
+                    // 使用 coroutineScope 启动协程去更新页面状态
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
                 },
                 icon = {
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
@@ -185,6 +177,7 @@ fun NavigationBar(
         }
     }
 }
+
 
 
 //导航
