@@ -112,7 +112,7 @@ fun ModListItem(
         coroutineScope.launch(Dispatchers.IO) {
             try {
                 imageBitmap =
-                    path?.let { loadImageBitmapFromPath(context, it, 1024, 1024) }  // 使用 Glide 加载图片
+                    path?.let { loadImageBitmapFromPath(context, it, 256, 256) }  // 使用 Glide 加载图片
             } catch (e: Exception) {
                 e.printStackTrace()
             }
