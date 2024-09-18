@@ -22,18 +22,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.modview.ModTopBar
@@ -57,31 +60,23 @@ enum class NavigationIndex(
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
     val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory)
-    val navController = rememberNavController()
-    val currentEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = NavigationIndex.valueOf(
-        currentEntry?.destination?.route ?: NavigationIndex.CONSOLE.name
-    )
+    val pagerState = rememberPagerState()
     val configuration = LocalConfiguration.current
 
     Row {
-        // 侧边栏
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
-                navController = navController,
-                currentScreen = currentScreen,
-                modViewModel = modViewModel,
+                pagerState = pagerState,
+                modViewModel = modViewModel
             )
         }
 
-        // 主内容区域
         Scaffold(
-            //顶栏
             topBar = {
-                when (currentScreen) {
-                    NavigationIndex.CONSOLE -> ConsoleTopBar(consoleViewModel)
-                    NavigationIndex.MOD -> ModTopBar(modViewModel)
-                    NavigationIndex.SETTINGS -> SettingTopBar()
+                when (pagerState.currentPage) {
+                    NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(consoleViewModel)
+                    NavigationIndex.MOD.ordinal -> ModTopBar(modViewModel)
+                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar()
                 }
                 val uiState by modViewModel.uiState.collectAsState()
                 Tips(
@@ -91,23 +86,26 @@ fun ModManagerApp() {
                     uiState = uiState
                 )
             },
-            //底栏
             bottomBar = {
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     NavigationBar(
-                        navController = navController,
-                        currentScreen = currentScreen,
+                        pagerState = pagerState,
                         modViewModel = modViewModel
                     )
                 }
             }
         ) { innerPadding ->
-            NavigationHost(
-                navController = navController,
-                modViewModel = modViewModel,
-                consoleViewModel = consoleViewModel,
+            HorizontalPager(
+                state = pagerState,
+                count = NavigationIndex.entries.size,
                 modifier = Modifier.padding(innerPadding)
-            )
+            ) { page ->
+                when (page) {
+                    NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
+                    NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
+                    NavigationIndex.SETTINGS.ordinal -> SettingPage()
+                }
+            }
         }
     }
 }
@@ -115,28 +113,27 @@ fun ModManagerApp() {
 //侧边导航
 @Composable
 fun NavigationRail(
-    navController: NavController,
-    currentScreen: NavigationIndex,
+    pagerState: PagerState,
     modViewModel: ModViewModel
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     NavigationRail(
         modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .fillMaxHeight()
             .padding(0.dp)
     ) {
-        Spacer(Modifier.weight(1f)) // 用于将内容垂直居中
-        NavigationIndex.entries.forEach { navigationItem ->
+        Spacer(Modifier.weight(1f))
+        NavigationIndex.entries.forEachIndexed { index, navigationItem ->
             Spacer(Modifier.height(16.dp))
             NavigationRailItem(
-                selected = currentScreen == navigationItem,
+                selected = pagerState.currentPage == index,
                 onClick = {
-                    if (currentScreen != navigationItem) {
-                        modViewModel.exitSelect()
-                        navController.navigate(navigationItem.name) {
-                            popUpTo(navController.graph.startDestinationId)
-                            launchSingleTop = true
-                        }
+                    modViewModel.exitSelect()
+                    // 使用 coroutineScope 启动协程去更新页面状态
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
                     }
                 },
                 icon = {
@@ -152,25 +149,22 @@ fun NavigationRail(
     }
 }
 
-
-//底部导航
 @Composable
 fun NavigationBar(
-    navController: NavController,
-    currentScreen: NavigationIndex,
+    pagerState: PagerState,
     modViewModel: ModViewModel
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     NavigationBar {
-        NavigationIndex.entries.forEach { navigationItem ->
+        NavigationIndex.entries.forEachIndexed { index, navigationItem ->
             NavigationBarItem(
-                selected = currentScreen == navigationItem,
+                selected = pagerState.currentPage == index,
                 onClick = {
-                    if (currentScreen != navigationItem) {
-                        modViewModel.exitSelect()
-                        navController.navigate(navigationItem.name) {
-                            popUpTo(navController.graph.startDestinationId)
-                            launchSingleTop = true
-                        }
+                    modViewModel.exitSelect()
+                    // 使用 coroutineScope 启动协程去更新页面状态
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
                     }
                 },
                 icon = {
@@ -183,6 +177,7 @@ fun NavigationBar(
         }
     }
 }
+
 
 
 //导航
