@@ -121,7 +121,7 @@ fun NavigationRail(
     // 使用 LaunchedEffect 来处理页面滚动
     LaunchedEffect(selectedIndex.intValue) {
         if (selectedIndex.intValue != pagerState.currentPage) {
-            pagerState.scrollToPage(selectedIndex.intValue)
+            pagerState.animateScrollToPage(selectedIndex.intValue)
         }
     }
 
@@ -163,7 +163,7 @@ fun NavigationBar(
     // 使用 LaunchedEffect 来处理页面滚动
     LaunchedEffect(selectedIndex.intValue) {
         if (selectedIndex.intValue != pagerState.currentPage) {
-            pagerState.scrollToPage(selectedIndex.intValue)
+            pagerState.animateScrollToPage(selectedIndex.intValue)
         }
     }
 
