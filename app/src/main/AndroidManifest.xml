@@ -42,16 +42,14 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-
             </intent-filter>
-
         </activity>
         <service
             android:name=".userservice.gamestart.ProjectSnowStartService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="dataSync"
-            android:permission="android.permission.INTERNET"></service>
+            android:permission="android.permission.INTERNET"/>
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
             android:authorities="${applicationId}.shizuku"
@@ -67,7 +65,6 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
-
         </intent>
     </queries>
 
