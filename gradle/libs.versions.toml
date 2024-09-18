@@ -1,4 +1,5 @@
 [versions]
+accompanistPager = "0.32.0"
 accompanistPermissions = "0.36.0"
 agp = "8.6.1"
 api = "13.1.5"
@@ -30,6 +31,7 @@ zip4j = "2.11.5"
 roomVersion = "2.6.1"
 
 [libraries]
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistPermissions" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }

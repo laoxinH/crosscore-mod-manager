@@ -186,7 +186,10 @@ dependencies {
     implementation(libs.x.zip.jbinding.xandroid)
     // 系统UI控制库，实现沉浸式状态栏
     implementation(libs.accompanist.systemuicontroller)
+    // Glide实现预览图压缩
     implementation(libs.glide)
+
+    implementation(libs.accompanist.pager)
 }
 
 // 计算apk的md5
