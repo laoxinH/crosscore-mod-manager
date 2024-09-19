@@ -1,5 +1,17 @@
 [
     {
+        "gameName": "交错战线",
+        "packageName": "com.gamebeans.gp.jczx",
+        "serviceName": "国际服",
+        "downloadUrl": ""
+    },
+    {
+        "gameName": "Muv Luv Dimensions",
+        "packageName": "jp.co.nextninja.dimensions",
+        "serviceName": "日服",
+        "downloadUrl": ""
+    },
+    {
         "gameName": "\u78a7\u84dd\u822a\u7ebf-\u914d\u7f6e\u7248\u672c2.0",
         "packageName": "com.bilibili.azurlane",
         "serviceName": "\u5b98\u670d",
@@ -20,13 +32,13 @@
     {
         "gameName": "\u660e\u65e5\u65b9\u821f",
         "packageName": "com.hypergryph.arknights.bilibili",
-        "serviceName": "B\u670d-\u914d\u7f6e2.2",
+        "serviceName": "B\u670d-\u914d\u7f6e2.3",
         "downloadUrl": ""
     },
     {
         "gameName": "\u660e\u65e5\u65b9\u821f",
         "packageName": "com.hypergryph.arknights",
-        "serviceName": "\u5b98\u670d-\u914d\u7f6e2.2",
+        "serviceName": "\u5b98\u670d-\u914d\u7f6e2.3",
         "downloadUrl": ""
     },
     {
@@ -59,4 +71,5 @@
         "serviceName": "\u65e5\u670d",
         "downloadUrl": ""
     }
+
 ]
