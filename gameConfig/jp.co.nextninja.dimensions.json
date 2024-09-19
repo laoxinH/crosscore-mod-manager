@@ -1,0 +1,22 @@
+{
+  "gameName": "Muv Luv Dimensions",
+  "serviceName": "日服",
+  "packageName": "jp.co.nextninja.dimensions",
+  "version": "1.1",
+  "gamePath": "Android/data/jp.co.nextninja.dimensions/",
+  "antiHarmonyFile": "",
+  "antiHarmonyContent": "",
+  "gameFilePath": [
+    "Android/data/jp.co.nextninja.dimensions/files/Contents",
+    "Android/data/jp.co.nextninja.dimensions/cache/Embedded/Tutorial/Contents/Android"
+  ],
+  "modType": [
+    "DLC",
+    "本体"
+  ],
+  "modSavePath": "",
+  "isGameFileRepeat": true,
+  "enableBackup": true,
+  "tips": "务必在游戏获取资源包后再扫描启用mod"
+
+}
