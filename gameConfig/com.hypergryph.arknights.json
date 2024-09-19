@@ -1,6 +1,6 @@
 {
   "gameName": "明日方舟",
-  "serviceName": "官服-配置2.3",
+  "serviceName": "官服-配置2.4",
   "packageName": "com.hypergryph.arknights",
   "version": "2.3",
   "gamePath": "Android/data/com.hypergryph.arknights/",
@@ -24,7 +24,9 @@
     "Android/data/com.hypergryph.arknights/files/AB/Android/audio/sound_beta_2/voice_en/",
     "Android/data/com.hypergryph.arknights/files/AB/Android/audio/sound_beta_2/voice_kr/",
     "Android/data/com.hypergryph.arknights/files/AB/Android/audio/sound_beta_2/voice_custom/",
-    "Android/data/com.hypergryph.arknights/files/AB/Android/arts/ui/homebackground/wrapper/"
+    "Android/data/com.hypergryph.arknights/files/AB/Android/arts/ui/homebackground/wrapper/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/battle/prefabs/",
+    "Android/data/com.hypergryph.arknights/files/AB/Android/audio/sound_beta_2/music/rogue_2"
   ],
   "modType": [
     "普通立绘",
@@ -44,7 +46,9 @@
     "英文语音",
     "韩文语音",
     "方言语音",
-    "主页背景"
+    "主页背景",
+    "token修改",
+    "水月肉鸽背景音乐"
   ],
   "modSavePath": "",
   "isGameFileRepeat": true,
