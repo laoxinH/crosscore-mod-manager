@@ -91,7 +91,6 @@ class ConsoleViewModel(
                 )
             }
         }
-        var gameInfoJob: Job? = null
         var updateModCountJob: Job? = null
         var updateAntiHarmonyJob: Job? = null
         var updateEnableModCountJob: Job? = null
@@ -180,7 +179,7 @@ class ConsoleViewModel(
             }.onFailure {
                 Log.e("ConsoleViewModel", "信息提示: $it")
             }.onSuccess { info ->
-                Log.d("ConsoleViewModel", "信息提示: ${info}")
+                Log.d("ConsoleViewModel", "信息提示: $info")
                 if (info.version > ModTools.getInfoVersion()) {
                     _uiState.update {
                         it.copy(infoBean = info)
@@ -415,8 +414,8 @@ class ConsoleViewModel(
                         Bitmap.Config.ARGB_8888
                     ).also { bitmap ->
                         val canvas = Canvas(bitmap)
-                        (drawable as AdaptiveIconDrawable).setBounds(0, 0, canvas.width, canvas.height)
-                        (drawable as AdaptiveIconDrawable).draw(canvas)
+                        drawable.setBounds(0, 0, canvas.width, canvas.height)
+                        drawable.draw(canvas)
                     }
                 }
 
@@ -427,7 +426,7 @@ class ConsoleViewModel(
                 }
             }
             return bitmap.asImageBitmap()
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             val context = App.get()
             val drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
             val bitmap = drawable.toBitmap()
@@ -518,7 +517,7 @@ class ConsoleViewModel(
                 Log.e("ConsoleViewModel", "checkUpdate: $it")
             }.onSuccess {
                 if (it.code > ModTools.getVersionCode()) {
-                    Log.d("ConsoleViewModel", "checkUpdate: ${it}")
+                    Log.d("ConsoleViewModel", "checkUpdate: $it")
                     _downloadUrl = it.url
                     _updateContent = it.des
                     setShowUpgradeDialog(true)
