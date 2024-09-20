@@ -35,7 +35,6 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
@@ -120,20 +119,24 @@ fun NavigationRail(
 
     NavigationRail(
         modifier = Modifier
-            .defaultMinSize(minWidth = 100.dp)
+            .defaultMinSize(minWidth = 80.dp)
             .fillMaxHeight()
             .padding(0.dp)
     ) {
         Spacer(Modifier.weight(1f))
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
-            Spacer(Modifier.height(16.dp))
+            val isSelected = pagerState.currentPage == index
+
+            Spacer(Modifier.height(12.dp))
             NavigationRailItem(
                 selected = pagerState.currentPage == index,
                 onClick = {
                     modViewModel.exitSelect()
                     // 使用 coroutineScope 启动协程去更新页面状态
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
+                    if (!isSelected) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
                     }
                 },
                 icon = {
@@ -141,9 +144,10 @@ fun NavigationRail(
                 },
                 label = {
                     Text(text = stringResource(id = navigationItem.title))
-                }
+                },
+                alwaysShowLabel = isSelected
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
         }
         Spacer(Modifier.weight(1f))
     }
@@ -158,13 +162,17 @@ fun NavigationBar(
 
     NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
+            val isSelected = pagerState.currentPage == index
+
             NavigationBarItem(
-                selected = pagerState.currentPage == index,
+                selected = isSelected,
                 onClick = {
                     modViewModel.exitSelect()
                     // 使用 coroutineScope 启动协程去更新页面状态
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
+                    if (!isSelected) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
                     }
                 },
                 icon = {
@@ -172,12 +180,12 @@ fun NavigationBar(
                 },
                 label = {
                     Text(text = stringResource(id = navigationItem.title))
-                }
+                },
+                alwaysShowLabel = isSelected
             )
         }
     }
 }
-
 
 
 //导航
