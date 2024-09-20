@@ -122,7 +122,7 @@ fun ModManagerApp() {
             BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
                 // 返回到 ConsolePage
                 scope.launch {
-                    pagerState.animateScrollToPage(NavigationIndex.CONSOLE.ordinal)
+                    pagerState.scrollToPage(NavigationIndex.CONSOLE.ordinal)
                 }
             }
 
