@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -213,6 +214,10 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                 )
             }
         })
+
+        // 添加 Spacer 以分离 SearchBox 和 TopAppBar
+        Spacer(modifier = Modifier.height(8.dp))
+
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
 
             // 根据 MutableState 显示或隐藏搜索框
@@ -319,6 +324,10 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                 // 添加更多的菜单项
             }
         })
+
+        // 添加 Spacer 以分离 SearchBox 和 TopAppBar
+        Spacer(modifier = Modifier.height(8.dp))
+
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
 
             // 根据 MutableState 显示或隐藏搜索框
@@ -364,9 +373,11 @@ fun SearchBox(
                 )
             }
         },
-        colors = TextFieldDefaults.colors( // 确保使用正确的 colors 方法
-            focusedContainerColor = Color(0xBCE9E9E9),
-            unfocusedContainerColor = Color(0xBCE9E9E9),
+        shape = MaterialTheme.shapes.medium,
+        // 使用动态取色
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
             unfocusedIndicatorColor = Color.Transparent,
             focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
