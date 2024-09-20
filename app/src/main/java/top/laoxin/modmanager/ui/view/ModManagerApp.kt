@@ -1,6 +1,8 @@
 package top.laoxin.modmanager.ui.view
 
+import android.app.Activity
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Row
@@ -20,13 +22,11 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -63,16 +63,8 @@ fun ModManagerApp() {
     val pagerState = rememberPagerState()
     val configuration = LocalConfiguration.current
 
-    // 创建 CoroutineScope
     val scope = rememberCoroutineScope()
-
-    // 使用 BackHandler 处理返回键事件
-    BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
-        // 启动协程以返回到 ConsolePage
-        scope.launch {
-            pagerState.animateScrollToPage(NavigationIndex.CONSOLE.ordinal)
-        }
-    }
+    var exitTime by remember { mutableLongStateOf(0L) }
 
     Row {
         // 根据屏幕方向选择布局
@@ -109,6 +101,31 @@ fun ModManagerApp() {
                 }
             }
         ) { innerPadding ->
+            val context = LocalContext.current // 在这里获取 Context
+            val exitToast: Toast =
+                remember { Toast.makeText(context, "再按一次退出应用", Toast.LENGTH_SHORT) }
+            val activity = context as? Activity // 获取当前 Activity
+
+            BackHandler(enabled = pagerState.currentPage == NavigationIndex.CONSOLE.ordinal) {
+                // 在 ConsolePage 显示退出确认
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - exitTime > 2000) {
+                    exitToast.show()
+                    exitTime = currentTime
+                } else {
+                    // 安全关闭应用
+                    exitToast.cancel()
+                    activity?.finish()
+                }
+            }
+
+            BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
+                // 返回到 ConsolePage
+                scope.launch {
+                    pagerState.animateScrollToPage(NavigationIndex.CONSOLE.ordinal)
+                }
+            }
+
             HorizontalPager(
                 state = pagerState,
                 count = NavigationIndex.entries.size,
@@ -193,7 +210,6 @@ fun NavigationBar(
         }
     }
 }
-
 
 
 //导航

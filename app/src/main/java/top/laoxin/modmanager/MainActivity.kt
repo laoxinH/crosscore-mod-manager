@@ -3,9 +3,7 @@ package top.laoxin.modmanager
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -23,11 +21,6 @@ import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ModManagerApp
 
 class MainActivity : ComponentActivity() {
-
-    private var exitTime: Long = 0 // 记录第一次返回的时间
-    private val exitToast: Toast by lazy {
-        Toast.makeText(this, "再按一次退出应用", Toast.LENGTH_SHORT)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,24 +65,9 @@ class MainActivity : ComponentActivity() {
                 ) {
                     ModManagerApp()
                 }
-
-                BackHandler {
-                    handleBackPress()
-                }
             }
         }
     }
-
-    private fun handleBackPress() {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - exitTime > 2000) { // 2秒内未再次按下
-            exitToast.show() // 显示提示信息
-            exitTime = currentTime // 更新返回时间
-        } else {
-            finish() // 再次按下则退出应用
-        }
-    }
-
 
     override fun onDestroy() {
         super.onDestroy()
@@ -98,34 +76,6 @@ class MainActivity : ComponentActivity() {
             Shizuku.removeRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
         }
     }
-
-
-    // 读取文件路径
-    /*    private fun loadPath(path: String?, isUserClicked: Boolean) {
-        if (path == null) {
-            return
-        }
-        val isNavigate = !TextUtils.equals(mPathCache, path)
-        mPathCache = path
-        if (FileTools.shouldRequestUriPermission(path)) {
-            if (isUserClicked) {
-
-                // 读取安卓目录权限
-                showRequestUriPermissionDialog()
-            }
-        } else {
-            mDirectory = File(path)
-            binding.tvPath.setText(mDirectory!!.getPath())
-            val list: List<BeanFile?> = FileTools.getSortedFileList(path)
-            val bundle = Bundle()
-            bundle.putParcelableArrayList(BundleKey.FILE_LIST, list as ArrayList<out Parcelable?>)
-            if (!isNavigate) {
-                mNavController.popBackStack()
-            }
-            mNavController.navigate(R.id.fileListFragment, bundle)
-        }
-    }*/
-
 }
 
 
