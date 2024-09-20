@@ -378,7 +378,7 @@ fun SearchBox(
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
