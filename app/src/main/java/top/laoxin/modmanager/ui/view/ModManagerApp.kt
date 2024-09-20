@@ -1,6 +1,9 @@
 package top.laoxin.modmanager.ui.view
 
+import android.app.Activity
 import android.content.res.Configuration
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -26,6 +29,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -62,7 +66,11 @@ fun ModManagerApp() {
     val pagerState = rememberPagerState()
     val configuration = LocalConfiguration.current
 
+    val scope = rememberCoroutineScope()
+    var exitTime by remember { mutableLongStateOf(0L) }
+
     Row {
+        // 根据屏幕方向选择布局
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
                 pagerState = pagerState,
@@ -72,6 +80,7 @@ fun ModManagerApp() {
 
         Scaffold(
             topBar = {
+                // 根据当前页面显示不同的顶部工具栏
                 when (pagerState.currentPage) {
                     NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(consoleViewModel)
                     NavigationIndex.MOD.ordinal -> ModTopBar(modViewModel)
@@ -86,6 +95,7 @@ fun ModManagerApp() {
                 )
             },
             bottomBar = {
+                // 在纵向模式下显示底部导航栏
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     NavigationBar(
                         pagerState = pagerState,
@@ -94,11 +104,37 @@ fun ModManagerApp() {
                 }
             }
         ) { innerPadding ->
+            val context = LocalContext.current // 在这里获取 Context
+            val exitToast: Toast =
+                remember { Toast.makeText(context, "再按一次退出应用", Toast.LENGTH_SHORT) }
+            val activity = context as? Activity // 获取当前 Activity
+
+            BackHandler(enabled = pagerState.currentPage == NavigationIndex.CONSOLE.ordinal) {
+                // 在 ConsolePage 显示退出确认
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - exitTime > 2000) {
+                    exitToast.show()
+                    exitTime = currentTime
+                } else {
+                    // 安全关闭应用
+                    exitToast.cancel()
+                    activity?.finish()
+                }
+            }
+
+            BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
+                // 返回到 ConsolePage
+                scope.launch {
+                    pagerState.scrollToPage(NavigationIndex.CONSOLE.ordinal)
+                }
+            }
+
             HorizontalPager(
                 state = pagerState,
                 count = NavigationIndex.entries.size,
                 modifier = Modifier.padding(innerPadding)
             ) { page ->
+                // 根据当前页显示不同的内容
                 when (page) {
                     NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
                     NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
@@ -166,6 +202,7 @@ fun NavigationRail(
     }
 }
 
+// 底部导航
 @Composable
 fun NavigationBar(
     pagerState: PagerState,
@@ -229,7 +266,6 @@ private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
         }
     }
 }
-
 
 //导航
 @Composable

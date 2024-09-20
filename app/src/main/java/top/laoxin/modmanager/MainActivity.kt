@@ -69,7 +69,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         if (PermissionTools.isShizukuAvailable) {
@@ -77,34 +76,6 @@ class MainActivity : ComponentActivity() {
             Shizuku.removeRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
         }
     }
-
-
-    // 读取文件路径
-    /*    private fun loadPath(path: String?, isUserClicked: Boolean) {
-        if (path == null) {
-            return
-        }
-        val isNavigate = !TextUtils.equals(mPathCache, path)
-        mPathCache = path
-        if (FileTools.shouldRequestUriPermission(path)) {
-            if (isUserClicked) {
-
-                // 读取安卓目录权限
-                showRequestUriPermissionDialog()
-            }
-        } else {
-            mDirectory = File(path)
-            binding.tvPath.setText(mDirectory!!.getPath())
-            val list: List<BeanFile?> = FileTools.getSortedFileList(path)
-            val bundle = Bundle()
-            bundle.putParcelableArrayList(BundleKey.FILE_LIST, list as ArrayList<out Parcelable?>)
-            if (!isNavigate) {
-                mNavController.popBackStack()
-            }
-            mNavController.navigate(R.id.fileListFragment, bundle)
-        }
-    }*/
-
 }
 
 
