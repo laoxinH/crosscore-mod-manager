@@ -224,7 +224,10 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             SearchBox(text = viewModel.getSearchText(),
                 onValueChange = { viewModel.setSearchText(it) },
                 hint = stringResource(R.string.mod_page_search_hit),
-                onClose = { viewModel.setSearchBoxVisible(false) })
+                onClose = {
+                    viewModel.setSearchBoxVisible(false)
+                    viewModel.setModsView(NavigationIndex.ALL_MODS)
+                })
         }
     }
 }
@@ -334,7 +337,10 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             SearchBox(text = viewModel.getSearchText(),
                 onValueChange = { viewModel.setSearchText(it) },
                 hint = stringResource(R.string.mod_page_search_hit),
-                onClose = { viewModel.setSearchBoxVisible(false) })
+                onClose = {
+                    viewModel.setSearchBoxVisible(false)
+                    viewModel.setModsView(NavigationIndex.ALL_MODS)
+                })
         }
     }
 }
