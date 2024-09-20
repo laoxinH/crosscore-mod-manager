@@ -58,7 +58,7 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
 @SuppressLint("NewApi")
 @Composable
-fun ConsoleContent(innerPadding: PaddingValues = PaddingValues(0.dp), viewModel: ConsoleViewModel) {
+fun ConsoleContent(viewModel: ConsoleViewModel) {
     val context = LocalContext.current
 
     val scrollState = rememberScrollState()

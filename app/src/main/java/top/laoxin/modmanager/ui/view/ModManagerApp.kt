@@ -2,6 +2,9 @@ package top.laoxin.modmanager.ui.view
 
 import android.content.res.Configuration
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -19,10 +22,7 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -35,7 +35,6 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
@@ -120,30 +119,48 @@ fun NavigationRail(
 
     NavigationRail(
         modifier = Modifier
-            .defaultMinSize(minWidth = 100.dp)
+            .defaultMinSize(minWidth = 80.dp)
             .fillMaxHeight()
             .padding(0.dp)
     ) {
         Spacer(Modifier.weight(1f))
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
-            Spacer(Modifier.height(16.dp))
+            val isSelected = pagerState.currentPage == index
+            var lastClickTime by remember { mutableLongStateOf(0L) }
+
+            Spacer(Modifier.height(12.dp))
             NavigationRailItem(
                 selected = pagerState.currentPage == index,
                 onClick = {
-                    modViewModel.exitSelect()
-                    // 使用 coroutineScope 启动协程去更新页面状态
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
+                    val currentTime = System.currentTimeMillis()
+                    if ((currentTime - lastClickTime) < 300) { // 检测双击
+                        // 刷新当前页面的逻辑
+                        refreshCurrentPage(pagerState.currentPage, modViewModel)
+                    } else {
+                        modViewModel.exitSelect()
+                        if (!isSelected) {
+                            coroutineScope.launch {
+                                pagerState.scrollToPage(index)
+                            }
+                        }
                     }
+                    lastClickTime = currentTime
                 },
                 icon = {
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
-                    Text(text = stringResource(id = navigationItem.title))
-                }
+                    AnimatedVisibility(
+                        visible = isSelected,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Text(text = stringResource(id = navigationItem.title))
+                    }
+                },
+                alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
         }
         Spacer(Modifier.weight(1f))
     }
@@ -155,29 +172,63 @@ fun NavigationBar(
     modViewModel: ModViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var lastClickTime by remember { mutableLongStateOf(0L) }
 
     NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
+            val isSelected = pagerState.currentPage == index
+
             NavigationBarItem(
-                selected = pagerState.currentPage == index,
+                selected = isSelected,
                 onClick = {
-                    modViewModel.exitSelect()
-                    // 使用 coroutineScope 启动协程去更新页面状态
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
+                    val currentTime = System.currentTimeMillis()
+                    if ((currentTime - lastClickTime) < 300) { // 检测双击
+                        // 刷新当前页面的逻辑
+                        refreshCurrentPage(pagerState.currentPage, modViewModel)
+                    } else {
+                        modViewModel.exitSelect()
+                        if (!isSelected) {
+                            coroutineScope.launch {
+                                pagerState.scrollToPage(index)
+                            }
+                        }
                     }
+                    lastClickTime = currentTime
                 },
                 icon = {
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
-                    Text(text = stringResource(id = navigationItem.title))
-                }
+                    AnimatedVisibility(
+                        visible = isSelected,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Text(text = stringResource(id = navigationItem.title))
+                    }
+                },
+                alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
             )
         }
     }
 }
 
+private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
+    // 根据当前页面的类型，执行相应的刷新逻辑
+    when (currentPage) {
+        NavigationIndex.CONSOLE.ordinal -> {
+            // 刷新控制台页面的逻辑
+        }
+
+        NavigationIndex.MOD.ordinal -> {
+            modViewModel.flashMods(false, true)
+        }
+
+        NavigationIndex.SETTINGS.ordinal -> {
+            // 刷新设置页面逻辑
+        }
+    }
+}
 
 
 //导航
