@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.ui.view
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,7 +36,6 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
@@ -63,7 +63,19 @@ fun ModManagerApp() {
     val pagerState = rememberPagerState()
     val configuration = LocalConfiguration.current
 
+    // 创建 CoroutineScope
+    val scope = rememberCoroutineScope()
+
+    // 使用 BackHandler 处理返回键事件
+    BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
+        // 启动协程以返回到 ConsolePage
+        scope.launch {
+            pagerState.animateScrollToPage(NavigationIndex.CONSOLE.ordinal)
+        }
+    }
+
     Row {
+        // 根据屏幕方向选择布局
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
                 pagerState = pagerState,
@@ -73,6 +85,7 @@ fun ModManagerApp() {
 
         Scaffold(
             topBar = {
+                // 根据当前页面显示不同的顶部工具栏
                 when (pagerState.currentPage) {
                     NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(consoleViewModel)
                     NavigationIndex.MOD.ordinal -> ModTopBar(modViewModel)
@@ -87,6 +100,7 @@ fun ModManagerApp() {
                 )
             },
             bottomBar = {
+                // 在纵向模式下显示底部导航栏
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     NavigationBar(
                         pagerState = pagerState,
@@ -100,6 +114,7 @@ fun ModManagerApp() {
                 count = NavigationIndex.entries.size,
                 modifier = Modifier.padding(innerPadding)
             ) { page ->
+                // 根据当前页显示不同的内容
                 when (page) {
                     NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
                     NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
@@ -149,6 +164,7 @@ fun NavigationRail(
     }
 }
 
+// 底部导航
 @Composable
 fun NavigationBar(
     pagerState: PagerState,
