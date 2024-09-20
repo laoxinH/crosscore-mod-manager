@@ -2,6 +2,9 @@ package top.laoxin.modmanager.ui.view
 
 import android.content.res.Configuration
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -135,7 +138,7 @@ fun NavigationRail(
                     // 使用 coroutineScope 启动协程去更新页面状态
                     if (!isSelected) {
                         coroutineScope.launch {
-                            pagerState.animateScrollToPage(index)
+                            pagerState.scrollToPage(index)
                         }
                     }
                 },
@@ -143,9 +146,15 @@ fun NavigationRail(
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
-                    Text(text = stringResource(id = navigationItem.title))
+                    AnimatedVisibility(
+                        visible = isSelected,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Text(text = stringResource(id = navigationItem.title))
+                    }
                 },
-                alwaysShowLabel = isSelected
+                alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
             )
             Spacer(Modifier.height(12.dp))
         }
@@ -171,7 +180,7 @@ fun NavigationBar(
                     // 使用 coroutineScope 启动协程去更新页面状态
                     if (!isSelected) {
                         coroutineScope.launch {
-                            pagerState.animateScrollToPage(index)
+                            pagerState.scrollToPage(index)
                         }
                     }
                 },
@@ -179,9 +188,15 @@ fun NavigationBar(
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
-                    Text(text = stringResource(id = navigationItem.title))
+                    AnimatedVisibility(
+                        visible = isSelected,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Text(text = stringResource(id = navigationItem.title))
+                    }
                 },
-                alwaysShowLabel = isSelected
+                alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
             )
         }
     }
