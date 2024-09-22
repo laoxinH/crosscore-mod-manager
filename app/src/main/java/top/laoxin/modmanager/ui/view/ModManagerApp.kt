@@ -9,10 +9,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
@@ -74,7 +71,8 @@ fun ModManagerApp() {
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
                 pagerState = pagerState,
-                modViewModel = modViewModel
+                modViewModel = modViewModel,
+                consoleViewModel = consoleViewModel
             )
         }
 
@@ -149,21 +147,20 @@ fun ModManagerApp() {
 @Composable
 fun NavigationRail(
     pagerState: PagerState,
-    modViewModel: ModViewModel
+    modViewModel: ModViewModel,
+    consoleViewModel: ConsoleViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var lastClickTime by remember { mutableLongStateOf(0L) }
 
     NavigationRail(
         modifier = Modifier
-            .defaultMinSize(minWidth = 80.dp)
             .fillMaxHeight()
             .padding(0.dp)
     ) {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
             val isSelected = pagerState.currentPage == index
-            var lastClickTime by remember { mutableLongStateOf(0L) }
 
-            Spacer(Modifier.height(12.dp))
             NavigationRailItem(
                 selected = pagerState.currentPage == index,
                 onClick = {
