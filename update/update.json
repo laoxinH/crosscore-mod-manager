@@ -1,10 +1,10 @@
 {
-    "code": 22,
-    "name": "3.0.1",
-    "filename": "ModManager-release.apk",
-    "url": "https://github.com/laoxinH/crosscore-mod-manager/releases/download/3.0.1/ModManager-release.apk",
-    "time": 1724858311822,
-    "des": "3.0.1 \u66f4\u65b0\n1.\u8c03\u6574\u6700\u4f4e\u5b89\u5353\u7248\u672c\u4e3a\u5b89\u53539\n2.\u4fee\u6539\u66f4\u65b0\u6e20\u9053\u4e3agithub\n3.\u5fae\u8c03\u5927\u5c4f\u8bbe\u5907\u6a2a\u5c4f\u5e03\u5c40\n\u6ce8\u610f!!\u6b63\u5f0f\u7248\u672c\u4fee\u6539\u4e86\u5305\u540d,\u5982\u679c\u5b89\u88c5\u66f4\u65b0\u540e\u4f1a\u663e\u793a\u4e24\u4e2a\u5b9e\u9a8c\u5ba4app\u8bf7\u5173\u6389\u65e7\u7248\u7684MOD\u5e76\u5378\u8f7d\n\u6ce8\u610f!!\u6b63\u5f0f\u7248\u672c\u4fee\u6539\u4e86\u5305\u540d,\u5982\u679c\u5b89\u88c5\u66f4\u65b0\u540e\u4f1a\u663e\u793a\u4e24\u4e2a\u5b9e\u9a8c\u5ba4app\u8bf7\u5173\u6389\u65e7\u7248\u7684MOD\u5e76\u5378\u8f7d\n",
-    "size": 21257184,
-    "md5": "ModManager-release.apk"
+  "code": 23,
+  "name": "3.0.2",
+  "filename": "ModManager-3.0.2-arm64-v8a.apk",
+  "url": "https://github.com/laoxinH/crosscore-mod-manager/releases/download/3.0.2/ModManager-3.0.2-arm64-v8a.apk",
+  "time": 1724858311822,
+  "des": "3.0.2 \u5f00\u653e\n1.\u9ed8\u8ba4\u91cd\u65b0\u4ee5github\u66f4\u65b0\n2.\u9996\u9875\u6dfb\u52a0\u6388\u6743\u72b6\u6001\u663e\u793a\n3.\u4fee\u6539\u9884\u89c8\u56fe\u8fc7\u5927\u5bfc\u81f4\u65e0\u54cd\u5e94\n4.\u4fee\u6539\u641c\u7d22\u680f\u9519\u4f4d\n5.\u6dfb\u52a0\u53cc\u51fb\u刷新\n6.\u9875\u9762\u53ef\u4ee5\u6ed1\u52a8\u5206\u6362\n7.\u8fb9\u6846\u6dfb\u52a0\u5f53\u524d\u6e38\u620ficon\n8.\u5e94\u7528\u關\u95ed\u9700\u8981\u4e24\u6b21\u786e\u8ba4",
+  "size": 15748753,
+  "md5": "ModManager-3.0.2-arm64-v8a.apk"
 }
