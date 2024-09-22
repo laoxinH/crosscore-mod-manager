@@ -1,13 +1,25 @@
 package top.laoxin.modmanager.ui.view
 
+import android.app.Activity
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ImagesearchRoller
@@ -19,15 +31,16 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -35,8 +48,8 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.modview.ModTopBar
@@ -63,16 +76,22 @@ fun ModManagerApp() {
     val pagerState = rememberPagerState()
     val configuration = LocalConfiguration.current
 
+    val scope = rememberCoroutineScope()
+    var exitTime by remember { mutableLongStateOf(0L) }
+
     Row {
+        // 根据屏幕方向选择布局
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
                 pagerState = pagerState,
-                modViewModel = modViewModel
+                modViewModel = modViewModel,
+                consoleViewModel = consoleViewModel
             )
         }
 
         Scaffold(
             topBar = {
+                // 根据当前页面显示不同的顶部工具栏
                 when (pagerState.currentPage) {
                     NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(consoleViewModel)
                     NavigationIndex.MOD.ordinal -> ModTopBar(modViewModel)
@@ -87,6 +106,7 @@ fun ModManagerApp() {
                 )
             },
             bottomBar = {
+                // 在纵向模式下显示底部导航栏
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     NavigationBar(
                         pagerState = pagerState,
@@ -95,11 +115,37 @@ fun ModManagerApp() {
                 }
             }
         ) { innerPadding ->
+            val context = LocalContext.current // 在这里获取 Context
+            val exitToast: Toast =
+                remember { Toast.makeText(context, "再按一次退出应用", Toast.LENGTH_SHORT) }
+            val activity = context as? Activity // 获取当前 Activity
+
+            BackHandler(enabled = pagerState.currentPage == NavigationIndex.CONSOLE.ordinal) {
+                // 在 ConsolePage 显示退出确认
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - exitTime > 2000) {
+                    exitToast.show()
+                    exitTime = currentTime
+                } else {
+                    // 安全关闭应用
+                    exitToast.cancel()
+                    activity?.finish()
+                }
+            }
+
+            BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
+                // 返回到 ConsolePage
+                scope.launch {
+                    pagerState.scrollToPage(NavigationIndex.CONSOLE.ordinal)
+                }
+            }
+
             HorizontalPager(
                 state = pagerState,
                 count = NavigationIndex.entries.size,
                 modifier = Modifier.padding(innerPadding)
             ) { page ->
+                // 根据当前页显示不同的内容
                 when (page) {
                     NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
                     NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
@@ -114,71 +160,144 @@ fun ModManagerApp() {
 @Composable
 fun NavigationRail(
     pagerState: PagerState,
-    modViewModel: ModViewModel
+    modViewModel: ModViewModel,
+    consoleViewModel: ConsoleViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var lastClickTime by remember { mutableLongStateOf(0L) }
+    val packageName = consoleViewModel.uiState.collectAsState().value.gameInfo.packageName
+    val gameIcon = remember(packageName) {
+        getGameIcon(packageName)
+    }
 
     NavigationRail(
         modifier = Modifier
-            .defaultMinSize(minWidth = 100.dp)
             .fillMaxHeight()
             .padding(0.dp)
     ) {
-        Spacer(Modifier.weight(1f))
-        NavigationIndex.entries.forEachIndexed { index, navigationItem ->
-            Spacer(Modifier.height(16.dp))
-            NavigationRailItem(
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    modViewModel.exitSelect()
-                    // 使用 coroutineScope 启动协程去更新页面状态
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                },
-                icon = {
-                    Icon(imageVector = navigationItem.icon, contentDescription = null)
-                },
-                label = {
-                    Text(text = stringResource(id = navigationItem.title))
-                }
-            )
-            Spacer(Modifier.height(16.dp))
+        // 顶部的按钮
+        Column {
+            NavigationIndex.entries.forEachIndexed { index, navigationItem ->
+                val isSelected = pagerState.currentPage == index
+
+                NavigationRailItem(
+                    selected = isSelected,
+                    onClick = {
+                        val currentTime = System.currentTimeMillis()
+                        if ((currentTime - lastClickTime) < 300) { // 检测双击
+                            // 刷新当前页面的逻辑
+                            refreshCurrentPage(pagerState.currentPage, modViewModel)
+                        } else {
+                            modViewModel.exitSelect()
+                            if (!isSelected) {
+                                coroutineScope.launch {
+                                    pagerState.scrollToPage(index)
+                                }
+                            }
+                        }
+                        lastClickTime = currentTime
+                    },
+                    icon = {
+                        Icon(imageVector = navigationItem.icon, contentDescription = null)
+                    },
+                    label = {
+                        AnimatedVisibility(
+                            visible = isSelected,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Text(text = stringResource(id = navigationItem.title))
+                        }
+                    },
+                    alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
+                )
+            }
         }
-        Spacer(Modifier.weight(1f))
+
+        Spacer(modifier = Modifier.weight(1f)) // 将游戏图标推到最底部
+
+        // 底部的游戏图标
+        Column(
+            modifier = Modifier
+                .padding(bottom = 16.dp) // 调整底部间距
+        ) {
+            gameIcon?.let {
+                Image(
+                    bitmap = it,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(64.dp) // 调整图标大小
+                        .padding(8.dp)
+                )
+            }
+        }
     }
 }
 
+// 底部导航
 @Composable
 fun NavigationBar(
     pagerState: PagerState,
     modViewModel: ModViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var lastClickTime by remember { mutableLongStateOf(0L) }
 
     NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
+            val isSelected = pagerState.currentPage == index
+
             NavigationBarItem(
-                selected = pagerState.currentPage == index,
+                selected = isSelected,
                 onClick = {
-                    modViewModel.exitSelect()
-                    // 使用 coroutineScope 启动协程去更新页面状态
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
+                    val currentTime = System.currentTimeMillis()
+                    if ((currentTime - lastClickTime) < 300) { // 检测双击
+                        // 刷新当前页面的逻辑
+                        refreshCurrentPage(pagerState.currentPage, modViewModel)
+                    } else {
+                        modViewModel.exitSelect()
+                        if (!isSelected) {
+                            coroutineScope.launch {
+                                pagerState.scrollToPage(index)
+                            }
+                        }
                     }
+                    lastClickTime = currentTime
                 },
                 icon = {
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
-                    Text(text = stringResource(id = navigationItem.title))
-                }
+                    AnimatedVisibility(
+                        visible = isSelected,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Text(text = stringResource(id = navigationItem.title))
+                    }
+                },
+                alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
             )
         }
     }
 }
 
+private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
+    // 根据当前页面的类型，执行相应的刷新逻辑
+    when (currentPage) {
+        NavigationIndex.CONSOLE.ordinal -> {
+            // 刷新控制台页面的逻辑
+        }
 
+        NavigationIndex.MOD.ordinal -> {
+            modViewModel.flashMods(false, true)
+        }
+
+        NavigationIndex.SETTINGS.ordinal -> {
+            // 刷新设置页面逻辑
+        }
+    }
+}
 
 //导航
 @Composable
@@ -202,5 +321,39 @@ fun NavigationHost(
         composable(route = NavigationIndex.SETTINGS.name) {
             SettingPage()
         }
+    }
+}
+
+// 获取应用图标
+fun getGameIcon(packageName: String): ImageBitmap? {
+    try {
+        val packageInfo = App.get().packageManager.getPackageInfo(packageName, 0)
+        var drawable = packageInfo.applicationInfo?.loadIcon(App.get().packageManager)
+        val bitmap = when (drawable) {
+            is BitmapDrawable -> drawable.bitmap
+            is AdaptiveIconDrawable -> {
+                Bitmap.createBitmap(
+                    drawable.intrinsicWidth,
+                    drawable.intrinsicHeight,
+                    Bitmap.Config.ARGB_8888
+                ).also { bitmap ->
+                    val canvas = Canvas(bitmap)
+                    drawable.setBounds(0, 0, canvas.width, canvas.height)
+                    drawable.draw(canvas)
+                }
+            }
+
+            else -> {
+                val context = App.get()
+                drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
+                drawable.toBitmap()
+            }
+        }
+        return bitmap.asImageBitmap()
+    } catch (_: PackageManager.NameNotFoundException) {
+        val context = App.get()
+        val drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
+        val bitmap = drawable.toBitmap()
+        return bitmap.asImageBitmap()
     }
 }
