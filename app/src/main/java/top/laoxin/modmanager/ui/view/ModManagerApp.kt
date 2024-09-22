@@ -159,7 +159,6 @@ fun NavigationRail(
             .fillMaxHeight()
             .padding(0.dp)
     ) {
-        Spacer(Modifier.weight(1f))
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
             val isSelected = pagerState.currentPage == index
             var lastClickTime by remember { mutableLongStateOf(0L) }
@@ -196,9 +195,7 @@ fun NavigationRail(
                 },
                 alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
             )
-            Spacer(Modifier.height(12.dp))
         }
-        Spacer(Modifier.weight(1f))
     }
 }
 

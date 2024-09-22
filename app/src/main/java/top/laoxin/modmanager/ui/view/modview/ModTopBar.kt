@@ -1,13 +1,15 @@
 package top.laoxin.modmanager.ui.view.modview
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -34,6 +36,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +45,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -215,19 +220,21 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             }
         })
 
-        // 添加 Spacer 以分离 SearchBox 和 TopAppBar
-        Spacer(modifier = Modifier.height(8.dp))
-
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
 
             // 根据 MutableState 显示或隐藏搜索框
-            SearchBox(text = viewModel.getSearchText(),
+            SearchBox(
+                text = viewModel.getSearchText(),
                 onValueChange = { viewModel.setSearchText(it) },
                 hint = stringResource(R.string.mod_page_search_hit),
                 onClose = {
                     viewModel.setSearchBoxVisible(false)
                     viewModel.setModsView(NavigationIndex.ALL_MODS)
-                })
+                    // 清空搜索框
+                    viewModel.setSearchText("")
+                }
+            )
+
         }
     }
 }
@@ -328,19 +335,22 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             }
         })
 
-        // 添加 Spacer 以分离 SearchBox 和 TopAppBar
-        Spacer(modifier = Modifier.height(8.dp))
 
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
 
             // 根据 MutableState 显示或隐藏搜索框
-            SearchBox(text = viewModel.getSearchText(),
+            SearchBox(
+                text = viewModel.getSearchText(),
                 onValueChange = { viewModel.setSearchText(it) },
                 hint = stringResource(R.string.mod_page_search_hit),
                 onClose = {
                     viewModel.setSearchBoxVisible(false)
                     viewModel.setModsView(NavigationIndex.ALL_MODS)
-                })
+                    // 清空搜索框
+                    viewModel.setSearchText("")
+                }
+            )
+
         }
     }
 }
@@ -354,6 +364,15 @@ fun SearchBox(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // 获取键盘控制器
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // 每次重新显示搜索框时请求显示键盘
+    LaunchedEffect(keyboardController) {
+        keyboardController?.show()
+    }
+
+    // 使用 TextField 组件实现搜索框
     TextField(
         value = text,
         onValueChange = onValueChange,
@@ -367,10 +386,22 @@ fun SearchBox(
         },
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
+            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 10.dp)
             .height(50.dp),
         textStyle = MaterialTheme.typography.bodyMedium,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            // 设置键盘的操作按钮为完成
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                // 隐藏键盘
+                keyboardController?.hide()
+            }
+        ),
+        // 设置为单行
+        singleLine = true,
         trailingIcon = {
             IconButton(onClick = onClose) {
                 Icon(
