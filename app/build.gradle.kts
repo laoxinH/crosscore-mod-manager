@@ -1,24 +1,3 @@
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
-
-object buildInfo {
-    val versionCode = 22
-    val versionName = "3.0.1"
-    val versionDes = versionName + " 更新\n" +
-            "1.调整最低安卓版本为安卓9\n" +
-            "2.修改更新渠道为github\n" +
-            "3.微调大屏设备横屏布局\n" +
-            "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n" +
-            "注意!!正式版本修改了包名,如果安装更新后会显示两个实验室app请关掉旧版的MOD并卸载\n"
-    val updateBaseUrl =
-        "https://github.com/laoxinH/crosscore-mod-manager/releases/download/$versionName/"
-    val updatePath = "update"
-    val updateInfoFilename = "update.json"
-    val gameConfigPaht = "gameConfig"
-    val gameConfigFilename = "gameConfig.json"
-
-}
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -55,8 +34,8 @@ android {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 35
-        versionCode = buildInfo.versionCode
-        versionName = buildInfo.versionName
+        versionCode = 23
+        versionName = "3.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -189,105 +168,4 @@ dependencies {
     implementation(libs.accompanist.pager)
 }
 
-// 计算apk的md5
-fun generateMD5(file: File): String? {
-    println("generateMD5: $file")
-    return file.name
-}
 
-
-fun generateUpdateInfo(apkName: String) {
-    println("------------------ Generating version info ------------------")
-    println("------------------ 开始生成apk信息 ------------------")
-    // 把apk文件从build目录复制到根项目的update文件夹下
-    val apkFile = project.file("build/outputs/apk/release/$apkName")
-    if (!apkFile.exists()) {
-        //throw  GradleScriptException("hhh")
-        println("apk file not found.")
-    }
-
-    val toDir = rootProject.file(buildInfo.updatePath)
-    val apkHash = generateMD5(apkFile)
-    val updateJsonFile = File(toDir, buildInfo.updateInfoFilename)
-    var writeNewFile = true
-
-    // 如果有以前的json文件，检查这次打包是否有改变
-    if (updateJsonFile.exists()) {
-        try {
-            val oldUpdateInfo = JsonSlurper().parse(updateJsonFile) as Map<*, *>
-            if (buildInfo.versionCode <= oldUpdateInfo["code"] as Int && apkHash == oldUpdateInfo["md5"] as String) {
-                writeNewFile = false
-            }
-        } catch (e: Exception) {
-            writeNewFile = true
-            e.printStackTrace()
-            updateJsonFile.delete()
-        }
-    }
-
-    if (writeNewFile) {
-        toDir.listFiles()?.forEach {
-            if (!it.delete()) {
-                it.deleteOnExit()
-            }
-        }
-        copy {
-            from(apkFile)
-            into(toDir)
-        }
-
-        // 创建json的实体类
-        // Expando可以简单理解为Map
-        val updateInfo = mutableMapOf(
-            "code" to buildInfo.versionCode,
-            "name" to buildInfo.versionName,
-            "filename" to apkFile.name,
-            "url" to "${buildInfo.updateBaseUrl}${apkFile.name}",
-            "time" to System.currentTimeMillis(),
-            "des" to buildInfo.versionDes,
-            "size" to apkFile.length(),
-            "md5" to apkHash
-        )
-        val newApkHash = generateMD5(File(toDir, apkName))
-        println("new apk md5: $newApkHash")
-        val outputJson = JsonBuilder(updateInfo).toPrettyString()
-        // println(outputJson)
-        // 将json写入文件中，用于查询更新
-        updateJsonFile.writeText(outputJson)
-    } else {
-        // 不需要更新
-        println(
-            "This version is already released.\n" +
-                    "VersionCode = ${buildInfo.versionCode}\n" +
-                    "Skip generateUpdateInfo."
-        )
-    }
-    println("------------------ Finish Generating version info ------------------")
-}
-
-fun generateGameConfigApi() {
-    val gameConfigDir = rootProject.file(buildInfo.gameConfigPaht)
-    val gameConfigList: MutableList<Map<String, String>> = mutableListOf()
-    gameConfigDir.listFiles()?.forEach {
-        if (it.name.endsWith(".json")) {
-            try {
-                val gameConfigMap = JsonSlurper().parse(it) as Map<*, *>
-                val gameConfig = mutableMapOf(
-                    "gameName" to gameConfigMap["gameName"] as String,
-                    "packageName" to gameConfigMap["packageName"] as String,
-                    "serviceName" to gameConfigMap["serviceName"] as String,
-                    "downloadUrl" to "",
-                )
-                gameConfigList.add(gameConfig)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-        }
-    }
-    val gameConfigFile =
-        rootProject.file(buildInfo.gameConfigPaht + "/api/" + buildInfo.gameConfigFilename)
-    val outputJson = JsonBuilder(gameConfigList).toPrettyString()
-    gameConfigFile.writeText(outputJson)
-
-}
