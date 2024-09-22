@@ -2,7 +2,7 @@
   "gameName": "交错战线",
   "serviceName": "国际服",
   "packageName": "com.gamebeans.gp.jczx",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "gamePath": "Android/data/com.gamebeans.gp.jczx/",
   "antiHarmonyFile": "",
   "antiHarmonyContent": "",
@@ -13,6 +13,6 @@
   "modType": [ "人物模型","登录动画" ],
   "modSavePath": "",
   "isGameFileRepeat": false,
-  "enableBackup" : false,
+  "enableBackup" : true,
   "tips" : "需要先下载游戏资源，才能扫描到MOD"
 }
