@@ -43,7 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.bean.ThinksBean
+import top.laoxin.modmanager.bean.ThanksBean
 import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
@@ -403,7 +403,7 @@ fun ThinksDialogCommon(
     title: String,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
-    thinks: List<ThinksBean>,
+    thinks: List<ThanksBean>,
     showDialog: Boolean = false,
     openUrl: (Context, String) -> Unit
 ) {
