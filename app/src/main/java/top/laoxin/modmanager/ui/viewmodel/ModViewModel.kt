@@ -737,8 +737,12 @@ class ModViewModel(
         // 取消上一个搜索任务
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
-            modRepository.search(searchText, _gameInfo.packageName).collect {
-                setSearchMods(it)
+            if (searchText.isEmpty()) {
+                setSearchMods(emptyList())
+            } else {
+                modRepository.search(searchText, _gameInfo.packageName).collect {
+                    setSearchMods(it)
+                }
             }
         }
     }

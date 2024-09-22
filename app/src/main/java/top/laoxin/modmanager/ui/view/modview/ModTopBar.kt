@@ -1,6 +1,8 @@
 package top.laoxin.modmanager.ui.view.modview
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +36,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -363,6 +366,11 @@ fun SearchBox(
 ) {
     // 获取键盘控制器
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    // 每次重新显示搜索框时请求显示键盘
+    LaunchedEffect(keyboardController) {
+        keyboardController?.show()
+    }
 
     // 使用 TextField 组件实现搜索框
     TextField(
