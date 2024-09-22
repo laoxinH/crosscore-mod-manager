@@ -8,8 +8,7 @@ import retrofit2.http.Path
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.InfoBean
-import top.laoxin.modmanager.bean.ThinksBean
-import top.laoxin.modmanager.bean.UpdateBean
+import top.laoxin.modmanager.bean.ThanksBean
 
 private const val BASE_URL =
     "https://gitee.com"
@@ -30,8 +29,8 @@ private val retrofit = Retrofit.Builder()
  * Retrofit service object for creating api calls
  */
 interface ModManagerApiService {
-    @GET("/laoxinH/Mod_Manager/raw/main/update/update.json")
-    suspend fun getUpdate(): UpdateBean
+//    @GET("/laoxinH/Mod_Manager/raw/main/update/update.json")
+//    suspend fun getUpdate(): UpdateBean
 
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/gameConfig.json")
     suspend fun getGameConfigs(): List<DownloadGameConfigBean>
@@ -42,7 +41,7 @@ interface ModManagerApiService {
 
     // 获取感谢名单
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/thinks.json")
-    suspend fun getThinksList(): List<ThinksBean>
+    suspend fun getThanksList(): List<ThanksBean>
 
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/information.json")
     suspend fun getInfo(): InfoBean

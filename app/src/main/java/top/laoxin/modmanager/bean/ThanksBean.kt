@@ -1,6 +1,6 @@
 package top.laoxin.modmanager.bean
 
-data class ThinksBean(
+data class ThanksBean(
     val name: String,
     val job: String,
     val link: String

@@ -3,7 +3,7 @@ package top.laoxin.modmanager.ui.state
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.InfoBean
-import top.laoxin.modmanager.bean.ThinksBean
+import top.laoxin.modmanager.bean.ThanksBean
 
 data class SettingUiState(
     // 删除备份对话框
@@ -20,7 +20,7 @@ data class SettingUiState(
     // 下载游戏配置列表
     val downloadGameConfigList: List<DownloadGameConfigBean> = emptyList(),
     // 感谢名单
-    val thinksList: List<ThinksBean> = emptyList(),
+    val thinksList: List<ThanksBean> = emptyList(),
     // 游戏提示弹窗
     val showGameTipsDialog: Boolean = false,
 

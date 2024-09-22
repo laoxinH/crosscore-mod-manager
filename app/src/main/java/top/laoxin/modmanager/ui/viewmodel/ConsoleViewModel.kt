@@ -45,6 +45,7 @@ import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.database.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
+import top.laoxin.modmanager.network.ModManagerGithubApi
 import top.laoxin.modmanager.observer.FlashModsObserver
 import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
@@ -509,17 +510,51 @@ class ConsoleViewModel(
     }
 
     //检测软件更新
+//    private fun checkUpdate() {
+//        viewModelScope.launch {
+//            kotlin.runCatching {
+//                ModManagerApi.retrofitService.getUpdate()
+//            }.onFailure {
+//                Log.e("ConsoleViewModel", "checkUpdate: $it")
+//            }.onSuccess {
+//                if (it.code > ModTools.getVersionCode()) {
+//                    Log.d("ConsoleViewModel", "checkUpdate: $it")
+//                    _downloadUrl = it.url
+//                    _updateContent = it.des
+//                    setShowUpgradeDialog(true)
+//                }
+//            }
+//        }
+//    }
     private fun checkUpdate() {
         viewModelScope.launch {
             kotlin.runCatching {
-                ModManagerApi.retrofitService.getUpdate()
-            }.onFailure {
-                Log.e("ConsoleViewModel", "checkUpdate: $it")
-            }.onSuccess {
-                if (it.code > ModTools.getVersionCode()) {
-                    Log.d("ConsoleViewModel", "checkUpdate: $it")
-                    _downloadUrl = it.url
-                    _updateContent = it.des
+                ModManagerGithubApi.retrofitService.getLatestRelease()
+            }.onFailure { exception ->
+                Log.e("ConsoleViewModel", "checkUpdate failed: ${exception.message}", exception)
+            }.onSuccess { release ->
+                Log.d("ConsoleViewModel", "Update available: $release")
+                // 当前版本号
+                val currentVersion = ModTools.getVersionName()
+                // tag_name 是版本号，这里进行比较
+                val releaseVersion = release.tag_name
+
+                if (releaseVersion != currentVersion) {
+                    Log.d("ConsoleViewModel", "Update available: $release")
+
+                    // 获取v8a资产
+                    val v8aAsset = release.assets.firstOrNull {
+                        it.name.contains(
+                            "arm64-v8a",
+                            ignoreCase = true
+                        ) ||
+                                it.browser_download_url.contains(
+                                    "arm64-v8a",
+                                    ignoreCase = true
+                                )
+                    }
+                    _downloadUrl = v8aAsset?.browser_download_url ?: ""
+                    _updateContent = release.body + "\n\n无法安装请前往github下载universal版本apk"
                     setShowUpgradeDialog(true)
                 }
             }

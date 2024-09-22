@@ -32,6 +32,7 @@ import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.database.backups.BackupRepository
 import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
+import top.laoxin.modmanager.network.ModManagerGithubApi
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
@@ -176,7 +177,7 @@ class SettingViewModel(
         if (b) {
             viewModelScope.launch(Dispatchers.IO) {
                 kotlin.runCatching {
-                    ModManagerApi.retrofitService.getThinksList()
+                    ModManagerApi.retrofitService.getThanksList()
                 }.onFailure {
                     Log.e("SettingViewModel", "showAcknowledgments: $it")
                     ToastUtils.longCall("获取感谢名单失败")
@@ -297,17 +298,54 @@ class SettingViewModel(
     }
 
     // 检测更新
+//    fun checkUpdate() {
+//        viewModelScope.launch {
+//            kotlin.runCatching {
+//                ModManagerApi.retrofitService.getUpdate()
+//            }.onFailure {
+//                Log.e("SettingViewModel", "checkUpdate: $it")
+//            }.onSuccess {
+//                Log.d("SettingViewModel", "checkUpdate: $it")
+//                if (it.code > ModTools.getVersionCode()) {
+//                    _downloadUrl = it.url
+//                    _updateDescription = it.des
+//                    setShowUpgradeDialog(true)
+//                } else {
+//                    ToastUtils.longCall(R.string.toast_no_update)
+//                }
+//            }
+//        }
+//    }
     fun checkUpdate() {
         viewModelScope.launch {
             kotlin.runCatching {
-                ModManagerApi.retrofitService.getUpdate()
-            }.onFailure {
-                Log.e("SettingViewModel", "checkUpdate: $it")
-            }.onSuccess {
-                Log.d("SettingViewModel", "checkUpdate: $it")
-                if (it.code > ModTools.getVersionCode()) {
-                    _downloadUrl = it.url
-                    _updateDescription = it.des
+                ModManagerGithubApi.retrofitService.getLatestRelease()
+            }.onFailure { exception ->
+                Log.e("ConsoleViewModel", "checkUpdate failed: ${exception.message}", exception)
+            }.onSuccess { release ->
+                Log.d("ConsoleViewModel", "Update available: $release")
+                // 当前版本号
+                val currentVersion = ModTools.getVersionName()
+                // tag_name 是版本号，这里进行比较
+                val releaseVersion = release.tag_name
+
+                if (releaseVersion != currentVersion) {
+                    Log.d("ConsoleViewModel", "Update available: $release")
+
+                    // 获取v8a资产
+                    val v8aAsset = release.assets.firstOrNull {
+                        it.name.contains(
+                            "arm64-v8a",
+                            ignoreCase = true
+                        ) ||
+                                it.browser_download_url.contains(
+                                    "arm64-v8a",
+                                    ignoreCase = true
+                                )
+                    }
+                    _downloadUrl = v8aAsset?.browser_download_url ?: ""
+                    _updateDescription =
+                        release.body + "\n\n无法安装请前往github下载universal版本apk"
                     setShowUpgradeDialog(true)
                 } else {
                     ToastUtils.longCall(R.string.toast_no_update)
