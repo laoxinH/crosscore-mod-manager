@@ -43,10 +43,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.tools.ModTools.ROOT_PATH
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
@@ -291,7 +292,9 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
-                    when (PermissionTools.checkPermission(ScanModPath.ANDROID_DATA)) {
+                    when (PermissionTools.checkPermission(
+                        ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")
+                    )) {
                         0 -> stringResource(id = R.string.permission, "FILE")
                         1 -> stringResource(id = R.string.permission, "DOCUMENT")
                         2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
