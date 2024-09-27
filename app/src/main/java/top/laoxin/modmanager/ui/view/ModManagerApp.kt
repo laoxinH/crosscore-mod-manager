@@ -184,7 +184,7 @@ fun NavigationRail(
                     selected = isSelected,
                     onClick = {
                         val currentTime = System.currentTimeMillis()
-                        if ((currentTime - lastClickTime) < 300) { // 检测双击
+                        if ((currentTime - lastClickTime) < 300 && isSelected) { // 检测双击
                             // 刷新当前页面的逻辑
                             refreshCurrentPage(pagerState.currentPage, modViewModel)
                         } else {
@@ -211,6 +211,8 @@ fun NavigationRail(
                     },
                     alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
                 )
+                // 两个选项间添加间隔
+                Spacer(modifier = Modifier.padding(10.dp))
             }
         }
 
@@ -251,7 +253,7 @@ fun NavigationBar(
                 selected = isSelected,
                 onClick = {
                     val currentTime = System.currentTimeMillis()
-                    if ((currentTime - lastClickTime) < 300) { // 检测双击
+                    if ((currentTime - lastClickTime) < 300 && isSelected) { // 检测双击
                         // 刷新当前页面的逻辑
                         refreshCurrentPage(pagerState.currentPage, modViewModel)
                     } else {
