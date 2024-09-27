@@ -212,7 +212,7 @@ fun NavigationRail(
                     alwaysShowLabel = false // 确保标签只在 isSelected 为 true 时显示
                 )
                 // 两个选项间添加间隔
-                Spacer(modifier = Modifier.padding(16.dp))
+                Spacer(modifier = Modifier.padding(10.dp))
             }
         }
 
