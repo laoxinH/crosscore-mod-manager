@@ -72,6 +72,7 @@ x-zip-jbinding-xandroid = { module = "com.github.omicronapps:7-Zip-JBinding-4And
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 androidx-roomcompiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
+desugar = "com.android.tools:desugar_jdk_libs_nio:2.1.2"
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
