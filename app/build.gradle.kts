@@ -1,3 +1,5 @@
+import kotlin.collections.addAll
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -5,6 +7,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.serialization)
 }
+
+val supportedAbis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 android {
     signingConfigs {
@@ -42,6 +46,17 @@ android {
             useSupportLibrary = true
         }
         signingConfig = signingConfigs.getByName("release")
+
+        ndk {
+            abiFilters.addAll(supportedAbis)
+            debugSymbolLevel = "FULL"
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
     }
 
     buildTypes {
@@ -62,18 +77,27 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+        isCoreLibraryDesugaringEnabled = true
     }
+
     kotlinOptions {
         jvmTarget = "21"
     }
+
     buildFeatures {
+        buildConfig = true
         compose = true
         aidl = true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "2.0.0"
     }
+
     packaging {
+        dex {
+            useLegacyPackaging = false
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -164,8 +188,10 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
     // Glide实现预览图压缩
     implementation(libs.glide)
-
+    // pager2
     implementation(libs.accompanist.pager)
+    // 依赖注入
+    coreLibraryDesugaring(libs.desugar)
 }
 
 
