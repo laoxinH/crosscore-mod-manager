@@ -1,41 +1,84 @@
-# Mod实验室
+<h1 align="center">
+    <img src="https://github.com/laoxinH/crosscore-mod-manager/blob/main/app/src/main/res/drawable/app_icon.png" width="200" alt="Mod实验室">
+  <br>Mod实验室<br>
+</h1>
+
+<p align="center">
+  <a href="https://github.com/laoxinH/crosscore-mod-manager/actions/workflows/ci.yml">
+    <img src="https://github.com/laoxinH/crosscore-mod-manager/actions/workflows/ci.yml/badge.svg" alt="Github Actions">
+  </a>
+  <a href="/LICENSE">
+    <img src="https://img.shields.io/github/license/laoxinH/crosscore-mod-manager" alt="LICENSE">
+  </a>
+  <a href="https://www.codefactor.io/repository/github/laoxinH/crosscore-mod-manager">
+    <img src="https://www.codefactor.io/repository/github/laoxinH/crosscore-mod-manager/badge" alt="CodeFactor">
+  </a>
+  <a href="https://github.com/laoxinH/crosscore-mod-manager/releases">
+    <img src="https://img.shields.io/github/v/release/laoxinH/crosscore-mod-manager" alt="Release">
+  </a>
+  <a href="https://github.com/laoxinH/crosscore-mod-manager/issues">
+    <img src="https://img.shields.io/github/issues/laoxinH/crosscore-mod-manager" alt="Issues">
+  </a>
+</p>
+
+<div align="center">
+  <h3>
+    <a href="#写在前面">
+    写在前面
+    </a>
+    <span> | </span>
+    <a href="#已实现功能">
+    已实现功能
+    </a>
+    <span> | </span>
+    <a href="#软件使用说明">
+    软件使用说明
+    </a>
+    <span> | </span>
+    <a href="#模组打包">
+    模组打包
+    </a>
+    <span> | </span>
+    <a href="#自定义扩展">
+    自定义扩展
+    </a>
+  </h3>
+</div>
 
 # 写在前面
 
-**本软件与官方无任何关系，如果侵犯到你的权益请联系我删除**
+**本软件为开源项目，与任何形式的商业收费行为无关，请勿上当受骗。**
 
-**使用本软件造成的一切后果与开发者无关，请低调使用软件，不要跳脸官方**
+**本软件与官方无任何关联。如有侵犯您的权益，请联系开发者处理。**
 
-**本人水平有限，代码写的稀烂，仅为实现功能，如果你有更好的实现方式或者有Bug反馈，请提交issues**
+**使用本软件所产生的任何后果，由用户自行承担，开发者不承担任何责任。请合理使用，避免与官方产生冲突。**
 
-**本软件不提供任何Mod文件，请自行寻找**
+**本软件由个人开发，功能实现有限。如有更优的实现方式或发现Bug，欢迎提交Issue或PR反馈。**
 
-## 已实现功能
+**本软件仅简化用户本地操作，不提供或传播任何资源文件，同时也不会上传任意用户信息。**
 
-> **目前实验室已经对安卓7-14进行适配，除了安卓14之外不在强制使用shizuku**
+
+# 已实现功能
+
+> **适配安卓9-14**
 
 1. [X] 扫描QQ下载目录中的Mod
 2. [X] 扫描系统Download目录中的Mod
 3. [X] 一键开启反和谐
 4. [X] 支持加密Mod
 5. [X] 支持Mod预览
-6. [X] 支持在Mod中添加作者信息（详见[MOD打包](#MOD打包)）
-7. [X] 支持任意的Mod打包方式，例如多级目录，不在局限于单一形式（详见[Mod打包部分](#MOD打包)）
-8. [X] 支持一个压缩文件中打包多个不同Mod（详见[Mod打包部分](#MOD打包)）
-9. [X] 支持自定义游戏配置文件（详见[自定义游戏部分](#添加自定义游戏)）
+6. [X] 支持在Mod中添加作者信息（详见[模组打包](#模组打包)）
+7. [X] 支持任意的Mod打包方式，例如多级目录，不在局限于单一形式（详见[模组打包](#模组打包)）
+8. [X] 支持一个压缩文件中打包多个不同Mod（详见[模组打包](#模组打包)）
+9. [X] 支持自定义游戏配置文件（详见[自定义扩展](#自定义扩展)）
 10. [X] 支持常见压缩包格式如7z、rar、zip
 11. [X] 支持批量管理MOD
 
-    > **关于特殊游戏打包说明，例如明日方舟、碧蓝航线等游戏（当游戏中多个目录存在同名文件时打包方式有所变化，见[特殊MOD打包说明](#特殊MOD打包说明)）**
-    >
+# 软件使用说明
 
-     **
+**[下载地址](https://github.com/laoxinH/crosscore-mod-manager/releases)**
 
-## 软件使用说明
-
-**[点击下载](https://github.com/laoxinH/crosscore-mod-manager/releases)最新的Mod实验室**
-
-**运行界面（安卓14使用实验室需要shizuku授权，如果不知道怎么使用shizuku请参考[shizuku官方使用说明](https://shizuku.rikka.app/zh-hans/guide/setup/#%E9%80%9A%E8%BF%87%E6%97%A0%E7%BA%BF%E8%B0%83%E8%AF%95%E5%90%AF%E5%8A%A8)）**
+**运行界面（部分设备需要shizuku授权，参考[shizuku官方使用说明](https://shizuku.rikka.app/zh-hans/guide/setup/#%E9%80%9A%E8%BF%87%E6%97%A0%E7%BA%BF%E8%B0%83%E8%AF%95%E5%90%AF%E5%8A%A8)）**
 
 ![1715962256872](image/readme/1715962256872.png?msec=1715965017839 "app主页")![1715962345763](image/readme/1715962345763.png?msec=1715965017839 "首次打开Mod页面")
 
@@ -48,11 +91,7 @@
 - **新曾Mod建议直接放置到配置的Mod目录**
 - ~~在设置页面可以点击给作者买杯卡布奇洛支持一下~~
 
-## MOD打包
-
-**注意打包MOD如果使用ZIP格式压缩请不要使用中文密码，RAR和7z无所谓**
-
-**注意打包MOD如果使用ZIP格式压缩请不要使用中文密码，RAR和7z无所谓**
+# 模组打包
 
 **注意打包MOD如果使用ZIP格式压缩请不要使用中文密码，RAR和7z无所谓**
 
@@ -84,7 +123,7 @@
 - **一个推荐的方案是将mod文件（必须存在），预览图（可有可无，推荐添加）、readme（可有可无，推荐添加）三类文件放置到同一个文件夹中**
 - **支持加密压缩文件，注意加密后将无法预览MOD详细信息，谨慎使用**
 
-## 特殊MOD打包说明
+## 特殊类型模组打包
 
 > **关于碧蓝航线等存在不同目录中有重名文件的情况下，mod打包的特殊说明**
 
@@ -98,38 +137,46 @@
 
 你需要在mod.zip里额外创建一个和你的mod类型对应的文件夹，再在里面存放mod本体，预览图和自述文件等内容。这样就可以使得软件可以正确识别到mod。
 
-## 添加自定义游戏
+# 自定义扩展
 
-### 1. 自定义游戏配置文件
+## 自定义游戏配置文件
 
-配置文件是json格式
+配置文件是**json**格式
 
-> **文件类容如下（可以参照尘白禁区的示例配置修改）：**
+> **文件内容如下（可以参照尘白禁区的示例配置修改）：**
+
+- `gameName`: 游戏名
+- `serviceName`: 服务器名
+- `packageName`: 游戏包名
+- `version`: 配置文件版本
+- `gamePath`: 游戏的data目录
+- `antiHarmonyFile`: 反和谐文件路径，没有则不填
+- `antiHarmonyContent`: 写入到反和谐文件中的内容，换行使用 \n ，无内容时留空
+- `gameFilePath`: 用于替换 mod 文件的目录
+- `modType`: mod类型，必须和 `gameFilePath` 中的目录一一对应，可为中文
+- `modSavePath`: mod 文件保存路径
+- `isGameFileRepeat`: 游戏文件是否存在重复
+- `enableBackup`: 是否启用备份
+- `tips`: 使用提示
 
 ```json
 {
-    "gameName": "尘白禁区",  // 必须填一个名字
-    "serviceName": "官服2.0.0",  // 必须填一个服务器名字
-    "packageName": "com.dragonli.projectsnow.lhm",  // 游戏包名
-    "version": "2.0.0",  // 配置文件版本
-    "gamePath": "Android/data/com.dragonli.projectsnow.lhm/",  // 游戏的data目录
-    "antiHarmonyFile": "",  // 反和谐文件路径，没有就不填
-    "antiHarmonyContent": "",  // 写入到反和谐文件中的内容,换行使用\n ，这两个反和谐配置没有则留空即可()空字符串"")没有不填
-// 用于替换mod文件的目录
+    "gameName": "尘白禁区",  
+    "serviceName": "官服2.0.0",  
+    "packageName": "com.dragonli.projectsnow.lhm",  
+    "version": "2.0.0",  
+    "gamePath": "Android/data/com.dragonli.projectsnow.lhm/",  
+    "antiHarmonyFile": "",  
+    "antiHarmonyContent": "",  
     "gameFilePath": [
         "Android/data/com.dragonli.projectsnow.lhm/files/2.0.0/"
     ],
- // mod类型类必须和gameFilePath中的目录一一对应,可以是中文
     "modType": [ "人物模型" ],
     "modSavePath": "",
     "isGameFileRepeat": false,
-    "enableBackup" : false,
-    "tips" : "第一次选择尘白禁区游戏需要先清除游戏数据或者卸载重装再选择(清除或者卸载重装后先运行游戏到登录界面,然后回到这里选择游戏后再运行游戏下载游戏数据),否则会提示MOD文件复制失败,后续有大更新也需要再次操作\n\n同时启动游戏需要在实验室控制台启动才能生效,在启动过程中推荐点击屏幕跳过切换账号5秒的等待, 若游戏提示下载资源失败点击重试即可\n\n若游戏有小资源更新建议先正常启动一次游戏再从实验室启动注入MOD"
+    "enableBackup": false,
+    "tips": "第一次选择尘白禁区游戏需要先清除游戏数据..."
 }
-
-// 注意当"isGameFileRepeat"为true时,压缩包内mod文件必须放到gameFilePath最后的路径
-// 比如"Android/data/com.hypergryph.arknights.bilibili/files/AB/Android/refs/",这个gameFilePath中要想扫描到mod
-// 必须在压缩包内存在"refs"文件夹,将用于替换这个游戏路径内的mod文件放入其中
 ```
 
-> 命名为*`xxx.json`*放入MOD实验 `配置的MOD目录`里的 `GameConfig`文件夹，再到设置中点击 `读取游戏配置`，然后点击 `选择游戏`即可出
+> **命名为*`xxx.json`*放入MOD实验 `配置的MOD目录`里的 `GameConfig`文件夹，再到设置中点击 `读取游戏配置`，然后点击 `选择游戏`即可使用自定义配置文件**
