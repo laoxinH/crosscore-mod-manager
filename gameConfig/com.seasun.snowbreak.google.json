@@ -1,13 +1,13 @@
 {
     "gameName": "尘白禁区",
-    "serviceName": "官服2.2.0",
-    "packageName": "com.dragonli.projectsnow.lhm",
+    "serviceName": "谷歌2.2.0",
+    "packageName": "com.seasun.snowbreak.google",
     "version": "2.2.0",
-    "gamePath": "Android/data/com.dragonli.projectsnow.lhm/",
+    "gamePath": "Android/data/com.seasun.snowbreak.google/",
     "antiHarmonyFile": "",
     "antiHarmonyContent": "",
     "gameFilePath": [
-        "Android/data/com.dragonli.projectsnow.lhm/files/2.2.0/"
+        "Android/data/com.seasun.snowbreak.google/files/2.2.0/"
     ],
     "modType": [ "人物模型" ],
     "modSavePath": "",
