@@ -1,11 +1,7 @@
 package top.laoxin.modmanager.tools
 
-import android.Manifest
-import android.content.Context
 import android.content.UriPermission
 import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Environment
 import android.util.Log
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
@@ -22,19 +18,6 @@ import top.laoxin.modmanager.userservice.shizuku.FileExplorerServiceManager
 
 object PermissionTools {
     private const val SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api"
-    private var osVersion = App.osVersion
-    fun hasStoragePermission(): Boolean {
-        val context: Context = App.get() as Context
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
-                    PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
-    }
-
 
     // shizuku监听器
     var REQUEST_PERMISSION_RESULT_LISTENER =
@@ -80,7 +63,7 @@ object PermissionTools {
                     App.get().packageManager?.getPackageInfo(SHIZUKU_PACKAGE_NAME, 0)
                     return true
                 }
-            } catch (e: PackageManager.NameNotFoundException) {
+            } catch (_: PackageManager.NameNotFoundException) {
                 Log.e("PermissionTools", "Shizuku/Sui not installed")
             }
             return false

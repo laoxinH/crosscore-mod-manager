@@ -1,12 +1,15 @@
 package top.laoxin.modmanager.ui.view.modview
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -28,9 +31,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +45,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,13 +56,10 @@ import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
+
 @Composable
 fun Tips(
-    text: String,
-    showTips: Boolean,
-    onDismiss: () -> Unit,
-    uiState: ModUiState,
-    modifier: Modifier = Modifier
+    text: String, showTips: Boolean, onDismiss: () -> Unit, uiState: ModUiState
 ) {
     if (showTips) {
         val tipsStart = if (uiState.unzipProgress.isNotEmpty()) {
@@ -116,13 +121,12 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
         NavigationIndex.DISABLE_MODS -> uiState.disableModList
         NavigationIndex.SEARCH_MODS -> uiState.searchModList
     }
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
+    Column {
+        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        title = {
+        ), title = {
             Box(contentAlignment = Alignment.CenterStart) {
                 Text(
                     stringResource(id = uiState.modsView.title),
@@ -134,14 +138,14 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                     ) {
 
                         /* if (uiState.modsSelected.isNotEmpty()){
-                             Text(
-                                 text = "已选：${uiState.modsSelected.size}",
-                                 style = MaterialTheme.typography.labelMedium,
-                                 color = MaterialTheme.colorScheme.onPrimary,
-                                 textAlign = TextAlign.Start,
-                             )
-                             Spacer(modifier = Modifier.width(8.dp))
-                         }*/
+                         Text(
+                             text = "已选：${uiState.modsSelected.size}",
+                             style = MaterialTheme.typography.labelMedium,
+                             color = MaterialTheme.colorScheme.onPrimary,
+                             textAlign = TextAlign.Start,
+                         )
+                         Spacer(modifier = Modifier.width(8.dp))
+                     }*/
                         val total =
                             if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
 
@@ -156,9 +160,7 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                 }
             }
 
-        },
-        actions = {
-
+        }, actions = {
             // 全选
             IconButton(onClick = {
                 // 在这里处理图标按钮的点击事件
@@ -216,31 +218,24 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                     //tint = MaterialTheme.colorScheme.primaryContainer
                 )
             }
+        })
+
+        AnimatedVisibility(visible = uiState.searchBoxVisible) {
+
+            // 根据 MutableState 显示或隐藏搜索框
+            SearchBox(
+                text = viewModel.getSearchText(),
+                onValueChange = { viewModel.setSearchText(it) },
+                hint = stringResource(R.string.mod_page_search_hit),
+                onClose = {
+                    viewModel.setSearchBoxVisible(false)
+                    viewModel.setModsView(NavigationIndex.ALL_MODS)
+                    // 清空搜索框
+                    viewModel.setSearchText("")
+                }
+            )
+
         }
-    )
-    AnimatedVisibility(visible = uiState.searchBoxVisible) {
-
-        // 根据 MutableState 显示或隐藏搜索框
-
-        CustomEdit(
-            text = viewModel.getSearchText(),
-            onValueChange = {
-                viewModel.setSearchText(it)
-            },
-            hint = stringResource(R.string.mod_page_search_hit),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 10.dp)
-                .height(50.dp)
-                .background(Color(0xBCE9E9E9), shape = MaterialTheme.shapes.medium)
-                .padding(horizontal = 16.dp),
-            textStyle = MaterialTheme.typography.bodyMedium,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            close = {
-                viewModel.setSearchBoxVisible(false)
-            }
-
-        )
     }
 }
 
@@ -250,13 +245,12 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
 
     var showMenu by remember { mutableStateOf(false) }
 
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
+    Column {
+        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        title = {
+        ), title = {
             Box(contentAlignment = Alignment.CenterStart) {
                 Text(
                     stringResource(id = uiState.modsView.title),
@@ -286,8 +280,7 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                 }
             }
 
-        },
-        actions = {
+        }, actions = {
 
             IconButton(onClick = {
                 // 在这里处理图标按钮的点击事件
@@ -324,55 +317,108 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                     // tint = MaterialTheme.colorScheme.primaryContainer
                 )
             }
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
+            DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
                     onClick = {
                         viewModel.setModsView(NavigationIndex.ENABLE_MODS)
 
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
+                    })
+                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
                     onClick = {
                         viewModel.setModsView(NavigationIndex.DISABLE_MODS)
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
+                    })
+                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
                     onClick = {
                         viewModel.setModsView(NavigationIndex.ALL_MODS)
-                    }
-                )
+                    })
                 // 添加更多的菜单项
             }
+        })
+
+
+        AnimatedVisibility(visible = uiState.searchBoxVisible) {
+
+            // 根据 MutableState 显示或隐藏搜索框
+            SearchBox(
+                text = viewModel.getSearchText(),
+                onValueChange = { viewModel.setSearchText(it) },
+                hint = stringResource(R.string.mod_page_search_hit),
+                onClose = {
+                    viewModel.setSearchBoxVisible(false)
+                    viewModel.setModsView(NavigationIndex.ALL_MODS)
+                    // 清空搜索框
+                    viewModel.setSearchText("")
+                }
+            )
+
         }
-    )
-    AnimatedVisibility(visible = uiState.searchBoxVisible) {
-
-        // 根据 MutableState 显示或隐藏搜索框
-
-        CustomEdit(
-            text = viewModel.getSearchText(),
-            onValueChange = {
-                viewModel.setSearchText(it)
-            },
-            hint = stringResource(R.string.mod_page_search_hit),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 10.dp)
-                .height(50.dp)
-                .background(Color(0xBCE9E9E9), shape = MaterialTheme.shapes.medium)
-                .padding(horizontal = 16.dp),
-            textStyle = MaterialTheme.typography.bodyMedium,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            close = {
-                viewModel.setSearchBoxVisible(false)
-            }
-
-        )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBox(
+    text: String,
+    onValueChange: (String) -> Unit,
+    hint: String,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // 获取键盘控制器
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // 每次重新显示搜索框时请求显示键盘
+    LaunchedEffect(keyboardController) {
+        keyboardController?.show()
+    }
+
+    // 使用 TextField 组件实现搜索框
+    TextField(
+        value = text,
+        onValueChange = onValueChange,
+        placeholder = {
+            Text(
+                text = hint,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) // 设置透明度
+                )
+            )
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 10.dp)
+            .height(50.dp),
+        textStyle = MaterialTheme.typography.bodyMedium,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            // 设置键盘的操作按钮为完成
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                // 隐藏键盘
+                keyboardController?.hide()
+            }
+        ),
+        // 设置为单行
+        singleLine = true,
+        trailingIcon = {
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = null
+                )
+            }
+        },
+        shape = MaterialTheme.shapes.medium,
+        // 使用动态取色
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
+    )
 }
