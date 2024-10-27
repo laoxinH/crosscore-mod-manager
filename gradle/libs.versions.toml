@@ -1,7 +1,7 @@
 [versions]
 accompanistPager = "0.36.0"
 accompanistPermissions = "0.36.0"
-agp = "8.6.1"
+agp = "8.7.1"
 api = "13.1.5"
 coilCompose = "2.7.0"
 commonsCompress = "1.27.1"
@@ -14,10 +14,10 @@ gson = "2.11.0"
 kotlin = "2.0.21"
 junit = "4.13.2"
 kotlinxSerializationJson = "1.7.3"
-activityCompose = "1.9.2"
+activityCompose = "1.9.3"
 lifecycleViewmodelCompose = "2.8.6"
-navigationCompose = "2.8.2"
-navigationRuntimeKtx = "2.8.2"
+navigationCompose = "2.8.3"
+navigationRuntimeKtx = "2.8.3"
 okhttpVersion = "4.12.0"
 provider = "13.1.5"
 retrofit = "2.11.0"
@@ -53,7 +53,7 @@ androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedat
 androidx-runtime-rxjava2 = { module = "androidx.compose.runtime:runtime-rxjava2" }
 api = { module = "dev.rikka.shizuku:api", version.ref = "api" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-compose-bom = { module = "androidx.compose:compose-bom", version = "2024.09.03" }
+compose-bom = { module = "androidx.compose:compose-bom", version = "2024.10.00" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterScalars" }
@@ -78,5 +78,5 @@ desugar = "com.android.tools:desugar_jdk_libs_nio:2.1.2"
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.0.21-1.0.25" }
+ksp = { id = "com.google.devtools.ksp", version = "2.0.21-1.0.26" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.0.21" }
