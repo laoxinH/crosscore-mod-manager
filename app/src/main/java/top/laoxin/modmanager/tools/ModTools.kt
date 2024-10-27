@@ -442,7 +442,8 @@ object ModTools {
                                 archiveFile.absolutePath
                             ),
                             modPath = if (archiveFile == null) File(file).parent
-                                ?: file else archiveFile.absolutePath
+                                ?: file else archiveFile.absolutePath,
+                            virtualPaths = if (archiveFile == null)  "" else archiveFile.absolutePath  + File(file).parentFile?.absolutePath
                         )
                         modBeanTempMap[key] = beanTemp
                     } else {
@@ -568,6 +569,7 @@ object ModTools {
                 author = App.get().getString(R.string.mod_bean_no_author),
                 date = archiveFile?.lastModified() ?: Date().time,
                 path = modBeanTemp.modPath,
+                virtualPaths = modBeanTemp.virtualPaths,
                 icon = modBeanTemp.iconPath,
                 images = modBeanTemp.images,
                 modFiles = modBeanTemp.modFiles,

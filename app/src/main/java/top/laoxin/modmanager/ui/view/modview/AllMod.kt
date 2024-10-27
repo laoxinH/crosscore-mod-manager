@@ -26,6 +26,7 @@ fun AllModPage(
         NavigationIndex.ENABLE_MODS -> uiState.enableModList
         NavigationIndex.DISABLE_MODS -> uiState.disableModList
         NavigationIndex.SEARCH_MODS -> uiState.searchModList
+        else -> uiState.modList
     }
 
     if (modList.isEmpty()) {

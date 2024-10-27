@@ -120,6 +120,7 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
         NavigationIndex.ENABLE_MODS -> uiState.enableModList
         NavigationIndex.DISABLE_MODS -> uiState.disableModList
         NavigationIndex.SEARCH_MODS -> uiState.searchModList
+        NavigationIndex.MODS_BROWSER -> uiState.modList
     }
     Column {
         TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
@@ -265,6 +266,7 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                             NavigationIndex.ENABLE_MODS -> uiState.enableModList
                             NavigationIndex.DISABLE_MODS -> uiState.disableModList
                             NavigationIndex.SEARCH_MODS -> uiState.searchModList
+                            NavigationIndex.MODS_BROWSER -> uiState.modList
                         }
                         val total =
                             if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
@@ -331,6 +333,11 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                     onClick = {
                         viewModel.setModsView(NavigationIndex.ALL_MODS)
                     })
+                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_mods_browser)) },
+                    onClick = {
+                        viewModel.setModsView(NavigationIndex.MODS_BROWSER)
+                    })
+
                 // 添加更多的菜单项
             }
         })

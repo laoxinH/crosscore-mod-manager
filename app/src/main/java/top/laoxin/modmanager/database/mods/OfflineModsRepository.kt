@@ -75,5 +75,9 @@ class OfflineModsRepository(private val modDao: ModDao) : ModRepository {
         return modDao.getModsCountByPath(path)
     }
 
+    override fun getModsByPath(path: String): Flow<List<ModBean>> {
+        return modDao.getModsByPath(path)
+    }
+
 
 }

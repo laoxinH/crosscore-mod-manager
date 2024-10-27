@@ -19,6 +19,8 @@ data class ModBean(
     val author: String?,
     val date: Long,
     val path: String?,
+    // 虚拟路径
+    val virtualPaths: String?,
     val icon: String?,
     val images: List<String>?,
     val modFiles: List<String>?,
@@ -39,6 +41,7 @@ data class ModBean(
         parcel.readString(),
         parcel.readString(),
         parcel.readLong(),
+        parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.createStringArrayList(),
@@ -63,6 +66,7 @@ data class ModBean(
         parcel.writeString(author)
         parcel.writeLong(date)
         parcel.writeString(path)
+        parcel.writeString(virtualPaths)
         parcel.writeString(icon)
         parcel.writeStringList(images)
         parcel.writeStringList(modFiles)
@@ -200,7 +204,8 @@ data class ModBean(
                         fileReadmePath = mod.fileReadmePath,
                         gameModPath = mod.gameModPath,
                         modType = mod.modType,
-                        isZipFile = mod.isZipFile
+                        isZipFile = mod.isZipFile,
+                        virtualPaths = mod.virtualPaths
                     )
                 }
 

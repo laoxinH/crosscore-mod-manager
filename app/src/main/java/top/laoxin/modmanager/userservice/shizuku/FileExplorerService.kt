@@ -55,6 +55,11 @@ class FileExplorerService : IFileExplorerService.Stub() {
             if (File(destPath!!).parentFile?.exists() == false) {
                 File(destPath).parentFile?.mkdirs()
             }
+            // 如果目标文件存在, 则删除
+            if (File(destPath).exists()){
+                File(destPath).delete()
+            }
+
             // 创建目标文件路径
             Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING)
             true

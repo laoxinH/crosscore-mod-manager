@@ -36,7 +36,10 @@ object DocumentFileTools : BaseFileTools {
             try {
                 val file = File(destPath)
                 if (file.parentFile?.exists() == false) file.parentFile?.mkdirs()
-                if (!file.exists()) file.createNewFile()
+                if (file.exists()) {
+                    file.delete()
+                }
+                file.createNewFile()
             } catch (e: Exception) {
                 Log.e(TAG, "copyFile 创建父目录 : ${e}")
             }

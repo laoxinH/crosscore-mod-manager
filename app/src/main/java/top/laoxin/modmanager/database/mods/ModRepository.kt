@@ -55,5 +55,8 @@ interface ModRepository {
     // 通过path查询mod数量
     fun getModsCountByPath(path: String): Flow<Int>
 
+    // 通过path查询mods
+    fun getModsByPath(path: String): Flow<List<ModBean>>
+
 
 }

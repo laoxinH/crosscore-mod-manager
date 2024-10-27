@@ -17,6 +17,7 @@ package top.laoxin.modmanager.ui.view.modview
  */
 
 
+import ModsBrowser
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
@@ -97,7 +98,8 @@ enum class NavigationIndex(
     ENABLE_MODS(R.string.mod_page_title_enable_mods, 1),
     DISABLE_MODS(R.string.mod_page_title_disable_mods, 2),
     SEARCH_MODS(R.string.mod_page_title_search_mods, 3),
-    ALL_MODS(R.string.mod_page_title_all_mods, 0)
+    ALL_MODS(R.string.mod_page_title_all_mods, 0),
+    MODS_BROWSER(R.string.mod_page_title_mods_browser, 4),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -156,7 +158,10 @@ fun ModPage(viewModel: ModViewModel) {
                     onPasswordSubmit = viewModel::checkPassword
                 )
             }
-            AllModPage(viewModel, uiState)
+            when (uiState.modsView) {
+                NavigationIndex.MODS_BROWSER -> ModsBrowser(viewModel, uiState)
+                else -> AllModPage(viewModel, uiState)
+            }
         }
     }
 

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -60,7 +61,7 @@ class ModViewModel(
 //     val uiState: StateFlow<ModUiState> = _uiState.asStateFlow()
 
     // 搜索框内容
-    private val _searchText = mutableStateOf("")
+    //private val _searchText = mutableStateOf("")
 
     // 互斥锁
     private val mutex = Mutex()
@@ -73,6 +74,14 @@ class ModViewModel(
 
     // 删除的mods
     private var delModsList = emptyList<ModBean>()
+
+    // 当前浏览的压缩包path
+    private var _currentZipPath by mutableStateOf("")
+    // 当前的虚拟路径
+    private var _currentPath by mutableStateOf("")
+
+    //当前研所包的文件列表
+    private var _currentFiles by mutableStateOf(emptyList<File>())
 
 
     // mod列表
@@ -168,11 +177,21 @@ class ModViewModel(
                 updateDisEnableMods()
                 updateProgressUpdateListener()
                 startFileObserver(it)
+                // 设置当前游戏mod目录
+                updateCurrentGameModPath(it)
+
             }
 
         }
 
 
+    }
+
+    // 更新当前游戏mod目录
+    private fun updateCurrentGameModPath(userPreferences: UserPreferencesState) {
+        _uiState.update {
+            it.copy(currentGameModPath = ModTools.ROOT_PATH + userPreferences.selectedDirectory + _gameInfo.packageName)
+        }
     }
 
     private fun updateProgressUpdateListener() {
@@ -733,7 +752,7 @@ class ModViewModel(
 
     // 设置搜索框内容
     fun setSearchText(searchText: String) {
-        this._searchText.value = searchText
+        _uiState.update { it.copy(searchContent = searchText) }
         // 取消上一个搜索任务
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
@@ -754,7 +773,7 @@ class ModViewModel(
 
     // 获取输入框内容
     fun getSearchText(): String {
-        return _searchText.value
+        return _uiState.value.searchContent
     }
 
 
@@ -926,6 +945,7 @@ class ModViewModel(
                     )
                 }
                 fileObserver?.startWatching()
+                updateFiles(_currentPath)
 
             }
         }
@@ -972,6 +992,7 @@ class ModViewModel(
                     )
                 }
                 fileObserver?.startWatching()
+                updateFiles(_currentPath)
 
             }
         }
@@ -989,6 +1010,64 @@ class ModViewModel(
             it.copy(openFailedMods = enableFailedMods)
         }
     }
+
+    // 通过path获取mods
+    fun getModsByPath(path: String): List<ModBean> {
+        return _uiState.value.modList.filter { it.path?.contains(path) == true }
+    }
+
+    // 通过path获取mods严格匹配
+    fun getModsByPathStrict(path: String): List<ModBean> {
+        val p = _uiState.value.modList.filter { it.path == path }
+
+        return _uiState.value.modList.filter { it.path == path }
+    }
+
+    private fun getArchiveFiles(path: String) {
+        _currentZipPath = path
+        // 读取压缩包文件
+
+            val fileHeaders = ArchiveUtil.listInArchiveFiles(path)
+            // 拼接路径
+            val files = fileHeaders.map {
+                File("$path/$it")
+            }
+            _currentFiles = files
+
+    }
+
+    fun updateFiles(currentPath: String) {
+        _currentPath = currentPath
+        Log.d("ModViewModel", "updateFiles: 触发跟新文件列表")
+        // 构建当前文件\
+        viewModelScope.launch {
+            if (File(currentPath).isDirectory) {
+                _uiState.update { it ->
+                    it.copy(
+                        currentFiles = File(currentPath).listFiles()?.toList()
+                            ?.sortedWith(compareBy({ !it.isDirectory }, { it.name })) ?: emptyList()
+                    )
+                }
+            } else {
+                if (_currentZipPath == "" || !currentPath.contains(_currentZipPath)) {
+                    getArchiveFiles(currentPath)
+                }
+
+                _uiState.update { it -> it.copy(currentFiles = _currentFiles.filter { it.parent == currentPath }) }
+            }
+        }
+        ///storage/emulated/0/Download/Mods/com.megagame.crosscore/圣歌.7z/圣歌 桃色乐境透
+    }
+
+
+    fun getModsByVirtualPathsStrict(path: String): List<ModBean> {
+        return _uiState.value.modList.filter { it.virtualPaths == path }
+    }
+
+    fun getModsByVirtualPaths(path: String): List<ModBean> {
+        return _uiState.value.modList.filter { it.virtualPaths?.contains(path) == true }
+    }
+
 
 }
 

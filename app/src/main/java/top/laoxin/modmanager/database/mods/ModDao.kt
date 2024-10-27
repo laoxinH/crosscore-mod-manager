@@ -79,4 +79,8 @@ interface ModDao {
     // 通过modpath查询mod数量`
     @Query("SELECT COUNT(*) FROM mods WHERE path = :path")
     fun getModsCountByPath(path: String): Flow<Int>
+
+    // 通过modpath 模糊查询mods
+    @Query("SELECT * from mods WHERE path LIKE '%' || :path || '%'")
+    fun getModsByPath(path: String): Flow<List<ModBean>>
 }

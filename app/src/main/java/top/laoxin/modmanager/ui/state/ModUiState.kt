@@ -2,6 +2,7 @@ package top.laoxin.modmanager.ui.state
 
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.ui.view.modview.NavigationIndex
+import java.io.File
 
 data class ModUiState(
     val modList: List<ModBean> = emptyList(),     // 所有mod列表
@@ -34,4 +35,12 @@ data class ModUiState(
     val showOpenFailedDialog: Boolean = false,   // 是否显示开启失败对话框
     // 开启失败的mods
     val openFailedMods: List<ModBean> = emptyList(),
-)
+    // 搜索框内容
+    val searchContent: String = "",
+    // 当前的游戏mod目录
+    val currentGameModPath: String = "",
+    val currentFiles: List<File> = emptyList(),
+    val isShowBack: Boolean = true
+) {
+
+}

@@ -10,6 +10,7 @@ data class ModBeanTemp(
     val isEncrypted: Boolean,
     val gamePackageName: String,
     val modType: String,
+    val virtualPaths: String,
     val gameModPath: String,
     val modPath: String,
     val isZip: Boolean = true,
