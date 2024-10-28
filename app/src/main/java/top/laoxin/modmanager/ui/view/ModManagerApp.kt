@@ -149,7 +149,7 @@ fun ModManagerApp() {
                 }
             }
 
-            // 使用 AnimatedContent 实现页面切换动画
+   /*         // 使用 AnimatedContent 实现页面切换动画
             AnimatedContent(
                 targetState = pagerState.currentPage,
                 transitionSpec = {
@@ -174,6 +174,17 @@ fun ModManagerApp() {
                         NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
                         NavigationIndex.SETTINGS.ordinal -> SettingPage()
                     }
+                }
+            }*/
+            HorizontalPager(
+                state = pagerState,
+                count = NavigationIndex.entries.size,
+                modifier = Modifier.padding(innerPadding)
+            ) { page ->
+                when (page) {
+                    NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
+                    NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
+                    NavigationIndex.SETTINGS.ordinal -> SettingPage()
                 }
             }
         }
