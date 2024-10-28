@@ -39,8 +39,10 @@ data class ModUiState(
     val searchContent: String = "",
     // 当前的游戏mod目录
     val currentGameModPath: String = "",
+    // 当前页面的文件
     val currentFiles: List<File> = emptyList(),
-    val isShowBack: Boolean = true
+    // 当前页面的mods
+    val currentMods: List<ModBean> = emptyList()
 ) {
 
 }

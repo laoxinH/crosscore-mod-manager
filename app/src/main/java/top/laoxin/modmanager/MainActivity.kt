@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
                         darkIcons = true
                     )
                     systemUiController.setNavigationBarColor(
-                        color = colors.background,
+                        color = colors.surfaceContainer,
                         darkIcons = true
                     )
                 }

@@ -41,6 +41,8 @@ class UserPreferencesRepository(
             "SCAN_DIRECTORY_MODS" to booleanPreferencesKey("SCAN_DIRECTORY_MODS"),
             // 删除解压目录
             "DELETE_UNZIP_DIRECTORY" to booleanPreferencesKey("DELETE_UNZIP_DIRECTORY"),
+            // 展示分类视图
+            "SHOW_CATEGORY_VIEW" to booleanPreferencesKey("SHOW_CATEGORY_VIEW"),
         )
         const val TAG = "UserPreferencesRepo"
     }

@@ -117,6 +117,8 @@ class ConsoleViewModel(
         userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", false)
     private val delUnzipDictionaryFlow =
         userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
+    private val showCategoryViewFlow =
+        userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", false)
     private val userPreferencesState = combine(
         selectedGameFlow,
         selectedDirectoryFlow
@@ -139,15 +141,17 @@ class ConsoleViewModel(
         openPermissionRequestDialogFlow,
         scanDirectoryModsFlow,
         delUnzipDictionaryFlow,
+        showCategoryViewFlow,
         _uiState
     ) { values ->
-        (values[6] as ConsoleUiState).copy(
+        (values[7] as ConsoleUiState).copy(
             scanQQDirectory = values[0] as Boolean,
             selectedDirectory = values[1] as String,
             scanDownload = values[2] as Boolean,
             openPermissionRequestDialog = values[3] as Boolean,
             scanDirectoryMods = values[4] as Boolean,
             delUnzipDictionary = values[5] as Boolean,
+            showCategoryView = values[6] as Boolean
         )
 
     }.stateIn(
@@ -415,8 +419,8 @@ class ConsoleViewModel(
                         Bitmap.Config.ARGB_8888
                     ).also { bitmap ->
                         val canvas = Canvas(bitmap)
-                        drawable.setBounds(0, 0, canvas.width, canvas.height)
-                        drawable.draw(canvas)
+                        (drawable as AdaptiveIconDrawable).setBounds(0, 0, canvas.width, canvas.height)
+                        (drawable as AdaptiveIconDrawable).draw(canvas)
                     }
                 }
 
@@ -608,6 +612,14 @@ class ConsoleViewModel(
                 userPreferencesRepository.savePreference("DELETE_UNZIP_DIRECTORY", it)
             }
         }
+    }
+
+    fun setShowCategoryView(it: Boolean) {
+        // 展示分类视图
+        viewModelScope.launch {
+            userPreferencesRepository.savePreference("SHOW_CATEGORY_VIEW", it)
+        }
+
     }
 }
 

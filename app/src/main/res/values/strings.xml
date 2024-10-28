@@ -181,5 +181,11 @@
     <string name="console_del_unzip_dictionary_content">将会在开启MOD后始终删除解压文件,可以节省空间,但下次开启同样的MOD会再次解压导致二次开启速度变慢!</string>
     <string name="mod_page_dropdownMenu_mods_browser">分类视图</string>
     <string name="mod_page_title_mods_browser">分类</string>
+    <string name="console_configuration_show_browswer">默认展示分类视图</string>
+    <string name="mod_browser_file_list_back">返回上级分类</string>
+    <string name="mod_browser_file_description">MOD数量: %1$s</string>
+    <string name="mod_top_bar_count">统计：%1$s</string>
+    <string name="mod_top_bar_tips">总进度 : %1$s</string>
+    <string name="toast_quit_qpp">再按一次退出应用</string>
 
 </resources>

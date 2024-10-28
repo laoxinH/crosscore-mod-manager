@@ -9,4 +9,6 @@ data class UserPreferencesState(
     val selectedGameIndex: Int = 0,
     val scanDirectoryMods: Boolean = false,
     val delUnzipDictionary: Boolean = false,
+    // 展示分类视图
+    val showCategoryView: Boolean = false,
 )

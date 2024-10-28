@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.ui.view
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -442,17 +443,23 @@ fun ThinksDialogCommon(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingTopBar() {
-    TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-    ),
-        title = {
-            Text(
-                stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
-            )
-        })
+fun SettingTopBar(modifier: Modifier = Modifier, configuration: Int) {
+    if( configuration != Configuration.ORIENTATION_LANDSCAPE) {
+        TopAppBar(
+            modifier = modifier,
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+
+                ),
+            title = {
+
+                Text(
+                    stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
+                )
+
+            })
+    }
+
 }
 
 @Preview

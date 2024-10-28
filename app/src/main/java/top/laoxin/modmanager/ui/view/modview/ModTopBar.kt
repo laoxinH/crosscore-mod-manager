@@ -1,13 +1,13 @@
 package top.laoxin.modmanager.ui.view.modview
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -68,7 +68,7 @@ fun Tips(
             text
         }
         val tipsEnd = if (uiState.multitaskingProgress.isNotEmpty()) {
-            "总进度 : ${uiState.multitaskingProgress}"
+            stringResource(R.string.mod_top_bar_tips, uiState.multitaskingProgress)
         } else {
             ""
         }
@@ -95,7 +95,7 @@ fun Tips(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModTopBar(viewModel: ModViewModel) {
+fun ModTopBar(viewModel: ModViewModel, modifier: Modifier = Modifier, configuration: Int) {
     val uiState by viewModel.uiState.collectAsState()
     if (uiState.isMultiSelect) {
         DialogCommon(
@@ -105,28 +105,33 @@ fun ModTopBar(viewModel: ModViewModel) {
             onCancel = { viewModel.setShowDelSelectModsDialog(false) },
             showDialog = uiState.showDelSelectModsDialog
         )
-        MultiSelectTopBar(viewModel, uiState)
+        MultiSelectTopBar(viewModel, uiState, modifier = modifier, configuration = configuration)
     } else {
-        GeneralTopBar(viewModel, uiState)
+        GeneralTopBar(viewModel, uiState, modifier = modifier,configuration = configuration)
     }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
+fun MultiSelectTopBar(
+    viewModel: ModViewModel,
+    uiState: ModUiState,
+    modifier: Modifier,
+    configuration: Int
+) {
     val modList = when (uiState.modsView) {
         NavigationIndex.ALL_MODS -> uiState.modList
         NavigationIndex.ENABLE_MODS -> uiState.enableModList
         NavigationIndex.DISABLE_MODS -> uiState.disableModList
         NavigationIndex.SEARCH_MODS -> uiState.searchModList
-        NavigationIndex.MODS_BROWSER -> uiState.modList
+        NavigationIndex.MODS_BROWSER -> uiState.currentMods
     }
     Column {
-        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        TopAppBar(
+            modifier = modifier,
+            colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
         ), title = {
             Box(contentAlignment = Alignment.CenterStart) {
                 Text(
@@ -151,7 +156,7 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                             if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
 
                         Text(
-                            text = "统计：$total",
+                            text = stringResource(R.string.mod_top_bar_count, total),
                             style = MaterialTheme.typography.labelMedium,
                             // color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Start,
@@ -230,7 +235,11 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                 hint = stringResource(R.string.mod_page_search_hit),
                 onClose = {
                     viewModel.setSearchBoxVisible(false)
-                    viewModel.setModsView(NavigationIndex.ALL_MODS)
+
+                    when (uiState.modsView) {
+                        NavigationIndex.MODS_BROWSER -> viewModel.setModsView(NavigationIndex.MODS_BROWSER)
+                        else -> viewModel.setModsView(NavigationIndex.ALL_MODS)
+                    }
                     // 清空搜索框
                     viewModel.setSearchText("")
                 }
@@ -242,16 +251,27 @@ fun MultiSelectTopBar(viewModel: ModViewModel, uiState: ModUiState) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
-
+fun GeneralTopBar(
+    viewModel: ModViewModel,
+    uiState: ModUiState,
+    modifier: Modifier,
+    configuration: Int
+) {
+    val modList = when (uiState.modsView) {
+        NavigationIndex.ALL_MODS -> uiState.modList
+        NavigationIndex.ENABLE_MODS -> uiState.enableModList
+        NavigationIndex.DISABLE_MODS -> uiState.disableModList
+        NavigationIndex.SEARCH_MODS -> uiState.searchModList
+        NavigationIndex.MODS_BROWSER -> uiState.currentMods
+    }
     var showMenu by remember { mutableStateOf(false) }
 
     Column {
-        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ), title = {
+        TopAppBar(
+            modifier = modifier,
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
+                ), title = {
             Box(contentAlignment = Alignment.CenterStart) {
                 Text(
                     stringResource(id = uiState.modsView.title),
@@ -261,18 +281,12 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                     Row(
                         modifier = Modifier.padding(top = 40.dp),
                     ) {
-                        val modList = when (uiState.modsView) {
-                            NavigationIndex.ALL_MODS -> uiState.modList
-                            NavigationIndex.ENABLE_MODS -> uiState.enableModList
-                            NavigationIndex.DISABLE_MODS -> uiState.disableModList
-                            NavigationIndex.SEARCH_MODS -> uiState.searchModList
-                            NavigationIndex.MODS_BROWSER -> uiState.modList
-                        }
+
                         val total =
                             if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
 
                         Text(
-                            text = "统计：$total",
+                            text = stringResource(R.string.mod_top_bar_count, total),
                             style = MaterialTheme.typography.labelMedium,
                             //color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Start,
@@ -296,7 +310,11 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
             }
             IconButton(onClick = {
                 viewModel.setSearchBoxVisible(true)
-                viewModel.setModsView(NavigationIndex.SEARCH_MODS)
+                when (uiState.modsView) {
+                    NavigationIndex.MODS_BROWSER -> viewModel.setModsView(NavigationIndex.MODS_BROWSER)
+                    else -> viewModel.setModsView(NavigationIndex.SEARCH_MODS)
+                }
+
                 // 请求焦点
             }, modifier = Modifier) {
                 Icon(
@@ -319,26 +337,31 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                     // tint = MaterialTheme.colorScheme.primaryContainer
                 )
             }
-            DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
-                    onClick = {
-                        viewModel.setModsView(NavigationIndex.ENABLE_MODS)
+            AnimatedVisibility(visible = showMenu,modifier = Modifier.offset(y = 20.dp) ) {
+                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
+                        onClick = {
+                            viewModel.setModsView(NavigationIndex.ENABLE_MODS)
+                            showMenu = false
+                        })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
+                        onClick = {
+                            viewModel.setModsView(NavigationIndex.DISABLE_MODS)
+                            showMenu = false
+                        })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
+                        onClick = {
+                            viewModel.setModsView(NavigationIndex.ALL_MODS)
+                            showMenu = false
+                        })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_mods_browser)) },
+                        onClick = {
+                            viewModel.setModsView(NavigationIndex.MODS_BROWSER)
+                            showMenu = false
+                        })
 
-                    })
-                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
-                    onClick = {
-                        viewModel.setModsView(NavigationIndex.DISABLE_MODS)
-                    })
-                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
-                    onClick = {
-                        viewModel.setModsView(NavigationIndex.ALL_MODS)
-                    })
-                DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_mods_browser)) },
-                    onClick = {
-                        viewModel.setModsView(NavigationIndex.MODS_BROWSER)
-                    })
-
-                // 添加更多的菜单项
+                    // 添加更多的菜单项
+                }
             }
         })
 
@@ -352,7 +375,10 @@ fun GeneralTopBar(viewModel: ModViewModel, uiState: ModUiState) {
                 hint = stringResource(R.string.mod_page_search_hit),
                 onClose = {
                     viewModel.setSearchBoxVisible(false)
-                    viewModel.setModsView(NavigationIndex.ALL_MODS)
+                    when (uiState.modsView) {
+                        NavigationIndex.MODS_BROWSER -> viewModel.setModsView(NavigationIndex.MODS_BROWSER)
+                        else -> viewModel.setModsView(NavigationIndex.ALL_MODS)
+                    }
                     // 清空搜索框
                     viewModel.setSearchText("")
                 }

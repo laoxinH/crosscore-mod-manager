@@ -1,6 +1,7 @@
 import android.os.Environment
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -41,6 +42,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.ui.res.stringResource
+import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.ui.view.modview.ModListItem
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -62,30 +65,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        // 返回上级目录按钮
-        if (currentPath != uiState.currentGameModPath){
 
-            FileListItem(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                name = "返回上级目录",
-                isSelected = false,
-                onLongClick = {
-                    // 长按事��
-                },
-                onClick = {
-                    if (currentPath != uiState.currentGameModPath) {
-                        previousPath = currentPath
-                        currentPath = File(currentPath).parent ?: currentPath
-                    }
-                },
-                onMultiSelectClick = {
-                    // 多选状态下的点击事件
-                },
-                isMultiSelect = uiState.isMultiSelect,
-                description = currentPath.replace(uiState.currentGameModPath, ""),
-                iconId = R.drawable.back_icon
-            )
-        }
 
         // 监听返回按键事件
         if (currentPath != uiState.currentGameModPath) {
@@ -109,14 +89,48 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                 }
             }, label = ""
         ) { path ->
+            val mods : MutableList<ModBean> = mutableListOf()
+            for (file in files) {
+                val modsByPath = viewModel.getModsByPathStrict(file.path)
+                val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
+                mods.addAll(modsByPath)
+                mods.addAll(modsByVirtualPaths)
+            }
+            viewModel.setCurrentMods(mods)
+            // 返回上级目录按钮
+
             LazyColumn {
-                items(files) { file ->
+                items(files) { file:File ->
+                    if (currentPath != uiState.currentGameModPath && files.indexOf(file) == 0){
+                        FileListItem(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                            name = stringResource(R.string.mod_browser_file_list_back),
+                            isSelected = false,
+                            onLongClick = {
+                                // 长按事��
+                            },
+                            onClick = {
+                                if (currentPath != uiState.currentGameModPath) {
+                                    previousPath = currentPath
+                                    currentPath = File(currentPath).parent ?: currentPath
+                                }
+                            },
+                            onMultiSelectClick = {
+                                // 多选状态下的点击事件
+                            },
+                            isMultiSelect = uiState.isMultiSelect,
+                            description = currentPath.replace(uiState.currentGameModPath, ""),
+                            iconId = R.drawable.back_icon
+                        )
+                    }
 
                     // 通过filepath获取mods
                     val modsByPath = viewModel.getModsByPathStrict(file.path)
                     // 通过虚拟路径获取mods
                     val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
-                    // mod数量
+
+                    // 设置当前页面的mods
+
                     val modCount = if (viewModel.getModsByPath(file.path).isNotEmpty()) viewModel.getModsByPath(file.path).size else viewModel.getModsByVirtualPaths(file.path).size
 
                     if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty()  && (file.isDirectory || !file.exists())) {
@@ -135,7 +149,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             },
                             onMultiSelectClick = {},
                             isMultiSelect = uiState.isMultiSelect,
-                            description = "MOD数量: $modCount",
+                            description = stringResource(R.string.mod_browser_file_description, modCount),
                             iconId = if (modCount > 0) R.drawable.folder_mod_icon else R.drawable.folder_icon
                         )
                     }
@@ -147,7 +161,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             onLongClick = {viewModel.modLongClick(modsByPath.firstOrNull() ?: modsByVirtualPaths.firstOrNull()!!)},
                             onMultiSelectClick = {viewModel.modMultiSelectClick(modsByPath.firstOrNull() ?: modsByVirtualPaths.firstOrNull()!!)},
                             isMultiSelect = uiState.isMultiSelect,
-                            modSwitchEnable = true,
+                            modSwitchEnable = uiState.modSwitchEnable,
                             openModDetail = { mod, _ ->
                                 viewModel.openModDetail(mod, true)
                             },
@@ -168,7 +182,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             },
                             onMultiSelectClick = {},
                             isMultiSelect = uiState.isMultiSelect,
-                            description = "MOD数量: ${viewModel.getModsByPath(file.path).size}",
+                            description = stringResource(R.string.mod_browser_file_description, viewModel.getModsByPath(file.path).size),
                             iconId = R.drawable.zip_mod_icon
                         )
                     }
@@ -199,18 +213,20 @@ fun FileListItem(
         elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(
             0.dp
         ),
-        modifier = modifier.combinedClickable(
-            onClick = {
-                if (isMultiSelect) {
-                    onMultiSelectClick()
-                } else {
-                    onClick()
+        modifier = modifier
+            .combinedClickable(
+                onClick = {
+                    if (isMultiSelect) {
+                        onMultiSelectClick()
+                    } else {
+                        onClick()
+                    }
+                },
+                onLongClick = {
+                    onLongClick()
                 }
-            },
-            onLongClick = {
-                onLongClick()
-            }
-        ).animateContentSize(),
+            )
+            .animateContentSize(),
         colors = CardDefaults.cardColors(
             containerColor = if (!isSelected) CardDefaults.cardColors().containerColor else MaterialTheme.colorScheme.secondaryContainer,
         )

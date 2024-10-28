@@ -30,4 +30,6 @@ data class ConsoleUiState(
     // 显示删除解压目录弹窗
     val showDeleteUnzipDialog: Boolean = false,
     val delUnzipDictionary: Boolean = false,
+    // 展示分类视图
+    val showCategoryView: Boolean = false,
 )

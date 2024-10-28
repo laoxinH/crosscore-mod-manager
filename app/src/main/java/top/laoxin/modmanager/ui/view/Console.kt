@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.ui.view
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -139,11 +140,11 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
                 viewModel.setOpenPermissionRequestDialog(false)
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         // 权限信息
         // PermissionInformationCard()
 
-        Spacer(modifier = Modifier.height(16.dp))
+       // Spacer(modifier = Modifier.height(16.dp))
         // 游戏信息
         GameInformationCard(
             viewModel,
@@ -423,6 +424,19 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Text(
+                    text = stringResource(id = R.string.console_configuration_show_browswer),
+                    style = typography.titleMedium
+                )
+                Switch(checked = uiState.showCategoryView, onCheckedChange = {
+                    viewModel.setShowCategoryView(it)
+                })
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 TextButton(
                     onClick = { openDirectoryLauncher.launch(null) },
                     contentPadding = PaddingValues(0.dp)
@@ -467,19 +481,28 @@ fun ConsolePage(viewModel: ConsoleViewModel) {
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ConsoleTopBar(viewModel: ConsoleViewModel) {
+fun ConsoleTopBar(
+    viewModel: ConsoleViewModel,
+    modifier: Modifier = Modifier,
+
+    configuration: Int
+) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
+            //titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            //navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
-        title = {
-            Text(
-                stringResource(id = R.string.console),
-                style = typography.titleLarge
+        modifier = modifier,
 
-            )
+        title = {
+            if ( configuration != Configuration.ORIENTATION_LANDSCAPE) {
+                Text(
+                    stringResource(id = R.string.console),
+                    style = typography.titleLarge
+
+                )
+            }
         },
         actions = {
             Text(text = "启动游戏")

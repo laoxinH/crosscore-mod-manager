@@ -134,6 +134,9 @@ class ModViewModel(
 
     private val delUnzipDictionaryFlow =
         userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
+    // 展示分类视图
+    private val showCategoryView =
+        userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", false)
 
     // 生成用户配置对象
     private val userPreferences: StateFlow<UserPreferencesState> = combine(
@@ -142,7 +145,8 @@ class ModViewModel(
         scanDownloadFlow,
         selectedGame,
         scanDirectoryMods,
-        delUnzipDictionaryFlow
+        delUnzipDictionaryFlow,
+        showCategoryView
     ) { values ->
         UserPreferencesState(
             scanQQDirectory = values[0] as Boolean,
@@ -150,7 +154,8 @@ class ModViewModel(
             scanDownload = values[2] as Boolean,
             selectedGameIndex = values[3] as Int,
             scanDirectoryMods = values[4] as Boolean,
-            delUnzipDictionary = values[5] as Boolean
+            delUnzipDictionary = values[5] as Boolean,
+            showCategoryView = values[6] as Boolean
         )
     }.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesState()
@@ -179,12 +184,27 @@ class ModViewModel(
                 startFileObserver(it)
                 // 设置当前游戏mod目录
                 updateCurrentGameModPath(it)
+                // 设置当前的视图
+                upDateCurrentModsView(it)
+
 
             }
 
         }
 
 
+    }
+
+    private fun upDateCurrentModsView(it: UserPreferencesState) {
+        if (it.showCategoryView) {
+            _uiState.update {
+                it.copy(modsView = NavigationIndex.MODS_BROWSER)
+            }
+        } else {
+            _uiState.update {
+                it.copy(modsView = NavigationIndex.ALL_MODS)
+            }
+        }
     }
 
     // 更新当前游戏mod目录
@@ -756,13 +776,26 @@ class ModViewModel(
         // 取消上一个搜索任务
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
-            if (searchText.isEmpty()) {
-                setSearchMods(emptyList())
-            } else {
-                modRepository.search(searchText, _gameInfo.packageName).collect {
-                    setSearchMods(it)
+            when (_uiState.value.modsView) {
+                NavigationIndex.MODS_BROWSER -> {
+                    if (searchText.isEmpty()) {
+                        updateFiles(_currentPath)
+                    } else {
+                        val searchFiles = _uiState.value.currentFiles.filter { it.name.contains(searchText) }
+                        _uiState.update { it.copy(currentFiles = searchFiles)}
+                    }
+                }
+                else -> {
+                    if (searchText.isEmpty()) {
+                        setSearchMods(emptyList())
+                    } else {
+                        modRepository.search(searchText, _gameInfo.packageName).collect {
+                            setSearchMods(it)
+                        }
+                    }
                 }
             }
+
         }
     }
 
@@ -1066,6 +1099,12 @@ class ModViewModel(
 
     fun getModsByVirtualPaths(path: String): List<ModBean> {
         return _uiState.value.modList.filter { it.virtualPaths?.contains(path) == true }
+    }
+
+    fun setCurrentMods(mods: List<ModBean>) {
+        _uiState.update {
+            it.copy(currentMods = mods)
+        }
     }
 
 
