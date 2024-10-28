@@ -149,7 +149,7 @@ fun ModManagerApp() {
                 }
             }
 
-   /*         // 使用 AnimatedContent 实现页面切换动画
+   /*         // 使用 AnimatedContent 实现页面切换动画，直接使用
             AnimatedContent(
                 targetState = pagerState.currentPage,
                 transitionSpec = {
