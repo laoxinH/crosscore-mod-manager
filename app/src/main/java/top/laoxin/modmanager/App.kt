@@ -78,11 +78,16 @@ class App : Application() {
             sdkVersion >= Build.VERSION_CODES.M -> OSVersion.OS_6
             else -> OSVersion.OS_5
         }
-        // 鸿蒙4.0
+        // 鸿蒙4
         val version = Build.VERSION.INCREMENTAL
         Log.d("App初始化", "checkOsVersion: $version")
-        if (version.contains("Harmony", true) && version.contains("4.0")) {
-            osVersion = OSVersion.OS_13
+        if (version.contains(
+                "Harmony",
+                true
+            ) && (version.contains("4.0") || version.contains("4.2"))
+        ) {
+            // 鸿蒙4目前仅可使用shizuku，故设置为14
+            osVersion = OSVersion.OS_14
         }
 
         Log.d("App", "checkOsVersion: $osVersion")

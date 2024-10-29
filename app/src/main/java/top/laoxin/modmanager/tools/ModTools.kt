@@ -443,7 +443,8 @@ object ModTools {
                             ),
                             modPath = if (archiveFile == null) File(file).parent
                                 ?: file else archiveFile.absolutePath,
-                            virtualPaths = if (archiveFile == null)  "" else archiveFile.absolutePath  + File(file).parentFile?.absolutePath
+                            virtualPaths = if (archiveFile == null) "" else archiveFile.absolutePath
+                                    + File(file).parentFile?.absolutePath
                         )
                         modBeanTempMap[key] = beanTemp
                     } else {
