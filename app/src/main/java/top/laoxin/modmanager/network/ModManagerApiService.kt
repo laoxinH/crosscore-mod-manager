@@ -40,7 +40,7 @@ interface ModManagerApiService {
     suspend fun downloadGameConfig(@Path("name") name: String): GameInfoBean
 
     // 获取感谢名单
-    @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/thinks.json")
+    @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/thanks.json")
     suspend fun getThanksList(): List<ThanksBean>
 
     @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/information.json")
