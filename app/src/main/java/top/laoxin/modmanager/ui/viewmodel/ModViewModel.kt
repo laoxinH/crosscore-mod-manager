@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -311,8 +310,8 @@ class ModViewModel(
                         ModTools.ROOT_PATH + userPreferencesState.selectedDirectory, _gameInfo
                     )
                     // 创建mods
-                    val modsScan = ModTools.createMods(
-                        _gameInfo.modSavePath, _gameInfo, _uiState.value.modList
+                    val modsScan = ModTools.scanArchiveMods(
+                        _gameInfo.modSavePath, _gameInfo
                     ).toMutableList()
                     // 扫描文件夹中的mod文件
                     if (userPreferencesState.scanDirectoryMods) {

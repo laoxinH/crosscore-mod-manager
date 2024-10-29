@@ -516,38 +516,73 @@ object ModTools {
         }
     }
 
-
-    suspend fun createMods(
+    // 扫描压缩文件mod
+    suspend fun scanArchiveMods(
         scanPath: String,
         gameInfo: GameInfoBean,
-        modList: List<ModBean>,
     ): MutableList<ModBean> {
         setModsToolsSpecialPathReadType(PermissionTools.checkPermission(scanPath))
         val scanMods = mutableListOf<ModBean>()
-        File(scanPath).listFiles()?.forEach { file ->
-            if (!file.isDirectory && (fileTools?.isExcludeFileType(file.name) == false && ArchiveUtil.isArchive(
-                    file.absolutePath
-                ))
-            ) {
-                val modTempMap = createModTempMap(
-                    file.absolutePath,
-                    scanPath,
-                    ArchiveUtil.listInArchiveFiles(file.absolutePath),
-                    gameInfo
-                )
-                Log.d(TAG, "modTempMap: $modTempMap")
-                val mods: List<ModBean> = readModBeans(
-                    file.absolutePath,
-                    scanPath,
-                    modTempMap,
-                )
-                scanMods.addAll(mods)
+        val archiveFiles = mutableListOf<File>()
 
+        // 收集所有符合条件的压缩包，包含子文件夹
+        withContext(Dispatchers.IO) {
+            Files.walk(Paths.get(scanPath)).use { paths ->
+                paths.filter { path ->
+                    val file = path.toFile()
+                    !file.isDirectory && fileTools?.isExcludeFileType(file.name) == false && ArchiveUtil.isArchive(
+                        file.absolutePath
+                    )
+                }.forEach { path ->
+                    archiveFiles.add(path.toFile())
+                }
             }
         }
+
+        // 处理收集到的压缩包mod
+        for (file in archiveFiles) {
+            val modTempMap = createModTempMap(
+                file.absolutePath,
+                scanPath,
+                ArchiveUtil.listInArchiveFiles(file.absolutePath),
+                gameInfo
+            )
+            Log.d(TAG, "modTempMap: $modTempMap")
+
+            val mods = readModBeans(
+                file.absolutePath,
+                scanPath,
+                modTempMap,
+            )
+            scanMods.addAll(mods)
+        }
+
         Log.d(TAG, "modsList: $scanMods")
         return scanMods
+    }
 
+    // 扫描文件夹mod
+    suspend fun scanDirectoryMods(scanPath: String, gameInfo: GameInfoBean): List<ModBean> {
+        val checkPermission = PermissionTools.checkPermission(gameInfo.gamePath)
+        setModsToolsSpecialPathReadType(checkPermission)
+        // 遍历scanPath及其子目录中的文件
+        try {
+            val modBeans = mutableListOf<ModBean>()
+            val files = mutableListOf<String>()
+            withContext(Dispatchers.IO) {
+                Files.walk(Paths.get(scanPath))
+            }.sorted(Comparator.reverseOrder()).forEach {
+                files.add(it.toString())
+            }
+            Log.d(TAG, "所有文件路径: $files")
+            val createModTempMap = createModTempMap(null, scanPath, files, gameInfo)
+            modBeans.addAll(readModBeans(null, scanPath, createModTempMap))
+            return modBeans
+        } catch (e: Exception) {
+            Log.e(TAG, "$e")
+            logRecord("扫描文件夹Mod失败: $e")
+            return emptyList()
+        }
     }
 
     private suspend fun readModBeans(
@@ -802,29 +837,6 @@ object ModTools {
             Log.e(TAG, "反和谐失败: $e")
             e.printStackTrace()
             false
-        }
-    }
-
-    suspend fun scanDirectoryMods(scanPath: String, gameInfo: GameInfoBean): List<ModBean> {
-        val checkPermission = PermissionTools.checkPermission(gameInfo.gamePath)
-        setModsToolsSpecialPathReadType(checkPermission)
-        // 遍历scanPath及其子目录中的文件
-        try {
-            val modBeans = mutableListOf<ModBean>()
-            val files = mutableListOf<String>()
-            withContext(Dispatchers.IO) {
-                Files.walk(Paths.get(scanPath))
-            }.sorted(Comparator.reverseOrder()).forEach {
-                files.add(it.toString())
-            }
-            Log.d(TAG, "所有文件路径: $files")
-            val createModTempMap = createModTempMap(null, scanPath, files, gameInfo)
-            modBeans.addAll(readModBeans(null, scanPath, createModTempMap))
-            return modBeans
-        } catch (e: Exception) {
-            Log.e(TAG, "$e")
-            logRecord("扫描文件夹Mod失败: $e")
-            return emptyList()
         }
     }
 
