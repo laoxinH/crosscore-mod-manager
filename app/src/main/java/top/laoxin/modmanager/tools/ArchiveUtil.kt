@@ -641,6 +641,12 @@ object ArchiveUtil {
      * 判断压缩包类型
      */
     private fun getFileType(file: File): FileType {
+
+        // 判断是否为apk文件,无视其直接返回
+        if (file.extension.equals("apk", ignoreCase = true)) {
+            return FileType.UNKNOWN
+        }
+
         var inputStream: FileInputStream? = null
         try {
             inputStream = FileInputStream(file)
