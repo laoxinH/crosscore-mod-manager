@@ -107,7 +107,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             name = stringResource(R.string.mod_browser_file_list_back),
                             isSelected = false,
                             onLongClick = {
-                                // 长按事��
+                                // 长按事件
                             },
                             onClick = {
                                 if (currentPath != uiState.currentGameModPath) {
@@ -170,7 +170,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             }
                         )
                     }
-                    if (modsByPath.size > 1) {
+                    if (modsByPath.size > 1 || modsByVirtualPaths.size > 1) {
                         FileListItem(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                             name = file.name,

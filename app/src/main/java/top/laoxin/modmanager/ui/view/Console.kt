@@ -50,6 +50,8 @@ import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ModTools.ROOT_PATH
 import top.laoxin.modmanager.tools.PermissionTools
+import top.laoxin.modmanager.tools.PermissionTools.hasShizukuPermission
+import top.laoxin.modmanager.tools.PermissionTools.isShizukuAvailable
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
@@ -144,7 +146,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         // 权限信息
         // PermissionInformationCard()
 
-       // Spacer(modifier = Modifier.height(16.dp))
+        // Spacer(modifier = Modifier.height(16.dp))
         // 游戏信息
         GameInformationCard(
             viewModel,
@@ -163,30 +165,6 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
     }
 }
 
-// 授权信息
-//@Composable
-//fun PermissionInformationCard() {
-//    Card {
-//        Column(
-//            Modifier
-//                .padding(16.dp)
-//                .fillMaxWidth()
-//        ) {
-//            Text(
-//                when (PermissionTools.checkPermission(ScanModPath.ANDROID_DATA)) {
-//                    0 -> stringResource(id = R.string.permission, "FILE")
-//                    1 -> stringResource(id = R.string.permission, "DOCUMENT")
-//                    2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
-//                    3 -> stringResource(id = R.string.permission, "SHIZUKU")
-//                    else -> stringResource(id = R.string.permission, "无权限")
-//                },
-//                style = typography.titleMedium
-//            )
-//        }
-//    }
-//}
-
-
 // 游戏信息选项卡
 @Composable
 fun GameInformationCard(
@@ -195,7 +173,6 @@ fun GameInformationCard(
     modifier: Modifier = Modifier
 ) {
     // 第一部分：一个卡片展示当前设置项目的一些信息
-
     Card(
         modifier = modifier
     ) {
@@ -290,17 +267,31 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                     //modifier = Modifier.padding(16.dp),
                     style = typography.titleLarge
                 )
+
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
-                    when (PermissionTools.checkPermission(
-                        ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")
-                    )) {
-                        0 -> stringResource(id = R.string.permission, "FILE")
-                        1 -> stringResource(id = R.string.permission, "DOCUMENT")
-                        2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
-                        3 -> stringResource(id = R.string.permission, "SHIZUKU")
-                        else -> stringResource(id = R.string.permission, "无权限")
+                    if (isShizukuAvailable && hasShizukuPermission()) {
+                        // 优先检查shizuku
+                        stringResource(id = R.string.permission, "SHIZUKU")
+                    } else {
+                        when (
+                            if (uiState.gameInfo.packageName.isNotEmpty()) {
+                                PermissionTools.checkPermission(
+                                    ROOT_PATH + "/Android/data/" + uiState.gameInfo.packageName
+                                )
+                            } else {
+                                PermissionTools.checkPermission(
+                                    ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")
+                                )
+                            }
+                        ) {
+                            0 -> stringResource(id = R.string.permission, "FILE")
+                            1 -> stringResource(id = R.string.permission, "DOCUMENT")
+                            2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
+                            3 -> stringResource(id = R.string.permission, "SHIZUKU")
+                            else -> stringResource(id = R.string.permission, "无权限")
+                        }
                     },
                     style = typography.labelLarge
                 )
@@ -496,7 +487,7 @@ fun ConsoleTopBar(
         modifier = modifier,
 
         title = {
-            if ( configuration != Configuration.ORIENTATION_LANDSCAPE) {
+            if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
                 Text(
                     stringResource(id = R.string.console),
                     style = typography.titleLarge
