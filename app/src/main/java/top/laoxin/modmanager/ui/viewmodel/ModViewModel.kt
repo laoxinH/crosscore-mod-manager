@@ -1045,13 +1045,16 @@ class ModViewModel(
 
     // 通过path获取mods
     fun getModsByPath(path: String): List<ModBean> {
-        return _uiState.value.modList.filter { it.path?.contains(path) == true }
+        return if (File(path).isDirectory) {
+            _uiState.value.modList.filter { it.path?.contains("$path/") == true }
+        } else {
+            _uiState.value.modList.filter { it.path?.contains(path) == true }
+        }
+
     }
 
     // 通过path获取mods严格匹配
     fun getModsByPathStrict(path: String): List<ModBean> {
-        val p = _uiState.value.modList.filter { it.path == path }
-
         return _uiState.value.modList.filter { it.path == path }
     }
 

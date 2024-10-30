@@ -46,7 +46,6 @@ import androidx.compose.ui.res.stringResource
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.ui.view.modview.ModListItem
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     var currentPath by remember { mutableStateOf(uiState.currentGameModPath) }
@@ -54,9 +53,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     var previousPath by remember { mutableStateOf(currentPath) }
 
     // 返回上级目录是否显示
-
-
-
     LaunchedEffect(currentPath) {
         viewModel.updateFiles(currentPath)
 
@@ -64,9 +60,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-
-
-
         // 监听返回按键事件
         if (currentPath != uiState.currentGameModPath) {
             BackHandler {
@@ -89,16 +82,33 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                 }
             }, label = ""
         ) { path ->
-            val mods : MutableList<ModBean> = mutableListOf()
-            for (file in files) {
-                val modsByPath = viewModel.getModsByPathStrict(file.path)
-                val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
-                mods.addAll(modsByPath)
-                mods.addAll(modsByVirtualPaths)
+            val mods = files.flatMap { file ->
+                viewModel.getModsByPathStrict(file.path) + viewModel.getModsByVirtualPathsStrict(file.path)
             }
             viewModel.setCurrentMods(mods)
             // 返回上级目录按钮
-
+            if (currentPath != uiState.currentGameModPath && files.isEmpty()){
+                FileListItem(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                    name = stringResource(R.string.mod_browser_file_list_back),
+                    isSelected = false,
+                    onLongClick = {
+                        // 长按事件
+                    },
+                    onClick = {
+                        if (currentPath != uiState.currentGameModPath) {
+                            previousPath = currentPath
+                            currentPath = File(currentPath).parent ?: currentPath
+                        }
+                    },
+                    onMultiSelectClick = {
+                        // 多选状态下的点击事件
+                    },
+                    isMultiSelect = uiState.isMultiSelect,
+                    description = currentPath.replace(uiState.currentGameModPath, ""),
+                    iconId = R.drawable.back_icon
+                )
+            }
             LazyColumn {
                 items(files) { file:File ->
                     if (currentPath != uiState.currentGameModPath && files.indexOf(file) == 0){
