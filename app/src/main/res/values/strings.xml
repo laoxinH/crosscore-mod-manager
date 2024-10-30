@@ -51,7 +51,7 @@
     <string name="setting_page_app_del_descript">这将删除所有游戏备份文件!</string>
     <string name="setting_page_app_clean_cache">清除缓存</string>
     <string name="setting_page_app_clean_cache_descript">清楚缓存的图片等文件</string>
-    <string name="setting_page_about_author">作者: laoxin</string>
+    <string name="setting_page_about_author">作者: laoxin &amp; 角沙糖 </string>
     <string name="setting_page_about_title">About</string>
     <string name="setting_page_about_pay">投喂开发者</string>
     <string name="setting_page_about_pay_descript">感觉用着不错?支持一下开发者</string>

@@ -51,7 +51,7 @@
     <string name="setting_page_app_del_descript">这将删除所有游戏备份文件!</string>
     <string name="setting_page_app_clean_cache">清除缓存</string>
     <string name="setting_page_app_clean_cache_descript">清楚缓存的图片等文件</string>
-    <string name="setting_page_about_author">作者: laoxin</string>
+    <string name="setting_page_about_author">作者: laoxin &amp; 角沙糖</string>
     <string name="setting_page_about_title">About</string>
     <string name="setting_page_about_pay">投喂开发者</string>
     <string name="setting_page_about_pay_descript">感觉用着不错?支持一下开发者</string>
@@ -179,5 +179,13 @@
     <string name="open_mod_failed_dialog_desc">%1$s个MOD开启失败, 是否执行回滚(只会回滚开启失败的MOD)</string>
     <string name="console_configuration_del_unzip">始终删除解压文件</string>
     <string name="console_del_unzip_dictionary_content">将会在开启MOD后始终删除解压文件,可以节省空间,但下次开启同样的MOD会再次解压导致二次开启速度变慢!</string>
+    <string name="mod_page_dropdownMenu_mods_browser">分类视图</string>
+    <string name="mod_page_title_mods_browser">分类</string>
+    <string name="console_configuration_show_browswer">默认展示分类视图</string>
+    <string name="mod_browser_file_list_back">返回上级分类</string>
+    <string name="mod_browser_file_description">MOD数量: %1$s</string>
+    <string name="mod_top_bar_count">统计：%1$s</string>
+    <string name="mod_top_bar_tips">总进度 : %1$s</string>
+    <string name="toast_quit_qpp">再按一次退出应用</string>
 
 </resources>
