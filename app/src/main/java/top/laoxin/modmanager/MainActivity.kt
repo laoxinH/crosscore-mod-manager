@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import rikka.shizuku.Shizuku
-import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ModManagerApp
