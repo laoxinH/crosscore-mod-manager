@@ -10,6 +10,6 @@ enum class SpecialGame(
     val needGameService: Boolean = false
 ) {
     ARKNIGHTS("hypergryph.arknights", ArknightsTools),
+    ARKNIGHTS_MOD("com.mrfz", ArknightsTools),
     PROJECTSNOW("dragonli.projectsnow", ProjectSnowTools, true)
-
 }
