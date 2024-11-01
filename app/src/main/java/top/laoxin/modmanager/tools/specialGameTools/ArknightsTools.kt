@@ -31,22 +31,17 @@ object ArknightsTools : BaseSpecialGameTools {
     private lateinit var persistentRes: PersistentRes
 
     data class HotUpdate(
-        var fullPack: FullPack = FullPack(),
         var versionId: String = "",
         var abInfos: MutableList<AbInfo> = mutableListOf(),
-        var countOfTypedRes: String = "",
+        var manifestName: String = "",
+        var manifestVersion: String = "",
         var packInfos: MutableList<AbInfo> = mutableListOf()
     )
 
     data class PersistentRes(
+        val manifestName: String = "",
+        val manifestVersion: String = "",
         val abInfos: MutableList<AbInfo> = mutableListOf(),
-    )
-
-    data class FullPack(
-        val totalSize: Long = 0,
-        val abSize: Long = 0,
-        val type: String = "",
-        val cid: Int = -1,
     )
 
     data class AbInfo(
@@ -59,6 +54,8 @@ object ArknightsTools : BaseSpecialGameTools {
         val type: String?,
         val pid: String?,
         val cid: Int?,
+        val cat: Int?,
+        val meta: Int?,
     )
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
