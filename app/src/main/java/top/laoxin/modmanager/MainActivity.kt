@@ -26,9 +26,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 启动 logcat 日志记录
-        LogTools.startLogcatLogging()
-
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
