@@ -88,14 +88,15 @@ fun UserAgreement() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp), state = listState
+                .padding(32.dp), state = listState
         ) {
             // 标题
             item {
                 Text(
                     text = stringResource(id = R.string.dialog_info_title),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 32.sp
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp, start = 8.dp, end = 8.dp)
                 )
@@ -152,7 +153,8 @@ fun UserAgreement() {
                     .padding(32.dp)
             ) {
                 Text(
-                    text = "确认", style = MaterialTheme.typography.bodyMedium
+                    text = stringResource(id = R.string.dialog_button_info_permission),
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
