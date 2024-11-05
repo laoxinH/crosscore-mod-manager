@@ -98,7 +98,7 @@ fun UserAgreement() {
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 32.sp
                     ),
-                    modifier = Modifier.padding(bottom = 8.dp, top = 8.dp, start = 8.dp, end = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
             }
             // 重要内容
