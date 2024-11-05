@@ -1,5 +1,6 @@
 package top.laoxin.modmanager
 
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -19,6 +20,7 @@ import rikka.shizuku.Shizuku
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ModManagerApp
+import top.lings.start.StartActivity
 
 class MainActivity : ComponentActivity() {
 
@@ -42,6 +44,19 @@ class MainActivity : ComponentActivity() {
         // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        // 检查是否同意许可，跳转到 StartActivity 页面
+        val sharedPreferences = getSharedPreferences("AppLaunch", MODE_PRIVATE)
+        val isConfirm = sharedPreferences.getBoolean("isConfirm", false)
+
+        if (!isConfirm) {
+            // 如果未同意许可，跳转到 StartActivity 进行确认
+            val intent = Intent(this, StartActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
+        // 同意许可，加载 MainActivity 的内容
         setContent {
             ModManagerTheme {
                 val systemUiController = rememberSystemUiController()
@@ -59,8 +74,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     ModManagerApp()
@@ -72,7 +86,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (PermissionTools.isShizukuAvailable) {
-            // 移除Shizuku权限请求回调
+            // 移除 Shizuku 权限请求回调
             Shizuku.removeRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
         }
     }

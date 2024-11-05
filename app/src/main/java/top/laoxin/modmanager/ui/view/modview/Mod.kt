@@ -18,7 +18,6 @@ package top.laoxin.modmanager.ui.view.modview
 
 
 import ModsBrowser
-import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
@@ -71,7 +70,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -108,10 +106,10 @@ fun ModPage(viewModel: ModViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     Box {
-        UserTipsDialog(
-            showDialog = uiState.showUserTipsDialog,
-            setUserTipsDialog = viewModel::setUserTipsDialog
-        )
+//        UserTipsDialog(
+//            showDialog = uiState.showUserTipsDialog,
+//            setUserTipsDialog = viewModel::setUserTipsDialog
+//        )
         DisEnableModsDialog(
             showDialog = uiState.showDisEnableModsDialog,
             mods = uiState.delEnableModsList,
@@ -173,39 +171,39 @@ fun ModPage(viewModel: ModViewModel) {
 }
 
 
-@Composable
-fun UserTipsDialog(
-    showDialog: Boolean,
-    setUserTipsDialog: (Boolean) -> Unit
-) {
-
-    if (showDialog) {
-        val context = LocalContext.current
-        AlertDialog(
-            onDismissRequest = {
-
-            }, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
-            title = { Text(stringResource(id = R.string.dialog_info_title)) },
-            text = { Text(stringResource(id = R.string.dialog_info_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    setUserTipsDialog(false)
-                }) {
-                    Text(stringResource(id = R.string.dialog_button_info_permission))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    if (context is Activity) {
-                        context.finish()
-                    }
-                }) {
-                    Text(stringResource(id = R.string.dialog_button_request_close))
-                }
-            }
-        )
-    }
-}
+//@Composable
+//fun UserTipsDialog(
+//    showDialog: Boolean,
+//    setUserTipsDialog: (Boolean) -> Unit
+//) {
+//
+//    if (showDialog) {
+//        val context = LocalContext.current
+//        AlertDialog(
+//            onDismissRequest = {
+//
+//            }, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
+//            title = { Text(stringResource(id = R.string.dialog_info_title)) },
+//            text = { Text(stringResource(id = R.string.dialog_info_message)) },
+//            confirmButton = {
+//                TextButton(onClick = {
+//                    setUserTipsDialog(false)
+//                }) {
+//                    Text(stringResource(id = R.string.dialog_button_info_permission))
+//                }
+//            },
+//            dismissButton = {
+//                TextButton(onClick = {
+//                    if (context is Activity) {
+//                        context.finish()
+//                    }
+//                }) {
+//                    Text(stringResource(id = R.string.dialog_button_request_close))
+//                }
+//            }
+//        )
+//    }
+//}
 
 // 关闭mods提示框
 @Composable
