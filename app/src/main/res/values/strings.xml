@@ -131,7 +131,7 @@
     <string name="console_setting_info_configuration_can_install">是</string>
     <string name="console_setting_info_configuration_not_install">否</string>
     <string name="dialog_dis_enable_mods_title">以下MOD已被删除是否关闭? 如果不关闭将会一直生效!</string>
-    <string name="console_upgrade_title">更新</string>
+    <string name="console_upgrade_title">强制更新</string>
     <string name="setting_page_about_update">检测更新</string>
     <string name="setting_page_about_update_descript">当前版本 : %1$s</string>
     <string name="toast_no_update">已是最新版本</string>
