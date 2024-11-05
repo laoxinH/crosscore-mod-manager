@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Handler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -78,7 +79,11 @@ fun UserAgreement() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         // 内部的 LazyColumn
         LazyColumn(
             modifier = Modifier
@@ -90,7 +95,8 @@ fun UserAgreement() {
                 Text(
                     text = stringResource(id = R.string.dialog_info_title),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 40.sp
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp, start = 8.dp, end = 8.dp)
                 )
@@ -100,7 +106,7 @@ fun UserAgreement() {
                 Text(
                     text = stringResource(id = R.string.dialog_info_important),
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         lineHeight = 28.sp
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
