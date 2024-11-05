@@ -55,6 +55,7 @@ import top.laoxin.modmanager.tools.PermissionTools.isShizukuAvailable
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
+import top.laoxin.modmanager.ui.view.commen.DialogCommonForUpdate
 import top.laoxin.modmanager.ui.view.commen.RequestNotificationPermission
 import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
@@ -106,16 +107,16 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         // 请求通知权限
         RequestNotificationPermission()
         // 升级提示
-        DialogCommon(
+        DialogCommonForUpdate(
             title = stringResource(id = R.string.console_upgrade_title),
             content = viewModel.updateContent,
             onConfirm = {
-                viewModel.setShowUpgradeDialog(false)
+//                viewModel.setShowUpgradeDialog(false)
                 viewModel.openUrl(context, viewModel.downloadUrl)
             },
-            onCancel = {
-                viewModel.setShowUpgradeDialog(false)
-            },
+//            onCancel = {
+//                viewModel.setShowUpgradeDialog(false)
+//            },
             showDialog = uiState.showUpgradeDialog
         )
 
@@ -136,8 +137,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
 
         if (viewModel.requestPermissionPath.isNotEmpty()) {
             RequestUriPermission(
-                path = viewModel.requestPermissionPath,
-                uiState.openPermissionRequestDialog
+                path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog
             ) {
                 viewModel.setOpenPermissionRequestDialog(false)
             }
@@ -149,9 +149,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         // Spacer(modifier = Modifier.height(16.dp))
         // 游戏信息
         GameInformationCard(
-            viewModel,
-            uiState.gameInfo,
-            Modifier.align(Alignment.CenterHorizontally)
+            viewModel, uiState.gameInfo, Modifier.align(Alignment.CenterHorizontally)
         )
 
         // 添加一些间距
@@ -168,9 +166,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
 // 游戏信息选项卡
 @Composable
 fun GameInformationCard(
-    viewModel: ConsoleViewModel,
-    gameInfo: GameInfoBean,
-    modifier: Modifier = Modifier
+    viewModel: ConsoleViewModel, gameInfo: GameInfoBean, modifier: Modifier = Modifier
 ) {
     // 第一部分：一个卡片展示当前设置项目的一些信息
     Card(
@@ -202,20 +198,17 @@ fun GameInformationCard(
                 )
                 Text(
                     text = stringResource(
-                        id = R.string.console_game_packegname,
-                        gameInfo.packageName
+                        id = R.string.console_game_packegname, gameInfo.packageName
                     ), style = typography.labelLarge
                 )
                 Text(
                     text = stringResource(
-                        id = R.string.console_game_version,
-                        gameInfo.version
+                        id = R.string.console_game_version, gameInfo.version
                     ), style = typography.labelLarge
                 )
                 Text(
                     text = stringResource(
-                        id = R.string.console_game_service,
-                        gameInfo.serviceName
+                        id = R.string.console_game_service, gameInfo.serviceName
                     ), style = typography.labelLarge
                 )
             }
@@ -241,17 +234,14 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(
-                        id = R.string.console_setting_info_mod_total,
-                        uiState.modCount.toString()
-                    ),
-                    style = typography.labelLarge
+                        id = R.string.console_setting_info_mod_total, uiState.modCount.toString()
+                    ), style = typography.labelLarge
                 )
                 Text(
                     text = stringResource(
                         id = R.string.console_setting_info_mod_enable,
                         uiState.enableModCount.toString()
-                    ),
-                    style = typography.labelLarge
+                    ), style = typography.labelLarge
                 )
             }
 
@@ -275,25 +265,22 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                         // 优先检查shizuku
                         stringResource(id = R.string.permission, "SHIZUKU")
                     } else {
-                        when (
-                            if (uiState.gameInfo.packageName.isNotEmpty()) {
-                                PermissionTools.checkPermission(
-                                    ROOT_PATH + "/Android/data/" + uiState.gameInfo.packageName
-                                )
-                            } else {
-                                PermissionTools.checkPermission(
-                                    ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")
-                                )
-                            }
-                        ) {
+                        when (if (uiState.gameInfo.packageName.isNotEmpty()) {
+                            PermissionTools.checkPermission(
+                                ROOT_PATH + "/Android/data/" + uiState.gameInfo.packageName
+                            )
+                        } else {
+                            PermissionTools.checkPermission(
+                                ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")
+                            )
+                        }) {
                             0 -> stringResource(id = R.string.permission, "FILE")
                             1 -> stringResource(id = R.string.permission, "DOCUMENT")
                             2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
                             3 -> stringResource(id = R.string.permission, "SHIZUKU")
                             else -> stringResource(id = R.string.permission, "无权限")
                         }
-                    },
-                    style = typography.labelLarge
+                    }, style = typography.labelLarge
                 )
                 Text(
                     stringResource(
@@ -301,8 +288,7 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                         if (uiState.canInstallMod) stringResource(R.string.console_setting_info_configuration_can_install) else stringResource(
                             R.string.console_setting_info_configuration_not_install
                         )
-                    ),
-                    style = typography.labelLarge
+                    ), style = typography.labelLarge
                 )
             }
         }
@@ -351,8 +337,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     text = stringResource(id = R.string.console_configuration_anti_harmony),
                     style = typography.titleMedium
                 )
-                Switch(
-                    checked = uiState.antiHarmony,
+                Switch(checked = uiState.antiHarmony,
                     onCheckedChange = { viewModel.openAntiHarmony(it) })
             }
 
@@ -439,8 +424,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     )
                 }
                 Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
-            }
-            /*           Row(
+            }/*           Row(
                            verticalAlignment = Alignment.CenterVertically,
                            horizontalArrangement = Arrangement.SpaceBetween,
                            modifier = Modifier.fillMaxWidth()
@@ -473,29 +457,24 @@ fun ConsolePage(viewModel: ConsoleViewModel) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ConsoleTopBar(
-    viewModel: ConsoleViewModel,
-    modifier: Modifier = Modifier,
+    viewModel: ConsoleViewModel, modifier: Modifier = Modifier,
 
     configuration: Int
 ) {
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-            //titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            //navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        modifier = modifier,
+    TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+        containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
+        //titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        //navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    ), modifier = modifier,
 
         title = {
             if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
                 Text(
-                    stringResource(id = R.string.console),
-                    style = typography.titleLarge
+                    stringResource(id = R.string.console), style = typography.titleLarge
 
                 )
             }
-        },
-        actions = {
+        }, actions = {
             Text(text = "启动游戏")
             IconButton(onClick = {
                 // 在这里处理图标按钮的点击事件
@@ -510,8 +489,7 @@ fun ConsoleTopBar(
             }
 
             // 添加更多的菜单项
-        }
-    )
+        })
 }
 
 @Preview(showBackground = true)
