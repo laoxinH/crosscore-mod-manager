@@ -713,13 +713,13 @@ class ModViewModel(
     }
 
     // 设置用户提示
-    fun setUserTipsDialog(b: Boolean) {
-        viewModelScope.launch {
-            userPreferencesRepository.savePreference(
-                "USER_TIPS", b
-            )
-        }
-    }
+//    fun setUserTipsDialog(b: Boolean) {
+//        viewModelScope.launch {
+//            userPreferencesRepository.savePreference(
+//                "USER_TIPS", b
+//            )
+//        }
+//    }
 
     private fun setShowDisEnableModsDialog(b: Boolean) {
         _uiState.update {

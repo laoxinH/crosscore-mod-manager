@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.userservice.shizuku
 
+import android.annotation.SuppressLint
 import android.os.RemoteException
 import android.util.Log
 import top.laoxin.modmanager.bean.GameInfoBean
@@ -98,6 +99,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
     }
 
     // 修改文件权限
+    @SuppressLint("SetWorldReadable")
     override fun chmod(path: String?): Boolean {
         return try {
             val g = File(path).setExecutable(true, false)

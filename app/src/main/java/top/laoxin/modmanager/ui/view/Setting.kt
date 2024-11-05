@@ -47,6 +47,7 @@ import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ThanksBean
 import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
+import top.laoxin.modmanager.ui.view.commen.DialogCommonForUpdate
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
@@ -90,16 +91,16 @@ fun SettingPage() {
         }
     }
 
-    DialogCommon(
+    DialogCommonForUpdate(
         title = stringResource(id = R.string.console_upgrade_title),
         content = viewModel.updateDescription,
         onConfirm = {
-            viewModel.setShowUpgradeDialog(false)
+//            viewModel.setShowUpgradeDialog(false)
             viewModel.openUrl(context, viewModel.downloadUrl)
         },
-        onCancel = {
-            viewModel.setShowUpgradeDialog(false)
-        },
+//        onCancel = {
+//            viewModel.setShowUpgradeDialog(false)
+//        },
         showDialog = uiState.showUpdateDialog
     )
     DialogCommon(
@@ -444,7 +445,7 @@ fun ThinksDialogCommon(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingTopBar(modifier: Modifier = Modifier, configuration: Int) {
-    if( configuration != Configuration.ORIENTATION_LANDSCAPE) {
+    if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
         TopAppBar(
             modifier = modifier,
             colors = TopAppBarDefaults.topAppBarColors(
@@ -454,7 +455,8 @@ fun SettingTopBar(modifier: Modifier = Modifier, configuration: Int) {
             title = {
 
                 Text(
-                    stringResource(id = R.string.settings), style = MaterialTheme.typography.titleLarge
+                    stringResource(id = R.string.settings),
+                    style = MaterialTheme.typography.titleLarge
                 )
 
             })
