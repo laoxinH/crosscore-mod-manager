@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -58,18 +59,20 @@ class MainActivity : ComponentActivity() {
 
         // 同意许可，加载 MainActivity 的内容
         setContent {
+            // 使用 Material3 主题适配深色模式
             ModManagerTheme {
                 val systemUiController = rememberSystemUiController()
                 val colors = MaterialTheme.colorScheme
+                val dark = isSystemInDarkTheme()
 
                 SideEffect {
                     systemUiController.setStatusBarColor(
                         color = Color.Transparent,
-                        darkIcons = true
+                        darkIcons = !dark
                     )
                     systemUiController.setNavigationBarColor(
                         color = colors.surfaceContainer,
-                        darkIcons = true
+                        darkIcons = !dark
                     )
                 }
 

@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
@@ -85,7 +84,6 @@ fun UserAgreement() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(0.dp)
-            .systemBarsPadding()
     ) {
         // 内部的 LazyColumn
         LazyColumn(
@@ -99,7 +97,8 @@ fun UserAgreement() {
                     text = stringResource(id = R.string.dialog_info_title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 32.sp
+                        fontSize = 32.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
@@ -110,7 +109,8 @@ fun UserAgreement() {
                     text = stringResource(id = R.string.dialog_info_important),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        lineHeight = 28.sp
+                        lineHeight = 28.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
@@ -120,7 +120,8 @@ fun UserAgreement() {
                 Text(
                     text = stringResource(id = R.string.dialog_info_message),
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        lineHeight = 28.sp
+                        lineHeight = 28.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
