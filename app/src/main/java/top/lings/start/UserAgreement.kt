@@ -95,8 +95,7 @@ fun UserAgreement() {
                 Text(
                     text = stringResource(id = R.string.dialog_info_title),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 40.sp
+                        fontWeight = FontWeight.ExtraBold
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp, start = 8.dp, end = 8.dp)
                 )
