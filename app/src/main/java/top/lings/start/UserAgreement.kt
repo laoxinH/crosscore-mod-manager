@@ -90,9 +90,20 @@ fun UserAgreement() {
                 Text(
                     text = stringResource(id = R.string.dialog_info_title),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold // 加粗标题
+                        fontWeight = FontWeight.ExtraBold
                     ),
                     modifier = Modifier.padding(bottom = 8.dp, top = 8.dp, start = 8.dp, end = 8.dp)
+                )
+            }
+            // 重要内容
+            item {
+                Text(
+                    text = stringResource(id = R.string.dialog_info_important),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 28.sp
+                    ),
+                    modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
             }
             // 消息内容

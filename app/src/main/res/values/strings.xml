@@ -76,7 +76,8 @@
     <string name="password_dialog_title">请输入密码后重新启用</string>
     <string name="password_dialog_label">密码(ZIP压缩包不支持中文密码)</string>
     <string name="dialog_info_title">用户协议</string>
-    <string name="dialog_info_message">1.实验室需要安装好游戏才能扫描\n2.Android 14需要shizuku授权\n3.Android 14用户若没有安装请前往设置页面下载shizuku\n4.授权后请点击刷新\n5.默认不会扫描QQ下载和系统download目录\n6.如有需要请前往控制台开启\n7.实验室会将扫描到的Mod自动移动到控制台配置的Mod目录\n8.新增Mod推荐放到控制台配置的Mod目录\n9.删除或添加Mod后如果实验室没有自动更新请点击刷新\n10.不能在任何官方相关渠道宣传实验室\n11.使用实验室造成的一切后果与开发者无关\n12.实验室与官方无关\n</string>
+    <string name="dialog_info_important">实验室为开源软件，完全免费，任何收费行为均与本软件无任何关联</string>
+    <string name="dialog_info_message">1. 实验室需要安装好相应游戏才能使用\n2. Android 11以上部分设备需要shizuku授权\n3. 授权后请刷新以进行扫描\n4. 默认不会扫描QQ下载和系统download目录，如有需要请前往控制台开启\n5. 实验室会将扫描到的Mod自动移动到控制台配置的Mod目录\n9. 删除或添加Mod后若没有自动更新请手动点击刷新</string>
     <string name="dialog_button_info_permission">同意并继续</string>
     <string name="setting_page_app_other">More</string>
     <string name="setting_page_more_shizuku">下载shizuku</string>

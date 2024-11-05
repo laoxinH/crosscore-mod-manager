@@ -298,16 +298,16 @@ fun GeneralTopBar(
 
         }, actions = {
 
-            IconButton(onClick = {
-                // 在这里处理图标按钮的点击事件
-                viewModel.setUserTipsDialog(true)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Info, // 使用信息图标
-                    contentDescription = "Info", // 为辅助功能提供描述
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
+//            IconButton(onClick = {
+//                // 在这里处理图标按钮的点击事件
+//                viewModel.setUserTipsDialog(true)
+//            }) {
+//                Icon(
+//                    imageVector = Icons.Default.Info, // 使用信息图标
+//                    contentDescription = "Info", // 为辅助功能提供描述
+//                    //tint = MaterialTheme.colorScheme.primaryContainer
+//                )
+//            }
             IconButton(onClick = {
                 viewModel.setSearchBoxVisible(true)
                 when (uiState.modsView) {
