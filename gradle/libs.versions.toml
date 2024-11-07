@@ -1,7 +1,7 @@
 [versions]
 accompanistPager = "0.36.0"
 accompanistPermissions = "0.36.0"
-agp = "8.6.1"
+agp = "8.7.2"
 api = "13.1.5"
 coilCompose = "2.7.0"
 commonsCompress = "1.27.1"
@@ -15,7 +15,7 @@ kotlin = "2.0.21"
 junit = "4.13.2"
 kotlinxSerializationJson = "1.7.3"
 activityCompose = "1.9.3"
-lifecycleViewmodelCompose = "2.8.6"
+lifecycleViewmodelCompose = "2.8.7"
 navigationCompose = "2.8.3"
 navigationRuntimeKtx = "2.8.3"
 okhttpVersion = "4.12.0"
@@ -53,7 +53,7 @@ androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedat
 androidx-runtime-rxjava2 = { module = "androidx.compose.runtime:runtime-rxjava2" }
 api = { module = "dev.rikka.shizuku:api", version.ref = "api" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-compose-bom = { module = "androidx.compose:compose-bom", version = "2024.10.00" }
+compose-bom = { module = "androidx.compose:compose-bom", version = "2024.10.01" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterScalars" }
@@ -72,7 +72,7 @@ x-zip-jbinding-xandroid = { module = "com.github.omicronapps:7-Zip-JBinding-4And
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 androidx-roomcompiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
-desugar = "com.android.tools:desugar_jdk_libs_nio:2.1.2"
+desugar = "com.android.tools:desugar_jdk_libs_nio:2.1.3"
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
