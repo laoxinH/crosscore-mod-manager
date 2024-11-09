@@ -49,8 +49,8 @@ androidx-material3-window-size = { module = "androidx.compose.material3:material
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
-androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
-androidx-runtime-rxjava2 = { module = "androidx.compose.runtime:runtime-rxjava2" }
+androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version = "1.7.5" }
+androidx-runtime-rxjava2 = { module = "androidx.compose.runtime:runtime-rxjava2", version = "1.7.5" }
 api = { module = "dev.rikka.shizuku:api", version.ref = "api" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 compose-bom = { module = "androidx.compose:compose-bom", version = "2024.10.01" }
@@ -66,7 +66,7 @@ provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.7.5" }
 material3 = { module = "androidx.compose.material3:material3" }
 x-zip-jbinding-xandroid = { module = "com.github.omicronapps:7-Zip-JBinding-4Android", version.ref = "xZipJbindingXandroid" }
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
