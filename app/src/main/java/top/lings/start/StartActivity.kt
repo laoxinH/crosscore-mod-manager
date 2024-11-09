@@ -8,7 +8,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 class StartActivity : ComponentActivity() {
 
@@ -24,7 +26,12 @@ class StartActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            // 使用 Material3 主题适配深色模式
+            // 设置导航栏背景颜色和图标亮度
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                isAppearanceLightNavigationBars = true
+                @Suppress("DEPRECATION")
+                window.navigationBarColor = MaterialTheme.colorScheme.surfaceContainer.toArgb()
+            }
             MaterialTheme(
                 colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
             ) {
