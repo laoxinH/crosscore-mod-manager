@@ -10,15 +10,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ImagesearchRoller
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -40,7 +34,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -102,9 +95,17 @@ fun ModManagerApp() {
             topBar = {
                 // 根据当前页面显示不同的顶部工具栏
                 when (pagerState.currentPage) {
-                    NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(consoleViewModel,configuration =  configuration.orientation)
-                    NavigationIndex.MOD.ordinal -> ModTopBar(modViewModel,configuration =  configuration.orientation)
-                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar(configuration =  configuration.orientation)
+                    NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(
+                        consoleViewModel,
+                        configuration = configuration.orientation
+                    )
+
+                    NavigationIndex.MOD.ordinal -> ModTopBar(
+                        modViewModel,
+                        configuration = configuration.orientation
+                    )
+
+                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar(configuration = configuration.orientation)
                 }
                 val uiState by modViewModel.uiState.collectAsState()
                 Tips(
@@ -126,7 +127,13 @@ fun ModManagerApp() {
         ) { innerPadding ->
             val context = LocalContext.current // 在这里获取 Context
             val exitToast: Toast =
-                remember { Toast.makeText(context, context.getText(R.string.toast_quit_qpp), Toast.LENGTH_SHORT) }
+                remember {
+                    Toast.makeText(
+                        context,
+                        context.getText(R.string.toast_quit_qpp),
+                        Toast.LENGTH_SHORT
+                    )
+                }
             val activity = context as? Activity // 获取当前 Activity
 
             BackHandler(enabled = pagerState.currentPage == NavigationIndex.CONSOLE.ordinal) {
@@ -149,33 +156,6 @@ fun ModManagerApp() {
                 }
             }
 
-   /*         // 使用 AnimatedContent 实现页面切换动画，直接使用
-            AnimatedContent(
-                targetState = pagerState.currentPage,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        (slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn()).togetherWith(
-                            slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }) + fadeOut()
-                        )
-                    } else {
-                        (slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth }) + fadeIn()).togetherWith(
-                            slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }) + fadeOut()
-                        )
-                    }.using(SizeTransform(clip = false))
-                }
-            ) { _ ->
-                HorizontalPager(
-                    state = pagerState,
-                    count = NavigationIndex.entries.size,
-                    modifier = Modifier.padding(innerPadding)
-                ) { page ->
-                    when (page) {
-                        NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
-                        NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
-                        NavigationIndex.SETTINGS.ordinal -> SettingPage()
-                    }
-                }
-            }*/
             HorizontalPager(
                 state = pagerState,
                 count = NavigationIndex.entries.size,
@@ -209,10 +189,11 @@ fun NavigationRail(
         modifier = Modifier
             .fillMaxHeight()
             .padding(0.dp),
-       // containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        // containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         // 顶部的当前页面名称
-        val currentPageName = stringResource(id = NavigationIndex.entries[pagerState.currentPage].title)
+        val currentPageName =
+            stringResource(id = NavigationIndex.entries[pagerState.currentPage].title)
         Text(
             text = currentPageName,
             modifier = Modifier.padding(16.dp)
@@ -221,8 +202,6 @@ fun NavigationRail(
 
             NavigationIndex.entries.forEachIndexed { index, navigationItem ->
                 val isSelected = pagerState.currentPage == index
-
-
 
                 NavigationRailItem(
                     selected = isSelected,
@@ -380,8 +359,8 @@ fun getGameIcon(packageName: String): ImageBitmap? {
                     Bitmap.Config.ARGB_8888
                 ).also { bitmap ->
                     val canvas = Canvas(bitmap)
-                    (drawable as AdaptiveIconDrawable).setBounds(0, 0, canvas.width, canvas.height)
-                    (drawable as AdaptiveIconDrawable).draw(canvas)
+                    drawable.setBounds(0, 0, canvas.width, canvas.height)
+                    drawable.draw(canvas)
                 }
             }
 

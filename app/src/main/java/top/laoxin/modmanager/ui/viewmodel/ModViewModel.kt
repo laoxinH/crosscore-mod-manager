@@ -76,6 +76,7 @@ class ModViewModel(
 
     // 当前浏览的压缩包path
     private var _currentZipPath by mutableStateOf("")
+
     // 当前的虚拟路径
     private var _currentPath by mutableStateOf("")
 
@@ -133,6 +134,7 @@ class ModViewModel(
 
     private val delUnzipDictionaryFlow =
         userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
+
     // 展示分类视图
     private val showCategoryView =
         userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", false)
@@ -780,10 +782,12 @@ class ModViewModel(
                     if (searchText.isEmpty()) {
                         updateFiles(_currentPath)
                     } else {
-                        val searchFiles = _uiState.value.currentFiles.filter { it.name.contains(searchText) }
-                        _uiState.update { it.copy(currentFiles = searchFiles)}
+                        val searchFiles =
+                            _uiState.value.currentFiles.filter { it.name.contains(searchText) }
+                        _uiState.update { it.copy(currentFiles = searchFiles) }
                     }
                 }
+
                 else -> {
                     if (searchText.isEmpty()) {
                         setSearchMods(emptyList())
@@ -1062,12 +1066,12 @@ class ModViewModel(
         _currentZipPath = path
         // 读取压缩包文件
 
-            val fileHeaders = ArchiveUtil.listInArchiveFiles(path)
-            // 拼接路径
-            val files = fileHeaders.map {
-                File("$path/$it")
-            }
-            _currentFiles = files
+        val fileHeaders = ArchiveUtil.listInArchiveFiles(path)
+        // 拼接路径
+        val files = fileHeaders.map {
+            File("$path/$it")
+        }
+        _currentFiles = files
 
     }
 

@@ -57,7 +57,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
                 File(destPath).parentFile?.mkdirs()
             }
             // 如果目标文件存在, 则删除
-            if (File(destPath).exists()){
+            if (File(destPath).exists()) {
                 File(destPath).delete()
             }
 

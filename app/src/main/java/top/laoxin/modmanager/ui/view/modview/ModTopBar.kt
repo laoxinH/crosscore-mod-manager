@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -107,7 +106,7 @@ fun ModTopBar(viewModel: ModViewModel, modifier: Modifier = Modifier, configurat
         )
         MultiSelectTopBar(viewModel, uiState, modifier = modifier, configuration = configuration)
     } else {
-        GeneralTopBar(viewModel, uiState, modifier = modifier,configuration = configuration)
+        GeneralTopBar(viewModel, uiState, modifier = modifier, configuration = configuration)
     }
 
 }
@@ -131,100 +130,100 @@ fun MultiSelectTopBar(
         TopAppBar(
             modifier = modifier,
             colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-        ), title = {
-            Box(contentAlignment = Alignment.CenterStart) {
-                Text(
-                    stringResource(id = uiState.modsView.title),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-                    Row(
-                        modifier = Modifier.padding(top = 40.dp),
-                    ) {
+                containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
+            ), title = {
+                Box(contentAlignment = Alignment.CenterStart) {
+                    Text(
+                        stringResource(id = uiState.modsView.title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                        Row(
+                            modifier = Modifier.padding(top = 40.dp),
+                        ) {
 
-                        /* if (uiState.modsSelected.isNotEmpty()){
-                         Text(
-                             text = "已选：${uiState.modsSelected.size}",
-                             style = MaterialTheme.typography.labelMedium,
-                             color = MaterialTheme.colorScheme.onPrimary,
-                             textAlign = TextAlign.Start,
-                         )
-                         Spacer(modifier = Modifier.width(8.dp))
-                     }*/
-                        val total =
-                            if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
+                            /* if (uiState.modsSelected.isNotEmpty()){
+                             Text(
+                                 text = "已选：${uiState.modsSelected.size}",
+                                 style = MaterialTheme.typography.labelMedium,
+                                 color = MaterialTheme.colorScheme.onPrimary,
+                                 textAlign = TextAlign.Start,
+                             )
+                             Spacer(modifier = Modifier.width(8.dp))
+                         }*/
+                            val total =
+                                if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
 
-                        Text(
-                            text = stringResource(R.string.mod_top_bar_count, total),
-                            style = MaterialTheme.typography.labelMedium,
-                            // color = MaterialTheme.colorScheme.onPrimary,
-                            textAlign = TextAlign.Start,
-                        )
+                            Text(
+                                text = stringResource(R.string.mod_top_bar_count, total),
+                                style = MaterialTheme.typography.labelMedium,
+                                // color = MaterialTheme.colorScheme.onPrimary,
+                                textAlign = TextAlign.Start,
+                            )
+                        }
+
                     }
-
                 }
-            }
 
-        }, actions = {
-            // 全选
-            IconButton(onClick = {
-                // 在这里处理图标按钮的点击事件
-                viewModel.allSelect(modList)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.SelectAll, // 使用信息图标
-                    contentDescription = "Info", // 为辅助功能提供描述
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            // 取消选择
-            IconButton(onClick = {
-                // 在这里处理图标按钮的点击事件
-                viewModel.deselect()
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Deselect, // 使用信息图标
-                    contentDescription = "Info", // 为辅助功能提供描述
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = {
-                // 在这里处理图标按钮的点击事件
-                viewModel.switchSelectMod(modList, true)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.FlashOn, // 使用信息图标
-                    contentDescription = "Info", // 为辅助功能提供描述
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = {
-                viewModel.switchSelectMod(modList, false)
+            }, actions = {
+                // 全选
+                IconButton(onClick = {
+                    // 在这里处理图标按钮的点击事件
+                    viewModel.allSelect(modList)
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.SelectAll, // 使用信息图标
+                        contentDescription = "Info", // 为辅助功能提供描述
+                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                // 取消选择
+                IconButton(onClick = {
+                    // 在这里处理图标按钮的点击事件
+                    viewModel.deselect()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Deselect, // 使用信息图标
+                        contentDescription = "Info", // 为辅助功能提供描述
+                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                IconButton(onClick = {
+                    // 在这里处理图标按钮的点击事件
+                    viewModel.switchSelectMod(modList, true)
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.FlashOn, // 使用信息图标
+                        contentDescription = "Info", // 为辅助功能提供描述
+                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                IconButton(onClick = {
+                    viewModel.switchSelectMod(modList, false)
 
-                // 请求焦点
-            }, modifier = Modifier) {
-                Icon(
-                    imageVector = Icons.Filled.FlashOff, contentDescription = null,
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = {
-                viewModel.delSelectedMods()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Delete, // 使用刷新图标
-                    contentDescription = "Refresh", // 为辅助功能提供描述
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = { viewModel.exitSelect() }, modifier = Modifier) {
-                Icon(
-                    imageVector = Icons.Filled.Close, contentDescription = null,
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-        })
+                    // 请求焦点
+                }, modifier = Modifier) {
+                    Icon(
+                        imageVector = Icons.Filled.FlashOff, contentDescription = null,
+                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                IconButton(onClick = {
+                    viewModel.delSelectedMods()
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete, // 使用刷新图标
+                        contentDescription = "Refresh", // 为辅助功能提供描述
+                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                IconButton(onClick = { viewModel.exitSelect() }, modifier = Modifier) {
+                    Icon(
+                        imageVector = Icons.Filled.Close, contentDescription = null,
+                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+            })
 
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
 
@@ -271,32 +270,32 @@ fun GeneralTopBar(
             modifier = modifier,
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-                ), title = {
-            Box(contentAlignment = Alignment.CenterStart) {
-                Text(
-                    stringResource(id = uiState.modsView.title),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Box {
-                    Row(
-                        modifier = Modifier.padding(top = 40.dp),
-                    ) {
+            ), title = {
+                Box(contentAlignment = Alignment.CenterStart) {
+                    Text(
+                        stringResource(id = uiState.modsView.title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Box {
+                        Row(
+                            modifier = Modifier.padding(top = 40.dp),
+                        ) {
 
-                        val total =
-                            if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
+                            val total =
+                                if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
 
-                        Text(
-                            text = stringResource(R.string.mod_top_bar_count, total),
-                            style = MaterialTheme.typography.labelMedium,
-                            //color = MaterialTheme.colorScheme.onPrimary,
-                            textAlign = TextAlign.Start,
-                        )
+                            Text(
+                                text = stringResource(R.string.mod_top_bar_count, total),
+                                style = MaterialTheme.typography.labelMedium,
+                                //color = MaterialTheme.colorScheme.onPrimary,
+                                textAlign = TextAlign.Start,
+                            )
+                        }
+
                     }
-
                 }
-            }
 
-        }, actions = {
+            }, actions = {
 
 //            IconButton(onClick = {
 //                // 在这里处理图标按钮的点击事件
@@ -308,62 +307,62 @@ fun GeneralTopBar(
 //                    //tint = MaterialTheme.colorScheme.primaryContainer
 //                )
 //            }
-            IconButton(onClick = {
-                viewModel.setSearchBoxVisible(true)
-                when (uiState.modsView) {
-                    NavigationIndex.MODS_BROWSER -> viewModel.setModsView(NavigationIndex.MODS_BROWSER)
-                    else -> viewModel.setModsView(NavigationIndex.SEARCH_MODS)
-                }
+                IconButton(onClick = {
+                    viewModel.setSearchBoxVisible(true)
+                    when (uiState.modsView) {
+                        NavigationIndex.MODS_BROWSER -> viewModel.setModsView(NavigationIndex.MODS_BROWSER)
+                        else -> viewModel.setModsView(NavigationIndex.SEARCH_MODS)
+                    }
 
-                // 请求焦点
-            }, modifier = Modifier) {
-                Icon(
-                    imageVector = Icons.Filled.Search, contentDescription = null,
-                    // tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = {
-                viewModel.flashMods(false, true)
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Refresh, // 使用刷新图标
-                    contentDescription = "Refresh", // 为辅助功能提供描述
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            IconButton(onClick = { showMenu = true }, modifier = Modifier) {
-                Icon(
-                    imageVector = Icons.Filled.Menu, contentDescription = null,
-                    // tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-            AnimatedVisibility(visible = showMenu,modifier = Modifier.offset(y = 20.dp) ) {
-                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
-                        onClick = {
-                            viewModel.setModsView(NavigationIndex.ENABLE_MODS)
-                            showMenu = false
-                        })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
-                        onClick = {
-                            viewModel.setModsView(NavigationIndex.DISABLE_MODS)
-                            showMenu = false
-                        })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
-                        onClick = {
-                            viewModel.setModsView(NavigationIndex.ALL_MODS)
-                            showMenu = false
-                        })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_mods_browser)) },
-                        onClick = {
-                            viewModel.setModsView(NavigationIndex.MODS_BROWSER)
-                            showMenu = false
-                        })
-
-                    // 添加更多的菜单项
+                    // 请求焦点
+                }, modifier = Modifier) {
+                    Icon(
+                        imageVector = Icons.Filled.Search, contentDescription = null,
+                        // tint = MaterialTheme.colorScheme.primaryContainer
+                    )
                 }
-            }
-        })
+                IconButton(onClick = {
+                    viewModel.flashMods(false, true)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh, // 使用刷新图标
+                        contentDescription = "Refresh", // 为辅助功能提供描述
+                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                IconButton(onClick = { showMenu = true }, modifier = Modifier) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu, contentDescription = null,
+                        // tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                AnimatedVisibility(visible = showMenu, modifier = Modifier.offset(y = 20.dp)) {
+                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
+                            onClick = {
+                                viewModel.setModsView(NavigationIndex.ENABLE_MODS)
+                                showMenu = false
+                            })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
+                            onClick = {
+                                viewModel.setModsView(NavigationIndex.DISABLE_MODS)
+                                showMenu = false
+                            })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
+                            onClick = {
+                                viewModel.setModsView(NavigationIndex.ALL_MODS)
+                                showMenu = false
+                            })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_mods_browser)) },
+                            onClick = {
+                                viewModel.setModsView(NavigationIndex.MODS_BROWSER)
+                                showMenu = false
+                            })
+
+                        // 添加更多的菜单项
+                    }
+                }
+            })
 
 
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
