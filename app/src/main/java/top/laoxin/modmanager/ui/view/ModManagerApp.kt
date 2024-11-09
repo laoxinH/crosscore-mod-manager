@@ -10,15 +10,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,11 +21,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ImagesearchRoller
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -40,7 +37,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -50,12 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
@@ -82,7 +72,10 @@ enum class NavigationIndex(
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
     val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory)
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { NavigationIndex.entries.size }
+    )
     val configuration = LocalConfiguration.current
 
     val scope = rememberCoroutineScope()
@@ -102,9 +95,17 @@ fun ModManagerApp() {
             topBar = {
                 // 根据当前页面显示不同的顶部工具栏
                 when (pagerState.currentPage) {
-                    NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(consoleViewModel,configuration =  configuration.orientation)
-                    NavigationIndex.MOD.ordinal -> ModTopBar(modViewModel,configuration =  configuration.orientation)
-                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar(configuration =  configuration.orientation)
+                    NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(
+                        consoleViewModel,
+                        configuration = configuration.orientation
+                    )
+
+                    NavigationIndex.MOD.ordinal -> ModTopBar(
+                        modViewModel,
+                        configuration = configuration.orientation
+                    )
+
+                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar(configuration = configuration.orientation)
                 }
                 val uiState by modViewModel.uiState.collectAsState()
                 Tips(
@@ -124,10 +125,16 @@ fun ModManagerApp() {
                 }
             }
         ) { innerPadding ->
-            val context = LocalContext.current // 在这里获取 Context
+            val context = LocalContext.current
             val exitToast: Toast =
-                remember { Toast.makeText(context, context.getText(R.string.toast_quit_qpp), Toast.LENGTH_SHORT) }
-            val activity = context as? Activity // 获取当前 Activity
+                remember {
+                    Toast.makeText(
+                        context,
+                        context.getText(R.string.toast_quit_qpp),
+                        Toast.LENGTH_SHORT
+                    )
+                }
+            val activity = context as? Activity
 
             BackHandler(enabled = pagerState.currentPage == NavigationIndex.CONSOLE.ordinal) {
                 // 在 ConsolePage 显示退出确认
@@ -145,40 +152,12 @@ fun ModManagerApp() {
             BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
                 // 返回到 ConsolePage
                 scope.launch {
-                    pagerState.scrollToPage(NavigationIndex.CONSOLE.ordinal)
+                    pagerState.animateScrollToPage(NavigationIndex.CONSOLE.ordinal)
                 }
             }
 
-   /*         // 使用 AnimatedContent 实现页面切换动画，直接使用
-            AnimatedContent(
-                targetState = pagerState.currentPage,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        (slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn()).togetherWith(
-                            slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }) + fadeOut()
-                        )
-                    } else {
-                        (slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth }) + fadeIn()).togetherWith(
-                            slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }) + fadeOut()
-                        )
-                    }.using(SizeTransform(clip = false))
-                }
-            ) { _ ->
-                HorizontalPager(
-                    state = pagerState,
-                    count = NavigationIndex.entries.size,
-                    modifier = Modifier.padding(innerPadding)
-                ) { page ->
-                    when (page) {
-                        NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
-                        NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
-                        NavigationIndex.SETTINGS.ordinal -> SettingPage()
-                    }
-                }
-            }*/
             HorizontalPager(
                 state = pagerState,
-                count = NavigationIndex.entries.size,
                 modifier = Modifier.padding(innerPadding)
             ) { page ->
                 when (page) {
@@ -209,10 +188,11 @@ fun NavigationRail(
         modifier = Modifier
             .fillMaxHeight()
             .padding(0.dp),
-       // containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        // containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         // 顶部的当前页面名称
-        val currentPageName = stringResource(id = NavigationIndex.entries[pagerState.currentPage].title)
+        val currentPageName =
+            stringResource(id = NavigationIndex.entries[pagerState.currentPage].title)
         Text(
             text = currentPageName,
             modifier = Modifier.padding(16.dp)
@@ -221,8 +201,6 @@ fun NavigationRail(
 
             NavigationIndex.entries.forEachIndexed { index, navigationItem ->
                 val isSelected = pagerState.currentPage == index
-
-
 
                 NavigationRailItem(
                     selected = isSelected,
@@ -286,7 +264,7 @@ fun NavigationBar(
     val coroutineScope = rememberCoroutineScope()
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
-    NavigationBar() {
+    NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
             val isSelected = pagerState.currentPage == index
 
@@ -327,42 +305,13 @@ fun NavigationBar(
 private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
     // 根据当前页面的类型，执行相应的刷新逻辑
     when (currentPage) {
-        NavigationIndex.CONSOLE.ordinal -> {
-            // 刷新控制台页面的逻辑
-        }
+        NavigationIndex.CONSOLE.ordinal -> {}
 
         NavigationIndex.MOD.ordinal -> {
-            modViewModel.flashMods(false, true)
+            modViewModel.flashMods(true)
         }
 
-        NavigationIndex.SETTINGS.ordinal -> {
-            // 刷新设置页面逻辑
-        }
-    }
-}
-
-//导航
-@Composable
-fun NavigationHost(
-    navController: NavHostController,
-    modViewModel: ModViewModel,
-    consoleViewModel: ConsoleViewModel,
-    modifier: Modifier = Modifier,
-) {
-    NavHost(
-        navController = navController,
-        startDestination = NavigationIndex.CONSOLE.name,
-        modifier = modifier
-    ) {
-        composable(route = NavigationIndex.CONSOLE.name) {
-            ConsolePage(consoleViewModel)
-        }
-        composable(route = NavigationIndex.MOD.name) {
-            ModPage(modViewModel)
-        }
-        composable(route = NavigationIndex.SETTINGS.name) {
-            SettingPage()
-        }
+        NavigationIndex.SETTINGS.ordinal -> {}
     }
 }
 
@@ -380,8 +329,8 @@ fun getGameIcon(packageName: String): ImageBitmap? {
                     Bitmap.Config.ARGB_8888
                 ).also { bitmap ->
                     val canvas = Canvas(bitmap)
-                    (drawable as AdaptiveIconDrawable).setBounds(0, 0, canvas.width, canvas.height)
-                    (drawable as AdaptiveIconDrawable).draw(canvas)
+                    drawable.setBounds(0, 0, canvas.width, canvas.height)
+                    drawable.draw(canvas)
                 }
             }
 

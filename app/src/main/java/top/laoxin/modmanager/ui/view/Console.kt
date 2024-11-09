@@ -305,10 +305,10 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
             // 你可以在这里处理用户选择的目录
             if (uri != null) {
                 // 使用uri
-                val path = uri.path?.split(":")?.last()?.replace(ModTools.ROOT_PATH + "/", "")
+                val path = uri.path?.split(":")?.last()?.replace("$ROOT_PATH/", "")
 
                 viewModel.setSelectedDirectory(
-                    path ?: (ModTools.ROOT_PATH + "/" + ModTools.DOWNLOAD_MOD_PATH)
+                    path ?: (ROOT_PATH + "/" + ModTools.DOWNLOAD_MOD_PATH)
                 )
                 // TODO: 使用path
             }

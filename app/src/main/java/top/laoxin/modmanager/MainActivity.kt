@@ -2,21 +2,19 @@ package top.laoxin.modmanager
 
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import rikka.shizuku.Shizuku
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
@@ -28,9 +26,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
+        // 获取屏幕宽度
+        val screenWidthDp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 使用 WindowMetrics 获取屏幕宽度（单位：dp）
+            val windowMetrics = windowManager.currentWindowMetrics
+            val widthPixels = windowMetrics.bounds.width()
+            widthPixels / resources.displayMetrics.density
+        } else {
+            // 兼容 Android 11 (API 30) 以下的版本
+            val displayMetrics = DisplayMetrics()
+            @Suppress("DEPRECATION")
+            windowManager.defaultDisplay.getMetrics(displayMetrics)
+            displayMetrics.widthPixels / displayMetrics.density
+        }
 
         // 判定设备是否是平板（假设屏幕宽度大于等于 600dp 为平板）
         requestedOrientation = if (screenWidthDp >= 600) {
@@ -57,25 +65,12 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        // 同意许可，加载 MainActivity 的内容
+        // 启用 Edge-to-Edge 模式
+        enableEdgeToEdge()
+
         setContent {
-            // 使用 Material3 主题适配深色模式
+            // 使用自定义主题适配深色模式
             ModManagerTheme {
-                val systemUiController = rememberSystemUiController()
-                val colors = MaterialTheme.colorScheme
-                val dark = isSystemInDarkTheme()
-
-                SideEffect {
-                    systemUiController.setStatusBarColor(
-                        color = Color.Transparent,
-                        darkIcons = !dark
-                    )
-                    systemUiController.setNavigationBarColor(
-                        color = colors.surfaceContainer,
-                        darkIcons = !dark
-                    )
-                }
-
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -52,7 +50,6 @@ import top.laoxin.modmanager.bean.ModBean
 
 @Composable
 fun ModList(
-    modifier: Modifier = Modifier,
     mods: List<ModBean>,
     modsSelected: List<Int>,
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -215,7 +212,6 @@ fun ModListItem(
 @Composable
 fun PasswordInputDialog(
     showDialog: Boolean,
-    mod: ModBean,
     onDismiss: () -> Unit,
     onPasswordSubmit: (String) -> Unit
 ) {
@@ -255,18 +251,3 @@ fun PasswordInputDialog(
         )
     }
 }
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ImagePager(images: List<ImageBitmap>) {
-    val pagerState = rememberPagerState(pageCount = { images.size })
-    HorizontalPager(state = pagerState) { page ->
-        Image(
-            bitmap = images[page],
-            contentDescription = "预览图",
-            modifier = Modifier.clip(RoundedCornerShape(8.dp)) // 设置图片的圆角
-        )
-    }
-}
-

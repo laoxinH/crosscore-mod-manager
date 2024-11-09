@@ -419,8 +419,13 @@ class ConsoleViewModel(
                         Bitmap.Config.ARGB_8888
                     ).also { bitmap ->
                         val canvas = Canvas(bitmap)
-                        (drawable as AdaptiveIconDrawable).setBounds(0, 0, canvas.width, canvas.height)
-                        (drawable as AdaptiveIconDrawable).draw(canvas)
+                        drawable.setBounds(
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        )
+                        drawable.draw(canvas)
                     }
                 }
 

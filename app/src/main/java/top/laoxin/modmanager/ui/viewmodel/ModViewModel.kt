@@ -21,12 +21,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
@@ -52,7 +49,7 @@ import top.laoxin.modmanager.ui.view.modview.NavigationIndex
 import java.io.File
 
 class ModViewModel(
-    private val userPreferencesRepository: UserPreferencesRepository,
+    userPreferencesRepository: UserPreferencesRepository,
     private val modRepository: ModRepository,
     private val backupRepository: BackupRepository
 ) : ViewModel(), ProgressUpdateListener, FlashObserverInterface {
@@ -61,9 +58,6 @@ class ModViewModel(
 
     // 搜索框内容
     //private val _searchText = mutableStateOf("")
-
-    // 互斥锁
-    private val mutex = Mutex()
 
     private var _requestPermissionPath by mutableStateOf("")
     val requestPermissionPath: String
@@ -76,6 +70,7 @@ class ModViewModel(
 
     // 当前浏览的压缩包path
     private var _currentZipPath by mutableStateOf("")
+
     // 当前的虚拟路径
     private var _currentPath by mutableStateOf("")
 
@@ -133,6 +128,7 @@ class ModViewModel(
 
     private val delUnzipDictionaryFlow =
         userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
+
     // 展示分类视图
     private val showCategoryView =
         userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", false)
@@ -274,7 +270,7 @@ class ModViewModel(
     }
 
 
-    fun flashMods(isInit: Boolean, isLoading: Boolean) {
+    fun flashMods(isLoading: Boolean) {
         flashModsJob?.cancel()
         kotlin.runCatching {
             //检擦是否选择游戏
@@ -567,8 +563,7 @@ class ModViewModel(
             setMultitaskingProgress("0/${mods.size}")
             mods.forEachIndexed { index, modBean ->
                 val backupBeans = backupRepository.getByModNameAndGamePackageName(
-                    modBean.name!!,
-                    _gameInfo.packageName
+                    modBean.name!!, _gameInfo.packageName
                 ).first()
                 Log.d("ModViewModel", "disableMod: 开始执行关闭$backupBeans")
                 kotlin.runCatching {
@@ -734,25 +729,10 @@ class ModViewModel(
         }
     }
 
-    fun setModList(modList: List<ModBean>) {
-        _uiState.value = _uiState.value.copy(modList = modList)
-    }
-
-    // 设置已开启mod
-    fun setEnableMods(modList: List<ModBean>) {
-        _uiState.value = _uiState.value.copy(enableModList = modList)
-    }
-
-    // 设置已关闭mods
-    fun setDisableMods(modList: List<ModBean>) {
-        _uiState.value = _uiState.value.copy(disableModList = modList)
-    }
-
     // 设置搜索mods
     fun setSearchMods(modList: List<ModBean>) {
         _uiState.value = _uiState.value.copy(searchModList = modList)
     }
-
 
     fun setOpenPermissionRequestDialog(openPermissionRequestDialog: Boolean) {
         _uiState.value =
@@ -780,10 +760,12 @@ class ModViewModel(
                     if (searchText.isEmpty()) {
                         updateFiles(_currentPath)
                     } else {
-                        val searchFiles = _uiState.value.currentFiles.filter { it.name.contains(searchText) }
-                        _uiState.update { it.copy(currentFiles = searchFiles)}
+                        val searchFiles =
+                            _uiState.value.currentFiles.filter { it.name.contains(searchText) }
+                        _uiState.update { it.copy(currentFiles = searchFiles) }
                     }
                 }
+
                 else -> {
                     if (searchText.isEmpty()) {
                         setSearchMods(emptyList())
@@ -823,31 +805,6 @@ class ModViewModel(
     }
 
 
-    suspend fun addMods(mods: List<ModBean>) {
-        mutex.withLock {
-            val modList = _uiState.value.modList.toMutableList()
-            modList.addAll(mods)
-            setModList(modList)
-        }
-    }
-
-    // 添加备份到数据库
-    suspend fun addBackup(backup: BackupBean) {
-        viewModelScope.launch {
-            backupRepository.insert(backup)
-        }
-    }
-
-    // 清空mods
-    fun clearMods() {
-        setModList(emptyList())
-    }
-
-    // 获取所有mods
-    fun getAllMods(): List<ModBean> {
-        return _uiState.value.modList
-    }
-
     // 设置解压进度
     private fun setUnzipProgress(progress: String) {
         viewModelScope.launch(Dispatchers.Main) {
@@ -870,7 +827,7 @@ class ModViewModel(
     }
 
     override fun onFlash() {
-        flashMods(false, false)
+        flashMods(false)
     }
 
     fun setModsView(enableMods: NavigationIndex) {
@@ -905,9 +862,7 @@ class ModViewModel(
     fun switchSelectMod(modList: List<ModBean>, b: Boolean) {
         if (_uiState.value.modsSelected.isEmpty()) return
         val modsSelected = modList.filter {
-            uiState.value.modsSelected.contains(it.id)
-                    && it.isEnable != b
-                    && (!it.isEncrypted || !it.password.isNullOrEmpty())
+            uiState.value.modsSelected.contains(it.id) && it.isEnable != b && (!it.isEncrypted || !it.password.isNullOrEmpty())
         }
         if (modsSelected.isEmpty()) return
         setUnzipProgress("")
@@ -971,8 +926,7 @@ class ModViewModel(
                 withContext(Dispatchers.Main) {
                     ToastUtils.longCall(
                         App.get().getString(
-                            R.string.toast_del_mods_success,
-                            singleFileMods.size.toString()
+                            R.string.toast_del_mods_success, singleFileMods.size.toString()
                         )
                     )
                 }
@@ -1002,8 +956,7 @@ class ModViewModel(
             viewModelScope.launch(Dispatchers.IO) {
                 fileObserver?.stopWatching()
                 val delMods = modRepository.getModsByPathAndGamePackageName(
-                    delMod.path!!,
-                    delMod.gamePackageName!!
+                    delMod.path!!, delMod.gamePackageName!!
                 ).first()
                 // 排除包含多个mod文件的压缩包
                 val disableMods = delMods.filter { !it.isEnable }
@@ -1062,12 +1015,12 @@ class ModViewModel(
         _currentZipPath = path
         // 读取压缩包文件
 
-            val fileHeaders = ArchiveUtil.listInArchiveFiles(path)
-            // 拼接路径
-            val files = fileHeaders.map {
-                File("$path/$it")
-            }
-            _currentFiles = files
+        val fileHeaders = ArchiveUtil.listInArchiveFiles(path)
+        // 拼接路径
+        val files = fileHeaders.map {
+            File("$path/$it")
+        }
+        _currentFiles = files
 
     }
 
