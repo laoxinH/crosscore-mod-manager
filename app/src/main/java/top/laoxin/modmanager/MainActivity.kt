@@ -7,17 +7,14 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import rikka.shizuku.Shizuku
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
@@ -68,25 +65,12 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        // 同意许可，加载 MainActivity 的内容
+        // 启用 Edge-to-Edge 模式
+        enableEdgeToEdge()
+
         setContent {
-            // 使用 Material3 主题适配深色模式
+            // 使用自定义主题适配深色模式
             ModManagerTheme {
-                val systemUiController = rememberSystemUiController()
-                val colors = MaterialTheme.colorScheme
-                val dark = isSystemInDarkTheme()
-
-                SideEffect {
-                    systemUiController.setStatusBarColor(
-                        color = Color.Transparent,
-                        darkIcons = !dark
-                    )
-                    systemUiController.setNavigationBarColor(
-                        color = colors.surfaceContainer,
-                        darkIcons = !dark
-                    )
-                }
-
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
