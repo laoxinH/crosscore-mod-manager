@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
@@ -46,15 +44,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.modview.ModTopBar
-import top.laoxin.modmanager.ui.view.modview.Tips
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
-
 
 // 导航栏索引
 enum class NavigationIndex(
@@ -67,34 +62,35 @@ enum class NavigationIndex(
 }
 
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
     val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory)
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { NavigationIndex.entries.size }
-    )
+    val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
 
-    val scope = rememberCoroutineScope()
     var exitTime by remember { mutableLongStateOf(0L) }
+    var currentPage by remember { mutableIntStateOf(0) }
+    var shouldScroll by remember { mutableStateOf(false) }
 
     Row {
-        // 根据屏幕方向选择布局
+        // 在横向模式下显示侧边导航栏
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
-                pagerState = pagerState,
+                currentPage = currentPage,
+                onPageSelected = { page ->
+                    currentPage = page
+                    shouldScroll = true
+                },
                 modViewModel = modViewModel,
                 consoleViewModel = consoleViewModel
             )
         }
 
         Scaffold(
+            // 根据当前页面显示不同的顶部工具栏
             topBar = {
-                // 根据当前页面显示不同的顶部工具栏
-                when (pagerState.currentPage) {
+                when (currentPage) {
                     NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(
                         consoleViewModel,
                         configuration = configuration.orientation
@@ -105,22 +101,21 @@ fun ModManagerApp() {
                         configuration = configuration.orientation
                     )
 
-                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar(configuration = configuration.orientation)
+                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar(
+                        configuration = configuration.orientation
+                    )
                 }
-                val uiState by modViewModel.uiState.collectAsState()
-                Tips(
-                    text = uiState.tipsText,
-                    showTips = uiState.showTips,
-                    onDismiss = { modViewModel.setShowTips(false) },
-                    uiState = uiState
-                )
             },
+            // 在纵向模式下显示底部导航栏
             bottomBar = {
-                // 在纵向模式下显示底部导航栏
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     NavigationBar(
-                        pagerState = pagerState,
-                        modViewModel = modViewModel
+                        currentPage = currentPage,
+                        modViewModel = modViewModel,
+                        onPageSelected = { page ->
+                            currentPage = page
+                            shouldScroll = true
+                        }
                     )
                 }
             }
@@ -130,40 +125,60 @@ fun ModManagerApp() {
                 remember {
                     Toast.makeText(
                         context,
-                        context.getText(R.string.toast_quit_qpp),
+                        context.getText(R.string.toast_quit_app),
                         Toast.LENGTH_SHORT
                     )
                 }
             val activity = context as? Activity
 
-            BackHandler(enabled = pagerState.currentPage == NavigationIndex.CONSOLE.ordinal) {
+            BackHandler(enabled = currentPage == NavigationIndex.CONSOLE.ordinal) {
                 // 在 ConsolePage 显示退出确认
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - exitTime > 2000) {
                     exitToast.show()
                     exitTime = currentTime
                 } else {
-                    // 安全关闭应用
                     exitToast.cancel()
                     activity?.finish()
                 }
             }
 
-            BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
-                // 返回到 ConsolePage
-                scope.launch {
-                    pagerState.animateScrollToPage(NavigationIndex.CONSOLE.ordinal)
-                }
+            BackHandler(enabled = currentPage != NavigationIndex.CONSOLE.ordinal) {
+                currentPage = NavigationIndex.CONSOLE.ordinal
             }
+
+            // 使用 HorizontalPager 实现分页效果
+            val pagerState = rememberPagerState(
+                initialPage = currentPage,
+                pageCount = { pageList.size }
+            )
 
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.padding(innerPadding)
             ) { page ->
+                // 每个页面显示的内容
                 when (page) {
                     NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
                     NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
                     NavigationIndex.SETTINGS.ordinal -> SettingPage()
+                }
+            }
+
+            // 监听 HorizontalPager 页面变化时更新 currentPage
+            LaunchedEffect(pagerState.currentPage) {
+                if (pagerState.currentPage != currentPage && !shouldScroll) {
+                    currentPage = pagerState.currentPage // 更新 currentPage
+                }
+            }
+
+            // 监听 currentPage 变化并触发页面滚动
+            LaunchedEffect(currentPage) {
+                if (shouldScroll) {
+                    pagerState.animateScrollToPage(currentPage)
+                    if (pagerState.currentPage == currentPage) {
+                        shouldScroll = false
+                    }
                 }
             }
         }
@@ -173,11 +188,11 @@ fun ModManagerApp() {
 //侧边导航
 @Composable
 fun NavigationRail(
-    pagerState: PagerState,
+    currentPage: Int,
+    onPageSelected: (Int) -> Unit,
     modViewModel: ModViewModel,
     consoleViewModel: ConsoleViewModel
 ) {
-    val coroutineScope = rememberCoroutineScope()
     var lastClickTime by remember { mutableLongStateOf(0L) }
     val packageName = consoleViewModel.uiState.collectAsState().value.gameInfo.packageName
     val gameIcon = remember(packageName) {
@@ -187,41 +202,38 @@ fun NavigationRail(
     NavigationRail(
         modifier = Modifier
             .fillMaxHeight()
-            .padding(0.dp),
-        // containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            .padding(0.dp)
     ) {
-        // 顶部的当前页面名称
-        val currentPageName =
-            stringResource(id = NavigationIndex.entries[pagerState.currentPage].title)
+        val currentPageName = stringResource(id = NavigationIndex.entries[currentPage].title)
         Text(
             text = currentPageName,
             modifier = Modifier.padding(16.dp)
         )
         Column {
-
             NavigationIndex.entries.forEachIndexed { index, navigationItem ->
-                val isSelected = pagerState.currentPage == index
+                val isSelected = currentPage == index
 
                 NavigationRailItem(
                     selected = isSelected,
                     onClick = {
                         val currentTime = System.currentTimeMillis()
                         if ((currentTime - lastClickTime) < 300 && isSelected) {
-                            refreshCurrentPage(pagerState.currentPage, modViewModel)
+                            refreshCurrentPage(currentPage, modViewModel)
                         } else {
+                            // 非双击或者是切换页面时，执行页面切换
                             modViewModel.exitSelect()
                             if (!isSelected) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
+                                onPageSelected(index)
                             }
                         }
                         lastClickTime = currentTime
                     },
                     icon = {
+                        // 显示图标
                         Icon(imageVector = navigationItem.icon, contentDescription = null)
                     },
                     label = {
+                        // 标签文字，仅在选中时显示
                         AnimatedVisibility(
                             visible = isSelected,
                             enter = fadeIn(),
@@ -239,8 +251,7 @@ fun NavigationRail(
         Spacer(modifier = Modifier.weight(1f))
 
         Column(
-            modifier = Modifier
-                .padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         ) {
             gameIcon?.let {
                 Image(
@@ -258,36 +269,37 @@ fun NavigationRail(
 // 底部导航
 @Composable
 fun NavigationBar(
-    pagerState: PagerState,
-    modViewModel: ModViewModel
+    currentPage: Int,
+    modViewModel: ModViewModel,
+    onPageSelected: (Int) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
     NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
-            val isSelected = pagerState.currentPage == index
+            val isSelected = currentPage == index
 
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
                     val currentTime = System.currentTimeMillis()
-                    if ((currentTime - lastClickTime) < 300 && isSelected) { // 检测双击
-                        refreshCurrentPage(pagerState.currentPage, modViewModel)
+                    if ((currentTime - lastClickTime) < 300 && isSelected) {
+                        refreshCurrentPage(currentPage, modViewModel)
                     } else {
+                        // 非双击或者是切换页面时，执行页面切换
                         modViewModel.exitSelect()
                         if (!isSelected) {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
+                            onPageSelected(index)
                         }
                     }
                     lastClickTime = currentTime
                 },
                 icon = {
+                    // 显示图标
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
+                    // 标签文字，仅在选中时显示
                     AnimatedVisibility(
                         visible = isSelected,
                         enter = fadeIn(),
