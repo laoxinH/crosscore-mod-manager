@@ -2,6 +2,7 @@ package top.laoxin.modmanager
 
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
@@ -28,9 +29,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
+        // 获取屏幕宽度
+        val screenWidthDp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 使用 WindowMetrics 获取屏幕宽度（单位：dp）
+            val windowMetrics = windowManager.currentWindowMetrics
+            val widthPixels = windowMetrics.bounds.width()
+            widthPixels / resources.displayMetrics.density
+        } else {
+            // 兼容 Android 11 (API 30) 以下的版本
+            val displayMetrics = DisplayMetrics()
+            @Suppress("DEPRECATION")
+            windowManager.defaultDisplay.getMetrics(displayMetrics)
+            displayMetrics.widthPixels / displayMetrics.density
+        }
 
         // 判定设备是否是平板（假设屏幕宽度大于等于 600dp 为平板）
         requestedOrientation = if (screenWidthDp >= 600) {
