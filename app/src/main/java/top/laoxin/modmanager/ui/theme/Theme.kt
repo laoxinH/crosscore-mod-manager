@@ -110,7 +110,11 @@ fun ModManagerTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
             WindowCompat.setDecorFitsSystemWindows(window, false)
+
+            // 通过背景色使状态栏和导航栏透明
+            window.setBackgroundDrawableResource(android.R.color.transparent)
 
             // 设置状态栏和导航栏的图标颜色
             WindowCompat.getInsetsController(window, view).let { controller ->

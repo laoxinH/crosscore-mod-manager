@@ -13,8 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import rikka.shizuku.Shizuku
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
@@ -26,21 +28,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        // 通过背景色使状态栏和导航栏透明
+        window.setBackgroundDrawableResource(android.R.color.transparent)
+
         // 获取屏幕宽度
         val screenWidthDp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // 使用 WindowMetrics 获取屏幕宽度（单位：dp）
             val windowMetrics = windowManager.currentWindowMetrics
             val widthPixels = windowMetrics.bounds.width()
             widthPixels / resources.displayMetrics.density
         } else {
-            // 兼容 Android 11 (API 30) 以下的版本
             val displayMetrics = DisplayMetrics()
             @Suppress("DEPRECATION")
             windowManager.defaultDisplay.getMetrics(displayMetrics)
             displayMetrics.widthPixels / displayMetrics.density
         }
 
-        // 判定设备是否是平板（假设屏幕宽度大于等于 600dp 为平板）
         requestedOrientation = if (screenWidthDp >= 600) {
             ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         } else {
@@ -50,27 +54,27 @@ class MainActivity : ComponentActivity() {
         // 添加 Shizuku 权限请求监听
         Shizuku.addRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
 
-        // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         // 检查是否同意许可，跳转到 StartActivity 页面
         val sharedPreferences = getSharedPreferences("AppLaunch", MODE_PRIVATE)
         val isConfirm = sharedPreferences.getBoolean("isConfirm", false)
 
         if (!isConfirm) {
-            // 如果未同意许可，跳转到 StartActivity 进行确认
             val intent = Intent(this, StartActivity::class.java)
             startActivity(intent)
             finish()
             return
         }
 
-        // 启用 Edge-to-Edge 模式
         enableEdgeToEdge()
 
         setContent {
-            // 使用自定义主题适配深色模式
             ModManagerTheme {
+                // 设置导航栏背景颜色和图标亮度
+                WindowInsetsControllerCompat(window, window.decorView).apply {
+                    isAppearanceLightNavigationBars = true
+                    @Suppress("DEPRECATION")
+                    window.navigationBarColor = MaterialTheme.colorScheme.surfaceContainer.toArgb()
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -84,7 +88,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (PermissionTools.isShizukuAvailable) {
-            // 移除 Shizuku 权限请求回调
             Shizuku.removeRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
         }
     }
