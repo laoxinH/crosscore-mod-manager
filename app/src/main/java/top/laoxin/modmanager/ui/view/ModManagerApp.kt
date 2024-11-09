@@ -308,7 +308,7 @@ private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
         NavigationIndex.CONSOLE.ordinal -> {}
 
         NavigationIndex.MOD.ordinal -> {
-            modViewModel.flashMods(false, true)
+            modViewModel.flashMods(true)
         }
 
         NavigationIndex.SETTINGS.ordinal -> {}

@@ -1,3 +1,5 @@
+package top.laoxin.modmanager.ui.view.modview
+
 import android.os.Environment
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -39,7 +41,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
-import top.laoxin.modmanager.ui.view.modview.ModListItem
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
 

@@ -322,7 +322,7 @@ fun GeneralTopBar(
                     )
                 }
                 IconButton(onClick = {
-                    viewModel.flashMods(false, true)
+                    viewModel.flashMods(true)
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Refresh, // 使用刷新图标

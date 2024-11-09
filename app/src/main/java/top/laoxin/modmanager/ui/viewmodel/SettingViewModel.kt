@@ -189,26 +189,12 @@ class SettingViewModel(
                 }
             }
         } else {
-            _uiState.value = _uiState.value.copy(showAcknowledgments = b)
+            _uiState.value = _uiState.value.copy(showAcknowledgments = false)
         }
     }
 
     fun showSwitchGame(b: Boolean) {
         _uiState.value = _uiState.value.copy(showSwitchGame = b)
-    }
-
-    // 设置游戏服务器
-    fun setGameServer(serviceName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            userPreferencesRepository.savePreference("GAME_SERVICE", serviceName)
-        }
-    }
-
-    // 设置安装位置
-    fun setInstallPath(path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            userPreferencesRepository.savePreference("INSTALL_PATH", path)
-        }
     }
 
     // 设置gameInfoList
@@ -398,7 +384,7 @@ class SettingViewModel(
             }
         } else {
             _uiState.update {
-                it.copy(showDownloadGameConfigDialog = b)
+                it.copy(showDownloadGameConfigDialog = false)
             }
         }
     }

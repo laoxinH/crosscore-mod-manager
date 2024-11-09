@@ -17,7 +17,6 @@ package top.laoxin.modmanager.ui.view.modview
  */
 
 
-import ModsBrowser
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
@@ -151,7 +150,6 @@ fun ModPage(viewModel: ModViewModel) {
                 )
                 PasswordInputDialog(
                     showDialog = uiState.showPasswordDialog,
-                    mod = it,
                     onDismiss = { viewModel.showPasswordDialog(false) },
                     onPasswordSubmit = viewModel::checkPassword
                 )
