@@ -21,6 +21,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ImagesearchRoller
@@ -43,12 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
@@ -75,7 +72,10 @@ enum class NavigationIndex(
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
     val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory)
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { NavigationIndex.entries.size }
+    )
     val configuration = LocalConfiguration.current
 
     val scope = rememberCoroutineScope()
@@ -125,7 +125,7 @@ fun ModManagerApp() {
                 }
             }
         ) { innerPadding ->
-            val context = LocalContext.current // 在这里获取 Context
+            val context = LocalContext.current
             val exitToast: Toast =
                 remember {
                     Toast.makeText(
@@ -134,7 +134,7 @@ fun ModManagerApp() {
                         Toast.LENGTH_SHORT
                     )
                 }
-            val activity = context as? Activity // 获取当前 Activity
+            val activity = context as? Activity
 
             BackHandler(enabled = pagerState.currentPage == NavigationIndex.CONSOLE.ordinal) {
                 // 在 ConsolePage 显示退出确认
@@ -152,13 +152,12 @@ fun ModManagerApp() {
             BackHandler(enabled = pagerState.currentPage != NavigationIndex.CONSOLE.ordinal) {
                 // 返回到 ConsolePage
                 scope.launch {
-                    pagerState.scrollToPage(NavigationIndex.CONSOLE.ordinal)
+                    pagerState.animateScrollToPage(NavigationIndex.CONSOLE.ordinal)
                 }
             }
 
             HorizontalPager(
                 state = pagerState,
-                count = NavigationIndex.entries.size,
                 modifier = Modifier.padding(innerPadding)
             ) { page ->
                 when (page) {
@@ -265,7 +264,7 @@ fun NavigationBar(
     val coroutineScope = rememberCoroutineScope()
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
-    NavigationBar() {
+    NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
             val isSelected = pagerState.currentPage == index
 
@@ -306,42 +305,13 @@ fun NavigationBar(
 private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
     // 根据当前页面的类型，执行相应的刷新逻辑
     when (currentPage) {
-        NavigationIndex.CONSOLE.ordinal -> {
-            // 刷新控制台页面的逻辑
-        }
+        NavigationIndex.CONSOLE.ordinal -> {}
 
         NavigationIndex.MOD.ordinal -> {
             modViewModel.flashMods(false, true)
         }
 
-        NavigationIndex.SETTINGS.ordinal -> {
-            // 刷新设置页面逻辑
-        }
-    }
-}
-
-//导航
-@Composable
-fun NavigationHost(
-    navController: NavHostController,
-    modViewModel: ModViewModel,
-    consoleViewModel: ConsoleViewModel,
-    modifier: Modifier = Modifier,
-) {
-    NavHost(
-        navController = navController,
-        startDestination = NavigationIndex.CONSOLE.name,
-        modifier = modifier
-    ) {
-        composable(route = NavigationIndex.CONSOLE.name) {
-            ConsolePage(consoleViewModel)
-        }
-        composable(route = NavigationIndex.MOD.name) {
-            ModPage(modViewModel)
-        }
-        composable(route = NavigationIndex.SETTINGS.name) {
-            SettingPage()
-        }
+        NavigationIndex.SETTINGS.ordinal -> {}
     }
 }
 
