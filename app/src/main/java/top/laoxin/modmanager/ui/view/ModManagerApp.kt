@@ -165,6 +165,13 @@ fun ModManagerApp() {
                 }
             }
 
+            // 监听 HorizontalPager 页面变化时更新 currentPage
+            LaunchedEffect(pagerState.currentPage) {
+                if (pagerState.currentPage != currentPage && !shouldScroll) {
+                    currentPage = pagerState.currentPage // 更新 currentPage
+                }
+            }
+
             // 监听 currentPage 变化并触发页面滚动
             LaunchedEffect(currentPage) {
                 if (shouldScroll) {
