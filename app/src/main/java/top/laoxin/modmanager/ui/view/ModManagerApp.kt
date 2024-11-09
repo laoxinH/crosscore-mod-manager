@@ -70,16 +70,18 @@ fun ModManagerApp() {
     val configuration = LocalConfiguration.current
 
     var exitTime by remember { mutableLongStateOf(0L) }
-
-    // 管理当前页面状态
     var currentPage by remember { mutableIntStateOf(0) }
+    var shouldScroll by remember { mutableStateOf(false) }
 
     Row {
         // 在横向模式下显示侧边导航栏
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
                 currentPage = currentPage,
-                onPageSelected = { page -> currentPage = page },
+                onPageSelected = { page ->
+                    currentPage = page
+                    shouldScroll = true
+                },
                 modViewModel = modViewModel,
                 consoleViewModel = consoleViewModel
             )
@@ -110,7 +112,10 @@ fun ModManagerApp() {
                     NavigationBar(
                         currentPage = currentPage,
                         modViewModel = modViewModel,
-                        onPageSelected = { page -> currentPage = page }
+                        onPageSelected = { page ->
+                            currentPage = page
+                            shouldScroll = true
+                        }
                     )
                 }
             }
@@ -160,9 +165,14 @@ fun ModManagerApp() {
                 }
             }
 
-            // 监听 HorizontalPager 页面切换时更新 currentPage
-            LaunchedEffect(pagerState.currentPage) {
-                currentPage = pagerState.currentPage
+            // 监听 currentPage 变化并触发页面滚动
+            LaunchedEffect(currentPage) {
+                if (shouldScroll) {
+                    pagerState.animateScrollToPage(currentPage)
+                    if (pagerState.currentPage == currentPage) {
+                        shouldScroll = false
+                    }
+                }
             }
         }
     }
@@ -203,6 +213,7 @@ fun NavigationRail(
                         if ((currentTime - lastClickTime) < 300 && isSelected) {
                             refreshCurrentPage(currentPage, modViewModel)
                         } else {
+                            // 非双击或者是切换页面时，执行页面切换
                             modViewModel.exitSelect()
                             if (!isSelected) {
                                 onPageSelected(index)
@@ -211,9 +222,11 @@ fun NavigationRail(
                         lastClickTime = currentTime
                     },
                     icon = {
+                        // 显示图标
                         Icon(imageVector = navigationItem.icon, contentDescription = null)
                     },
                     label = {
+                        // 标签文字，仅在选中时显示
                         AnimatedVisibility(
                             visible = isSelected,
                             enter = fadeIn(),
@@ -252,7 +265,6 @@ fun NavigationBar(
     currentPage: Int,
     modViewModel: ModViewModel,
     onPageSelected: (Int) -> Unit
-
 ) {
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
@@ -264,9 +276,10 @@ fun NavigationBar(
                 selected = isSelected,
                 onClick = {
                     val currentTime = System.currentTimeMillis()
-                    if ((currentTime - lastClickTime) < 300 && isSelected) { // 检测双击
+                    if ((currentTime - lastClickTime) < 300 && isSelected) {
                         refreshCurrentPage(currentPage, modViewModel)
                     } else {
+                        // 非双击或者是切换页面时，执行页面切换
                         modViewModel.exitSelect()
                         if (!isSelected) {
                             onPageSelected(index)
@@ -275,9 +288,11 @@ fun NavigationBar(
                     lastClickTime = currentTime
                 },
                 icon = {
+                    // 显示图标
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
+                    // 标签文字，仅在选中时显示
                     AnimatedVisibility(
                         visible = isSelected,
                         enter = fadeIn(),
