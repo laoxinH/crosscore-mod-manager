@@ -457,8 +457,8 @@ fun ConsolePage(viewModel: ConsoleViewModel) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ConsoleTopBar(
-    viewModel: ConsoleViewModel, modifier: Modifier = Modifier,
-
+    viewModel: ConsoleViewModel,
+    modifier: Modifier = Modifier,
     configuration: Int
 ) {
     TopAppBar(colors = TopAppBarDefaults.topAppBarColors(

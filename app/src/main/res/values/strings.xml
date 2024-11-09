@@ -187,6 +187,6 @@
     <string name="mod_browser_file_description">MOD数量: %1$s</string>
     <string name="mod_top_bar_count">统计：%1$s</string>
     <string name="mod_top_bar_tips">总进度 : %1$s</string>
-    <string name="toast_quit_qpp">再按一次退出应用</string>
+    <string name="toast_quit_app">再按一次退出应用</string>
 
 </resources>
