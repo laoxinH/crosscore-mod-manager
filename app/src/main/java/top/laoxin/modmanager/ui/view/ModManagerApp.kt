@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
@@ -50,6 +52,7 @@ import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.modview.ModTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
+import kotlin.math.abs
 
 // 导航栏索引
 enum class NavigationIndex(
@@ -144,7 +147,9 @@ fun ModManagerApp() {
             }
 
             BackHandler(enabled = currentPage != NavigationIndex.CONSOLE.ordinal) {
+                // 在其他页面显示返回键返回到 ConsolePage
                 currentPage = NavigationIndex.CONSOLE.ordinal
+                shouldScroll = true
             }
 
             // 使用 HorizontalPager 实现分页效果
@@ -175,7 +180,13 @@ fun ModManagerApp() {
             // 监听 currentPage 变化并触发页面滚动
             LaunchedEffect(currentPage) {
                 if (shouldScroll) {
-                    pagerState.animateScrollToPage(currentPage)
+                    pagerState.animateScrollToPage(
+                        page = currentPage,
+                        animationSpec = tween(
+                            durationMillis = abs(pagerState.currentPage - currentPage) * 100 + 200,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
                     if (pagerState.currentPage == currentPage) {
                         shouldScroll = false
                     }

@@ -42,7 +42,6 @@ class App : Application() {
             Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
             LogTools.logRecord("Uncaught exception in thread ${thread.name}: $throwable")
         }
-
     }
 
     private fun createFile() {

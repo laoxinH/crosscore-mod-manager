@@ -247,7 +247,6 @@ fun SelectPermissionDialog(
 }
 
 // 请求通知权限
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RequestNotificationPermission() {
@@ -309,7 +308,6 @@ fun RequestNotificationPermission() {
                         )
 
                     } else {
-
                         //如果这是用户第一次登陆此功能，或者用户不想再次被要求获得此权限，请说明该权限是必需的(用��选择拒绝且不再询问)
                         DialogCommon(
                             title = stringResource(id = R.string.dialog_reqest_notification_title),
@@ -328,7 +326,5 @@ fun RequestNotificationPermission() {
                 }
             }
         }
-
     }
-
 }
