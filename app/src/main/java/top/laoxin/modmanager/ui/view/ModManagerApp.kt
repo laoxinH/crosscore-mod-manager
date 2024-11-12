@@ -16,10 +16,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -28,14 +32,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ImagesearchRoller
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -43,11 +52,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.view.modview.ModPage
 import top.laoxin.modmanager.ui.view.modview.ModTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
@@ -133,9 +145,14 @@ fun ModManagerApp() {
                     )
                 }
             val activity = context as? Activity
+            val uiState = modViewModel.uiState.collectAsState().value
+            val pagerState = rememberPagerState(
+                initialPage = currentPage,
+                pageCount = { pageList.size }
+            )
 
+            // 在 ConsolePage 显示退出确认
             BackHandler(enabled = currentPage == NavigationIndex.CONSOLE.ordinal) {
-                // 在 ConsolePage 显示退出确认
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - exitTime > 2000) {
                     exitToast.show()
@@ -146,28 +163,10 @@ fun ModManagerApp() {
                 }
             }
 
+            // 在其他页面显示返回键返回到 ConsolePage
             BackHandler(enabled = currentPage != NavigationIndex.CONSOLE.ordinal) {
-                // 在其他页面显示返回键返回到 ConsolePage
                 currentPage = NavigationIndex.CONSOLE.ordinal
                 shouldScroll = true
-            }
-
-            // 使用 HorizontalPager 实现分页效果
-            val pagerState = rememberPagerState(
-                initialPage = currentPage,
-                pageCount = { pageList.size }
-            )
-
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.padding(innerPadding)
-            ) { page ->
-                // 每个页面显示的内容
-                when (page) {
-                    NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
-                    NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
-                    NavigationIndex.SETTINGS.ordinal -> SettingPage()
-                }
             }
 
             // 监听 HorizontalPager 页面变化时更新 currentPage
@@ -189,6 +188,36 @@ fun ModManagerApp() {
                     )
                     if (pagerState.currentPage == currentPage) {
                         shouldScroll = false
+                    }
+                }
+            }
+
+            // 页面内容
+            Box(modifier = Modifier.fillMaxSize()) {
+                // 显示进度
+                if (uiState.showTips) {
+                    ProcessTips(
+                        text = uiState.tipsText,
+                        onDismiss = { modViewModel.setShowTips(false) },
+                        uiState = uiState,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = innerPadding.calculateTopPadding())
+                            .zIndex(10f)
+                    )
+                }
+
+                // 每个页面显示的内容
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .zIndex(0f)
+                ) { page ->
+                    when (page) {
+                        NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
+                        NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
+                        NavigationIndex.SETTINGS.ordinal -> SettingPage()
                     }
                 }
             }
@@ -370,4 +399,62 @@ fun getGameIcon(packageName: String): ImageBitmap? {
         val bitmap = drawable.toBitmap()
         return bitmap.asImageBitmap()
     }
+}
+
+@Composable
+fun ProcessTips(
+    text: String,
+    onDismiss: () -> Unit,
+    uiState: ModUiState,
+    modifier: Modifier
+) {
+    // 构建提示文本
+    val tipsStart =
+        if (uiState.unzipProgress.isNotEmpty()) {
+            "$text : ${uiState.unzipProgress}"
+        } else {
+            text
+        }
+
+    val tipsEnd =
+        if (uiState.multitaskingProgress.isNotEmpty()) {
+            stringResource(R.string.mod_top_bar_tips, uiState.multitaskingProgress)
+        } else {
+            ""
+        }
+
+    // 显示提示
+    Box(modifier.fillMaxWidth(0.7f)) {
+        Snackbar(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.padding(16.dp),
+            shape = MaterialTheme.shapes.medium,
+            action = {
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.padding(4.dp),
+                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.tips_btn_close),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+        ) {
+            Text(
+                text = "$tipsStart $tipsEnd",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+
 }

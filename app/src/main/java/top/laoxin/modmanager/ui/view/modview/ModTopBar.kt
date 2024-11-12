@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +31,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -43,6 +44,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -54,43 +57,6 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
-
-
-@Composable
-fun Tips(
-    text: String, showTips: Boolean, onDismiss: () -> Unit, uiState: ModUiState
-) {
-    if (showTips) {
-        val tipsStart = if (uiState.unzipProgress.isNotEmpty()) {
-            "$text : ${uiState.unzipProgress}"
-        } else {
-            text
-        }
-        val tipsEnd = if (uiState.multitaskingProgress.isNotEmpty()) {
-            stringResource(R.string.mod_top_bar_tips, uiState.multitaskingProgress)
-        } else {
-            ""
-        }
-        Snackbar(
-            action = {
-                TextButton(onClick = { onDismiss() }) {
-
-                    Text(
-                        stringResource(R.string.tips_btn_close),
-                        color = MaterialTheme.colorScheme.onSecondary
-                    )
-
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(8.dp)
-
-        ) {
-            Text(text = "$tipsStart $tipsEnd", style = MaterialTheme.typography.bodyMedium)
-
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -225,13 +191,13 @@ fun MultiSelectTopBar(
                 }
             })
 
+        // 显示或隐藏搜索框
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
-
-            // 根据 MutableState 显示或隐藏搜索框
             SearchBox(
                 text = viewModel.getSearchText(),
                 onValueChange = { viewModel.setSearchText(it) },
                 hint = stringResource(R.string.mod_page_search_hit),
+                visible = uiState.searchBoxVisible,
                 onClose = {
                     viewModel.setSearchBoxVisible(false)
 
@@ -243,7 +209,6 @@ fun MultiSelectTopBar(
                     viewModel.setSearchText("")
                 }
             )
-
         }
     }
 }
@@ -296,17 +261,16 @@ fun GeneralTopBar(
                 }
 
             }, actions = {
-
-//            IconButton(onClick = {
-//                // 在这里处理图标按钮的点击事件
-//                viewModel.setUserTipsDialog(true)
-//            }) {
-//                Icon(
-//                    imageVector = Icons.Default.Info, // 使用信息图标
-//                    contentDescription = "Info", // 为辅助功能提供描述
-//                    //tint = MaterialTheme.colorScheme.primaryContainer
-//                )
-//            }
+//                    IconButton(onClick = {
+//                        // 在这里处理图标按钮的点击事件
+//                        viewModel.setUserTipsDialog(true)
+//                    }) {
+//                        Icon(
+//                            imageVector = Icons.Default.Info, // 使用信息图标
+//                            contentDescription = "Info", // 为辅助功能提供描述
+//                            //tint = MaterialTheme.colorScheme.primaryContainer
+//                        )
+//                    }
                 IconButton(onClick = {
                     viewModel.setSearchBoxVisible(true)
                     when (uiState.modsView) {
@@ -362,16 +326,16 @@ fun GeneralTopBar(
                         // 添加更多的菜单项
                     }
                 }
-            })
+            }
+        )
 
-
+        // 显示或隐藏搜索框
         AnimatedVisibility(visible = uiState.searchBoxVisible) {
-
-            // 根据 MutableState 显示或隐藏搜索框
             SearchBox(
                 text = viewModel.getSearchText(),
                 onValueChange = { viewModel.setSearchText(it) },
                 hint = stringResource(R.string.mod_page_search_hit),
+                visible = uiState.searchBoxVisible,
                 onClose = {
                     viewModel.setSearchBoxVisible(false)
                     when (uiState.modsView) {
@@ -382,7 +346,6 @@ fun GeneralTopBar(
                     viewModel.setSearchText("")
                 }
             )
-
         }
     }
 }
@@ -394,14 +357,22 @@ fun SearchBox(
     onValueChange: (String) -> Unit,
     hint: String,
     onClose: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    visible: Boolean
 ) {
     // 获取键盘控制器
     val keyboardController = LocalSoftwareKeyboardController.current
+    // 创建 FocusRequester 控制焦点
+    val focusRequester = remember { FocusRequester() }
 
-    // 每次重新显示搜索框时请求显示键盘
-    LaunchedEffect(keyboardController) {
-        keyboardController?.show()
+    // 每次重新显示搜索框时，请求焦点和显示键盘
+    LaunchedEffect(visible) {
+        if (visible) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        } else {
+            keyboardController?.hide()
+        }
     }
 
     // 使用 TextField 组件实现搜索框
@@ -419,7 +390,8 @@ fun SearchBox(
         modifier = modifier
             .fillMaxWidth()
             .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 10.dp)
-            .height(50.dp),
+            .height(50.dp)
+            .focusRequester(focusRequester), // 关联 FocusRequester
         textStyle = MaterialTheme.typography.bodyMedium,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,

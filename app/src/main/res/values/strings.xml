@@ -93,7 +93,7 @@
     <string name="setting_page_more_acknowledgments">鸣谢</string>
     <string name="setting_page_more_acknowledgments_descript">鸣谢名单(对开发给予帮助的热心网友)</string>
     <string name="setting_acknowledgments">感谢名单</string>
-    <string name="tips_btn_close">关闭</string>
+    <string name="tips_btn_close">隐藏</string>
     <string name="tips_open_mod">正在开启Mod</string>
     <string name="tips_unzip_mod">正在解压Mod</string>
     <string name="tips_backups_game_files">正在备份游戏文件</string>
