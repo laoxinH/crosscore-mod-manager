@@ -1,6 +1,8 @@
 package top.laoxin.modmanager.userservice.gamestart
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.Build
@@ -29,23 +31,33 @@ class ProjectSnowStartService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-
-        val gameInfo: GameInfoBean = intent?.extras?.getParcelable("game_info")!!
+        val gameInfo: GameInfoBean = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
+            @Suppress("DEPRECATION")
+            intent?.extras?.getParcelable("game_info")!!
+        } else {
+            intent?.extras?.getParcelable("game_info", GameInfoBean::class.java)!!
+        }
 
         val checkFilepath =
             "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/${ProjectSnowTools.CHECK_FILENAME}"
         Log.d("TestService", "onStartCommand: $checkFilepath")
 
+        // 显示通知
+        val channelId = getString(R.string.channel_id)
+        val channelName = getString(R.string.channel_name)
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel = NotificationChannel(channelId, channelName, importance)
 
-        val notification: Notification = Notification.Builder(this, getString(R.string.channel_id))
-            .setContentTitle(getString(R.string.channel_tiile))
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        val notification: Notification = Notification.Builder(this, channelId)
+            .setContentTitle(getString(R.string.channel_title))
             .setContentText(getString(R.string.channel_content))
             .setSmallIcon(R.drawable.app_icon)
-            .setPriority(Notification.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setOngoing(true)
             .build()
-        // 显示通知
 
         startForeground(1, notification)
 

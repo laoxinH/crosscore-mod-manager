@@ -1,7 +1,6 @@
 package top.laoxin.modmanager.tools
 
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Environment
 import android.os.RemoteException
 import android.util.Log
@@ -49,8 +48,6 @@ object ModTools {
     val GAME_CHECK_FILE_PATH = MY_APP_PATH + "gameCheckFile/"
     private var specialPathReadType: Int = PathType.DOCUMENT
     var iFileExplorerService: IFileExplorerService? = null
-    private val PACKAGE_MANAGER: PackageManager =
-        App.get().packageManager ?: throw NullPointerException()
     private const val TAG = "ModTools"
     private var fileTools: BaseFileTools? = null
     var progressUpdateListener: ProgressUpdateListener? = null
@@ -119,7 +116,7 @@ object ModTools {
     }
 
 
-    suspend fun copyModFiles(
+    fun copyModFiles(
         modBean: ModBean,
         gameModPath: String,
         unZipPath: String,
@@ -145,7 +142,7 @@ object ModTools {
 
     }
 
-    suspend fun restoreGameFiles(backups: List<BackupBean?>) {
+    fun restoreGameFiles(backups: List<BackupBean?>) {
         if (backups.isEmpty()) return
         val checkPermission = PermissionTools.checkPermission(backups[0]?.gameFilePath ?: "")
         setModsToolsSpecialPathReadType(checkPermission)
@@ -172,7 +169,7 @@ object ModTools {
         }
     }
 
-    suspend fun deleteTempFile(): Boolean {
+    fun deleteTempFile(): Boolean {
         return if (File(MODS_TEMP_PATH).exists()) {
             setModsToolsSpecialPathReadType(PathType.FILE)
             fileTools?.deleteFile(MODS_TEMP_PATH) == true
@@ -181,7 +178,7 @@ object ModTools {
         }
     }
 
-    suspend fun deleteBackupFiles(
+    fun deleteBackupFiles(
         gameInfo: GameInfoBean
     ): Boolean {
 
@@ -193,7 +190,7 @@ object ModTools {
         }
     }
 
-    suspend fun deleteMods(mods: List<ModBean>): Boolean {
+    fun deleteMods(mods: List<ModBean>): Boolean {
         return try {
             setModsToolsSpecialPathReadType(PathType.FILE)
             mods.forEach {
@@ -208,7 +205,7 @@ object ModTools {
 
 
     // 删除缓存文件
-    suspend fun deleteCache(): Boolean {
+    fun deleteCache(): Boolean {
 
         return if (File(MODS_IMAGE_PATH).exists()) {
             setModsToolsSpecialPathReadType(PathType.FILE)
@@ -223,7 +220,7 @@ object ModTools {
     }
 
     // 读取mod信息
-    suspend fun readModInfo(unZipPath: String, modBean: ModBean): ModBean {
+    fun readModInfo(unZipPath: String, modBean: ModBean): ModBean {
         var bean = modBean.copy(description = "MOD已解密")
         // 读取readme
         bean = readReadmeFile(unZipPath, bean)
@@ -238,7 +235,7 @@ object ModTools {
         // 读取images文件输入流
         if (bean.images != null) {
             val images = mutableListOf<String>()
-            for (image in bean.images!!) {
+            for (image in bean.images) {
                 val imagePath = unZipPath + image
                 val file = File(imagePath)
                 val md5 = MD5Tools.calculateMD5(file.inputStream())
@@ -252,7 +249,7 @@ object ModTools {
 
 
     // 读取readme文件
-    private suspend fun readReadmeFile(unZipPath: String, modBean: ModBean): ModBean {
+    private fun readReadmeFile(unZipPath: String, modBean: ModBean): ModBean {
         // 判断是否存在readme文件
         val infoMap = mutableMapOf<String, String>()
         if (modBean.readmePath != null) {
@@ -495,7 +492,7 @@ object ModTools {
                 )
             }
 
-        } catch (e: RemoteException) {
+        } catch (_: RemoteException) {
             flags.add(false)
         }
         if (!flags.all { it }) {
@@ -505,16 +502,6 @@ object ModTools {
         return true
     }
 
-
-    // 修改文件权限
-    fun chmod(path: String?): Boolean {
-        return try {
-            iFileExplorerService?.chmod(path) == true
-        } catch (e: RemoteException) {
-            e.printStackTrace()
-            false
-        }
-    }
 
     // 扫描压缩文件mod
     suspend fun scanArchiveMods(
@@ -551,7 +538,6 @@ object ModTools {
 
             val mods = readModBeans(
                 file.absolutePath,
-                scanPath,
                 modTempMap,
             )
             scanMods.addAll(mods)
@@ -576,7 +562,7 @@ object ModTools {
             }
             Log.d(TAG, "所有文件路径: $files")
             val createModTempMap = createModTempMap(null, scanPath, files, gameInfo)
-            modBeans.addAll(readModBeans(null, scanPath, createModTempMap))
+            modBeans.addAll(readModBeans(null, createModTempMap))
             return modBeans
         } catch (e: Exception) {
             Log.e(TAG, "$e")
@@ -585,9 +571,8 @@ object ModTools {
         }
     }
 
-    private suspend fun readModBeans(
+    private fun readModBeans(
         filepath: String?,
-        scanPath: String,
         modTempMap: MutableMap<String, ModBeanTemp>,
     ): List<ModBean> {
         if (modTempMap.isEmpty()) {
@@ -720,7 +705,7 @@ object ModTools {
                 )
             }
 
-        } catch (e: RemoteException) {
+        } catch (_: RemoteException) {
             flags.add(false)
         }
         if (!flags.all { it }) {
@@ -740,7 +725,7 @@ object ModTools {
                 flags.add(unZipModsByFileHeardByDocument(path, gameModPath, it, password))
             }
 
-        } catch (e: RemoteException) {
+        } catch (_: RemoteException) {
             flags.add(false)
         }
         if (!flags.all { it }) {
@@ -838,15 +823,6 @@ object ModTools {
             e.printStackTrace()
             false
         }
-    }
-
-    fun getGameFiles(gameInfo: GameInfoBean): List<String> {
-        val gameFiles = mutableListOf<String>()
-        gameInfo.gameFilePath.forEach {
-            val gameFilesNames = fileTools?.getFilesNames(it)
-            gameFiles.addAll(gameFilesNames ?: emptyList())
-        }
-        return gameFiles
     }
 
     fun makeModsDirs() {
@@ -1003,28 +979,13 @@ object ModTools {
         }
     }
 
-    fun getVersionCode(): Int {
-        return try {
-            val context = App.get()
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionCode
-            } else {
-                val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-                packageInfo.longVersionCode.toInt() // Use this for Android versions 9.0 (API level 28) and higher
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-            -1
-        }
-    }
-
     fun getVersionName(): String? {
         return try {
             val context = App.get()
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
-            "未知"
+            App.get().getString(R.string.unknown)
         }
     }
 
@@ -1064,7 +1025,7 @@ object ModTools {
         }
     }
 
-    suspend fun specialOperationDisable(
+    fun specialOperationDisable(
         backupBeans: List<BackupBean>,
         packageName: String,
         modBean: ModBean

@@ -51,6 +51,7 @@ class UserPreferencesRepository(
         val preferenceKey = PREFERENCES_KEYS[key]
         if (preferenceKey != null) {
             dataStore.edit { preferences ->
+                @Suppress("UNCHECKED_CAST")
                 preferences[preferenceKey as Preferences.Key<T>] = value
             }
         }
@@ -68,6 +69,7 @@ class UserPreferencesRepository(
                     throw it
                 }
             }.map { preferences ->
+                @Suppress("UNCHECKED_CAST")
                 preferences[preferenceKey as Preferences.Key<T>] ?: defaultValue
             }
         } else {

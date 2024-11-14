@@ -8,9 +8,11 @@ import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.FileObserver
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -46,6 +48,7 @@ import top.laoxin.modmanager.database.antiHarmony.AntiHarmonyRepository
 import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
 import top.laoxin.modmanager.observer.FlashModsObserver
+import top.laoxin.modmanager.observer.FlashModsObserverLow
 import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
@@ -106,11 +109,9 @@ class ConsoleViewModel(
 
     private val scanQQDirectoryFlow =
         userPreferencesRepository.getPreferenceFlow("SCAN_QQ_DIRECTORY", false)
-    private val selectedDirectoryFlow =
-        userPreferencesRepository.getPreferenceFlow(
-            "SELECTED_DIRECTORY",
-            ModTools.DOWNLOAD_MOD_PATH
-        )
+    private val selectedDirectoryFlow = userPreferencesRepository.getPreferenceFlow(
+        "SELECTED_DIRECTORY", ModTools.DOWNLOAD_MOD_PATH
+    )
     private val scanDownloadFlow =
         userPreferencesRepository.getPreferenceFlow("SCAN_DOWNLOAD", false)
     private val openPermissionRequestDialogFlow =
@@ -122,17 +123,13 @@ class ConsoleViewModel(
     private val showCategoryViewFlow =
         userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", false)
     private val userPreferencesState = combine(
-        selectedGameFlow,
-        selectedDirectoryFlow
+        selectedGameFlow, selectedDirectoryFlow
     ) { selectedGame, selectedDirectory ->
         UserPreferencesState(
-            selectedGameIndex = selectedGame,
-            selectedDirectory = selectedDirectory
+            selectedGameIndex = selectedGame, selectedDirectory = selectedDirectory
         )
     }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        UserPreferencesState()
+        viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesState()
     )
 
 
@@ -157,9 +154,7 @@ class ConsoleViewModel(
         )
 
     }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        ConsoleUiState()
+        viewModelScope, SharingStarted.WhileSubscribed(5000), ConsoleUiState()
     )
 
     init {
@@ -174,7 +169,12 @@ class ConsoleViewModel(
                 updateModCount()
                 updateAntiHarmony()
                 updateEnableModCount()
-                openDictionaryObserver(it)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    openDictionaryObserver(it)
+                } else {
+                    Log.d("ConsoleViewModel", "openDictionaryObserver无法使用: 低于Android 10")
+                    openDictionaryObserverLow(it)
+                }
             }
         }
     }
@@ -223,8 +223,7 @@ class ConsoleViewModel(
                     if (antiHarmonyBean == null) {
                         antiHarmonyRepository.insert(
                             AntiHarmonyBean(
-                                gamePackageName = gameInfo.packageName,
-                                isEnable = false
+                                gamePackageName = gameInfo.packageName, isEnable = false
                             )
                         )
                         _uiState.update {
@@ -240,6 +239,7 @@ class ConsoleViewModel(
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun openDictionaryObserver(userPreferencesState: UserPreferencesState) {
         fileObserver?.stopWatching()
 
@@ -248,11 +248,18 @@ class ConsoleViewModel(
         fileObserver?.startWatching()
     }
 
+    private fun openDictionaryObserverLow(userPreferencesState: UserPreferencesState) {
+        fileObserver?.stopWatching()
+
+        fileObserver =
+            FlashModsObserverLow(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
+        fileObserver?.startWatching()
+    }
+
     private fun setScanQQDirectory(scanQQDirectory: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.savePreference(
-                "SCAN_QQ_DIRECTORY",
-                scanQQDirectory
+                "SCAN_QQ_DIRECTORY", scanQQDirectory
             )
         }
     }
@@ -263,8 +270,7 @@ class ConsoleViewModel(
             try {
                 val file = File(
                     (ModTools.ROOT_PATH + "/$selectedDirectory/" + ModTools.GAME_CONFIG).replace(
-                        "tree",
-                        ""
+                        "tree", ""
                     ).replace("//", "/")
                 )
                 if (!file.absolutePath.contains("${ModTools.ROOT_PATH}/Android")) {
@@ -287,8 +293,7 @@ class ConsoleViewModel(
     private fun setScanDownload(scanDownload: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.savePreference(
-                "SCAN_DOWNLOAD",
-                scanDownload
+                "SCAN_DOWNLOAD", scanDownload
             )
         }
     }
@@ -296,23 +301,20 @@ class ConsoleViewModel(
     fun setOpenPermissionRequestDialog(openPermissionRequestDialog: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.savePreference(
-                "OPEN_PERMISSION_REQUEST_DIALOG",
-                openPermissionRequestDialog
+                "OPEN_PERMISSION_REQUEST_DIALOG", openPermissionRequestDialog
             )
         }
     }
 
 
     // 设置扫描文件夹中的Mods
-    fun setScanDirectoryMods(scanDirectoryMods: Boolean) {
-        /*  if (gameInfo.isGameFileRepeat){
+    fun setScanDirectoryMods(scanDirectoryMods: Boolean) {/*  if (gameInfo.isGameFileRepeat){
               ToastUtils.longCall(R.string.toast_game_config_not_suppose)
               return
           }*/
         viewModelScope.launch {
             userPreferencesRepository.savePreference(
-                "SCAN_DIRECTORY_MODS",
-                scanDirectoryMods
+                "SCAN_DIRECTORY_MODS", scanDirectoryMods
             )
         }
     }
@@ -331,13 +333,13 @@ class ConsoleViewModel(
         Log.d("ConsoleViewModel", "getGameInfo: $gameInfo")
         if (gameInfo.packageName.isNotEmpty()) {
             try {
-                val packageInfo =
-                    App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
+                val packageInfo = App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
                 if (packageInfo != null) {
                     withContext(Dispatchers.Main) {
                         setGameInfo(
                             gameInfo.copy(
-                                version = packageInfo.versionName ?: "未知",
+                                version = packageInfo.versionName ?: App.get()
+                                    .getString(R.string.unknown),
                             )
                         )
                     }
@@ -410,8 +412,7 @@ class ConsoleViewModel(
 
     fun openUrl(context: Context, url: String) {
         val urlIntent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse(url)
+            Intent.ACTION_VIEW, Uri.parse(url)
         )
         context.startActivity(urlIntent)
     }
@@ -425,16 +426,11 @@ class ConsoleViewModel(
                 is BitmapDrawable -> drawable.bitmap
                 is AdaptiveIconDrawable -> {
                     Bitmap.createBitmap(
-                        drawable.intrinsicWidth,
-                        drawable.intrinsicHeight,
-                        Bitmap.Config.ARGB_8888
+                        drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
                     ).also { bitmap ->
                         val canvas = Canvas(bitmap)
                         drawable.setBounds(
-                            0,
-                            0,
-                            canvas.width,
-                            canvas.height
+                            0, 0, canvas.width, canvas.height
                         )
                         drawable.draw(canvas)
                     }
@@ -549,11 +545,9 @@ class ConsoleViewModel(
 
     fun startGameService() {
         val intent = Intent(App.get(), ProjectSnowStartService::class.java)
-        intent.putExtras(
-            Bundle().apply {
-                putParcelable("game_info", getGameInfo())
-            }
-        )
+        intent.putExtras(Bundle().apply {
+            putParcelable("game_info", getGameInfo())
+        })
         App.get().stopService(intent)
         App.get().startForegroundService(intent)
     }

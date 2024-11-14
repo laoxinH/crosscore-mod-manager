@@ -148,7 +148,7 @@
     <string name="toast_this_dir_has_no_prim_android">不能使用安卓系统目录</string>
     <string name="channel_name">游戏启动服务</string>
     <string name="channel_id">114514</string>
-    <string name="channel_tiile">游戏MOD注入服务</string>
+    <string name="channel_title">游戏MOD注入服务</string>
     <string name="channel_content">游戏MOD注入服务通知</string>
     <string name="toast_game_not_found">启动游戏失败</string>
     <string name="setting_page_app_swtch_permission_shizuku">申请shizuku授权</string>
@@ -188,5 +188,5 @@
     <string name="mod_top_bar_count">统计：%1$s</string>
     <string name="mod_top_bar_tips">总进度 : %1$s</string>
     <string name="toast_quit_app">再按一次退出应用</string>
-
+    <string name="unknown">未知</string>
 </resources>

@@ -39,7 +39,7 @@ android {
         minSdk = 28
         targetSdk = 35
         versionCode = 31
-        versionName = "3.2.0-test"
+        versionName = "3.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -53,7 +53,7 @@ android {
         }
 
         externalNativeBuild {
-            cmake {
+            ndkBuild {
                 arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
@@ -109,6 +109,26 @@ android {
 
 kotlin {
     jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs = listOf(
+            "-progressive",
+            "-Xjvm-default=all",
+            "-Xcontext-receivers",
+            "-Xwhen-guards",
+
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
+            "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
+            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-opt-in=kotlin.contracts.ExperimentalContracts",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=kotlinx.coroutines.FlowPreview",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+        )
+    }
 }
 
 androidComponents {

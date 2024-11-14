@@ -93,7 +93,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
         return try {
             Log.d(TAG, "fileExists: $path==${File(path!!).exists()}")
             File(path).exists()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -102,9 +102,9 @@ class FileExplorerService : IFileExplorerService.Stub() {
     @SuppressLint("SetWorldReadable")
     override fun chmod(path: String?): Boolean {
         return try {
-            val g = File(path).setExecutable(true, false)
+            val g = File(path!!).setExecutable(true, false)
             val h = File(path).setReadable(true, false)
-            val command = "chmod 777 " + path
+            val command = "chmod 777 $path"
             Log.i(TAG, "command = $command g = $g h = $h")
             val runtime = Runtime.getRuntime()
             runtime.exec(command)
@@ -205,7 +205,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
         return try {
             val file = File(path!!)
             file.isFile
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -215,7 +215,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
             val lastModified = File(path).lastModified()
             Log.d(TAG, "isFileChanged: $lastModified")
             lastModified
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             0
         }
     }
