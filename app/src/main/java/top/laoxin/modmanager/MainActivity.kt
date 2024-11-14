@@ -21,7 +21,7 @@ import rikka.shizuku.Shizuku
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ModManagerApp
-import top.lings.start.StartActivity
+import top.lings.userAgreement.UserAgreementActivity
 
 class MainActivity : ComponentActivity() {
 
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
         val isConfirm = sharedPreferences.getBoolean("isConfirm", false)
 
         if (!isConfirm) {
-            val intent = Intent(this, StartActivity::class.java)
+            val intent = Intent(this, UserAgreementActivity::class.java)
             startActivity(intent)
             finish()
             return

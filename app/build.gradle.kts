@@ -160,7 +160,7 @@ dependencies {
     // 添加 documentfile 依赖
     implementation(libs.androidx.documentfile)
     // 添加shizuku 依赖
-    implementation(libs.api)
+    implementation(libs.shizuku)
     implementation(libs.provider)
     // 添加datastore 依赖储存用户配置
     implementation(libs.androidx.datastore.preferences)

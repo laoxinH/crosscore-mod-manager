@@ -36,7 +36,7 @@
 
         <!--启动页-->
         <activity
-            android:name="top.lings.start.StartActivity"
+            android:name="top.lings.userAgreement.UserAgreementActivity"
             android:exported="true"
             android:theme="@style/Theme.ModManager" />
         <!--主页面-->
