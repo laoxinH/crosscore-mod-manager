@@ -91,18 +91,18 @@ fun SettingPage() {
         }
     }
 
-    DialogCommonForUpdate(
-        title = stringResource(id = R.string.console_upgrade_title),
-        content = viewModel.updateDescription,
-        onConfirm = {
-//            viewModel.setShowUpgradeDialog(false)
-            viewModel.openUrl(context, viewModel.downloadUrl)
-        },
-//        onCancel = {
-//            viewModel.setShowUpgradeDialog(false)
-//        },
-        showDialog = uiState.showUpdateDialog
-    )
+    viewModel.updateContent?.let {
+        DialogCommonForUpdate(
+            title = stringResource(id = R.string.console_upgrade_title),
+            content = it,
+            onConfirm = {
+                viewModel.downloadUrl?.let { url -> viewModel.openUrl(context, url) }
+            },
+
+            showDialog = uiState.showUpdateDialog
+        )
+    }
+
     DialogCommon(
         title = stringResource(id = R.string.console_game_tips_title),
         content = viewModel.gameInfo.tips,

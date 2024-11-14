@@ -107,18 +107,16 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         // 请求通知权限
         RequestNotificationPermission()
         // 升级提示
-        DialogCommonForUpdate(
-            title = stringResource(id = R.string.console_upgrade_title),
-            content = viewModel.updateContent,
-            onConfirm = {
-//                viewModel.setShowUpgradeDialog(false)
-                viewModel.openUrl(context, viewModel.downloadUrl)
-            },
-//            onCancel = {
-//                viewModel.setShowUpgradeDialog(false)
-//            },
-            showDialog = uiState.showUpgradeDialog
-        )
+        viewModel.updateContent?.let {
+            DialogCommonForUpdate(
+                title = stringResource(id = R.string.console_upgrade_title),
+                content = it,
+                onConfirm = {
+                    viewModel.downloadUrl?.let { url -> viewModel.openUrl(context, url) }
+                },
+                showDialog = uiState.showUpgradeDialog
+            )
+        }
 
         // 信息提示
         DialogCommon(

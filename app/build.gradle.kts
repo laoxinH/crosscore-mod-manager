@@ -39,7 +39,7 @@ android {
         minSdk = 28
         targetSdk = 35
         versionCode = 31
-        versionName = "3.2.0"
+        versionName = "3.2.0-test"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -83,10 +83,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-
     buildFeatures {
         buildConfig = true
         compose = true
@@ -109,6 +105,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 androidComponents {
@@ -199,7 +199,4 @@ dependencies {
     implementation(libs.accompanist.pager)
     // 依赖注入
     coreLibraryDesugaring(libs.desugar)
-
 }
-
-

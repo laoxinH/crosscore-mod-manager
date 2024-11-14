@@ -1,18 +1,17 @@
 package top.laoxin.modmanager.bean
 
-import kotlinx.serialization.Serializable
+import com.google.gson.annotations.SerializedName
+import top.lings.updater.util.AppConfig
 
-@Serializable
 data class GithubBean(
-    val tag_name: String,
-    val name: String,
-    val body: String,
-    val published_at: String,
-    val assets: List<Asset>
-)
+    @SerializedName("tag_name") val version: String,
+    @SerializedName("body") val info: String,
+    @SerializedName("assets") val assets: List<GitHubAssets>
+) {
+    fun getDownloadLink(): String {
+        val asset = assets.find { AppConfig.matchVariant(it.downloadLink) } ?: assets[0]
+        return asset.downloadLink
+    }
+}
 
-@Serializable
-data class Asset(
-    val name: String,
-    val browser_download_url: String
-)
+data class GitHubAssets(@SerializedName("browser_download_url") val downloadLink: String)

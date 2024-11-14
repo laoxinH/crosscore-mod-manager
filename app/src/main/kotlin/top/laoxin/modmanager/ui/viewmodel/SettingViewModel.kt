@@ -32,11 +32,11 @@ import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.database.backups.BackupRepository
 import top.laoxin.modmanager.database.mods.ModRepository
 import top.laoxin.modmanager.network.ModManagerApi
-import top.laoxin.modmanager.network.ModManagerGithubApi
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.ui.state.SettingUiState
+import top.lings.updater.Updater
 
 
 class SettingViewModel(
@@ -66,14 +66,15 @@ class SettingViewModel(
     private var _gameInfo = mutableStateOf(GameInfoConstant.gameInfoList[0])
     val gameInfo get() = _gameInfo.value
 
-    // 更新描述
-    private var _updateDescription by mutableStateOf("")
-    val updateDescription get() = _updateDescription
-
     // 下载地址
-    private var _downloadUrl by mutableStateOf("")
+    private var _downloadUrl: String? by mutableStateOf("")
+    val downloadUrl: String?
+        get() = _downloadUrl
 
-    val downloadUrl get() = _downloadUrl
+    // 更新内容
+    private var _updateContent: String? by mutableStateOf("")
+    val updateContent: String?
+        get() = _updateContent
 
     init {
 
@@ -304,39 +305,10 @@ class SettingViewModel(
 //    }
     fun checkUpdate() {
         viewModelScope.launch {
-            kotlin.runCatching {
-                ModManagerGithubApi.retrofitService.getLatestRelease()
-            }.onFailure { exception ->
-                Log.e("ConsoleViewModel", "checkUpdate failed: ${exception.message}", exception)
-            }.onSuccess { release ->
-                Log.d("ConsoleViewModel", "Update available: $release")
-                // 当前版本号
-                val currentVersion = ModTools.getVersionName()
-                // tag_name 是版本号，这里进行比较
-                val releaseVersion = release.tag_name
-
-                if (releaseVersion != currentVersion) {
-                    Log.d("ConsoleViewModel", "Update available: $release")
-
-                    // 获取v8a资产
-                    val v8aAsset = release.assets.firstOrNull {
-                        it.name.contains(
-                            "arm64-v8a",
-                            ignoreCase = true
-                        ) ||
-                                it.browser_download_url.contains(
-                                    "arm64-v8a",
-                                    ignoreCase = true
-                                )
-                    }
-                    _downloadUrl = v8aAsset?.browser_download_url ?: ""
-                    _updateDescription =
-                        release.body + "\n\n无法安装请前往github下载universal版本apk"
-                    setShowUpgradeDialog(true)
-                } else {
-                    ToastUtils.longCall(R.string.toast_no_update)
-                }
-            }
+            val update = Updater.checkUpdate()
+            _downloadUrl = update?.first
+            _updateContent = update?.second
+            setShowUpgradeDialog(true)
         }
     }
 
