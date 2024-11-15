@@ -51,7 +51,7 @@
     <string name="setting_page_app_del_descript">这将删除所有游戏备份文件!</string>
     <string name="setting_page_app_clean_cache">清除缓存</string>
     <string name="setting_page_app_clean_cache_descript">清楚缓存的图片等文件</string>
-    <string name="setting_page_about_author">作者: laoxin &amp; 角沙糖</string>
+    <string name="setting_page_about_author">作者: laoxin &amp; 角砂糖 </string>
     <string name="setting_page_about_title">About</string>
     <string name="setting_page_about_pay">投喂开发者</string>
     <string name="setting_page_about_pay_descript">感觉用着不错?支持一下开发者</string>
@@ -76,7 +76,8 @@
     <string name="password_dialog_title">请输入密码后重新启用</string>
     <string name="password_dialog_label">密码(ZIP压缩包不支持中文密码)</string>
     <string name="dialog_info_title">用户协议</string>
-    <string name="dialog_info_message">1.实验室需要安装好游戏才能扫描\n2.Android 14需要shizuku授权\n3.Android 14用户若没有安装请前往设置页面下载shizuku\n4.授权后请点击刷新\n5.默认不会扫描QQ下载和系统download目录\n6.如有需要请前往控制台开启\n7.实验室会将扫描到的Mod自动移动到控制台配置的Mod目录\n8.新增Mod推荐放到控制台配置的Mod目录\n9.删除或添加Mod后如果实验室没有自动更新请点击刷新\n10.不能在任何官方相关渠道宣传实验室\n11.使用实验室造成的一切后果与开发者无关\n12.实验室与官方无关\n</string>
+    <string name="dialog_info_important">* MOD实验室为开源软件，完全免费，任何收费行为均与本软件无任何关联,由此产生的一切纠纷均与本软件无关\n\n* 任何形式的修改均会存在风险，同意此协议即代表您自愿承担由此造成的一切后果</string>
+    <string name="dialog_info_message">1. 实验室需要安装好相应游戏才能使用\n2. Android 11以上部分设备需要shizuku授权\n3. 授权后请刷新以进行扫描\n4. 默认不会扫描QQ下载和系统download目录，如有需要请前往控制台开启\n5. 实验室会将扫描到的Mod自动移动到控制台配置的Mod目录\n6. 删除或添加Mod后若没有自动更新请手动点击刷新</string>
     <string name="dialog_button_info_permission">同意并继续</string>
     <string name="setting_page_app_other">More</string>
     <string name="setting_page_more_shizuku">下载shizuku</string>
@@ -92,7 +93,7 @@
     <string name="setting_page_more_acknowledgments">鸣谢</string>
     <string name="setting_page_more_acknowledgments_descript">鸣谢名单(对开发给予帮助的热心网友)</string>
     <string name="setting_acknowledgments">感谢名单</string>
-    <string name="tips_btn_close">关闭</string>
+    <string name="tips_btn_close">隐藏</string>
     <string name="tips_open_mod">正在开启Mod</string>
     <string name="tips_unzip_mod">正在解压Mod</string>
     <string name="tips_backups_game_files">正在备份游戏文件</string>
@@ -130,7 +131,7 @@
     <string name="console_setting_info_configuration_can_install">是</string>
     <string name="console_setting_info_configuration_not_install">否</string>
     <string name="dialog_dis_enable_mods_title">以下MOD已被删除是否关闭? 如果不关闭将会一直生效!</string>
-    <string name="console_upgrade_title">更新</string>
+    <string name="console_upgrade_title">强制更新</string>
     <string name="setting_page_about_update">检测更新</string>
     <string name="setting_page_about_update_descript">当前版本 : %1$s</string>
     <string name="toast_no_update">已是最新版本</string>
@@ -147,7 +148,7 @@
     <string name="toast_this_dir_has_no_prim_android">不能使用安卓系统目录</string>
     <string name="channel_name">游戏启动服务</string>
     <string name="channel_id">114514</string>
-    <string name="channel_tiile">游戏MOD注入服务</string>
+    <string name="channel_title">游戏MOD注入服务</string>
     <string name="channel_content">游戏MOD注入服务通知</string>
     <string name="toast_game_not_found">启动游戏失败</string>
     <string name="setting_page_app_swtch_permission_shizuku">申请shizuku授权</string>
@@ -186,6 +187,6 @@
     <string name="mod_browser_file_description">MOD数量: %1$s</string>
     <string name="mod_top_bar_count">统计：%1$s</string>
     <string name="mod_top_bar_tips">总进度 : %1$s</string>
-    <string name="toast_quit_qpp">再按一次退出应用</string>
-
+    <string name="toast_quit_app">再按一次退出应用</string>
+    <string name="unknown">未知</string>
 </resources>

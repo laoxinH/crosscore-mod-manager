@@ -21,6 +21,8 @@
 
 -keep class net.sf.sevenzipjbinding.** { *; }
 -keep class top.laoxin.modmanager.** { *; }
+-keep class top.lings.userAgreement.** { *; }
+-keep class top.lings.updater.** { *; }
 -keep class okhttp3.** { *; }
 -keep class com.squareup.okhttp.** { *; }
 

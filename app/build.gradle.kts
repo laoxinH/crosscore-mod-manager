@@ -38,8 +38,8 @@ android {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 35
-        versionCode = 29
-        versionName = "3.1.5"
+        versionCode = 31
+        versionName = "3.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -53,7 +53,7 @@ android {
         }
 
         externalNativeBuild {
-            cmake {
+            ndkBuild {
                 arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
@@ -83,10 +83,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-
     buildFeatures {
         buildConfig = true
         compose = true
@@ -108,6 +104,30 @@ android {
             excludes += "/META-INF/ASL2.0"
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs = listOf(
+            "-progressive",
+            "-Xjvm-default=all",
+            "-Xcontext-receivers",
+            "-Xwhen-guards",
+
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
+            "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
+            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-opt-in=kotlin.contracts.ExperimentalContracts",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=kotlinx.coroutines.FlowPreview",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+        )
     }
 }
 
@@ -160,7 +180,7 @@ dependencies {
     // 添加 documentfile 依赖
     implementation(libs.androidx.documentfile)
     // 添加shizuku 依赖
-    implementation(libs.api)
+    implementation(libs.shizuku)
     implementation(libs.provider)
     // 添加datastore 依赖储存用户配置
     implementation(libs.androidx.datastore.preferences)
@@ -199,7 +219,4 @@ dependencies {
     implementation(libs.accompanist.pager)
     // 依赖注入
     coreLibraryDesugaring(libs.desugar)
-
 }
-
-
