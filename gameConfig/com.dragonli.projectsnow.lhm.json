@@ -1,8 +1,8 @@
 {
     "gameName": "尘白禁区",
-    "serviceName": "官服2.2.0",
+    "serviceName": "官服2.3.0",
     "packageName": "com.dragonli.projectsnow.lhm",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "gamePath": "Android/data/com.dragonli.projectsnow.lhm/",
     "antiHarmonyFile": "",
     "antiHarmonyContent": "",

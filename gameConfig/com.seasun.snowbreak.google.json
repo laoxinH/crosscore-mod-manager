@@ -1,8 +1,8 @@
 {
     "gameName": "尘白禁区",
-    "serviceName": "谷歌2.2.0",
+    "serviceName": "谷歌2.3.0",
     "packageName": "com.seasun.snowbreak.google",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "gamePath": "Android/data/com.seasun.snowbreak.google/",
     "antiHarmonyFile": "",
     "antiHarmonyContent": "",
