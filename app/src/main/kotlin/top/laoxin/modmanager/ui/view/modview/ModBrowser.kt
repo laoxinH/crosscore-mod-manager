@@ -1,7 +1,6 @@
 package top.laoxin.modmanager.ui.view.modview
 
 import android.os.Environment
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
@@ -57,7 +56,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     val listState = rememberLazyListState()
     val scrollPositions = remember { mutableMapOf<String, Int>() }
     val scrollOffsets = remember { mutableMapOf<String, Int>() }
-    Log.d(TAG, "ModsBrowser: ${ModTools.MOD_PATH}")
     if (currentPath == ModTools.MOD_PATH) {
         return NoMod()
     }
@@ -190,9 +188,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                     ) viewModel.getModsByPath(file.path).filter { it.isEnable }.size else viewModel.getModsByVirtualPaths(
                         file.path
                     ).filter { it.isEnable }.size
-
-                    Log.d(TAG, "已开启: $modEnableCount")
-
                     if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty() && (file.isDirectory || !file.exists())) {
                         FileListItem(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
