@@ -51,6 +51,7 @@ object ModTools {
     private const val TAG = "ModTools"
     private var fileTools: BaseFileTools? = null
     var progressUpdateListener: ProgressUpdateListener? = null
+    var MOD_PATH = ""
 
     fun setModsToolsSpecialPathReadType(type: Int) {
         when (type) {
@@ -235,7 +236,7 @@ object ModTools {
         // 读取images文件输入流
         if (bean.images != null) {
             val images = mutableListOf<String>()
-            for (image in bean.images) {
+            for (image in bean.images!!) {
                 val imagePath = unZipPath + image
                 val file = File(imagePath)
                 val md5 = MD5Tools.calculateMD5(file.inputStream())
@@ -1089,5 +1090,9 @@ object ModTools {
         }
         file.createNewFile()
         file.writeText(version.toString())
+    }
+
+    fun setModPath(selectedDirectory: String) {
+        MOD_PATH = "$ROOT_PATH$selectedDirectory"
     }
 }

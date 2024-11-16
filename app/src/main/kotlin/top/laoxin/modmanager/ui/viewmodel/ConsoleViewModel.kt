@@ -165,6 +165,7 @@ class ConsoleViewModel(
             userPreferencesState.collectLatest {
                 updateLogTools(it)
                 updateGameInfo(it)
+                updateModTools(it.selectedDirectory)
                 checkInstallMod()
                 updateModCount()
                 updateAntiHarmony()
@@ -177,6 +178,10 @@ class ConsoleViewModel(
                 }
             }
         }
+    }
+
+    private fun updateModTools(selectedDirectory: String) {
+        ModTools.setModPath(selectedDirectory)
     }
 
     private fun checkUpdate() {

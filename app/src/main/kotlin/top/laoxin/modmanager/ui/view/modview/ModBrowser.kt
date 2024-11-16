@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.ui.view.modview
 
 import android.os.Environment
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
@@ -12,6 +13,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,22 +42,39 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
-
+const val TAG = "ModsBrowser"
 @Composable
 fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
-    var currentPath by remember { mutableStateOf(uiState.currentGameModPath) }
+    var currentPath by remember { mutableStateOf(uiState.currentPath) }
     val files = uiState.currentFiles
     var previousPath by remember { mutableStateOf(currentPath) }
+    val listState = rememberLazyListState()
+    val scrollPositions = remember { mutableMapOf<String, Int>() }
+    val scrollOffsets = remember { mutableMapOf<String, Int>() }
+    Log.d(TAG, "ModsBrowser: ${ModTools.MOD_PATH}")
+    if (currentPath == ModTools.MOD_PATH) {
+        return NoMod()
+    }
 
     // 返回上级目录是否显示
     LaunchedEffect(currentPath) {
         viewModel.updateFiles(currentPath)
+    }
 
-        //files = File(currentPath).listFiles()?.toList()?.sortedWith(compareBy({ !it.isDirectory }, { it.name })) ?: emptyList()
+    // 监听列表加载状态并在加载完成后滚动到指定位置
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.totalItemsCount }
+            .collect { itemCount ->
+                if (itemCount > 0) {
+                    listState.scrollToItem(scrollPositions[currentPath] ?: 0, scrollOffsets[currentPath] ?: 0)
+                }
+            }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -62,6 +82,9 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         if (currentPath != uiState.currentGameModPath) {
             BackHandler {
                 if (currentPath != Environment.getExternalStorageDirectory().path) {
+                    // 记录当前路径的滚动位置
+                    scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                    scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
                     previousPath = currentPath
                     currentPath = File(currentPath).parent ?: currentPath
                 }
@@ -69,26 +92,23 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         }
 
         AnimatedContent(
-            targetState = currentPath,
-            transitionSpec = {
+            targetState = currentPath, transitionSpec = {
                 if (targetState > initialState) {
                     slideInHorizontally(
                         initialOffsetX = { fullWidth -> fullWidth },
                         animationSpec = tween(durationMillis = 300)
-                    ) togetherWith
-                            slideOutHorizontally(
-                                targetOffsetX = { fullWidth -> -fullWidth },
-                                animationSpec = tween(durationMillis = 300)
-                            )
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth },
+                        animationSpec = tween(durationMillis = 300)
+                    )
                 } else {
                     slideInHorizontally(
                         initialOffsetX = { fullWidth -> -fullWidth },
                         animationSpec = tween(durationMillis = 300)
-                    ) togetherWith
-                            slideOutHorizontally(
-                                targetOffsetX = { fullWidth -> fullWidth },
-                                animationSpec = tween(durationMillis = 300)
-                            )
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth },
+                        animationSpec = tween(durationMillis = 300)
+                    )
                 }
             }, label = ""
         ) { path ->
@@ -109,6 +129,9 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                     },
                     onClick = {
                         if (currentPath != uiState.currentGameModPath) {
+                            // 记录当前路径的滚动位置
+                            scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                            scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
                             previousPath = currentPath
                             currentPath = File(currentPath).parent ?: currentPath
                         }
@@ -121,7 +144,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                     iconId = R.drawable.back_icon
                 )
             }
-            LazyColumn {
+            LazyColumn(state = listState) {
                 items(files) { file: File ->
                     if (currentPath != uiState.currentGameModPath && files.indexOf(file) == 0) {
                         FileListItem(
@@ -133,6 +156,9 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             },
                             onClick = {
                                 if (currentPath != uiState.currentGameModPath) {
+                                    // 记录当前路径的滚动位置
+                                    scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                                    scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
                                     previousPath = currentPath
                                     currentPath = File(currentPath).parent ?: currentPath
                                 }
@@ -159,6 +185,14 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                         file.path
                     ).size
 
+                    val modEnableCount = if (viewModel.getModsByPath(file.path)
+                            .isNotEmpty()
+                    ) viewModel.getModsByPath(file.path).filter { it.isEnable }.size else viewModel.getModsByVirtualPaths(
+                        file.path
+                    ).filter { it.isEnable }.size
+
+                    Log.d(TAG, "已开启: $modEnableCount")
+
                     if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty() && (file.isDirectory || !file.exists())) {
                         FileListItem(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
@@ -167,6 +201,9 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             onLongClick = {},
                             onClick = {
                                 if (file.isDirectory || !file.exists()) {
+                                    // 记录当前路径的滚动位置
+                                    scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                                    scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
                                     previousPath = currentPath
                                     currentPath = file.path
                                 } else {
@@ -176,15 +213,13 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             onMultiSelectClick = {},
                             isMultiSelect = uiState.isMultiSelect,
                             description = stringResource(
-                                R.string.mod_browser_file_description,
-                                modCount
+                                R.string.mod_browser_file_description, modCount, modEnableCount
                             ),
                             iconId = if (modCount > 0) R.drawable.folder_mod_icon else R.drawable.folder_icon
                         )
                     }
                     if (modsByPath.size == 1 || modsByVirtualPaths.size == 1) {
-                        ModListItem(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        ModListItem(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                             mod = modsByPath.firstOrNull() ?: modsByVirtualPaths.firstOrNull()!!,
                             isSelected = uiState.modsSelected.contains(
                                 modsByPath.firstOrNull()?.id
@@ -207,8 +242,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             },
                             enableMod = { mod, isEnable ->
                                 viewModel.switchMod(mod, isEnable)
-                            }
-                        )
+                            })
                     }
                     if (modsByPath.size > 1 || modsByVirtualPaths.size > 1) {
                         FileListItem(
@@ -217,6 +251,9 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             isSelected = false,
                             onLongClick = {},
                             onClick = {
+                                // 记录当前路径的滚动位置
+                                scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                                scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
                                 previousPath = currentPath
                                 currentPath = file.path
                             },
@@ -224,7 +261,8 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             isMultiSelect = uiState.isMultiSelect,
                             description = stringResource(
                                 R.string.mod_browser_file_description,
-                                viewModel.getModsByPath(file.path).size
+                                viewModel.getModsByPath(file.path).size,
+                                viewModel.getModsByPath(file.path).filter { it.isEnable }.size
                             ),
                             iconId = R.drawable.zip_mod_icon
                         )
@@ -255,22 +293,17 @@ fun FileListItem(
     Card(
         elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(
             0.dp
-        ),
-        modifier = modifier
-            .combinedClickable(
-                onClick = {
-                    if (isMultiSelect) {
-                        onMultiSelectClick()
-                    } else {
-                        onClick()
-                    }
-                },
-                onLongClick = {
-                    onLongClick()
+        ), modifier = modifier
+            .combinedClickable(onClick = {
+                if (isMultiSelect) {
+                    onMultiSelectClick()
+                } else {
+                    onClick()
                 }
-            )
-            .animateContentSize(),
-        colors = CardDefaults.cardColors(
+            }, onLongClick = {
+                onLongClick()
+            })
+            .animateContentSize(), colors = CardDefaults.cardColors(
             containerColor = if (!isSelected) CardDefaults.cardColors().containerColor else MaterialTheme.colorScheme.secondaryContainer,
         )
     ) {
@@ -299,8 +332,7 @@ fun FileListItem(
             }
             Spacer(Modifier.width(16.dp))
             Column(
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
 
                 Text(

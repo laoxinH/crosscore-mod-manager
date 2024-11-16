@@ -181,8 +181,6 @@ class ModViewModel(
                 updateCurrentGameModPath(it)
                 // 设置当前的视图
                 upDateCurrentModsView(it)
-
-
             }
 
         }
@@ -205,7 +203,9 @@ class ModViewModel(
     // 更新当前游戏mod目录
     private fun updateCurrentGameModPath(userPreferences: UserPreferencesState) {
         _uiState.update {
-            it.copy(currentGameModPath = ModTools.ROOT_PATH + userPreferences.selectedDirectory + _gameInfo.packageName)
+            it.copy(currentGameModPath = ModTools.ROOT_PATH + userPreferences.selectedDirectory + _gameInfo.packageName,
+                currentPath = ModTools.ROOT_PATH + userPreferences.selectedDirectory + _gameInfo.packageName
+            )
         }
     }
 
@@ -1026,6 +1026,7 @@ class ModViewModel(
 
     fun updateFiles(currentPath: String) {
         _currentPath = currentPath
+        _uiState.update { it.copy(currentPath = currentPath)}
         Log.d("ModViewModel", "updateFiles: 触发跟新文件列表")
         // 构建当前文件\
         viewModelScope.launch {
@@ -1040,7 +1041,6 @@ class ModViewModel(
                 if (_currentZipPath == "" || !currentPath.contains(_currentZipPath)) {
                     getArchiveFiles(currentPath)
                 }
-
                 _uiState.update { it -> it.copy(currentFiles = _currentFiles.filter { it.parent == currentPath }) }
             }
         }

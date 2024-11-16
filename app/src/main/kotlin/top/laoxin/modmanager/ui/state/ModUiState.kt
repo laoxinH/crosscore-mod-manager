@@ -42,7 +42,9 @@ data class ModUiState(
     // 当前页面的文件
     val currentFiles: List<File> = emptyList(),
     // 当前页面的mods
-    val currentMods: List<ModBean> = emptyList()
+    val currentMods: List<ModBean> = emptyList(),
+    // 当前路径
+    val currentPath: String = "",
 ) {
 
 }
