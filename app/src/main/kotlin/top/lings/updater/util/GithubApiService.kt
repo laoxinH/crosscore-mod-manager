@@ -1,4 +1,4 @@
-package top.lings.updater
+package top.lings.updater.util
 
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit

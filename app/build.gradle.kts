@@ -54,7 +54,11 @@ android {
 
         externalNativeBuild {
             ndkBuild {
-                arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+                arguments += arrayOf(
+                    "-DANDROID_STL=none",
+                    "-DCMAKE_CXX_STANDARD=23",
+                    "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
+                )
             }
         }
     }

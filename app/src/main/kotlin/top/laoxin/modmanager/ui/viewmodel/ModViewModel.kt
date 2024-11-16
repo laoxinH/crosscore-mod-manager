@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.ui.viewmodel
 
+import android.os.Build
 import android.os.FileObserver
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import top.laoxin.modmanager.exception.PasswordErrorException
 import top.laoxin.modmanager.exception.PermissionsException
 import top.laoxin.modmanager.listener.ProgressUpdateListener
 import top.laoxin.modmanager.observer.FlashModsObserver
+import top.laoxin.modmanager.observer.FlashModsObserverLow
 import top.laoxin.modmanager.observer.FlashObserverInterface
 import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
@@ -203,8 +205,11 @@ class ModViewModel(
     // 更新当前游戏mod目录
     private fun updateCurrentGameModPath(userPreferences: UserPreferencesState) {
         _uiState.update {
-            it.copy(currentGameModPath = ModTools.ROOT_PATH + userPreferences.selectedDirectory + _gameInfo.packageName,
-                currentPath = ModTools.ROOT_PATH + userPreferences.selectedDirectory + _gameInfo.packageName
+            it.copy(
+                currentGameModPath = ModTools.ROOT_PATH +
+                        userPreferences.selectedDirectory + _gameInfo.packageName,
+                currentPath = ModTools.ROOT_PATH +
+                        userPreferences.selectedDirectory + _gameInfo.packageName
             )
         }
     }
@@ -213,7 +218,11 @@ class ModViewModel(
         ArchiveUtil.progressUpdateListener = this
         ModTools.progressUpdateListener = this
         BaseSpecialGameTools.progressUpdateListener = this
-        FlashModsObserver.flashObserver = this
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            FlashModsObserver.flashObserver = this
+        } else {
+            FlashModsObserverLow.flashObserver = this
+        }
     }
 
     private fun updateGameInfo(userPreferencesState: UserPreferencesState) {
@@ -264,8 +273,11 @@ class ModViewModel(
     // 启动文件夹监听
     private fun startFileObserver(userPreferencesState: UserPreferencesState) {
         fileObserver?.stopWatching()
-        fileObserver =
+        fileObserver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             FlashModsObserver(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory + _gameInfo.packageName)
+        } else {
+            FlashModsObserverLow(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory + _gameInfo.packageName)
+        }
         fileObserver?.startWatching()
     }
 
@@ -1026,7 +1038,7 @@ class ModViewModel(
 
     fun updateFiles(currentPath: String) {
         _currentPath = currentPath
-        _uiState.update { it.copy(currentPath = currentPath)}
+        _uiState.update { it.copy(currentPath = currentPath) }
         Log.d("ModViewModel", "updateFiles: 触发跟新文件列表")
         // 构建当前文件\
         viewModelScope.launch {

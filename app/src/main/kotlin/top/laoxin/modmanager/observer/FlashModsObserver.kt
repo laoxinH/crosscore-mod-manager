@@ -22,6 +22,7 @@ class FlashModsObserver(val path: String) : FileObserver(File(path), ALL_EVENTS)
     }
 }
 
+// 安卓10以下
 @Suppress("DEPRECATION")
 class FlashModsObserverLow(val path: String) : FileObserver(path, ALL_EVENTS) {
     companion object {

@@ -236,7 +236,7 @@ object ModTools {
         // 读取images文件输入流
         if (bean.images != null) {
             val images = mutableListOf<String>()
-            for (image in bean.images!!) {
+            for (image in bean.images) {
                 val imagePath = unZipPath + image
                 val file = File(imagePath)
                 val md5 = MD5Tools.calculateMD5(file.inputStream())
@@ -482,7 +482,7 @@ object ModTools {
     }
 
 
-    suspend fun copyModStreamByShizuku(
+    fun copyModStreamByShizuku(
         modTempPath: String, gameModPath: String, files: List<String>, password: String?
     ): Boolean {
         val flags: MutableList<Boolean> = ArrayList()
@@ -666,7 +666,7 @@ object ModTools {
 
 
     // 通过流写入mod文件
-    suspend fun copyModsByStream(
+    fun copyModsByStream(
         path: String,
         gameModPath: String,
         modFiles: List<String>,
@@ -734,7 +734,6 @@ object ModTools {
             throw CopyStreamFailedException(App.get().getString(R.string.toast_copy_failed))
         }
         return true
-
     }
 
     private fun unZipModsByFileHeardByFile(

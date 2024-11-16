@@ -170,12 +170,7 @@ class ConsoleViewModel(
                 updateModCount()
                 updateAntiHarmony()
                 updateEnableModCount()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    openDictionaryObserver(it)
-                } else {
-                    Log.d("ConsoleViewModel", "openDictionaryObserver无法使用: 低于Android 10")
-                    openDictionaryObserverLow(it)
-                }
+                openDictionaryObserver(it)
             }
         }
     }
@@ -244,23 +239,18 @@ class ConsoleViewModel(
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun openDictionaryObserver(userPreferencesState: UserPreferencesState) {
         fileObserver?.stopWatching()
 
         fileObserver =
-            FlashModsObserver(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                FlashModsObserver(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
+            } else {
+                FlashModsObserverLow(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
+            }
         fileObserver?.startWatching()
     }
-
-    private fun openDictionaryObserverLow(userPreferencesState: UserPreferencesState) {
-        fileObserver?.stopWatching()
-
-        fileObserver =
-            FlashModsObserverLow(ModTools.ROOT_PATH + userPreferencesState.selectedDirectory)
-        fileObserver?.startWatching()
-    }
-
+    
     private fun setScanQQDirectory(scanQQDirectory: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.savePreference(
