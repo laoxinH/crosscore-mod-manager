@@ -1,7 +1,7 @@
 [versions]
 accompanistPager = "0.36.0"
 accompanistPermissions = "0.36.0"
-agp = "8.7.2"
+agp = "8.7.3"
 shizuku = "13.1.5"
 coilCompose = "2.7.0"
 commonsCompress = "1.27.1"
