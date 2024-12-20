@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.FileObserver
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -58,7 +57,6 @@ import top.laoxin.modmanager.ui.state.UserPreferencesState
 import top.laoxin.modmanager.userservice.gamestart.ProjectSnowStartService
 import top.lings.updater.Updater
 import java.io.File
-
 
 class ConsoleViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
