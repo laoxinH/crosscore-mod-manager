@@ -34,6 +34,8 @@ android {
     namespace = "top.laoxin.modmanager"
     compileSdk = 35
 
+    ndkVersion = "28.0.12433566 rc1"
+
     defaultConfig {
         applicationId = "com.mod.manager"
         minSdk = 28
@@ -50,16 +52,6 @@ android {
         ndk {
             abiFilters.addAll(supportedAbis)
             debugSymbolLevel = "FULL"
-        }
-
-        externalNativeBuild {
-            ndkBuild {
-                arguments += arrayOf(
-                    "-DANDROID_STL=none",
-                    "-DCMAKE_CXX_STANDARD=23",
-                    "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
-                )
-            }
         }
     }
 
@@ -91,6 +83,7 @@ android {
         buildConfig = true
         compose = true
         aidl = true
+        viewBinding = true
     }
 
     composeOptions {
@@ -119,7 +112,6 @@ kotlin {
             "-Xjvm-default=all",
             "-Xcontext-receivers",
             "-Xwhen-guards",
-
             "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",

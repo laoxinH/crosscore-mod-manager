@@ -56,10 +56,10 @@ class ModViewModel(
     private val backupRepository: BackupRepository
 ) : ViewModel(), ProgressUpdateListener, FlashObserverInterface {
     private val _uiState = MutableStateFlow(ModUiState())
-//     val uiState: StateFlow<ModUiState> = _uiState.asStateFlow()
+    // val uiState: StateFlow<ModUiState> = _uiState.asStateFlow()
 
     // 搜索框内容
-    //private val _searchText = mutableStateOf("")
+    // private val _searchText = mutableStateOf("")
 
     private var _requestPermissionPath by mutableStateOf("")
     val requestPermissionPath: String
@@ -76,12 +76,10 @@ class ModViewModel(
     // 当前的虚拟路径
     private var _currentPath by mutableStateOf("")
 
-    //当前研所包的文件列表
+    // 当前研所包的文件列表
     private var _currentFiles by mutableStateOf(emptyList<File>())
 
-
     // mod列表
-
 
     // 扫描mod目录列表
     // 从用户配置中读取mod目录
@@ -120,8 +118,7 @@ class ModViewModel(
     // 用户提示
     private val userTips = userPreferencesRepository.getPreferenceFlow("USER_TIPS", true)
 
-
-    // 选择游戏`
+    // 选择游戏
     private val selectedGame = userPreferencesRepository.getPreferenceFlow("SELECTED_GAME", 0)
 
     // 扫描文件夹中的Mods
@@ -158,7 +155,6 @@ class ModViewModel(
         viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesState()
     )
 
-
     val uiState: StateFlow<ModUiState> = combine(
         userTips, _uiState
     ) { userTips, uiState ->
@@ -166,7 +162,6 @@ class ModViewModel(
     }.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), ModUiState()
     )
-
 
     init {
         Log.d("ModViewModel", "init: 初始化${userPreferences.value}")
@@ -184,10 +179,7 @@ class ModViewModel(
                 // 设置当前的视图
                 upDateCurrentModsView(it)
             }
-
         }
-
-
     }
 
     private fun upDateCurrentModsView(it: UserPreferencesState) {
@@ -1026,7 +1018,6 @@ class ModViewModel(
     private fun getArchiveFiles(path: String) {
         _currentZipPath = path
         // 读取压缩包文件
-
         val fileHeaders = ArchiveUtil.listInArchiveFiles(path)
         // 拼接路径
         val files = fileHeaders.map {
@@ -1056,9 +1047,7 @@ class ModViewModel(
                 _uiState.update { it -> it.copy(currentFiles = _currentFiles.filter { it.parent == currentPath }) }
             }
         }
-        ///storage/emulated/0/Download/Mods/com.megagame.crosscore/圣歌.7z/圣歌 桃色乐境透
     }
-
 
     fun getModsByVirtualPathsStrict(path: String): List<ModBean> {
         return _uiState.value.modList.filter { it.virtualPaths == path }
@@ -1073,8 +1062,4 @@ class ModViewModel(
             it.copy(currentMods = mods)
         }
     }
-
-
 }
-
-
