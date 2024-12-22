@@ -220,9 +220,9 @@ data class ModBean(
     }
 
     fun isNew(mods: List<ModBean>): ModBean? {
-        Log.d("ModBean", "所有mod$mods")
+        //Log.d("ModBean", "所有mod$mods")
         if (mods.none { it.path == path && it.name == name }) {
-            Log.d("ModBean", "新的: $name==$path")
+            //Log.d("ModBean", "新的: $name==$path")
             return this
         }
         return null

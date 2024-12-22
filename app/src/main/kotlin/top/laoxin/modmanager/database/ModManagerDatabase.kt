@@ -10,13 +10,15 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import top.laoxin.modmanager.bean.AntiHarmonyBean
 import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.bean.ScanFileBean
 import top.laoxin.modmanager.database.antiHarmony.AntiHarmonyDao
 import top.laoxin.modmanager.database.backups.BackupDao
 import top.laoxin.modmanager.database.mods.ModDao
+import top.laoxin.modmanager.database.sacnFile.ScanFileDao
 
 @Database(
-    entities = [ModBean::class, BackupBean::class, AntiHarmonyBean::class],
-    version = 4,
+    entities = [ModBean::class, BackupBean::class, AntiHarmonyBean::class, ScanFileBean::class],
+    version = 5,
     exportSchema = false
 )
 
@@ -26,6 +28,7 @@ abstract class ModManagerDatabase : RoomDatabase() {
     abstract fun modDao(): ModDao
     abstract fun backupDao(): BackupDao
     abstract fun antiHarmonyDao(): AntiHarmonyDao
+    abstract fun scanFileDao(): ScanFileDao
 
 
     companion object {
@@ -53,6 +56,14 @@ abstract class ModManagerDatabase : RoomDatabase() {
             }
         }
 
+        // 数据库迁移4-5
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Perform the necessary schema changes
+                database.execSQL("CREATE TABLE IF NOT EXISTS `scanFiles` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `path` TEXT NOT NULL, `name` TEXT NOT NULL, `modifyTime` INTEGER NOT NULL, `size` INTEGER NOT NULL)")
+            }
+        }
+
         @Volatile
         private var Instance: ModManagerDatabase? = null
         fun getDatabase(context: Context): ModManagerDatabase {
@@ -60,6 +71,7 @@ abstract class ModManagerDatabase : RoomDatabase() {
                 Room.databaseBuilder(context, ModManagerDatabase::class.java, "mod_database")
                     .addMigrations(MIGRATION_2_3)
                     .addMigrations(MIGRATION_3_4)
+                    .addMigrations(MIGRATION_4_5)
                     //.allowMainThreadQueries() // 允许在主线程查询数据
                     .build()
                     .also { Instance = it }

@@ -189,4 +189,7 @@
     <string name="mod_top_bar_tips">总进度 : %1$s</string>
     <string name="toast_quit_app">再按一次退出应用</string>
     <string name="unknown">未知</string>
+    <string name="toast_flash_complate">新增: %1$s 更新: %2$s 删除: %3$s</string>
+    <string name="console_status_no_permission">无权限</string>
+    <string name="console_top_bar_start_game">启动游戏</string>
 </resources>

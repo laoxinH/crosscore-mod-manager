@@ -15,6 +15,7 @@ import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.GameInfoBean
 import top.laoxin.modmanager.bean.ModBean
 import top.laoxin.modmanager.bean.ModBeanTemp
+import top.laoxin.modmanager.bean.ScanFileBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ScanModPath
@@ -26,6 +27,7 @@ import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
+import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import top.laoxin.modmanager.useservice.IFileExplorerService
 import java.io.File
 import java.io.IOException
@@ -391,10 +393,6 @@ object ModTools {
                 gameFileMap.apply {
                     gameInfo.gameFilePath.forEachIndexed { index, it ->
                         val pathName = File(it).name
-                        Log.d(
-                            "ZipTools",
-                            "${pathName}----${(File(file).parentFile?.name ?: "0")}"
-                        )
                         if (pathName == (File(file).parentFile?.name ?: "")) {
                             put(
                                 gameInfo.modType[index],
@@ -404,8 +402,6 @@ object ModTools {
                     }
                 }
             }
-
-            Log.d("ZipTools", "gameFileMap: $gameFileMap")
             gameFileMap.forEach {
 
                 if ((fileTools?.isFileExist(it.value) == true && fileTools?.isFile(it.value) == true)
@@ -439,8 +435,7 @@ object ModTools {
                             isZip = if (archiveFile == null) false else ArchiveUtil.isArchive(
                                 archiveFile.absolutePath
                             ),
-                            modPath = if (archiveFile == null) File(file).parent
-                                ?: file else archiveFile.absolutePath,
+                            modPath = if (archiveFile == null) File(file).parent ?: file else archiveFile.absolutePath,
                             virtualPaths = if (archiveFile == null) "" else archiveFile.absolutePath
                                     + File(file).parentFile?.absolutePath
                         )
@@ -508,6 +503,8 @@ object ModTools {
     suspend fun scanArchiveMods(
         scanPath: String,
         gameInfo: GameInfoBean,
+        scanFiles: List<ScanFileBean>,
+        modViewModel: ModViewModel,
     ): MutableList<ModBean> {
         setModsToolsSpecialPathReadType(PermissionTools.checkPermission(scanPath))
         val scanMods = mutableListOf<ModBean>()
@@ -529,6 +526,33 @@ object ModTools {
 
         // 处理收集到的压缩包mod
         for (file in archiveFiles) {
+            // 判断文件是否再scanfiles中
+            val scanFile = scanFiles.find { it.path == file.absolutePath }
+            if (scanFile != null) {
+                // 如果文件已经扫描过，判断是否需要更新
+                if (scanFile.modifyTime != file.lastModified() || scanFile.size != file.length()) {
+                    modViewModel.insertScanFile(
+                        ScanFileBean(
+                            id = scanFile.id,
+                            path = file.absolutePath,
+                            name = file.name,
+                            modifyTime = file.lastModified(),
+                            size = file.length()
+                        )
+                    )
+                } else {
+                    continue
+                }
+            } else {
+                modViewModel.insertScanFile(
+                    ScanFileBean(
+                        path = file.absolutePath,
+                        name = file.name,
+                        modifyTime = file.lastModified(),
+                        size = file.length()
+                    )
+                )
+            }
             val modTempMap = createModTempMap(
                 file.absolutePath,
                 scanPath,

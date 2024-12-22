@@ -276,7 +276,8 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                             1 -> stringResource(id = R.string.permission, "DOCUMENT")
                             2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
                             3 -> stringResource(id = R.string.permission, "SHIZUKU")
-                            else -> stringResource(id = R.string.permission, "无权限")
+                            else -> stringResource(id = R.string.permission,
+                                stringResource(R.string.console_status_no_permission))
                         }
                     }, style = typography.labelLarge
                 )
@@ -473,7 +474,7 @@ fun ConsoleTopBar(
                 )
             }
         }, actions = {
-            Text(text = "启动游戏")
+            Text(text = stringResource(R.string.console_top_bar_start_game))
             IconButton(onClick = {
                 // 在这里处理图标按钮的点击事件
                 viewModel.startGame()

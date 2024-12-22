@@ -26,12 +26,14 @@ import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.bean.ScanFileBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.database.backups.BackupRepository
 import top.laoxin.modmanager.database.mods.ModRepository
+import top.laoxin.modmanager.database.sacnFile.ScanFileRepository
 import top.laoxin.modmanager.exception.NoSelectedGameException
 import top.laoxin.modmanager.exception.PasswordErrorException
 import top.laoxin.modmanager.exception.PermissionsException
@@ -49,11 +51,13 @@ import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.state.UserPreferencesState
 import top.laoxin.modmanager.ui.view.modview.NavigationIndex
 import java.io.File
+import kotlin.math.log
 
 class ModViewModel(
     userPreferencesRepository: UserPreferencesRepository,
     private val modRepository: ModRepository,
-    private val backupRepository: BackupRepository
+    private val backupRepository: BackupRepository,
+    private val scanFileRepository: ScanFileRepository
 ) : ViewModel(), ProgressUpdateListener, FlashObserverInterface {
     private val _uiState = MutableStateFlow(ModUiState())
     // val uiState: StateFlow<ModUiState> = _uiState.asStateFlow()
@@ -91,7 +95,8 @@ class ModViewModel(
                 ModViewModel(
                     application.userPreferencesRepository,
                     application.container.modRepository,
-                    application.container.backupRepository
+                    application.container.backupRepository,
+                    application.container.scanFileRepository
                 )
             }
         }
@@ -309,9 +314,18 @@ class ModViewModel(
                     ModTools.scanMods(
                         ModTools.ROOT_PATH + userPreferencesState.selectedDirectory, _gameInfo
                     )
+                    // 读取scanfiles
+                    var scanFiles = scanFileRepository.getAll().first()
+                    // 判断scanfiles中的文件是否被删除
+                    scanFiles.filter { !File(it.path).exists() || File(it.path).lastModified() != it.modifyTime || File(it.path).length() != it.size }.forEach {
+                        Log.d("ModViewModel", "文件已删除: $it")
+                        scanFileRepository.delete(it)
+                    }
+                    scanFiles = scanFiles.filter { File(it.path).exists() && File(it.path).lastModified() == it.modifyTime }
+
                     // 创建mods
                     val modsScan = ModTools.scanArchiveMods(
-                        _gameInfo.modSavePath, _gameInfo
+                        _gameInfo.modSavePath, _gameInfo,scanFiles,this@ModViewModel
                     ).toMutableList()
                     // 扫描文件夹中的mod文件
                     if (userPreferencesState.scanDirectoryMods) {
@@ -322,6 +336,12 @@ class ModViewModel(
                         )
                     }
                     val mods = uiState.value.modList
+                    // 在mods中找到和scanFiles中同路径的mod
+                    val mods1 = mods.filter { mod ->
+                        scanFiles.any { it.path == mod.path }
+                    }
+                    modsScan.addAll(mods1)
+
                     Log.d("ModViewModel", "已有的mods: $mods")
                     // 对比modsScan和mods，对比是否有新的mod
                     val addMods = ModTools.getNewMods(mods, modsScan)
@@ -333,7 +353,13 @@ class ModViewModel(
                     val updateMods = checkUpdateMods(mods, modsScan)
                     modRepository.updateAll(updateMods)
                     withContext(Dispatchers.Main) {
-                        ToastUtils.longCall("新增: ${addMods.size} 更新: ${updateMods.size} 删除: ${delModsList.size}")
+                        ToastUtils.longCall(
+                            App.get().getString(
+                                R.string.toast_flash_complate,
+                                addMods.size.toString(),
+                                updateMods.size.toString(),
+                                delModsList.size.toString()
+                            ))
                     }
                     setLoading(false)
                     fileObserver?.startWatching()
@@ -390,10 +416,6 @@ class ModViewModel(
         Log.d("ModViewModel", "更新: $updatedMods")
         return updatedMods
     }
-
-
-    // 权限检查
-
 
     // 权限检查
     private fun checkPermission(path: String) {
@@ -1062,4 +1084,14 @@ class ModViewModel(
             it.copy(currentMods = mods)
         }
     }
+
+    // 向scanfile表中插入数据
+    fun insertScanFile(scanFile: ScanFileBean) {
+        viewModelScope.launch {
+            scanFileRepository.insert(scanFile)
+        }
+    }
+
+
+
 }
