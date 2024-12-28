@@ -34,7 +34,7 @@ android {
     namespace = "top.laoxin.modmanager"
     compileSdk = 35
 
-    ndkVersion = "28.0.12433566 rc1"
+    ndkVersion = "27.2.12479018"
 
     defaultConfig {
         applicationId = "com.mod.manager"
@@ -53,6 +53,17 @@ android {
             abiFilters.addAll(supportedAbis)
             debugSymbolLevel = "FULL"
         }
+
+        externalNativeBuild {
+            ndkBuild {
+                arguments += arrayOf(
+                    "-DANDROID_STL=none",
+                    "-DCMAKE_CXX_STANDARD=23",
+                    "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
+                )
+            }
+        }
+
     }
 
     buildTypes {

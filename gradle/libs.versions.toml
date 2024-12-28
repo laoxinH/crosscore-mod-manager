@@ -27,7 +27,7 @@ roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 rules = "1.6.1"
 xz = "1.10"
-xZipJbindingXandroid = "Release-16.02-2.02"
+xZipJbindingXandroid = "2024.12"
 zip4j = "2.11.5"
 roomVersion = "2.6.1"
 desugar = "2.1.4"
@@ -76,7 +76,7 @@ retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
 material3 = { module = "androidx.compose.material3:material3" }
-x-zip-jbinding-xandroid = { module = "com.github.omicronapps:7-Zip-JBinding-4Android", version.ref = "xZipJbindingXandroid" }
+x-zip-jbinding-xandroid = { module = "com.github.lings03:7-Zip-JBinding-4Android", version.ref = "xZipJbindingXandroid" }
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 androidx-roomcompiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
