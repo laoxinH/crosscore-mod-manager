@@ -1,4 +1,4 @@
-package top.laoxin.modmanager.ui.view.modview
+package top.laoxin.modmanager.ui.view.modView
 
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi

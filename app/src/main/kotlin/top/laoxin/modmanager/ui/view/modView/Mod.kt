@@ -1,4 +1,4 @@
-package top.laoxin.modmanager.ui.view.modview
+package top.laoxin.modmanager.ui.view.modView
 
 /*
  * Copyright (C) 2023 The Android Open Source Project

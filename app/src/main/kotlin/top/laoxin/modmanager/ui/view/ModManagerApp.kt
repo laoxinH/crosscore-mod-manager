@@ -60,8 +60,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
-import top.laoxin.modmanager.ui.view.modview.ModPage
-import top.laoxin.modmanager.ui.view.modview.ModTopBar
+import top.laoxin.modmanager.ui.view.modView.ModPage
+import top.laoxin.modmanager.ui.view.modView.ModTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import kotlin.math.abs

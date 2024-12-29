@@ -49,9 +49,8 @@ import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.specialGameTools.BaseSpecialGameTools
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.state.UserPreferencesState
-import top.laoxin.modmanager.ui.view.modview.NavigationIndex
+import top.laoxin.modmanager.ui.view.modView.NavigationIndex
 import java.io.File
-import kotlin.math.log
 
 class ModViewModel(
     userPreferencesRepository: UserPreferencesRepository,
