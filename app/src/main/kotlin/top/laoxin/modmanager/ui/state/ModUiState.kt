@@ -1,7 +1,7 @@
 package top.laoxin.modmanager.ui.state
 
 import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.ui.view.modview.NavigationIndex
+import top.laoxin.modmanager.ui.view.modView.NavigationIndex
 import java.io.File
 
 data class ModUiState(

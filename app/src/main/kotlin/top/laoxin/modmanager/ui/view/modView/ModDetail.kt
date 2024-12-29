@@ -1,4 +1,4 @@
-package top.laoxin.modmanager.ui.view.modview
+package top.laoxin.modmanager.ui.view.modView
 
 import android.icu.text.SimpleDateFormat
 import androidx.annotation.StringRes

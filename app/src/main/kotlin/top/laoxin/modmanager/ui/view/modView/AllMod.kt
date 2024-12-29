@@ -1,4 +1,4 @@
-package top.laoxin.modmanager.ui.view.modview
+package top.laoxin.modmanager.ui.view.modView
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

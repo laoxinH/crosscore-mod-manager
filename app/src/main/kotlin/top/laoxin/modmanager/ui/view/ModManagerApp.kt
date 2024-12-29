@@ -53,6 +53,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.drawable.toBitmap
@@ -60,8 +61,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
-import top.laoxin.modmanager.ui.view.modview.ModPage
-import top.laoxin.modmanager.ui.view.modview.ModTopBar
+import top.laoxin.modmanager.ui.view.modView.ModPage
+import top.laoxin.modmanager.ui.view.modView.ModTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import kotlin.math.abs
@@ -75,7 +76,6 @@ enum class NavigationIndex(
     MOD(R.string.mod, Icons.Filled.ImagesearchRoller),
     SETTINGS(R.string.settings, Icons.Filled.Settings)
 }
-
 
 @Composable
 fun ModManagerApp() {
