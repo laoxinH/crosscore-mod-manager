@@ -8,14 +8,12 @@ import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import top.laoxin.modmanager.MainActivity
+import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.lings.userAgreement.UserAgreementActivity
 
 class StartActivity : ComponentActivity() {
@@ -41,29 +39,30 @@ class StartActivity : ComponentActivity() {
                 @Suppress("DEPRECATION")
                 window.navigationBarColor = MaterialTheme.colorScheme.surfaceContainer.toArgb()
             }
-            MaterialTheme(
-                colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-            ) {
-                Start(onTimeout = {
-                    // 检查用户协议状态并跳转到 MainActivity 或 UserAgreementActivity
-                    val sharedPreferences = getSharedPreferences("AppLaunch", MODE_PRIVATE)
-                    val isConfirm = sharedPreferences.getBoolean("isConfirm", false)
-
-                    val intent = if (isConfirm) {
-                        Intent(this, MainActivity::class.java)
-                    } else {
-                        Intent(this, UserAgreementActivity::class.java)
-                    }
-
-                    startActivity(intent)
-                    finish()
-                })
+            ModManagerTheme {
+                Start(onTimeout = ::jumpToActivity)
             }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+    //  跳转到 MainActivity 或 UserAgreementActivity
+    fun jumpToActivity() {
+        // 检查用户协议状态并跳转到 MainActivity 或 UserAgreementActivity
+        val sharedPreferences = getSharedPreferences("AppLaunch", MODE_PRIVATE)
+        val isConfirm = sharedPreferences.getBoolean("isConfirm", false)
+
+        val intent = if (isConfirm) {
+            Intent(this, MainActivity::class.java)
+        } else {
+            Intent(this, UserAgreementActivity::class.java)
+        }
+
+        startActivity(intent)
+        finish()
     }
 
     // 检查屏幕方向
