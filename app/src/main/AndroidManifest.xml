@@ -36,12 +36,7 @@
 
         <!--启动页-->
         <activity
-            android:name="top.lings.userAgreement.UserAgreementActivity"
-            android:exported="true"
-            android:theme="@style/Theme.ModManager" />
-        <!--主页面-->
-        <activity
-            android:name=".MainActivity"
+            android:name="top.lings.start.StartActivity"
             android:exported="true"
             android:theme="@style/Theme.ModManager">
             <intent-filter>
@@ -49,6 +44,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--用户协议-->
+        <activity
+            android:name="top.lings.userAgreement.UserAgreementActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ModManager" />
+        <!--主页面-->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ModManager" />
 
         <service
             android:name=".userservice.gamestart.ProjectSnowStartService"
