@@ -42,6 +42,7 @@ fun AllModPage(
         modsSelected = uiState.modsSelected,
         onLongClick = viewModel::modLongClick,
         onMultiSelectClick = viewModel::modMultiSelectClick,
+        modViewModel = viewModel
     )
 }
 

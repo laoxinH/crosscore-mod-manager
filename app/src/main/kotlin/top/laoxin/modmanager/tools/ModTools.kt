@@ -43,8 +43,8 @@ object ModTools {
     val BACKUP_PATH = MY_APP_PATH + "backup/"
     private val MODS_TEMP_PATH = MY_APP_PATH + "temp/"
     val MODS_UNZIP_PATH = MY_APP_PATH + "temp/unzip/"
-    private val MODS_ICON_PATH = MY_APP_PATH + "icon/"
-    private val MODS_IMAGE_PATH = MY_APP_PATH + "images/"
+    val MODS_ICON_PATH = MY_APP_PATH + "icon/"
+    val MODS_IMAGE_PATH = MY_APP_PATH + "images/"
     const val GAME_CONFIG = "GameConfig/"
     const val DOWNLOAD_MOD_PATH = "/Download/Mods/"
     val GAME_CHECK_FILE_PATH = MY_APP_PATH + "gameCheckFile/"
@@ -381,6 +381,7 @@ object ModTools {
             val modFileName = File(file).name
             val gameFileMap = mutableMapOf<String, String>()
             if (!gameInfo.isGameFileRepeat) {
+                // 如果游戏文件路径不重复
                 gameFileMap.apply {
                     gameInfo.gameFilePath.forEachIndexed { index, _ ->
                         put(
@@ -390,6 +391,7 @@ object ModTools {
                     }
                 }
             } else {
+                // 如果游戏文件路径重复
                 gameFileMap.apply {
                     gameInfo.gameFilePath.forEachIndexed { index, it ->
                         val pathName = File(it).name
@@ -435,7 +437,8 @@ object ModTools {
                             isZip = if (archiveFile == null) false else ArchiveUtil.isArchive(
                                 archiveFile.absolutePath
                             ),
-                            modPath = if (archiveFile == null) File(file).parent ?: file else archiveFile.absolutePath,
+                            modPath = if (archiveFile == null) File(file).parent
+                                ?: file else archiveFile.absolutePath,
                             virtualPaths = if (archiveFile == null) "" else archiveFile.absolutePath
                                     + File(file).parentFile?.absolutePath
                         )

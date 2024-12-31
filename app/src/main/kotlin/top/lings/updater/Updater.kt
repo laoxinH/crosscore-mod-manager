@@ -3,8 +3,8 @@ package top.lings.updater
 import android.util.Log
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.BuildConfig
-import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.tools.ToastUtils
 import top.lings.updater.util.GithubApi
 
 object Updater {
