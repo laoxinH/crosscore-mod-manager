@@ -20,61 +20,34 @@ package top.laoxin.modmanager.ui.view.modView
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -115,7 +88,8 @@ fun ModPage(viewModel: ModViewModel) {
             switchMod = { mod, enable -> viewModel.switchMod(mod, enable, true) },
             onConfirmRequest = {
                 viewModel.delMods()
-            }
+            },
+            viewModel = viewModel
         )
         DialogCommon(
             title = stringResource(R.string.open_mod_failed_dialog_title),
@@ -210,6 +184,7 @@ fun DisEnableModsDialog(
     mods: List<ModBean>,
     switchMod: (ModBean, Boolean) -> Unit,
     onConfirmRequest: () -> Unit,
+    viewModel: ModViewModel
 ) {
     if (showDialog) {
         if (mods.isNotEmpty()) {
@@ -231,7 +206,8 @@ fun DisEnableModsDialog(
                                 enableMod = switchMod,
                                 isMultiSelect = false,
                                 onLongClick = { },
-                                onMultiSelectClick = { }
+                                onMultiSelectClick = { },
+                                modViewModel = viewModel
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -272,109 +248,109 @@ suspend fun loadImageBitmapFromPath(
                 .get()
             bitmap.asImageBitmap()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("loadImageBitmapFromPath", "加载图片失败: $e")
             null
         }
     }
 }
 
 
-/**
- * @param hint: 空字符时的提示
- * @param startIcon: 左侧图标;  -1 则不显示
- * @param iconSpacing: 左侧图标与文字的距离; 相当于: drawablePadding
- */
-@Composable
-fun CustomEdit(
-    text: String = "",
-    onValueChange: (String) -> Unit,
-    modifier: Modifier,
-    hint: String = "请输入",
-    @DrawableRes startIcon: Int = -1,
-    iconSpacing: Dp = 6.dp,
-    enabled: Boolean = true,
-    readOnly: Boolean = false,
-    textStyle: TextStyle = TextStyle.Default,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    cursorBrush: Brush = SolidColor(MaterialTheme.colorScheme.primary),
-    close: () -> Unit
-) {
-    // 焦点, 用于控制是否显示 右侧叉号
-    var hasFocus by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-
-    BasicTextField(
-        value = text,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .focusRequester(focusRequester)
-            .onFocusChanged {
-                if (!it.isFocused && hasFocus) {
-                    // 组件失去焦点
-                    close()
-                }
-                hasFocus = it.isFocused
-            },
-        singleLine = true,
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = textStyle,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = KeyboardActions(onDone = { close() }),
-        visualTransformation = visualTransformation,
-        cursorBrush = cursorBrush,
-        decorationBox = @Composable { innerTextField ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // -1 不显示 左侧Icon
-                if (startIcon != -1) {
-                    Image(painter = painterResource(id = startIcon), contentDescription = null)
-                    Spacer(modifier = Modifier.width(iconSpacing))
-                }
-
-                Box(modifier = Modifier.weight(1f)) {
-                    // 当空字符时, 显示hint
-                    if (text.isEmpty())
-                        Text(text = hint, color = Color.Gray, style = textStyle)
-
-                    // 原本输入框的内容
-                    innerTextField()
-                }
-
-                // 存在焦点 且 有输入内容时. 显示叉号
-                if (hasFocus && text.isNotEmpty()) {
-                    Log.d("CustomEdit", "CustomEdit:失去焦点 ")
-
-                    Icon(imageVector = Icons.Filled.Clear, // 清除图标
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primaryContainer,
-                        // 点击就清空text
-                        modifier = Modifier.clickable {
-                            onValueChange.invoke("")
-                        })
-                }
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primaryContainer,
-
-                    modifier = Modifier
-                        .clickable {
-                            close()
-                        }
-                        .padding(start = 10.dp)
-                )
-            }
-        }
-    )
-
-    LaunchedEffect(focusRequester) {
-        focusRequester.requestFocus()
-    }
-}
+///**
+// * @param hint: 空字符时的提示
+// * @param startIcon: 左侧图标;  -1 则不显示
+// * @param iconSpacing: 左侧图标与文字的距离; 相当于: drawablePadding
+// */
+//@Composable
+//fun CustomEdit(
+//    text: String = "",
+//    onValueChange: (String) -> Unit,
+//    modifier: Modifier,
+//    hint: String = "请输入",
+//    @DrawableRes startIcon: Int = -1,
+//    iconSpacing: Dp = 6.dp,
+//    enabled: Boolean = true,
+//    readOnly: Boolean = false,
+//    textStyle: TextStyle = TextStyle.Default,
+//    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+//    visualTransformation: VisualTransformation = VisualTransformation.None,
+//    cursorBrush: Brush = SolidColor(MaterialTheme.colorScheme.primary),
+//    close: () -> Unit
+//) {
+//    // 焦点, 用于控制是否显示 右侧叉号
+//    var hasFocus by remember { mutableStateOf(false) }
+//    val focusRequester = remember { FocusRequester() }
+//
+//    BasicTextField(
+//        value = text,
+//        onValueChange = onValueChange,
+//        modifier = modifier
+//            .focusRequester(focusRequester)
+//            .onFocusChanged {
+//                if (!it.isFocused && hasFocus) {
+//                    // 组件失去焦点
+//                    close()
+//                }
+//                hasFocus = it.isFocused
+//            },
+//        singleLine = true,
+//        enabled = enabled,
+//        readOnly = readOnly,
+//        textStyle = textStyle,
+//        keyboardOptions = keyboardOptions,
+//        keyboardActions = KeyboardActions(onDone = { close() }),
+//        visualTransformation = visualTransformation,
+//        cursorBrush = cursorBrush,
+//        decorationBox = @Composable { innerTextField ->
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                // -1 不显示 左侧Icon
+//                if (startIcon != -1) {
+//                    Image(painter = painterResource(id = startIcon), contentDescription = null)
+//                    Spacer(modifier = Modifier.width(iconSpacing))
+//                }
+//
+//                Box(modifier = Modifier.weight(1f)) {
+//                    // 当空字符时, 显示hint
+//                    if (text.isEmpty())
+//                        Text(text = hint, color = Color.Gray, style = textStyle)
+//
+//                    // 原本输入框的内容
+//                    innerTextField()
+//                }
+//
+//                // 存在焦点 且 有输入内容时. 显示叉号
+//                if (hasFocus && text.isNotEmpty()) {
+//                    Log.d("CustomEdit", "CustomEdit:失去焦点 ")
+//
+//                    Icon(imageVector = Icons.Filled.Clear, // 清除图标
+//                        contentDescription = null,
+//                        tint = MaterialTheme.colorScheme.primaryContainer,
+//                        // 点击就清空text
+//                        modifier = Modifier.clickable {
+//                            onValueChange.invoke("")
+//                        })
+//                }
+//                Icon(
+//                    imageVector = Icons.Filled.Search,
+//                    contentDescription = null,
+//                    tint = MaterialTheme.colorScheme.primaryContainer,
+//
+//                    modifier = Modifier
+//                        .clickable {
+//                            close()
+//                        }
+//                        .padding(start = 10.dp)
+//                )
+//            }
+//        }
+//    )
+//
+//    LaunchedEffect(focusRequester) {
+//        focusRequester.requestFocus()
+//    }
+//}
 
 
 // 创建一个占据全屏的居中文本, 提示没有mod

@@ -30,7 +30,8 @@ object LogTools {
             if (!logFile.exists()) {
                 logFile.createNewFile()
             } else {
-                logFile.writeText("")
+                logFile.delete()
+                logFile.createNewFile()
             }
 
             val executor = Executors.newSingleThreadExecutor()

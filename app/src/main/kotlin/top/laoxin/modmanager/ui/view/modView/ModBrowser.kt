@@ -45,7 +45,9 @@ import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
+
 const val TAG = "ModsBrowser"
+
 @Composable
 fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     var currentPath by remember { mutableStateOf(uiState.currentPath) }
@@ -68,7 +70,10 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         snapshotFlow { listState.layoutInfo.totalItemsCount }
             .collect { itemCount ->
                 if (itemCount > 0) {
-                    listState.scrollToItem(scrollPositions[currentPath] ?: 0, scrollOffsets[currentPath] ?: 0)
+                    listState.scrollToItem(
+                        scrollPositions[currentPath] ?: 0,
+                        scrollOffsets[currentPath] ?: 0
+                    )
                 }
             }
     }
@@ -154,7 +159,8 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                                 if (currentPath != uiState.currentGameModPath) {
                                     // 记录当前路径的滚动位置
                                     scrollPositions[currentPath] = listState.firstVisibleItemIndex
-                                    scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
+                                    scrollOffsets[currentPath] =
+                                        listState.firstVisibleItemScrollOffset
                                     previousPath = currentPath
                                     currentPath = File(currentPath).parent ?: currentPath
                                 }
@@ -183,7 +189,8 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
 
                     val modEnableCount = if (viewModel.getModsByPath(file.path)
                             .isNotEmpty()
-                    ) viewModel.getModsByPath(file.path).filter { it.isEnable }.size else viewModel.getModsByVirtualPaths(
+                    ) viewModel.getModsByPath(file.path)
+                        .filter { it.isEnable }.size else viewModel.getModsByVirtualPaths(
                         file.path
                     ).filter { it.isEnable }.size
                     if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty() && (file.isDirectory || !file.exists())) {
@@ -196,7 +203,8 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                                 if (file.isDirectory || !file.exists()) {
                                     // 记录当前路径的滚动位置
                                     scrollPositions[currentPath] = listState.firstVisibleItemIndex
-                                    scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
+                                    scrollOffsets[currentPath] =
+                                        listState.firstVisibleItemScrollOffset
                                     previousPath = currentPath
                                     currentPath = file.path
                                 } else {
@@ -212,7 +220,8 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                         )
                     }
                     if (modsByPath.size == 1 || modsByVirtualPaths.size == 1) {
-                        ModListItem(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        ModListItem(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                             mod = modsByPath.firstOrNull() ?: modsByVirtualPaths.firstOrNull()!!,
                             isSelected = uiState.modsSelected.contains(
                                 modsByPath.firstOrNull()?.id
@@ -235,7 +244,9 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             },
                             enableMod = { mod, isEnable ->
                                 viewModel.switchMod(mod, isEnable)
-                            })
+                            },
+                            modViewModel = viewModel
+                        )
                     }
                     if (modsByPath.size > 1 || modsByVirtualPaths.size > 1) {
                         FileListItem(

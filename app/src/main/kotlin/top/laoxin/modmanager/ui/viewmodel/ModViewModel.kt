@@ -44,6 +44,7 @@ import top.laoxin.modmanager.observer.FlashObserverInterface
 import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.tools.ModTools.MODS_IMAGE_PATH
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.specialGameTools.BaseSpecialGameTools
@@ -316,15 +317,20 @@ class ModViewModel(
                     // 读取scanfiles
                     var scanFiles = scanFileRepository.getAll().first()
                     // 判断scanfiles中的文件是否被删除
-                    scanFiles.filter { !File(it.path).exists() || File(it.path).lastModified() != it.modifyTime || File(it.path).length() != it.size }.forEach {
+                    scanFiles.filter {
+                        !File(it.path).exists() || File(it.path).lastModified() != it.modifyTime || File(
+                            it.path
+                        ).length() != it.size
+                    }.forEach {
                         Log.d("ModViewModel", "文件已删除: $it")
                         scanFileRepository.delete(it)
                     }
-                    scanFiles = scanFiles.filter { File(it.path).exists() && File(it.path).lastModified() == it.modifyTime }
+                    scanFiles =
+                        scanFiles.filter { File(it.path).exists() && File(it.path).lastModified() == it.modifyTime }
 
                     // 创建mods
                     val modsScan = ModTools.scanArchiveMods(
-                        _gameInfo.modSavePath, _gameInfo,scanFiles,this@ModViewModel
+                        _gameInfo.modSavePath, _gameInfo, scanFiles, this@ModViewModel
                     ).toMutableList()
                     // 扫描文件夹中的mod文件
                     if (userPreferencesState.scanDirectoryMods) {
@@ -358,7 +364,8 @@ class ModViewModel(
                                 addMods.size.toString(),
                                 updateMods.size.toString(),
                                 delModsList.size.toString()
-                            ))
+                            )
+                        )
                     }
                     setLoading(false)
                     fileObserver?.startWatching()
@@ -463,6 +470,37 @@ class ModViewModel(
     // 打开密码输入框
     fun showPasswordDialog(b: Boolean) {
         _uiState.value = _uiState.value.copy(showPasswordDialog = b)
+    }
+
+    // 刷新mod预览图
+    fun flashModImage(mods: ModBean) {
+        val modBean = mods
+        // 判断modbean是否包含密码
+        if (modBean.isEncrypted && modBean.password == null) {
+            // 如果包含密码，弹出密码输入框
+            setModDetail(modBean)
+            showPasswordDialog(true)
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            if (modBean.isZipFile) {
+                try {
+                    ArchiveUtil.extractSpecificFile(
+                        modBean.path!!,
+                        modBean.images.orEmpty().map {
+                            it.substringAfter(MODS_IMAGE_PATH + File(modBean.path).nameWithoutExtension + "/")
+                        },
+                        MODS_IMAGE_PATH + File(modBean.path).nameWithoutExtension,
+                        modBean.password,
+                        false
+                    )
+                } catch (_: Exception) {
+                    throw Exception(
+                        App.get().getString(R.string.toast_decompression_failed)
+                    )
+                }
+            }
+        }
     }
 
 
@@ -732,7 +770,7 @@ class ModViewModel(
         _requestPermissionPath = path
     }
 
-    // 设置用户提示
+// 设置用户提示
 //    fun setUserTipsDialog(b: Boolean) {
 //        viewModelScope.launch {
 //            userPreferencesRepository.savePreference(
@@ -852,7 +890,8 @@ class ModViewModel(
     }
 
     override fun onFlash() {
-        flashMods(false)
+        // 检测到文件变化，自动刷新mods
+        flashMods(true)
     }
 
     fun setModsView(enableMods: NavigationIndex) {
@@ -1052,7 +1091,7 @@ class ModViewModel(
         _currentPath = currentPath
         _uiState.update { it.copy(currentPath = currentPath) }
         Log.d("ModViewModel", "updateFiles: 触发跟新文件列表")
-        // 构建当前文件\
+        // 构建当前文件
         viewModelScope.launch {
             if (File(currentPath).isDirectory) {
                 _uiState.update { it ->
@@ -1090,7 +1129,5 @@ class ModViewModel(
             scanFileRepository.insert(scanFile)
         }
     }
-
-
 
 }

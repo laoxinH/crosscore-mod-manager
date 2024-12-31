@@ -44,6 +44,7 @@
         <string name="mod_page_mod_detail_dialog_detali_descript">Description: %1$s</string>
         <string name="mod_page_mod_detail_dialog_detali_version">Version: %1$s</string>
         <string name="mod_page_mod_detail_dialog_detali_path">Path: %1$s</string>
+        <string name="mod_page_mod_detail_dialog_detali_path_images">Images Path: %1$s</string>
         <string name="mod_page_mod_detail_dialog_detali_author">Author: %1$s</string>
         <string name="mod_page_mod_detail_dialog_detali_perview">Preview</string>
         <string name="mod_page_mod_detail_dialog_close">Close</string>

@@ -47,6 +47,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.tools.LogTools.logRecord
+import top.laoxin.modmanager.ui.viewmodel.ModViewModel
+import java.io.File
 
 @Composable
 fun ModList(
@@ -61,6 +64,7 @@ fun ModList(
     onLongClick: (ModBean) -> Unit,  // 长按
     // 多选点击
     onMultiSelectClick: (ModBean) -> Unit, // 多选状态下的点击
+    modViewModel: ModViewModel
 ) {
     LazyColumn(
         // state = state,
@@ -81,7 +85,8 @@ fun ModList(
                 isSelected = modsSelected.contains(mod.id),
                 onLongClick = onLongClick,
                 onMultiSelectClick = onMultiSelectClick,
-                isMultiSelect = isMultiSelect
+                isMultiSelect = isMultiSelect,
+                modViewModel = modViewModel
             )
         }
     }
@@ -100,18 +105,32 @@ fun ModListItem(
     modSwitchEnable: Boolean,
     openModDetail: (ModBean, Boolean) -> Unit,
     enableMod: (ModBean, Boolean) -> Unit,
+    modViewModel: ModViewModel
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-    val path = mod.icon
-    LaunchedEffect(path) {
+
+    LaunchedEffect(mod.icon) {
         coroutineScope.launch(Dispatchers.IO) {
-            try {
-                imageBitmap =
-                    path?.let { loadImageBitmapFromPath(context, it, 256, 256) }  // 使用 Glide 加载图片
-            } catch (e: Exception) {
-                e.printStackTrace()
+            mod.icon?.let {
+                if (File(mod.icon).exists()) {
+                    imageBitmap = loadImageBitmapFromPath(context, mod.icon, 256, 256)
+                } else {
+                    Log.e("ModList", "ICON文件不存在: ${mod.icon}")
+                    logRecord("ICON文件不存在: ${mod.icon}")
+                    if (mod.icon.substringAfterLast('/') == "null") {
+                        Log.e("ModDetail", "ICON信息异常: ${mod.icon}")
+                        logRecord("ICON信息异常: ${mod.icon}")
+                        modViewModel.setModDetail(mod.copy(icon = null))
+                    } else {
+                        modViewModel.flashModImage(mod)
+                        imageBitmap = loadImageBitmapFromPath(context, mod.icon, 256, 256)
+
+                        Log.i("ModList", "已重新解压ICON: ${mod.icon}")
+                        logRecord("已重新解压ICON: ${mod.icon}")
+                    }
+                }
             }
         }
     }

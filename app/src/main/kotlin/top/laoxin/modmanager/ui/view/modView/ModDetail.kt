@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.ui.view.modView
 
 import android.icu.text.SimpleDateFormat
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -52,10 +53,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.tools.ArchiveUtil
+import top.laoxin.modmanager.tools.LogTools.logRecord
+import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
+import java.io.File
 import java.util.Date
 import java.util.Locale
 
@@ -121,12 +127,23 @@ fun ModDetailPartialBottomSheet(
                     LaunchedEffect(mod.images) {
                         imageBitmaps.clear()
                         mod.images.mapNotNull { path ->
-                            loadImageBitmapFromPath(context, path, 1024, 1024)  //保持图片的比例压缩
+                            if (File(path).exists()) {
+                                loadImageBitmapFromPath(context, path, 1024, 1024)
+                            } else {
+                                Log.e("ModDetail", "图片文件不存在: $path")
+                                logRecord("图片文件不存在: $path")
+
+                                viewModel.flashModImage(mod)
+
+                                Log.e("ModDetail", "图片文件已重新解压: $path")
+                                logRecord("图片文件已重新解压: $path")
+
+                                loadImageBitmapFromPath(context, path, 1024, 1024)
+                            }
                         }.also { loadedBitmaps ->
                             imageBitmaps.addAll(loadedBitmaps)
                         }
                     }
-
 
                     // 显示图片轮播
                     ImageCarouselWithIndicator(imageBitmaps)
@@ -202,10 +219,19 @@ fun ModDetailPartialBottomSheet(
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
+
+                        mod.images?.joinToString { it }?.let {
+                            Text(
+                                text = stringResource(
+                                    R.string.mod_page_mod_detail_dialog_detali_path_images,
+                                    it
+                                ),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
             }
-
         }
 
 

@@ -43,6 +43,7 @@
     <string name="mod_page_mod_detail_dialog_detali_descript">描述: %1$s</string>
     <string name="mod_page_mod_detail_dialog_detali_version">版本: %1$s</string>
     <string name="mod_page_mod_detail_dialog_detali_path">路径: %1$s</string>
+    <string name="mod_page_mod_detail_dialog_detali_path_images">图片路径: %1$s</string>
     <string name="mod_page_mod_detail_dialog_detali_author">作者: %1$s</string>
     <string name="mod_page_mod_detail_dialog_detali_perview">预览</string>
     <string name="mod_page_mod_detail_dialog_close">关闭</string>
@@ -50,7 +51,7 @@
     <string name="setting_page_app_del_backup">删除备份</string>
     <string name="setting_page_app_del_descript">这将删除所有游戏备份文件!</string>
     <string name="setting_page_app_clean_cache">清除缓存</string>
-    <string name="setting_page_app_clean_cache_descript">清楚缓存的图片等文件</string>
+    <string name="setting_page_app_clean_cache_descript">清楚缓存的图片等文件，可能造成图片显示异常</string>
     <string name="setting_page_about_author">作者: laoxin &amp; 角砂糖 </string>
     <string name="setting_page_about_title">About</string>
     <string name="setting_page_about_pay">投喂开发者</string>
