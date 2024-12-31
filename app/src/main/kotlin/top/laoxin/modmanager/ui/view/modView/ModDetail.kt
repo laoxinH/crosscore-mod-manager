@@ -53,12 +53,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools.logRecord
-import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File

@@ -1,7 +1,6 @@
 package top.laoxin.modmanager.database.sacnFile
 
 import kotlinx.coroutines.flow.Flow
-import top.laoxin.modmanager.bean.BackupBean
 import top.laoxin.modmanager.bean.ScanFileBean
 
 class OfflineScanFileRepository(private val scanFileDao: ScanFileDao) : ScanFileRepository {

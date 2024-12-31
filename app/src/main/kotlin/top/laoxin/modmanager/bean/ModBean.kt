@@ -2,7 +2,6 @@ package top.laoxin.modmanager.bean
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
