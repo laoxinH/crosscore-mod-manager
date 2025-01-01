@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="https://github.com/laoxinH/crosscore-mod-manager/blob/main/app/src/main/res/drawable/app_icon.png" width="200" alt="Mod实验室">
+    <img src="https://github.com/laoxinH/crosscore-mod-manager/blob/main/app/src/main/res/drawable/start.webp" width="200" alt="Mod实验室">
   <br>Mod实验室<br>
 </h1>
 
