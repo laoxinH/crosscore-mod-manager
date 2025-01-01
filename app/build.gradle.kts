@@ -40,8 +40,8 @@ android {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 35
-        versionCode = 33
-        versionName = "3.2.2"
+        versionCode = 34
+        versionName = "3.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
