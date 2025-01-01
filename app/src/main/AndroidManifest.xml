@@ -38,7 +38,7 @@
         <activity
             android:name="top.lings.start.StartActivity"
             android:exported="true"
-            android:theme="@style/Theme.ModManager">
+            android:theme="@style/Theme.ModManager.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

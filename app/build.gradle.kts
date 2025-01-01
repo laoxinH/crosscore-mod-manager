@@ -224,6 +224,8 @@ dependencies {
     implementation(libs.glide)
     // pager2
     implementation(libs.accompanist.pager)
-    // 依赖注入
+    // desugar
     coreLibraryDesugaring(libs.desugar)
+    // 启动页
+    implementation(libs.androidx.core.splashscreen)
 }
