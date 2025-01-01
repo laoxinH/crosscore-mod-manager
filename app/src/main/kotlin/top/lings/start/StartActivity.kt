@@ -6,17 +6,15 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.toArgb
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import top.laoxin.modmanager.MainActivity
-import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.lings.userAgreement.UserAgreementActivity
+import java.util.concurrent.atomic.AtomicBoolean
 
 class StartActivity : ComponentActivity() {
+    private val isKeepOnScreen = AtomicBoolean(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,23 +23,27 @@ class StartActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         // 通过背景色使状态栏和导航栏透明
         window.setBackgroundDrawableResource(android.R.color.transparent)
-
         // 启用 Edge-to-Edge 模式
         enableEdgeToEdge()
 
-        // 检查屏幕方向
         checkOrientation()
 
-        setContent {
-            // 设置导航栏背景颜色和图标亮度
-            WindowInsetsControllerCompat(window, window.decorView).apply {
-                isAppearanceLightNavigationBars = true
-                @Suppress("DEPRECATION")
-                window.navigationBarColor = MaterialTheme.colorScheme.surfaceContainer.toArgb()
+        jumpToActivity()
+
+        // 保持SplashScreen
+        var splashScreen = installSplashScreen().apply {
+            setKeepOnScreenCondition {
+                isKeepOnScreen.get()
             }
-            ModManagerTheme {
-                Start(onTimeout = ::jumpToActivity)
-            }
+        }
+
+        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+            splashScreenViewProvider.iconView.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction {
+                    splashScreenViewProvider.remove()
+                }.start()
         }
     }
 
@@ -49,9 +51,8 @@ class StartActivity : ComponentActivity() {
         super.onDestroy()
     }
 
-    //  跳转到 MainActivity 或 UserAgreementActivity
+    // 检查用户协议状态并跳转到 MainActivity 或 UserAgreementActivity
     fun jumpToActivity() {
-        // 检查用户协议状态并跳转到 MainActivity 或 UserAgreementActivity
         val sharedPreferences = getSharedPreferences("AppLaunch", MODE_PRIVATE)
         val isConfirm = sharedPreferences.getBoolean("isConfirm", false)
 
@@ -62,6 +63,7 @@ class StartActivity : ComponentActivity() {
         }
 
         startActivity(intent)
+        isKeepOnScreen.set(false)
         finish()
     }
 

@@ -2,8 +2,14 @@
 <resources>
 
     <style name="Theme.ModManager" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowDisablePreview">false</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.ModManager.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/start</item>
+        <item name="windowSplashScreenAnimationDuration">500</item>
+        <item name="postSplashScreenTheme">@style/Theme.ModManager</item>
     </style>
 
 </resources>

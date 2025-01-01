@@ -63,6 +63,7 @@ class App : Application() {
     companion object {
         private lateinit var sApp: App
         lateinit var osVersion: OSVersion
+        var isHuawei = false
         fun get(): App {
             return sApp
         }
@@ -80,13 +81,10 @@ class App : Application() {
         // 鸿蒙4
         val version = Build.VERSION.INCREMENTAL
         Log.d("App初始化", "checkOsVersion: $version")
-        if (version.contains(
-                "Harmony",
-                true
-            ) && (version.contains("4.0") || version.contains("4.2"))
-        ) {
+        if ((version.contains("104.0") || version.contains("104.2")) && osVersion == OSVersion.OS_11) {
             // 鸿蒙4目前仅可使用shizuku，故设置为14
             osVersion = OSVersion.OS_14
+            isHuawei = true
         }
 
         Log.d("App", "checkOsVersion: $osVersion")
