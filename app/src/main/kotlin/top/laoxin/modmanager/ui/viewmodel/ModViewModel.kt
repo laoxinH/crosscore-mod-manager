@@ -477,9 +477,6 @@ class ModViewModel(
         val modBean = mods
         // 判断modbean是否包含密码
         if (modBean.isEncrypted && modBean.password == null) {
-            // 如果包含密码，弹出密码输入框
-            setModDetail(modBean)
-            showPasswordDialog(true)
             return
         }
         viewModelScope.launch(Dispatchers.IO) {
