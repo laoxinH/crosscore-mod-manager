@@ -238,7 +238,7 @@ object ModTools {
         // 读取images文件输入流
         if (bean.images != null) {
             val images = mutableListOf<String>()
-            for (image in bean.images) {
+            for (image in bean.images!!) {
                 val imagePath = unZipPath + image
                 val file = File(imagePath)
                 val md5 = MD5Tools.calculateMD5(file.inputStream())

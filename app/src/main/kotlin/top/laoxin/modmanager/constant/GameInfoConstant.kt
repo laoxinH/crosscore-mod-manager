@@ -15,11 +15,22 @@ object GameInfoConstant {
         mutableListOf(
             ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore/files/Custom/",
             ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore/files/videos/login/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore/files/sounds/cv/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore/files/sounds/cv/cv_skin/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore/files/sounds/cv/bgms/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore/files/sounds/cv/picture/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore/files/sounds/cv/fight/effect",
+
         ),
         "",
         mutableListOf(
             "游戏模型",
             "登录页面",
+            "角色语言",
+            "皮肤语音",
+            "背景音乐",
+            "图册语音",
+            "战斗音效",
         ),
         false
     )
@@ -34,11 +45,23 @@ object GameInfoConstant {
         mutableListOf(
             ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore.bilibili/files/Custom/",
             ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore.bilibili/files/videos/login/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore.bilibili/files/sounds/cv/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore.bilibili/files/sounds/cv/cv_skin/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore.bilibili/files/sounds/bgms/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore.bilibili/files/sounds/cv/picture/",
+            ModTools.ROOT_PATH + "/Android/data/com.megagame.crosscore.bilibili/files/sounds/cv/fight/effect",
+
         ),
         "",
         mutableListOf(
             "游戏模型",
             "登录页面",
+            "角色语言",
+            "皮肤语音",
+            "背景音乐",
+            "图册语音",
+            "战斗音效",
+
         ),
         false
     )
