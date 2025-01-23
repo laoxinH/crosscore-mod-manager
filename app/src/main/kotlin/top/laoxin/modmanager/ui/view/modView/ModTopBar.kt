@@ -114,7 +114,7 @@ fun MultiSelectTopBar(
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBackIosNew,
                                     contentDescription = null,
-                                    Modifier.size(16.dp)
+                                    Modifier.size(12.dp)
                                 )
                                 Text(
                                     text = uiState.currentPath.replace(
@@ -123,8 +123,8 @@ fun MultiSelectTopBar(
                                     )
                                         .substringAfterLast('/')
                                         .substringBeforeLast('.')
-                                        .takeLast(5),
-                                    style = MaterialTheme.typography.titleLarge,
+                                        .takeLast(4),
+                                    style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
@@ -290,7 +290,7 @@ fun GeneralTopBar(
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBackIosNew,
                                     contentDescription = null,
-                                    Modifier.size(16.dp)
+                                    Modifier.size(12.dp)
                                 )
                                 Text(
                                     text = uiState.currentPath.replace(
@@ -299,8 +299,8 @@ fun GeneralTopBar(
                                     )
                                         .substringAfterLast('/')
                                         .substringBeforeLast('.')
-                                        .takeLast(5),
-                                    style = MaterialTheme.typography.titleLarge,
+                                        .takeLast(4),
+                                    style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
