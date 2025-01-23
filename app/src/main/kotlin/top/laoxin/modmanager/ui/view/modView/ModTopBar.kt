@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -94,7 +97,44 @@ fun MultiSelectTopBar(
             modifier = modifier,
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-            ), title = {
+            ),
+            navigationIcon = {
+                if (uiState.modsView == NavigationIndex.MODS_BROWSER && uiState.isBackPathExist) {
+                    Button(
+                        onClick = {
+                            viewModel.setDoBackFunction(true)
+                        },
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBackIosNew,
+                                    contentDescription = null,
+                                    Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = uiState.currentPath.replace(
+                                        uiState.currentGameModPath,
+                                        ""
+                                    )
+                                        .substringAfterLast('/')
+                                        .substringBeforeLast('.')
+                                        .takeLast(5),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    null
+                }
+            },
+            title = {
                 Box(contentAlignment = Alignment.CenterStart) {
                     Text(
                         stringResource(id = uiState.modsView.title),
@@ -128,7 +168,8 @@ fun MultiSelectTopBar(
                     }
                 }
 
-            }, actions = {
+            },
+            actions = {
                 // 全选
                 IconButton(onClick = {
                     // 在这里处理图标按钮的点击事件
@@ -232,7 +273,44 @@ fun GeneralTopBar(
             modifier = modifier,
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-            ), title = {
+            ),
+            navigationIcon = {
+                if (uiState.modsView == NavigationIndex.MODS_BROWSER && uiState.isBackPathExist) {
+                    Button(
+                        onClick = {
+                            viewModel.setDoBackFunction(true)
+                        },
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBackIosNew,
+                                    contentDescription = null,
+                                    Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = uiState.currentPath.replace(
+                                        uiState.currentGameModPath,
+                                        ""
+                                    )
+                                        .substringAfterLast('/')
+                                        .substringBeforeLast('.')
+                                        .takeLast(5),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    null
+                }
+            },
+            title = {
                 Box(contentAlignment = Alignment.CenterStart) {
                     Text(
                         stringResource(id = uiState.modsView.title),
@@ -257,7 +335,8 @@ fun GeneralTopBar(
                     }
                 }
 
-            }, actions = {
+            },
+            actions = {
 //                    IconButton(onClick = {
 //                        // 在这里处理图标按钮的点击事件
 //                        viewModel.setUserTipsDialog(true)

@@ -146,7 +146,7 @@ class ModViewModel(
         scanDirectoryMods,
         delUnzipDictionaryFlow,
         showCategoryView
-    ) { values ->
+    ) { values: Array<Any> ->
         UserPreferencesState(
             scanQQDirectory = values[0] as Boolean,
             selectedDirectory = values[1] as String,
@@ -894,6 +894,18 @@ class ModViewModel(
     fun setModsView(enableMods: NavigationIndex) {
         _uiState.update {
             it.copy(modsView = enableMods)
+        }
+    }
+
+    fun setBackIconVisiable(b: Boolean) {
+        _uiState.update {
+            it.copy(isBackPathExist = b)
+        }
+    }
+
+    fun setDoBackFunction(b: Boolean) {
+        _uiState.update {
+            it.copy(doBackFunction = b)
         }
     }
 

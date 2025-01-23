@@ -45,6 +45,7 @@ import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
+import kotlin.collections.set
 
 const val TAG = "ModsBrowser"
 
@@ -56,11 +57,30 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     val listState = rememberLazyListState()
     val scrollPositions = remember { mutableMapOf<String, Int>() }
     val scrollOffsets = remember { mutableMapOf<String, Int>() }
+    val doBackFunction by rememberUpdatedState(uiState.doBackFunction)
     if (currentPath == ModTools.MOD_PATH) {
         return NoMod()
     }
 
-    // 返回上级目录是否显示
+    fun doBack() {
+        if (currentPath != uiState.currentGameModPath && currentPath != Environment.getExternalStorageDirectory().path) {
+            // 记录当前路径的滚动位置
+            scrollPositions[currentPath] = listState.firstVisibleItemIndex
+            scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
+            previousPath = currentPath
+            currentPath = File(currentPath).parent ?: currentPath
+        }
+    }
+
+    LaunchedEffect(doBackFunction) {
+        if (doBackFunction) {
+            doBack()
+            viewModel.setDoBackFunction(false)
+            viewModel.setBackIconVisiable(false)
+        }
+    }
+
+    // 监听当前路径变化并更新文件列表
     LaunchedEffect(currentPath) {
         viewModel.updateFiles(currentPath)
     }
@@ -82,13 +102,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         // 监听返回按键事件
         if (currentPath != uiState.currentGameModPath) {
             BackHandler {
-                if (currentPath != Environment.getExternalStorageDirectory().path) {
-                    // 记录当前路径的滚动位置
-                    scrollPositions[currentPath] = listState.firstVisibleItemIndex
-                    scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
-                    previousPath = currentPath
-                    currentPath = File(currentPath).parent ?: currentPath
-                }
+                viewModel.setDoBackFunction(true)
             }
         }
 
@@ -119,59 +133,19 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                 )
             }
             viewModel.setCurrentMods(mods)
-            // 返回上级目录按钮
+
+            // 空目录的返回上级目录按钮
             if (currentPath != uiState.currentGameModPath && files.isEmpty()) {
-                FileListItem(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                    name = stringResource(R.string.mod_browser_file_list_back),
-                    isSelected = false,
-                    onLongClick = {
-                        // 长按事件
-                    },
-                    onClick = {
-                        if (currentPath != uiState.currentGameModPath) {
-                            // 记录当前路径的滚动位置
-                            scrollPositions[currentPath] = listState.firstVisibleItemIndex
-                            scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
-                            previousPath = currentPath
-                            currentPath = File(currentPath).parent ?: currentPath
-                        }
-                    },
-                    onMultiSelectClick = {
-                        // 多选状态下的点击事件
-                    },
-                    isMultiSelect = uiState.isMultiSelect,
-                    description = currentPath.replace(uiState.currentGameModPath, ""),
-                    iconId = R.drawable.back_icon
-                )
+                viewModel.setBackIconVisiable(true)
             }
+
             LazyColumn(state = listState) {
+
                 items(files) { file: File ->
-                    if (currentPath != uiState.currentGameModPath && files.indexOf(file) == 0) {
-                        FileListItem(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                            name = stringResource(R.string.mod_browser_file_list_back),
-                            isSelected = false,
-                            onLongClick = {
-                                // 长按事件
-                            },
-                            onClick = {
-                                if (currentPath != uiState.currentGameModPath) {
-                                    // 记录当前路径的滚动位置
-                                    scrollPositions[currentPath] = listState.firstVisibleItemIndex
-                                    scrollOffsets[currentPath] =
-                                        listState.firstVisibleItemScrollOffset
-                                    previousPath = currentPath
-                                    currentPath = File(currentPath).parent ?: currentPath
-                                }
-                            },
-                            onMultiSelectClick = {
-                                // 多选状态下的点击事件
-                            },
-                            isMultiSelect = uiState.isMultiSelect,
-                            description = currentPath.replace(uiState.currentGameModPath, ""),
-                            iconId = R.drawable.back_icon
-                        )
+
+                    // 非空目录的返回上级目录按钮
+                    if (!uiState.isBackPathExist && currentPath != uiState.currentGameModPath) {
+                        viewModel.setBackIconVisiable(true)
                     }
 
                     // 通过filepath获取mods
@@ -180,7 +154,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                     val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
 
                     // 设置当前页面的mods
-
                     val modCount = if (viewModel.getModsByPath(file.path)
                             .isNotEmpty()
                     ) viewModel.getModsByPath(file.path).size else viewModel.getModsByVirtualPaths(
