@@ -66,7 +66,8 @@
     <string name="toast_del_cache_filed">删除缓存失败</string>
     <string name="github_url">https://github.com/laoxinH/crosscore-mod-manager/releases</string>
     <string name="alipay_url">https://qr.alipay.com/fkx13953osk3jretx8ehg48</string>
-    <string name="mod_page_no_mod">" ((٩(//̀Д/́/)۶))这里什么都没有啊"</string>
+    <string name="mod_page_no_mod">((٩(//̀Д/́/)۶))这里什么都没有啊</string>
+    <string name="mod_page_no_mod_dir">当前路径为空</string>
     <string name="mod_pag_loading">正在扫描 : %1$s</string>
     <string name="mod_page_title_all_mods">MOD</string>
     <string name="mod_page_title_enable_mods">已开启</string>
