@@ -12,7 +12,7 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
-import top.laoxin.modmanager.useservice.IFileExplorerService
+import top.laoxin.modmanager.service.IFileExplorerService
 
 
 object FileExplorerServiceManager {

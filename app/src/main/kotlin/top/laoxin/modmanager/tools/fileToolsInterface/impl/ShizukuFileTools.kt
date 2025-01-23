@@ -3,7 +3,7 @@ package top.laoxin.modmanager.tools.fileToolsInterface.impl
 import android.util.Log
 import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
-import top.laoxin.modmanager.useservice.IFileExplorerService
+import top.laoxin.modmanager.service.IFileExplorerService
 import java.io.InputStream
 
 object ShizukuFileTools : BaseFileTools {
