@@ -25,6 +25,10 @@ class OfflineModsRepository(private val modDao: ModDao) : ModRepository {
         modDao.update(mod)
     }
 
+    override suspend fun getModById(id: Int): ModBean {
+        return modDao.getModById(id)
+    }
+
 
     override suspend fun insertAll(mods: List<ModBean>) {
         modDao.insertAll(mods)

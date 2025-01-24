@@ -14,6 +14,9 @@ interface ModRepository {
     // 删除数据
     suspend fun deleteMod(mod: ModBean)
 
+    // 通过id查询数据
+    suspend fun getModById(id: Int): ModBean
+
     // 获取所有数据
     fun getAllIModsStream(): Flow<List<ModBean>>
 

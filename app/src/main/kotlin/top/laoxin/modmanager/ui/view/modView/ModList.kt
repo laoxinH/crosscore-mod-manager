@@ -123,6 +123,7 @@ fun ModListItem(
                         Log.e("ModDetail", "ICON信息异常: ${mod.icon}")
                         logRecord("ICON信息异常: ${mod.icon}")
                         modViewModel.setModDetail(mod.copy(icon = null))
+                        modViewModel.updateMod(mod.copy(icon = null))
                     } else {
                         modViewModel.flashModImage(mod)
                         imageBitmap = loadImageBitmapFromPath(context, mod.icon, 256, 256)

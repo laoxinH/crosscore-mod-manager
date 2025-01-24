@@ -24,6 +24,10 @@ interface ModDao {
     @Delete
     suspend fun delete(modBean: ModBean)
 
+    // 通过id查询数据
+    @Query("SELECT * from mods WHERE id = :id")
+    suspend fun getModById(id: Int): ModBean
+
     // 查询所有数据
     @Query("SELECT * from mods ORDER BY date DESC")
     fun getAll(): Flow<List<ModBean>>

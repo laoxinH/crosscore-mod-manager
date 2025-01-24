@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -312,25 +313,27 @@ fun LabelAndIconButtonGroup(
         if (showButton) {
             Row(
                 modifier = Modifier
-                //.padding(40.dp),
-                //horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                /* IconButton(onClick = { *//* Handle click *//* }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
-                }*/
-                IconButton(onClick = { viewModel.deleteMod() }) {
+                IconButton(onClick = {
+                    viewModel.refreshModDetail()
+                }) {
                     Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = "Settings",
+                        Icons.Filled.Refresh,
+                        contentDescription = "refresh",
                         tint = MaterialTheme.colorScheme.primary
                     )
-
                 }
-                // Add more icons as needed...
+                IconButton(onClick = {
+                    viewModel.deleteMod()
+                }) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = "delete",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
-
-
     }
 }
 

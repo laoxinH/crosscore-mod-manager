@@ -1,22 +1,5 @@
 package top.laoxin.modmanager.ui.view.modView
 
-/*
- * Copyright (C) 2023 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
@@ -78,10 +61,6 @@ fun ModPage(viewModel: ModViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     Box {
-//        UserTipsDialog(
-//            showDialog = uiState.showUserTipsDialog,
-//            setUserTipsDialog = viewModel::setUserTipsDialog
-//        )
         DisEnableModsDialog(
             showDialog = uiState.showDisEnableModsDialog,
             mods = uiState.delEnableModsList,
@@ -134,48 +113,7 @@ fun ModPage(viewModel: ModViewModel) {
             }
         }
     }
-
-
-    /*    StoragePermissionDialog(
-            showDialog = uiState.openPermissionRequestDialog,
-            viewModel = viewModel
-        ) { viewModel.setOpenPermissionRequestDialog(false) }*/
 }
-
-
-//@Composable
-//fun UserTipsDialog(
-//    showDialog: Boolean,
-//    setUserTipsDialog: (Boolean) -> Unit
-//) {
-//
-//    if (showDialog) {
-//        val context = LocalContext.current
-//        AlertDialog(
-//            onDismissRequest = {
-//
-//            }, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
-//            title = { Text(stringResource(id = R.string.dialog_info_title)) },
-//            text = { Text(stringResource(id = R.string.dialog_info_message)) },
-//            confirmButton = {
-//                TextButton(onClick = {
-//                    setUserTipsDialog(false)
-//                }) {
-//                    Text(stringResource(id = R.string.dialog_button_info_permission))
-//                }
-//            },
-//            dismissButton = {
-//                TextButton(onClick = {
-//                    if (context is Activity) {
-//                        context.finish()
-//                    }
-//                }) {
-//                    Text(stringResource(id = R.string.dialog_button_request_close))
-//                }
-//            }
-//        )
-//    }
-//}
 
 // 关闭mods提示框
 @Composable
@@ -230,7 +168,6 @@ fun DisEnableModsDialog(
     }
 }
 
-
 // 使用 Glide 加载 Bitmap，同时保持图片比例
 suspend fun loadImageBitmapFromPath(
     context: Context,
@@ -254,108 +191,6 @@ suspend fun loadImageBitmapFromPath(
     }
 }
 
-
-///**
-// * @param hint: 空字符时的提示
-// * @param startIcon: 左侧图标;  -1 则不显示
-// * @param iconSpacing: 左侧图标与文字的距离; 相当于: drawablePadding
-// */
-//@Composable
-//fun CustomEdit(
-//    text: String = "",
-//    onValueChange: (String) -> Unit,
-//    modifier: Modifier,
-//    hint: String = "请输入",
-//    @DrawableRes startIcon: Int = -1,
-//    iconSpacing: Dp = 6.dp,
-//    enabled: Boolean = true,
-//    readOnly: Boolean = false,
-//    textStyle: TextStyle = TextStyle.Default,
-//    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-//    visualTransformation: VisualTransformation = VisualTransformation.None,
-//    cursorBrush: Brush = SolidColor(MaterialTheme.colorScheme.primary),
-//    close: () -> Unit
-//) {
-//    // 焦点, 用于控制是否显示 右侧叉号
-//    var hasFocus by remember { mutableStateOf(false) }
-//    val focusRequester = remember { FocusRequester() }
-//
-//    BasicTextField(
-//        value = text,
-//        onValueChange = onValueChange,
-//        modifier = modifier
-//            .focusRequester(focusRequester)
-//            .onFocusChanged {
-//                if (!it.isFocused && hasFocus) {
-//                    // 组件失去焦点
-//                    close()
-//                }
-//                hasFocus = it.isFocused
-//            },
-//        singleLine = true,
-//        enabled = enabled,
-//        readOnly = readOnly,
-//        textStyle = textStyle,
-//        keyboardOptions = keyboardOptions,
-//        keyboardActions = KeyboardActions(onDone = { close() }),
-//        visualTransformation = visualTransformation,
-//        cursorBrush = cursorBrush,
-//        decorationBox = @Composable { innerTextField ->
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                // -1 不显示 左侧Icon
-//                if (startIcon != -1) {
-//                    Image(painter = painterResource(id = startIcon), contentDescription = null)
-//                    Spacer(modifier = Modifier.width(iconSpacing))
-//                }
-//
-//                Box(modifier = Modifier.weight(1f)) {
-//                    // 当空字符时, 显示hint
-//                    if (text.isEmpty())
-//                        Text(text = hint, color = Color.Gray, style = textStyle)
-//
-//                    // 原本输入框的内容
-//                    innerTextField()
-//                }
-//
-//                // 存在焦点 且 有输入内容时. 显示叉号
-//                if (hasFocus && text.isNotEmpty()) {
-//                    Log.d("CustomEdit", "CustomEdit:失去焦点 ")
-//
-//                    Icon(imageVector = Icons.Filled.Clear, // 清除图标
-//                        contentDescription = null,
-//                        tint = MaterialTheme.colorScheme.primaryContainer,
-//                        // 点击就清空text
-//                        modifier = Modifier.clickable {
-//                            onValueChange.invoke("")
-//                        })
-//                }
-//                Icon(
-//                    imageVector = Icons.Filled.Search,
-//                    contentDescription = null,
-//                    tint = MaterialTheme.colorScheme.primaryContainer,
-//
-//                    modifier = Modifier
-//                        .clickable {
-//                            close()
-//                        }
-//                        .padding(start = 10.dp)
-//                )
-//            }
-//        }
-//    )
-//
-//    LaunchedEffect(focusRequester) {
-//        focusRequester.requestFocus()
-//    }
-//}
-
-
-// 创建一个占据全屏的居中文本, 提示没有mod
-
-
 // 创建一个全屏的加载动画
 @Composable
 fun Loading(
@@ -372,9 +207,6 @@ fun Loading(
             modifier = Modifier.padding(top = 8.dp),
             style = MaterialTheme.typography.titleSmall
         )
-    }
-    Box {
-
     }
 }
 

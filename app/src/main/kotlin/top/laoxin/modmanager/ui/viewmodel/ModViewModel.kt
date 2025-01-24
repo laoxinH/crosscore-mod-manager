@@ -45,6 +45,7 @@ import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ModTools.MODS_IMAGE_PATH
+import top.laoxin.modmanager.tools.ModTools.MODS_UNZIP_PATH
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.specialGameTools.BaseSpecialGameTools
@@ -60,10 +61,6 @@ class ModViewModel(
     private val scanFileRepository: ScanFileRepository
 ) : ViewModel(), ProgressUpdateListener, FlashObserverInterface {
     private val _uiState = MutableStateFlow(ModUiState())
-    // val uiState: StateFlow<ModUiState> = _uiState.asStateFlow()
-
-    // 搜索框内容
-    // private val _searchText = mutableStateOf("")
 
     private var _requestPermissionPath by mutableStateOf("")
     val requestPermissionPath: String
@@ -82,8 +79,6 @@ class ModViewModel(
 
     // 当前研所包的文件列表
     private var _currentFiles by mutableStateOf(emptyList<File>())
-
-    // mod列表
 
     // 扫描mod目录列表
     // 从用户配置中读取mod目录
@@ -358,6 +353,7 @@ class ModViewModel(
                     val updateMods = checkUpdateMods(mods, modsScan)
                     modRepository.updateAll(updateMods)
                     withContext(Dispatchers.Main) {
+                        LogTools.logRecord(updateMods.toString())
                         ToastUtils.longCall(
                             App.get().getString(
                                 R.string.toast_flash_complate,
@@ -500,6 +496,50 @@ class ModViewModel(
         }
     }
 
+    // 刷新mod预览图
+    fun flashModDetail(mods: ModBean) {
+        val modBean = mods
+        // 判断modbean是否包含密码
+        if (modBean.isEncrypted && modBean.password == null) {
+            // 如果包含密码，弹出密码输入框
+            setModDetail(modBean)
+            showPasswordDialog(true)
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            if (modBean.isZipFile) {
+                try {
+                    if (!modBean.fileReadmePath.isNullOrEmpty()) {
+                        ArchiveUtil.extractSpecificFile(
+                            modBean.path!!,
+                            listOf(modBean.fileReadmePath!!),
+                            MODS_UNZIP_PATH + File(modBean.path).nameWithoutExtension,
+                            modBean.password,
+                            false
+                        )
+                    } else if (!modBean.readmePath.isNullOrEmpty()) {
+                        ArchiveUtil.extractSpecificFile(
+                            modBean.path!!,
+                            listOf(modBean.readmePath!!),
+                            MODS_UNZIP_PATH + File(modBean.path).nameWithoutExtension,
+                            modBean.password,
+                            false
+                        )
+                    }
+                } catch (_: Exception) {
+                    throw Exception(
+                        App.get().getString(R.string.toast_decompression_failed)
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateMod(mod: ModBean) {
+        viewModelScope.launch {
+            modRepository.updateMod(mod)
+        }
+    }
+
 
     // 开启mod
     private fun enableMod(mods: List<ModBean>) {
@@ -541,12 +581,12 @@ class ModViewModel(
 
                         val decompression = ArchiveUtil.decompression(
                             modBean.path!!,
-                            ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path).nameWithoutExtension + "/",
+                            MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path).nameWithoutExtension + "/",
                             modBean.password,
                         )
                         if (decompression) {
                             unZipPath =
-                                ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(
+                                MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(
                                     modBean.path
                                 ).nameWithoutExtension + "/"
                         } else {
@@ -686,7 +726,7 @@ class ModViewModel(
                             "${App.get().getString(R.string.tips_unzip_mod)} ${modBean.name}"
                         )
                         val unZipPath =
-                            ModTools.MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path!!).nameWithoutExtension + "/"
+                            MODS_UNZIP_PATH + _gameInfo.packageName + "/" + File(modBean.path!!).nameWithoutExtension + "/"
                         val decompression = ArchiveUtil.decompression(
                             modBean.path, unZipPath, password, true
                         )
@@ -1016,6 +1056,81 @@ class ModViewModel(
         _uiState.update {
             it.copy(showDelSelectModsDialog = b)
         }
+    }
+
+    fun refreshModDetail() {
+        val modBean = _uiState.value.modDetail!!
+        flashModDetail(modBean)
+        var newModBean = modBean
+
+        val infoMap = mutableMapOf<String, String>()
+        var path = ""
+        if (modBean.isZipFile) {
+            if (modBean.readmePath != null) {
+                path =
+                    MODS_UNZIP_PATH + File(modBean.path!!).nameWithoutExtension + '/' + modBean.readmePath!!
+            } else if (modBean.fileReadmePath != null) {
+                path =
+                    MODS_UNZIP_PATH + File(modBean.path!!).nameWithoutExtension + '/' + modBean.fileReadmePath!!
+            }
+        } else {
+            if (modBean.readmePath != null) {
+                path = modBean.readmePath!!
+            } else if (modBean.fileReadmePath != null) {
+                path = modBean.fileReadmePath!!
+            }
+        }
+
+        val readmeFile = File(path)
+        if (readmeFile.exists()) {
+            val reader = readmeFile.bufferedReader()
+            val lines = reader.readLines()
+            for (line in lines) {
+                val parts = line.split("：")
+                if (parts.size == 2) {
+                    val key = parts[0].trim()
+                    val value = parts[1].trim()
+                    infoMap[key] = value
+                }
+            }
+        }
+
+        newModBean = modBean.copy(
+            name = infoMap["名称"],
+            description = infoMap["描述"],
+            author = infoMap["作者"],
+            version = infoMap["版本"]
+        )
+
+        setShowModDetail(false)
+        setLoading(true)
+
+        LogTools.logRecord("info:$infoMap")
+        LogTools.logRecord("old:$modBean")
+        LogTools.logRecord("new:$newModBean")
+
+        setModDetail(
+            modBean.copy(
+                name = newModBean.name,
+                description = newModBean.description,
+                author = newModBean.author,
+                version = newModBean.version,
+            )
+        )
+
+        viewModelScope.launch {
+            modRepository.updateMod(
+                modBean.copy(
+                    name = newModBean.name,
+                    description = newModBean.description,
+                    author = newModBean.author,
+                    version = newModBean.version,
+                )
+            )
+
+            LogTools.logRecord("use:" + modRepository.getModById(modBean.id).toString())
+        }
+        setLoading(false)
     }
 
     fun deleteMod() {
