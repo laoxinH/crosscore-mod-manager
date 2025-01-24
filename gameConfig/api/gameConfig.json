@@ -36,18 +36,6 @@
         "downloadUrl": ""
     },
     {
-        "gameName": "\u660e\u65e5\u65b9\u821f",
-        "packageName": "com.hypergryph.arknights.bilibili",
-        "serviceName": "B\u670d-\u914d\u7f6e2.4",
-        "downloadUrl": ""
-    },
-    {
-        "gameName": "\u660e\u65e5\u65b9\u821f",
-        "packageName": "com.hypergryph.arknights",
-        "serviceName": "\u5b98\u670d-\u914d\u7f6e2.4",
-        "downloadUrl": ""
-    },
-    {
         "gameName": "\u68d5\u8272\u5c18\u57c32",
         "packageName": "com.neowizgames.game.browndust2",
         "serviceName": "\u56fd\u9645\u670d",
