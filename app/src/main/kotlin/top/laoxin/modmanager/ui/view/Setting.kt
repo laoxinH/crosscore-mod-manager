@@ -19,10 +19,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Update
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,7 +42,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfoBean
@@ -52,10 +53,7 @@ import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @Composable
-fun SettingPage() {
-    val viewModel: SettingViewModel = viewModel(
-        factory = SettingViewModel.Factory
-    )
+fun SettingPage(viewModel: SettingViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -444,24 +442,61 @@ fun ThinksDialogCommon(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingTopBar(modifier: Modifier = Modifier, configuration: Int) {
-    if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
-        TopAppBar(
-            modifier = modifier,
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-
-                ),
-            title = {
-
+fun SettingTopBar(
+    viewModel: SettingViewModel,
+    modifier: Modifier = Modifier,
+    configuration: Int
+) {
+    val context = LocalContext.current
+    TopAppBar(
+        modifier = modifier,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor =
+            if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface
+            else MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        title = {
+            if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
                 Text(
                     stringResource(id = R.string.settings),
                     style = MaterialTheme.typography.titleLarge
                 )
-
-            })
-    }
-
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    viewModel.openUrl(context, context.getString(R.string.github_url))
+                },
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.github_icon),
+                    contentDescription = null,
+                    Modifier.size(28.dp)
+                )
+            }
+            IconButton(onClick = {
+                viewModel.openUrl(context, context.getString(R.string.alipay_url))
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.alipay_icon),
+                    contentDescription = null,
+                    Modifier.size(28.dp)
+                )
+            }
+            IconButton(
+                onClick = {
+                    viewModel.checkUpdate()
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Update,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        }
+    )
 }
 
 @Preview

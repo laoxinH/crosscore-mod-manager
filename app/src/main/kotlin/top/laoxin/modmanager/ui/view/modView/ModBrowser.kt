@@ -4,6 +4,8 @@ import android.os.Environment
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -109,23 +111,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         AnimatedContent(
             targetState = currentPath,
             transitionSpec = {
-                if (targetState > initialState) {
-                    slideInHorizontally(
-                        initialOffsetX = { fullWidth -> fullWidth },
-                        animationSpec = tween(durationMillis = 200)
-                    ) togetherWith slideOutHorizontally(
-                        targetOffsetX = { fullWidth -> -fullWidth },
-                        animationSpec = tween(durationMillis = 200)
-                    )
-                } else {
-                    slideInHorizontally(
-                        initialOffsetX = { fullWidth -> -fullWidth },
-                        animationSpec = tween(durationMillis = 200)
-                    ) togetherWith slideOutHorizontally(
-                        targetOffsetX = { fullWidth -> fullWidth },
-                        animationSpec = tween(durationMillis = 200)
-                    )
-                }
+                EnterTransition.None togetherWith ExitTransition.None
             }
         ) { path ->
             val mods = files.flatMap { file ->
@@ -143,7 +129,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
             if (uiState.currentFiles.isEmpty() && uiState.currentMods.isEmpty()) {
                 NoModInDir()
             } else {
-
                 LazyColumn(state = listState) {
 
                     items(files) { file: File ->

@@ -276,8 +276,10 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
                             1 -> stringResource(id = R.string.permission, "DOCUMENT")
                             2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
                             3 -> stringResource(id = R.string.permission, "SHIZUKU")
-                            else -> stringResource(id = R.string.permission,
-                                stringResource(R.string.console_status_no_permission))
+                            else -> stringResource(
+                                id = R.string.permission,
+                                stringResource(R.string.console_status_no_permission)
+                            )
                         }
                     }, style = typography.labelLarge
                 )
@@ -460,12 +462,13 @@ fun ConsoleTopBar(
     modifier: Modifier = Modifier,
     configuration: Int
 ) {
-    TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-        //titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        //navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-    ), modifier = modifier,
-
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
+            //titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            //navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ),
+        modifier = modifier,
         title = {
             if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
                 Text(
@@ -473,7 +476,8 @@ fun ConsoleTopBar(
 
                 )
             }
-        }, actions = {
+        },
+        actions = {
             Text(text = stringResource(R.string.console_top_bar_start_game))
             IconButton(onClick = {
                 // 在这里处理图标按钮的点击事件

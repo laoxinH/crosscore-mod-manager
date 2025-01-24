@@ -64,6 +64,7 @@ import top.laoxin.modmanager.ui.view.modView.ModPage
 import top.laoxin.modmanager.ui.view.modView.ModTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
+import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 import kotlin.math.abs
 
 // 导航栏索引
@@ -80,6 +81,7 @@ enum class NavigationIndex(
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
     val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory)
+    val settingViewModel: SettingViewModel = viewModel(factory = SettingViewModel.Factory)
     val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
 
@@ -116,6 +118,7 @@ fun ModManagerApp() {
                     )
 
                     NavigationIndex.SETTINGS.ordinal -> SettingTopBar(
+                        settingViewModel,
                         configuration = configuration.orientation
                     )
                 }
@@ -216,7 +219,7 @@ fun ModManagerApp() {
                     when (page) {
                         NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
                         NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
-                        NavigationIndex.SETTINGS.ordinal -> SettingPage()
+                        NavigationIndex.SETTINGS.ordinal -> SettingPage(settingViewModel)
                     }
                 }
             }
