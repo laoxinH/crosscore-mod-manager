@@ -1129,9 +1129,13 @@ class ModViewModel(
             } else {
                 // 无 README 文件
                 val newModBean = modBean.copy(
-                    name = modBean.path?.substringAfterLast("/")?.substringBeforeLast("."),
+                    name = modBean.path?.substringAfterLast("/")?.substringBeforeLast(".")
+                            + "(${
+                        modBean.virtualPaths?.removePrefix(modBean.path ?: "")?.trimStart('/')
+                    })".replace("/", "|"),
                     description = App.get().getString(R.string.mod_bean_no_readme),
                     author = App.get().getString(R.string.mod_bean_no_author),
+                    version = "1.0"
                 )
 
                 setModDetail(newModBean)
