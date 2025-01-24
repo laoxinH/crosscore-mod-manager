@@ -10,7 +10,6 @@ data class ModUiState(
     val disableModList: List<ModBean> = emptyList(),     // 关闭mod列表
     val searchModList: List<ModBean> = emptyList(),     // 搜索mod列表
     val isLoading: Boolean = false,          // 是否正在加载
-    val isRefreshing: Boolean = false,
     val openPermissionRequestDialog: Boolean = false,  // 是否打开权限请求对话框
     val modDetail: ModBean? = null,       // 打开的mod详情
     val showModDetail: Boolean = false,   // 是否显示mod详情

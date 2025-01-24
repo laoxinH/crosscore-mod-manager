@@ -945,10 +945,6 @@ class ModViewModel(
         _uiState.value = _uiState.value.copy(isLoading = isLoading)
     }
 
-    fun setRefreshing(isRefreshing: Boolean) {
-        _uiState.value = _uiState.value.copy(isRefreshing = isRefreshing)
-    }
-
     // 设置加载目录
     private suspend fun setLoadingPath(loadingPath: String) {
         withContext(Dispatchers.Main) {
@@ -1112,7 +1108,6 @@ class ModViewModel(
     }
 
     fun refreshModDetail() {
-        setRefreshing(true)
         val modBean = _uiState.value.modDetail!!
 
         // 启动协程等待解压并读取完成
@@ -1121,8 +1116,6 @@ class ModViewModel(
             if (modBean.readmePath != null || modBean.fileReadmePath != null) {
 
                 val newModBean = flashModDetail(modBean)
-
-                setShowModDetail(false)
 
                 LogTools.logRecord("old:$modBean")
                 LogTools.logRecord("new:$newModBean")
@@ -1148,8 +1141,6 @@ class ModViewModel(
 
                 LogTools.logRecord("use:" + modRepository.getModById(modBean.id).toString())
             }
-
-            setRefreshing(false)
         }
     }
 
