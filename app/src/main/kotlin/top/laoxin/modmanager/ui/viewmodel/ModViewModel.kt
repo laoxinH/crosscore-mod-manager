@@ -496,18 +496,23 @@ class ModViewModel(
         }
     }
 
-    // 刷新mod预览图
-    fun flashModDetail(mods: ModBean) {
+    // 刷新readme文件
+    suspend fun flashModDetail(mods: ModBean): ModBean {
         val modBean = mods
-        // 判断modbean是否包含密码
+        val infoMap = mutableMapOf<String, String>()
+        var path = ""
+
+        // 判断是否需要密码
         if (modBean.isEncrypted && modBean.password == null) {
-            // 如果包含密码，弹出密码输入框
             setModDetail(modBean)
             showPasswordDialog(true)
         }
-        viewModelScope.launch(Dispatchers.IO) {
+
+        return withContext(Dispatchers.IO) {
+            // 判断是否是压缩包
             if (modBean.isZipFile) {
                 try {
+                    // 解压操作
                     if (!modBean.fileReadmePath.isNullOrEmpty()) {
                         ArchiveUtil.extractSpecificFile(
                             modBean.path!!,
@@ -525,12 +530,52 @@ class ModViewModel(
                             false
                         )
                     }
-                } catch (_: Exception) {
-                    throw Exception(
-                        App.get().getString(R.string.toast_decompression_failed)
-                    )
+                } catch (e: Exception) {
+                    LogTools.logRecord("解压或读取文件失败: ${e.message}")
                 }
             }
+
+            // 设置文件路径
+            path = getModReadmePath(modBean)
+
+            // 读取 README 文件
+            val readmeFile = File(path)
+            if (readmeFile.exists()) {
+                val reader = readmeFile.bufferedReader()
+                val lines = reader.readLines()
+                for (line in lines) {
+                    val parts = line.split("：")
+                    if (parts.size == 2) {
+                        val key = parts[0].trim()
+                        val value = parts[1].trim()
+                        infoMap[key] = value
+                    }
+                }
+            }
+            LogTools.logRecord("info:$infoMap")
+
+            // 返回更新后的 modBean
+            modBean.copy(
+                name = infoMap["名称"],
+                description = infoMap["描述"],
+                author = infoMap["作者"],
+                version = infoMap["版本"]
+            )
+        }
+    }
+
+    // 获取 README 路径的逻辑
+    fun getModReadmePath(modBean: ModBean): String {
+        return if (modBean.isZipFile) {
+            if (modBean.readmePath != null) {
+                MODS_UNZIP_PATH + File(modBean.path!!).nameWithoutExtension + '/' + modBean.readmePath!!
+            } else if (modBean.fileReadmePath != null) {
+                MODS_UNZIP_PATH + File(modBean.path!!).nameWithoutExtension + '/' + modBean.fileReadmePath!!
+            } else {
+                ""
+            }
+        } else {
+            modBean.readmePath ?: modBean.fileReadmePath ?: ""
         }
     }
 
@@ -575,7 +620,11 @@ class ModViewModel(
                         backupRepository.insertAll(backups)
                     }
                     // 解压mod压缩包
-                    setTipsText("${App.get().getString(R.string.tips_unzip_mod)} ${modBean.name}")
+                    setTipsText(
+                        "${
+                            App.get().getString(R.string.tips_unzip_mod)
+                        } ${modBean.name}"
+                    )
                     var unZipPath: String = ""
                     if (modBean.isZipFile) {
 
@@ -896,6 +945,10 @@ class ModViewModel(
         _uiState.value = _uiState.value.copy(isLoading = isLoading)
     }
 
+    fun setRefreshing(isRefreshing: Boolean) {
+        _uiState.value = _uiState.value.copy(isRefreshing = isRefreshing)
+    }
+
     // 设置加载目录
     private suspend fun setLoadingPath(loadingPath: String) {
         withContext(Dispatchers.Main) {
@@ -1059,78 +1112,45 @@ class ModViewModel(
     }
 
     fun refreshModDetail() {
+        setRefreshing(true)
         val modBean = _uiState.value.modDetail!!
-        flashModDetail(modBean)
-        var newModBean = modBean
 
-        val infoMap = mutableMapOf<String, String>()
-        var path = ""
-        if (modBean.isZipFile) {
-            if (modBean.readmePath != null) {
-                path =
-                    MODS_UNZIP_PATH + File(modBean.path!!).nameWithoutExtension + '/' + modBean.readmePath!!
-            } else if (modBean.fileReadmePath != null) {
-                path =
-                    MODS_UNZIP_PATH + File(modBean.path!!).nameWithoutExtension + '/' + modBean.fileReadmePath!!
-            }
-        } else {
-            if (modBean.readmePath != null) {
-                path = modBean.readmePath!!
-            } else if (modBean.fileReadmePath != null) {
-                path = modBean.fileReadmePath!!
-            }
-        }
-
-        val readmeFile = File(path)
-        if (readmeFile.exists()) {
-            val reader = readmeFile.bufferedReader()
-            val lines = reader.readLines()
-            for (line in lines) {
-                val parts = line.split("：")
-                if (parts.size == 2) {
-                    val key = parts[0].trim()
-                    val value = parts[1].trim()
-                    infoMap[key] = value
-                }
-            }
-        }
-
-        newModBean = modBean.copy(
-            name = infoMap["名称"],
-            description = infoMap["描述"],
-            author = infoMap["作者"],
-            version = infoMap["版本"]
-        )
-
-        setShowModDetail(false)
-        setLoading(true)
-
-        LogTools.logRecord("info:$infoMap")
-        LogTools.logRecord("old:$modBean")
-        LogTools.logRecord("new:$newModBean")
-
-        setModDetail(
-            modBean.copy(
-                name = newModBean.name,
-                description = newModBean.description,
-                author = newModBean.author,
-                version = newModBean.version,
-            )
-        )
-
+        // 启动协程等待解压并读取完成
         viewModelScope.launch {
-            modRepository.updateMod(
-                modBean.copy(
-                    name = newModBean.name,
-                    description = newModBean.description,
-                    author = newModBean.author,
-                    version = newModBean.version,
-                )
-            )
+            // 有 README 文件
+            if (modBean.readmePath != null || modBean.fileReadmePath != null) {
 
-            LogTools.logRecord("use:" + modRepository.getModById(modBean.id).toString())
+                val newModBean = flashModDetail(modBean)
+
+                setShowModDetail(false)
+
+                LogTools.logRecord("old:$modBean")
+                LogTools.logRecord("new:$newModBean")
+
+                setModDetail(newModBean)
+
+                // 更新数据库
+                modRepository.updateMod(newModBean)
+
+                LogTools.logRecord("use:" + modRepository.getModById(modBean.id).toString())
+            } else {
+                // 无 README 文件
+                val newModBean = modBean.copy(
+                    name = modBean.path?.substringAfterLast("/")?.substringBeforeLast("."),
+                    description = App.get().getString(R.string.mod_bean_no_readme),
+                    author = App.get().getString(R.string.mod_bean_no_author),
+                )
+
+                setModDetail(newModBean)
+
+                // 更新数据库
+                modRepository.updateMod(newModBean)
+
+                LogTools.logRecord("use:" + modRepository.getModById(modBean.id).toString())
+            }
+
+            setRefreshing(false)
         }
-        setLoading(false)
     }
 
     fun deleteMod() {
@@ -1221,7 +1241,8 @@ class ModViewModel(
                 _uiState.update { it ->
                     it.copy(
                         currentFiles = File(currentPath).listFiles()?.toList()
-                            ?.sortedWith(compareBy({ !it.isDirectory }, { it.name })) ?: emptyList()
+                            ?.sortedWith(compareBy({ !it.isDirectory }, { it.name }))
+                            ?: emptyList()
                     )
                 }
             } else {

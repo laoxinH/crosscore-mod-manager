@@ -93,6 +93,8 @@ fun ModPage(viewModel: ModViewModel) {
         }
         if (uiState.isLoading) {
             Loading(uiState.loadingPath)
+        } else if (uiState.isRefreshing) {
+            Loading(stringResource(R.string.mod_refreshing))
         } else {
             uiState.modDetail?.let {
                 ModDetailPartialBottomSheet(

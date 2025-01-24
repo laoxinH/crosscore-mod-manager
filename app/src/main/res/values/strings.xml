@@ -180,6 +180,7 @@
     <string name="dialog_reqest_notification_message">MOD实验室启动某些游戏(例如尘白禁区)的MOD注入服务需要保留后台服务, 为防止系统关闭后台需要显示通知!</string>
     <string name="open_mod_failed_dialog_title">开启失败</string>
     <string name="open_mod_failed_dialog_desc">%1$s个MOD开启失败, 是否执行回滚(只会回滚开启失败的MOD)</string>
+    <string name="mod_refreshing">重新扫描Readme中</string>
     <string name="console_configuration_del_unzip">始终删除解压文件</string>
     <string name="console_del_unzip_dictionary_content">将会在开启MOD后始终删除解压文件,可以节省空间,但下次开启同样的MOD会再次解压导致二次开启速度变慢!</string>
     <string name="mod_page_dropdownMenu_mods_browser">分类视图</string>
