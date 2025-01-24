@@ -76,18 +76,6 @@
         "packageName": "com.YostarJP.BlueArchive",
         "serviceName": "\u65e5\u670d",
         "downloadUrl": ""
-    },
-    {
-        "gameName": "Arknights(2.4)",
-        "packageName": "com.hypergryph.arknights.bilibili",
-        "serviceName": "BL",
-        "downloadUrl": ""
-    },
-    {
-        "gameName": "Arknights(2.4)",
-        "packageName": "com.hypergryph.arknights",
-        "serviceName": "OF",
-        "downloadUrl": ""
     }
 
 ]
