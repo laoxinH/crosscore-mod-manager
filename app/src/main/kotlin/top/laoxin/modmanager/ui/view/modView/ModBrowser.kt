@@ -55,7 +55,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     val scrollPositions = remember { mutableMapOf<String, Int>() }
     val scrollOffsets = remember { mutableMapOf<String, Int>() }
     val doBackFunction by rememberUpdatedState(uiState.doBackFunction)
-    var displayPath by remember { mutableStateOf(currentPath) }
     if (currentPath == ModTools.MOD_PATH) {
         return NoMod()
     }
@@ -82,7 +81,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     LaunchedEffect(currentPath) {
         snapshotFlow { currentPath }
             .collect { newPath ->
-                displayPath = newPath
                 viewModel.updateFiles(newPath)
             }
     }
@@ -109,7 +107,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         }
 
         AnimatedContent(
-            targetState = displayPath,
+            targetState = currentPath,
             transitionSpec = {
                 if (targetState > initialState) {
                     slideInHorizontally(
@@ -142,7 +140,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                 viewModel.setBackIconVisiable(true)
             }
 
-            if (files.isEmpty()) {
+            if (uiState.currentFiles.isEmpty() && uiState.currentMods.isEmpty()) {
                 NoModInDir()
             } else {
 

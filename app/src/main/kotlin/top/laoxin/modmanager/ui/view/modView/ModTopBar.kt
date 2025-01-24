@@ -113,19 +113,8 @@ fun MultiSelectTopBar(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBackIosNew,
-                                    contentDescription = null,
+                                    contentDescription = "back",
                                     Modifier.size(12.dp)
-                                )
-                                Text(
-                                    text = uiState.currentPath.replace(
-                                        uiState.currentGameModPath,
-                                        ""
-                                    )
-                                        .substringAfterLast('/')
-                                        .substringBeforeLast('.')
-                                        .takeLast(4),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
                         }
@@ -289,19 +278,8 @@ fun GeneralTopBar(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBackIosNew,
-                                    contentDescription = null,
+                                    contentDescription = "back",
                                     Modifier.size(12.dp)
-                                )
-                                Text(
-                                    text = uiState.currentPath.replace(
-                                        uiState.currentGameModPath,
-                                        ""
-                                    )
-                                        .substringAfterLast('/')
-                                        .substringBeforeLast('.')
-                                        .takeLast(4),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
                         }
