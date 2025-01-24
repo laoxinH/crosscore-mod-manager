@@ -67,7 +67,8 @@
         <string name="toast_del_cache_filed">Failed to delete cache</string>
         <string name="github_url" translatable="false">https://github.com/laoxinH/crosscore-mod-manager/releases</string>
         <string name="alipay_url" translatable="false">https://qr.alipay.com/fkx13953osk3jretx8ehg48</string>
-        <string name="mod_page_no_mod">" ((٩(//̀Д/́/)۶)) Nothing here"</string>
+        <string name="mod_page_no_mod">((٩(//̀Д/́/)۶)) Nothing here</string>
+        <string name="mod_page_no_mod_dir">Nothing here</string>
         <string name="mod_pag_loading">Scanning: %1$s</string>
         <string name="mod_page_title_all_mods" translatable="false">MOD</string>
         <string name="mod_page_title_enable_mods">Enabled</string>

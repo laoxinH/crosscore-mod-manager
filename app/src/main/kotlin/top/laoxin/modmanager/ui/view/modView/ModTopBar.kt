@@ -4,14 +4,19 @@ import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -94,7 +100,32 @@ fun MultiSelectTopBar(
             modifier = modifier,
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-            ), title = {
+            ),
+            navigationIcon = {
+                if (uiState.modsView == NavigationIndex.MODS_BROWSER)
+                    Button(
+                        onClick = {
+                            viewModel.setDoBackFunction(true)
+                        },
+                        modifier = Modifier.size(35.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(0.dp),
+                        enabled = uiState.isBackPathExist,
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBackIosNew,
+                                contentDescription = "back",
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                else null
+            },
+            title = {
                 Box(contentAlignment = Alignment.CenterStart) {
                     Text(
                         stringResource(id = uiState.modsView.title),
@@ -104,18 +135,9 @@ fun MultiSelectTopBar(
                         Row(
                             modifier = Modifier.padding(top = 40.dp),
                         ) {
-
-                            /* if (uiState.modsSelected.isNotEmpty()){
-                             Text(
-                                 text = "已选：${uiState.modsSelected.size}",
-                                 style = MaterialTheme.typography.labelMedium,
-                                 color = MaterialTheme.colorScheme.onPrimary,
-                                 textAlign = TextAlign.Start,
-                             )
-                             Spacer(modifier = Modifier.width(8.dp))
-                         }*/
                             val total =
-                                if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}" else "${modList.size}"
+                                if (uiState.modsSelected.isNotEmpty()) "${uiState.modsSelected.size}/${modList.size}"
+                                else "${modList.size}"
 
                             Text(
                                 text = stringResource(R.string.mod_top_bar_count, total),
@@ -128,7 +150,8 @@ fun MultiSelectTopBar(
                     }
                 }
 
-            }, actions = {
+            },
+            actions = {
                 // 全选
                 IconButton(onClick = {
                     // 在这里处理图标按钮的点击事件
@@ -232,7 +255,32 @@ fun GeneralTopBar(
             modifier = modifier,
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-            ), title = {
+            ),
+            navigationIcon = {
+                if (uiState.modsView == NavigationIndex.MODS_BROWSER)
+                    Button(
+                        onClick = {
+                            viewModel.setDoBackFunction(true)
+                        },
+                        modifier = Modifier.size(35.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(0.dp),
+                        enabled = uiState.isBackPathExist,
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBackIosNew,
+                                contentDescription = "back",
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                else null
+            },
+            title = {
                 Box(contentAlignment = Alignment.CenterStart) {
                     Text(
                         stringResource(id = uiState.modsView.title),
@@ -257,17 +305,8 @@ fun GeneralTopBar(
                     }
                 }
 
-            }, actions = {
-//                    IconButton(onClick = {
-//                        // 在这里处理图标按钮的点击事件
-//                        viewModel.setUserTipsDialog(true)
-//                    }) {
-//                        Icon(
-//                            imageVector = Icons.Default.Info, // 使用信息图标
-//                            contentDescription = "Info", // 为辅助功能提供描述
-//                            //tint = MaterialTheme.colorScheme.primaryContainer
-//                        )
-//                    }
+            },
+            actions = {
                 IconButton(onClick = {
                     viewModel.setSearchBoxVisible(true)
                     when (uiState.modsView) {

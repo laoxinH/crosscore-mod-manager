@@ -28,7 +28,7 @@ import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
 import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
-import top.laoxin.modmanager.useservice.IFileExplorerService
+import top.laoxin.modmanager.service.IFileExplorerService
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files

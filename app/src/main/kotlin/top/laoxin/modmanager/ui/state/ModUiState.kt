@@ -45,6 +45,8 @@ data class ModUiState(
     val currentMods: List<ModBean> = emptyList(),
     // 当前路径
     val currentPath: String = "",
-) {
-
-}
+    // 是否显示返回按钮
+    val isBackPathExist: Boolean = false,
+    // 执行返回操作
+    val doBackFunction: Boolean = false,
+)

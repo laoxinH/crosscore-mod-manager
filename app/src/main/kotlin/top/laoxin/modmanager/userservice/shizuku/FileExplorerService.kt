@@ -8,7 +8,7 @@ import top.laoxin.modmanager.constant.SpecialGame
 import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
 
-import top.laoxin.modmanager.useservice.IFileExplorerService
+import top.laoxin.modmanager.service.IFileExplorerService
 
 import java.io.File
 import java.io.IOException

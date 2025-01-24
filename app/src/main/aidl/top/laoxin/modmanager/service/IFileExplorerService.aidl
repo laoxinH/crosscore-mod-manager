@@ -1,5 +1,5 @@
 // IFileExplorerService.aidl
-package top.laoxin.modmanager.useservice;
+package top.laoxin.modmanager.service;
 import top.laoxin.modmanager.bean.BeanFile;
 import top.laoxin.modmanager.bean.ModBean;
 import top.laoxin.modmanager.bean.GameInfoBean;
