@@ -51,9 +51,9 @@
     <string name="setting_page_app_del_backup">删除备份</string>
     <string name="setting_page_app_del_descript">这将删除所有游戏备份文件!</string>
     <string name="setting_page_app_clean_cache">清除缓存</string>
-    <string name="setting_page_app_clean_cache_descript">清楚缓存的图片等文件，可能造成图片显示异常</string>
+    <string name="setting_page_app_clean_cache_descript">清除缓存的图片等文件，可能造成图片显示异常</string>
     <string name="setting_page_about_author">作者: laoxin &amp; 角砂糖 </string>
-    <string name="setting_page_about_title">About</string>
+    <string name="setting_page_about_title">关于</string>
     <string name="setting_page_about_pay">投喂开发者</string>
     <string name="setting_page_about_pay_descript">感觉用着不错?支持一下开发者</string>
     <string name="setting_page_about_github">前往Github下载最新版</string>
@@ -62,6 +62,7 @@
     <string name="toast_del_buckup_filed">%s : 删除备份失败</string>
     <string name="setting_del_backups_dialog_title">警告</string>
     <string name="setting_del_backups_dialog_content_txt">删除备份后将无法正常恢复游戏文件, 请谨慎操作！请在关闭所有Mod后进行操作</string>
+    <string name="setting_del_cache_dialog_content_txt">清除缓存的图片等文件。App在使用时会试图重新加载，但仍旧可能可能造成异常</string>
     <string name="toast_del_cache_success">删除缓存成功</string>
     <string name="toast_del_cache_filed">删除缓存失败</string>
     <string name="github_url">https://github.com/laoxinH/crosscore-mod-manager/releases</string>
@@ -81,7 +82,7 @@
     <string name="dialog_info_important">* MOD实验室为开源软件，完全免费，任何收费行为均与本软件无任何关联,由此产生的一切纠纷均与本软件无关\n\n* 任何形式的修改均会存在风险，同意此协议即代表您自愿承担由此造成的一切后果</string>
     <string name="dialog_info_message">1. 实验室需要安装好相应游戏才能使用\n2. Android 11以上部分设备需要shizuku授权\n3. 授权后请刷新以进行扫描\n4. 默认不会扫描QQ下载和系统download目录，如有需要请前往控制台开启\n5. 实验室会将扫描到的Mod自动移动到控制台配置的Mod目录\n6. 删除或添加Mod后若没有自动更新请手动点击刷新</string>
     <string name="dialog_button_info_permission">同意并继续</string>
-    <string name="setting_page_app_other">More</string>
+    <string name="setting_page_app_other">更多</string>
     <string name="setting_page_more_shizuku">下载shizuku</string>
     <string name="shzuiku_url">https://shizuku.rikka.app/zh-hans/download/</string>
     <string name="setting_page_more_shizuku_descript">前往shizuku下载页面</string>

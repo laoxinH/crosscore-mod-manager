@@ -7,8 +7,8 @@ data class UserPreferencesState(
     val installPath: String = "",
     val gameService: String = "",
     val selectedGameIndex: Int = 0,
-    val scanDirectoryMods: Boolean = false,
+    val scanDirectoryMods: Boolean = true,
     val delUnzipDictionary: Boolean = false,
     // 展示分类视图
-    val showCategoryView: Boolean = false,
+    val showCategoryView: Boolean = true,
 )

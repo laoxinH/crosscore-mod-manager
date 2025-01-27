@@ -63,6 +63,7 @@
     <string name="toast_del_buckup_filed">%s: Failed to delete backup</string>
     <string name="setting_del_backups_dialog_title">Warning</string>
     <string name="setting_del_backups_dialog_content_txt">Deleting backups will prevent normal restoration of game files, please proceed with caution! Please disable all mods before proceeding</string>
+    <string name="setting_del_cache_dialog_content_txt">Clear cached images and other files. May cause problem.</string>
     <string name="toast_del_cache_success">Cache deleted successfully</string>
     <string name="toast_del_cache_filed">Failed to delete cache</string>
     <string name="github_url" translatable="false">https://github.com/laoxinH/crosscore-mod-manager/releases</string>

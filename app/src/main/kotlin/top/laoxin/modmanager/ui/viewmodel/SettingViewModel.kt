@@ -133,6 +133,11 @@ class SettingViewModel(
         _uiState.value = _uiState.value.copy(deleteBackupDialog = open)
     }
 
+    // 设置删除备份对话框
+    fun setDeleteCacheDialog(open: Boolean) {
+        _uiState.value = _uiState.value.copy(deleteCacheDialog = open)
+    }
+
     fun deleteCache() {
         viewModelScope.launch(Dispatchers.IO) {
             val delCache = ModTools.deleteCache()

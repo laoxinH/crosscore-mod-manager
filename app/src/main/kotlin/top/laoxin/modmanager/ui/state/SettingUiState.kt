@@ -8,6 +8,8 @@ import top.laoxin.modmanager.bean.ThanksBean
 data class SettingUiState(
     // 删除备份对话框
     val deleteBackupDialog: Boolean = false,
+    // 删除缓存对话框
+    val deleteCacheDialog: Boolean = false,
     val showAcknowledgments: Boolean = false,
     val showSwitchGame: Boolean = false,
     val gameInfoList: List<GameInfoBean> = emptyList(),

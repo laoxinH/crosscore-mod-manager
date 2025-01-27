@@ -60,6 +60,7 @@ fun SettingPage(viewModel: SettingViewModel) {
     SettingContent(
         uiState,
         viewModel::setDeleteBackupDialog,
+        viewModel::setDeleteCacheDialog,
         viewModel::deleteAllBackups,
         viewModel::deleteCache,
         viewModel::deleteTemp,
@@ -73,7 +74,7 @@ fun SettingPage(viewModel: SettingViewModel) {
         viewModel::requestShizukuPermission
 
     )
-    ThinksDialogCommon(
+    ThanksDialogCommon(
         title = stringResource(R.string.setting_acknowledgments),
         onConfirm = { viewModel.showAcknowledgments(false) },
         onCancel = { viewModel.showAcknowledgments(false) },
@@ -143,6 +144,7 @@ fun SettingPage(viewModel: SettingViewModel) {
 fun SettingContent(
     uiState: SettingUiState,
     setDeleteBackupDialog: (Boolean) -> Unit,
+    setDeleteCacheDialog: (Boolean) -> Unit,
     deleteAllBackups: () -> Unit,
     deleteCache: () -> Unit,
     deleteTemp: () -> Unit,
@@ -163,6 +165,13 @@ fun SettingContent(
         onCancel = { setDeleteBackupDialog(false) },
         showDialog = uiState.deleteBackupDialog,
     )
+    DialogCommon(
+        title = stringResource(R.string.setting_del_backups_dialog_title),
+        content = stringResource(R.string.setting_del_cache_dialog_content_txt),
+        onConfirm = { deleteCache() },
+        onCancel = { setDeleteCacheDialog(false) },
+        showDialog = uiState.deleteCacheDialog,
+    )
     Column(
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp)
@@ -177,7 +186,7 @@ fun SettingContent(
             onClick = { setDeleteBackupDialog(true) })
         SettingItem(name = stringResource(R.string.setting_page_app_clean_cache),
             description = stringResource(R.string.setting_page_app_clean_cache_descript),
-            onClick = { deleteCache() })
+            onClick = { setDeleteCacheDialog(true) })
         SettingItem(name = stringResource(R.string.setting_page_app_clean_temp),
             description = stringResource(R.string.setting_page_app_clean_temp_descript),
             onClick = { deleteTemp() })
@@ -399,7 +408,7 @@ fun DownloadGameConfigDialog(
 }
 
 @Composable
-fun ThinksDialogCommon(
+fun ThanksDialogCommon(
     title: String,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
