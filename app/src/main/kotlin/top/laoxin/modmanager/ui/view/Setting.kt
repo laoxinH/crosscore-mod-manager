@@ -97,7 +97,9 @@ fun SettingPage(viewModel: SettingViewModel) {
             onConfirm = {
                 viewModel.downloadUrl?.let { url -> viewModel.openUrl(context, url) }
             },
-
+            onDismiss = {
+                viewModel.universalUrl?.let { url -> viewModel.openUrl(context, url) }
+            },
             showDialog = uiState.showUpdateDialog
         )
     }
@@ -288,7 +290,6 @@ fun SettingItem(
                         .size(32.dp),
                 )
             }
-
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = name, style = MaterialTheme.typography.titleSmall // 更大的字体
@@ -300,15 +301,12 @@ fun SettingItem(
             }
         }
     }
-
-
 }
 
 @Composable
 fun SettingTitle(
     title: String, icon: ImageVector
 ) {
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -316,22 +314,18 @@ fun SettingTitle(
             .heightIn(60.dp),
     ) {
         // 图标
-
         Icon(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.padding(end = 8.dp),
             tint = MaterialTheme.colorScheme.primary
         )
-
         Text(
             text = title, style = MaterialTheme.typography.headlineSmall,
             // modifier = Modifier.align(Alignment.CenterStart),
             color = MaterialTheme.colorScheme.primary
         )
     }
-
-
 }
 
 // 切换游戏版本的弹窗
@@ -343,7 +337,8 @@ fun SwitchGameDialog(
     showDialog: Boolean
 ) {
     if (showDialog) {
-        AlertDialog(onDismissRequest = { showSwitchGameInfo(false) }, // 点击对话框外的区域时关闭对话框
+        AlertDialog(
+            onDismissRequest = { showSwitchGameInfo(false) }, // 点击对话框外的区域时关闭对话框
             title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) }, text = {
                 val toMutableList = gameInfoList.toMutableList()
                 toMutableList.removeAt(0)
@@ -359,16 +354,16 @@ fun SwitchGameDialog(
                             })
                     }
                 }
-            }, confirmButton = {
+            },
+            confirmButton = {
                 TextButton(onClick = {
                     showSwitchGameInfo(false)
                 }) {
                     Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
                 }
-            })
-
+            }
+        )
     }
-
 }
 
 @Composable
@@ -379,11 +374,11 @@ fun DownloadGameConfigDialog(
     showDialog: Boolean
 ) {
     if (showDialog) {
-        AlertDialog(onDismissRequest = { showDownloadGameConfigDialog(false) }, // 点击对话框外的区域时关闭对话框
+        AlertDialog(
+            onDismissRequest = { showDownloadGameConfigDialog(false) }, // 点击对话框外的区域时关闭对话框
             title = { Text(text = stringResource(R.string.switch_download_game_tiltle)) }, text = {
                 val toMutableList = gameInfoList.toMutableList()
                 //toMutableList.removeAt(0)
-
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->
                         SettingItem(name = gameInfo.gameName + "(${gameInfo.serviceName})",
@@ -395,16 +390,16 @@ fun DownloadGameConfigDialog(
                             })
                     }
                 }
-            }, confirmButton = {
+            },
+            confirmButton = {
                 TextButton(onClick = {
                     showDownloadGameConfigDialog(false)
                 }) {
                     Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
                 }
-            })
-
+            }
+        )
     }
-
 }
 
 @Composable
@@ -421,14 +416,14 @@ fun ThanksDialogCommon(
         AlertDialog(onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
             title = { Text(text = title) }, text = {
                 LazyColumn {
-                    itemsIndexed(thinks) { index, think ->
-                        SettingItem(name = think.name,
+                    itemsIndexed(thinks) { index, thank ->
+                        SettingItem(name = thank.name,
                             description = context.getString(
-                                R.string.setting_thinks_link_desc, think.job
+                                R.string.setting_thinks_link_desc, thank.job
                             ),
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
-                                openUrl(context, think.link)
+                                openUrl(context, thank.link)
                             })
                     }
                 }

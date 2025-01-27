@@ -65,4 +65,16 @@ class VersionViewModel(application: Application) : ViewModel() {
             versionRepository.saveVersionUrl(versionUrl)
         }
     }
+
+    // 获取版本下载地址
+    suspend fun loadUniversalUrl(): String {
+        return versionRepository.getUniversalUrl()
+    }
+
+    // 更新版本下载地址
+    fun updateUniversalUrl(universalUrl: String) {
+        viewModelScope.launch {
+            versionRepository.saveUniversalUrl(universalUrl)
+        }
+    }
 }

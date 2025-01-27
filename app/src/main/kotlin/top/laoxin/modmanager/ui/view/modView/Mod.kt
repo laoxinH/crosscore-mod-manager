@@ -48,10 +48,10 @@ enum class NavigationIndex(
     @StringRes val title: Int,
     val index: Int,
 ) {
+    ALL_MODS(R.string.mod_page_title_all_mods, 0),
     ENABLE_MODS(R.string.mod_page_title_enable_mods, 1),
     DISABLE_MODS(R.string.mod_page_title_disable_mods, 2),
     SEARCH_MODS(R.string.mod_page_title_search_mods, 3),
-    ALL_MODS(R.string.mod_page_title_all_mods, 0),
     MODS_BROWSER(R.string.mod_page_title_mods_browser, 4),
 }
 

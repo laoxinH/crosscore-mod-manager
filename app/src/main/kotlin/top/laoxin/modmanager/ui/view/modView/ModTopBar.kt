@@ -126,7 +126,13 @@ fun MultiSelectTopBar(
                 else null
             },
             title = {
-                Box(contentAlignment = Alignment.CenterStart) {
+                Box(
+                    contentAlignment = Alignment.CenterStart,
+                    modifier = if (uiState.modsView == NavigationIndex.MODS_BROWSER)
+                        Modifier.padding(start = 6.dp)
+                    else
+                        Modifier
+                ) {
                     Text(
                         stringResource(id = uiState.modsView.title),
                         style = MaterialTheme.typography.titleLarge
@@ -281,7 +287,13 @@ fun GeneralTopBar(
                 else null
             },
             title = {
-                Box(contentAlignment = Alignment.CenterStart) {
+                Box(
+                    contentAlignment = Alignment.CenterStart,
+                    modifier = if (uiState.modsView == NavigationIndex.MODS_BROWSER)
+                        Modifier.padding(start = 6.dp)
+                    else
+                        Modifier
+                ) {
                     Text(
                         stringResource(id = uiState.modsView.title),
                         style = MaterialTheme.typography.titleLarge

@@ -122,7 +122,7 @@
     <string name="toast_setect_game_success">Selected: %1$s %2$s</string>
     <string name="toast_set_game_info_failed">Game not installed: %1$s %2$s</string>
     <string name="toast_please_select_game">Please select a game in settings</string>
-    <string name="console_configuration_scan_dictionary">Scan Folder MOD</string>
+    <string name="console_configuration_disable_scan_dictionary">Disable Scan Folder MOD</string>
     <string name="console_scan_directory_mods">Note</string>
     <string name="console_scan_directory_mods_content">This feature will only scan the game package name (e.g., com.megagame.crosscore) folders containing MODs in the configured MOD directory (QQ and system downloads will not be scanned)</string>
     <string name="toast_this_dir_has_no_prim">Insufficient permissions for this folder</string>
@@ -135,7 +135,7 @@
     <string name="console_setting_info_configuration_can_install">Yes</string>
     <string name="console_setting_info_configuration_not_install">No</string>
     <string name="dialog_dis_enable_mods_title">The following MODs have been deleted, disable them? If not disabled, they will remain effective!</string>
-    <string name="console_upgrade_title">Mandatory Update</string>
+    <string name="console_upgrade_title">New Version Founded</string>
     <string name="setting_page_about_update">Check for Updates</string>
     <string name="setting_page_about_update_descript">Current version: %1$s</string>
     <string name="toast_no_update">Already the latest version</string>
@@ -186,7 +186,7 @@
     <string name="console_del_unzip_dictionary_content">Will always delete unzipped files after enabling MOD, can save space, but next time enabling the same MOD will decompress again, causing slower second enable speed!</string>
     <string name="mod_page_dropdownMenu_mods_browser">Category View</string>
     <string name="mod_page_title_mods_browser">Category</string>
-    <string name="console_configuration_show_browswer">Default Show Category View</string>
+    <string name="console_configuration_disable_browswer">Disable Category View</string>
     <string name="mod_browser_file_list_back">Back to Previous Category</string>
     <string name="mod_browser_file_description">Number of MODs: %1$s Enabled: %2$s</string>
     <string name="mod_top_bar_count">Count: %1$s</string>
@@ -197,4 +197,6 @@
     <string name="console_status_no_permission">Unauthorized</string>
     <string name="console_top_bar_start_game">Start Game</string>
     <string name="mod_refreshing">Refreshing Readme</string>
+    <string name="download">Default</string>
+    <string name="download_universal">Universal</string>
 </resources>

@@ -5,7 +5,7 @@ import top.laoxin.modmanager.BuildConfig
 import top.lings.updater.util.GithubApi
 
 object Updater {
-    suspend fun checkUpdate(): Triple<String, String, String>? {
+    suspend fun checkUpdate(): Triple<List<String>, String, String>? {
         kotlin.runCatching {
             GithubApi.retrofitService.getLatestRelease()
         }.onFailure { exception ->
@@ -18,7 +18,11 @@ object Updater {
 
             if (releaseVersion != currentVersion) {
                 Log.d("Updater", "Update available: $release")
-                return Triple(release.getDownloadLink(), release.info, releaseVersion)
+                return Triple(
+                    listOf(release.getDownloadLink(), release.getDownloadLinkUniversal()),
+                    release.info,
+                    releaseVersion
+                )
             } else {
                 Log.d("Updater", "No update available")
             }

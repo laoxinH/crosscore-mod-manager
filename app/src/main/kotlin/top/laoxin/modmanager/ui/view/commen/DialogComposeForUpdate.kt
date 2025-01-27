@@ -15,6 +15,7 @@ fun DialogCommonForUpdate(
     title: String,
     content: String,
     onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
     showDialog: Boolean = false
 ) {
     if (showDialog) {
@@ -27,7 +28,14 @@ fun DialogCommonForUpdate(
                 TextButton(onClick = {
                     onConfirm()
                 }) {
-                    Text(stringResource(id = R.string.dialog_button_confirm))
+                    Text(stringResource(id = R.string.download))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    onDismiss()
+                }) {
+                    Text(stringResource(id = R.string.download_universal))
                 }
             }
         )

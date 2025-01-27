@@ -9,8 +9,13 @@ data class GithubBean(
     @SerializedName("assets") val assets: List<GitHubAssets>
 ) {
     fun getDownloadLink(): String {
-        val asset = assets.find { AppConfig.matchVariant(it.downloadLink) } ?: assets[0]
-        return asset.downloadLink
+        return assets.find { AppConfig.matchVariant(it.downloadLink) }?.downloadLink
+            ?: assets[0].downloadLink
+    }
+
+    fun getDownloadLinkUniversal(): String {
+        return assets.find { it.downloadLink.contains("universal") }?.downloadLink
+            ?: assets[0].downloadLink
     }
 }
 

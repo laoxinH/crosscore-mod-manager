@@ -20,6 +20,7 @@ class VersionRepository(context: Context) {
     private val versionKey = stringPreferencesKey("version")
     private val versionInfoKey = stringPreferencesKey("version_info")
     private val versionUrlKey = stringPreferencesKey("version_url")
+    private val universalUrlKey = stringPreferencesKey("universal_url")
 
     // 存储版本号
     suspend fun saveVersion(version: String) {
@@ -58,5 +59,18 @@ class VersionRepository(context: Context) {
     suspend fun getVersionUrl(): String {
         val preferences = versionDataStore.data.first()
         return preferences[versionUrlKey] ?: App.get().getString(R.string.github_url)
+    }
+
+    // 存储通用下载地址
+    suspend fun saveUniversalUrl(universalUrl: String) {
+        versionDataStore.edit { preferences ->
+            preferences[universalUrlKey] = universalUrl
+        }
+    }
+
+    // 获取通用下载地址
+    suspend fun getUniversalUrl(): String {
+        val preferences = versionDataStore.data.first()
+        return preferences[universalUrlKey] ?: App.get().getString(R.string.github_url)
     }
 }

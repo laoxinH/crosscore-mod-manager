@@ -115,6 +115,9 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
                 onConfirm = {
                     viewModel.downloadUrl?.let { url -> viewModel.openUrl(context, url) }
                 },
+                onDismiss = {
+                    viewModel.universalUrl?.let { url -> viewModel.openUrl(context, url) }
+                },
                 showDialog = uiState.showUpgradeDialog
             )
         }
@@ -339,17 +342,48 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
             // 添加一些间距
             Spacer(modifier = Modifier.height(14.dp))
 
+            // 不支持反和谐就隐藏
+            if (uiState.gameInfo.antiHarmonyFile.isNotEmpty() || uiState.gameInfo.antiHarmonyContent.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.console_configuration_anti_harmony),
+                        style = typography.titleMedium
+                    )
+                    Switch(checked = uiState.antiHarmony,
+                        onCheckedChange = { viewModel.openAntiHarmony(it) })
+                }
+            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(id = R.string.console_configuration_anti_harmony),
+                    text = stringResource(id = R.string.console_configuration_disable_browswer),
                     style = typography.titleMedium
                 )
-                Switch(checked = uiState.antiHarmony,
-                    onCheckedChange = { viewModel.openAntiHarmony(it) })
+                Switch(checked = !uiState.showCategoryView, onCheckedChange = {
+                    viewModel.setShowCategoryView(!it)
+                })
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.console_configuration_disable_scan_dictionary),
+                    style = typography.titleMedium
+                )
+                Switch(checked = !uiState.scanDirectoryMods, onCheckedChange = {
+                    viewModel.openScanDirectoryMods(!it)
+                })
             }
 
             Row(
@@ -380,19 +414,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     viewModel.openScanDownloadDirectoryDialog(it)
                 })
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.console_configuration_scan_dictionary),
-                    style = typography.titleMedium
-                )
-                Switch(checked = uiState.scanDirectoryMods, onCheckedChange = {
-                    viewModel.openScanDirectoryMods(it)
-                })
-            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -406,19 +428,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     viewModel.openDelUnzipDialog(it)
                 })
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.console_configuration_show_browswer),
-                    style = typography.titleMedium
-                )
-                Switch(checked = uiState.showCategoryView, onCheckedChange = {
-                    viewModel.setShowCategoryView(it)
-                })
-            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -435,25 +445,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     )
                 }
                 Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
-            }/*           Row(
-                           verticalAlignment = Alignment.CenterVertically,
-                           horizontalArrangement = Arrangement.SpaceBetween,
-                           modifier = Modifier.fillMaxWidth()
-                       ) {
-                           TextButton(
-                               onClick = { viewModel.startGameService() },
-                               contentPadding = PaddingValues(0.dp)
-                           ) {
-                               Text(
-                                   text = "测试",
-                                   modifier = Modifier.padding(0.dp),
-                                   style = typography.titleMedium
-                               )
-                           }
-                           Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
-                       }*/
-            // 添加一个按钮，用户点击按钮后，打开文件选择器
-
+            }
         }
     }
 }

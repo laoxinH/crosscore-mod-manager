@@ -76,6 +76,10 @@ class SettingViewModel(
     val downloadUrl: String?
         get() = _downloadUrl
 
+    private var _universalUrl: String? by mutableStateOf("")
+    val universalUrl: String?
+        get() = _universalUrl
+
     // 更新内容
     private var _updateContent: String? by mutableStateOf("")
     val updateContent: String?
@@ -308,18 +312,21 @@ class SettingViewModel(
         viewModelScope.launch {
             val update = Updater.checkUpdate()
             if (update != null) {
-                _downloadUrl = update.first
+                _downloadUrl = update.first[0]
+                _universalUrl = update.first[1]
                 _updateContent = update.second
                 var version = update.third
 
                 versionViewModel.updateVersion(version)
                 _updateContent?.let { versionViewModel.updateVersionInfo(it) }
                 _downloadUrl?.let { versionViewModel.updateVersionUrl(it) }
+                _universalUrl?.let { versionViewModel.updateUniversalUrl(it) }
 
                 setShowUpgradeDialog(true)
             } else if (versionViewModel.loadVersion() != BuildConfig.VERSION_NAME) {
                 _downloadUrl = versionViewModel.loadVersionUrl()
                 _updateContent = versionViewModel.loadVersionInfo()
+                _universalUrl = versionViewModel.loadUniversalUrl()
                 setShowUpgradeDialog(true)
             } else {
                 ToastUtils.longCall(R.string.toast_no_update)

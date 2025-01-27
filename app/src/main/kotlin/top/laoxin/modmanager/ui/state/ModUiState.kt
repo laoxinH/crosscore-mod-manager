@@ -24,7 +24,7 @@ data class ModUiState(
     val delEnableModsList: List<ModBean> = emptyList(),     // mod列表
     val showDisEnableModsDialog: Boolean = false,   // 是否显示禁用mod对话框
     val unzipProgress: String = "",       // 解压进度
-    val modsView: NavigationIndex = NavigationIndex.ALL_MODS,   // mod视图
+    val modsView: NavigationIndex = NavigationIndex.MODS_BROWSER,   // mod视图
     val modsSelected: List<Int> = emptyList(),     // 选中的mod
     val isMultiSelect: Boolean = false,   // 是否显示多选
     val multitaskingProgress: String = "",     // 多任务进度
