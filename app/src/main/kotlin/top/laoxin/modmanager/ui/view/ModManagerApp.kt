@@ -371,6 +371,10 @@ private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
 
 // 获取应用图标
 fun getGameIcon(packageName: String): ImageBitmap? {
+    var packageName = packageName
+    if (packageName.isEmpty() || packageName == "null") {
+        packageName = App.get().packageName
+    }
     try {
         val packageInfo = App.get().packageManager.getPackageInfo(packageName, 0)
         var drawable = packageInfo.applicationInfo?.loadIcon(App.get().packageManager)

@@ -23,7 +23,7 @@ object Updater {
                 Log.d("Updater", "Update available: $release")
                 return Pair(release.getDownloadLink(), release.info)
             } else {
-                ToastUtils.longCall(App.get().getString(R.string.toast_no_update))
+                Log.d("Updater", "No update available")
             }
         }
         return null

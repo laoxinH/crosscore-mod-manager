@@ -180,9 +180,11 @@ class ConsoleViewModel(
     private fun checkUpdate() {
         viewModelScope.launch {
             val update = Updater.checkUpdate()
-            _downloadUrl = update?.first
-            _updateContent = update?.second
-            setShowUpgradeDialog(true)
+            if (update != null) {
+                _downloadUrl = update.first
+                _updateContent = update.second
+                setShowUpgradeDialog(true)
+            }
         }
     }
 
@@ -248,7 +250,7 @@ class ConsoleViewModel(
             }
         fileObserver?.startWatching()
     }
-    
+
     private fun setScanQQDirectory(scanQQDirectory: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.savePreference(

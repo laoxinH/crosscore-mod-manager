@@ -194,7 +194,7 @@ fun GameInformationCard(
                 Column {
                     Text(
                         text = App.get().getString(R.string.toast_please_select_game),
-                        style = typography.labelLarge
+                        style = typography.titleLarge
                     )
                 }
             } else {

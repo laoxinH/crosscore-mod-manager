@@ -93,12 +93,13 @@ class SettingViewModel(
         setDeleteBackupDialog(false)
         gameInfoJob = viewModelScope.launch(Dispatchers.IO) {
 
-            if (_gameInfo == GameInfoConstant.NO_GAME) {
+            if (gameInfo == GameInfoConstant.NO_GAME) {
                 withContext(Dispatchers.Main) {
                     ToastUtils.longCall(R.string.toast_please_select_game)
                 }
+                this@launch.cancel()
             } else {
-                modRepository.getEnableMods(_gameInfo.value.packageName).collect {
+                modRepository.getEnableMods(gameInfo.packageName).collect {
                     if (it.isNotEmpty()) {
                         // 如果有mod开启则提示
                         withContext(Dispatchers.Main) {
@@ -106,14 +107,14 @@ class SettingViewModel(
                         }
                         this@launch.cancel()
                     } else {
-                        val delBackupFile: Boolean = ModTools.deleteBackupFiles(_gameInfo.value)
+                        val delBackupFile: Boolean = ModTools.deleteBackupFiles(gameInfo)
                         if (delBackupFile) {
-                            backupRepository.deleteByGamePackageName(_gameInfo.value.packageName)
+                            backupRepository.deleteByGamePackageName(gameInfo.packageName)
                             withContext(Dispatchers.Main) {
                                 ToastUtils.longCall(
                                     App.get().getString(
                                         R.string.toast_del_buckup_success,
-                                        _gameInfo.value.gameName,
+                                        gameInfo.gameName,
                                     )
                                 )
                             }
@@ -122,7 +123,7 @@ class SettingViewModel(
                                 ToastUtils.longCall(
                                     App.get().getString(
                                         R.string.toast_del_buckup_filed,
-                                        _gameInfo.value.gameName,
+                                        gameInfo.gameName,
                                     )
                                 )
                             }
@@ -146,6 +147,7 @@ class SettingViewModel(
     }
 
     fun deleteCache() {
+        setDeleteCacheDialog(false)
         viewModelScope.launch(Dispatchers.IO) {
             val delCache = ModTools.deleteCache()
             if (delCache) {
@@ -296,31 +298,16 @@ class SettingViewModel(
         }
     }
 
-    // 检测更新
-//    fun checkUpdate() {
-//        viewModelScope.launch {
-//            kotlin.runCatching {
-//                ModManagerApi.retrofitService.getUpdate()
-//            }.onFailure {
-//                Log.e("SettingViewModel", "checkUpdate: $it")
-//            }.onSuccess {
-//                Log.d("SettingViewModel", "checkUpdate: $it")
-//                if (it.code > ModTools.getVersionCode()) {
-//                    _downloadUrl = it.url
-//                    _updateDescription = it.des
-//                    setShowUpgradeDialog(true)
-//                } else {
-//                    ToastUtils.longCall(R.string.toast_no_update)
-//                }
-//            }
-//        }
-//    }
     fun checkUpdate() {
         viewModelScope.launch {
             val update = Updater.checkUpdate()
-            _downloadUrl = update?.first
-            _updateContent = update?.second
-            setShowUpgradeDialog(true)
+            if (update != null) {
+                _downloadUrl = update.first
+                _updateContent = update.second
+                setShowUpgradeDialog(true)
+            } else {
+                ToastUtils.longCall(R.string.toast_no_update)
+            }
         }
     }
 

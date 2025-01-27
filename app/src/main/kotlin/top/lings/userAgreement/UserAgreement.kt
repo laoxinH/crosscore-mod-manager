@@ -131,11 +131,11 @@ fun UserAgreement() {
         // 如果倒计时还没结束，显示剩余时间
         if (!isConfirmed.value) {
             Button(
-                onClick = {
-                    null
-                }, modifier = Modifier
+                onClick = { null },
+                modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(32.dp)
+                    .padding(32.dp),
+                enabled = false
             ) {
                 Text(
                     text = "${20 - timeSpent.intValue}", style = MaterialTheme.typography.bodyMedium
@@ -152,9 +152,11 @@ fun UserAgreement() {
                     val intent = Intent(context, MainActivity::class.java)
                     context.startActivity(intent)
                     (context as Activity).finish()
-                }, modifier = Modifier
+                },
+                modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(32.dp)
+                    .padding(32.dp),
+                enabled = true
             ) {
                 Text(
                     text = stringResource(id = R.string.dialog_button_info_permission),
