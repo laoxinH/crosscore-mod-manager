@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.GameInfoBean
+import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.ModTools.ROOT_PATH
 import top.laoxin.modmanager.tools.PermissionTools
@@ -189,26 +190,35 @@ fun GameInformationCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             // 第二个区域：采用垂直布局，添加一些描述信息
-            Column {
-                Text(
-                    text = stringResource(id = R.string.console_game_name, gameInfo.gameName),
-                    style = typography.labelLarge
-                )
-                Text(
-                    text = stringResource(
-                        id = R.string.console_game_packegname, gameInfo.packageName
-                    ), style = typography.labelLarge
-                )
-                Text(
-                    text = stringResource(
-                        id = R.string.console_game_version, gameInfo.version
-                    ), style = typography.labelLarge
-                )
-                Text(
-                    text = stringResource(
-                        id = R.string.console_game_service, gameInfo.serviceName
-                    ), style = typography.labelLarge
-                )
+            if (gameInfo == GameInfoConstant.NO_GAME) {
+                Column {
+                    Text(
+                        text = App.get().getString(R.string.toast_please_select_game),
+                        style = typography.labelLarge
+                    )
+                }
+            } else {
+                Column {
+                    Text(
+                        text = stringResource(id = R.string.console_game_name, gameInfo.gameName),
+                        style = typography.labelLarge
+                    )
+                    Text(
+                        text = stringResource(
+                            id = R.string.console_game_packegname, gameInfo.packageName
+                        ), style = typography.labelLarge
+                    )
+                    Text(
+                        text = stringResource(
+                            id = R.string.console_game_version, gameInfo.version
+                        ), style = typography.labelLarge
+                    )
+                    Text(
+                        text = stringResource(
+                            id = R.string.console_game_service, gameInfo.serviceName
+                        ), style = typography.labelLarge
+                    )
+                }
             }
         }
     }

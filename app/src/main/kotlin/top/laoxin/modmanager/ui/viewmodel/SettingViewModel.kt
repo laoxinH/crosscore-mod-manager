@@ -92,33 +92,40 @@ class SettingViewModel(
         gameInfoJob?.cancel()
         setDeleteBackupDialog(false)
         gameInfoJob = viewModelScope.launch(Dispatchers.IO) {
-            modRepository.getEnableMods(_gameInfo.value.packageName).collect {
-                if (it.isNotEmpty()) {
-                    // 如果有mod开启则提示
-                    withContext(Dispatchers.Main) {
-                        ToastUtils.longCall(R.string.toast_del_buckup_when_mod_enable)
-                    }
-                    this@launch.cancel()
-                } else {
-                    val delBackupFile: Boolean = ModTools.deleteBackupFiles(_gameInfo.value)
-                    if (delBackupFile) {
-                        backupRepository.deleteByGamePackageName(_gameInfo.value.packageName)
+
+            if (_gameInfo == GameInfoConstant.NO_GAME) {
+                withContext(Dispatchers.Main) {
+                    ToastUtils.longCall(R.string.toast_please_select_game)
+                }
+            } else {
+                modRepository.getEnableMods(_gameInfo.value.packageName).collect {
+                    if (it.isNotEmpty()) {
+                        // 如果有mod开启则提示
                         withContext(Dispatchers.Main) {
-                            ToastUtils.longCall(
-                                App.get().getString(
-                                    R.string.toast_del_buckup_success,
-                                    _gameInfo.value.gameName,
-                                )
-                            )
+                            ToastUtils.longCall(R.string.toast_del_buckup_when_mod_enable)
                         }
+                        this@launch.cancel()
                     } else {
-                        withContext(Dispatchers.Main) {
-                            ToastUtils.longCall(
-                                App.get().getString(
-                                    R.string.toast_del_buckup_filed,
-                                    _gameInfo.value.gameName,
+                        val delBackupFile: Boolean = ModTools.deleteBackupFiles(_gameInfo.value)
+                        if (delBackupFile) {
+                            backupRepository.deleteByGamePackageName(_gameInfo.value.packageName)
+                            withContext(Dispatchers.Main) {
+                                ToastUtils.longCall(
+                                    App.get().getString(
+                                        R.string.toast_del_buckup_success,
+                                        _gameInfo.value.gameName,
+                                    )
                                 )
-                            )
+                            }
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                ToastUtils.longCall(
+                                    App.get().getString(
+                                        R.string.toast_del_buckup_filed,
+                                        _gameInfo.value.gameName,
+                                    )
+                                )
+                            }
                         }
                     }
                 }
