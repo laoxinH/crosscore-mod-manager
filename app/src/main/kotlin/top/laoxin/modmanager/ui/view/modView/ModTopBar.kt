@@ -107,7 +107,9 @@ fun MultiSelectTopBar(
                         onClick = {
                             viewModel.setDoBackFunction(true)
                         },
-                        modifier = Modifier.size(35.dp),
+                        modifier = Modifier
+                            .size(35.dp)
+                            .padding(start = 6.dp),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(0.dp),
                         enabled = uiState.isBackPathExist,
@@ -268,7 +270,9 @@ fun GeneralTopBar(
                         onClick = {
                             viewModel.setDoBackFunction(true)
                         },
-                        modifier = Modifier.size(35.dp),
+                        modifier = Modifier
+                            .size(35.dp)
+                            .padding(start = 6.dp),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(0.dp),
                         enabled = uiState.isBackPathExist,

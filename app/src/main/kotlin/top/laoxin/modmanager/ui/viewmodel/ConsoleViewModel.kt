@@ -124,11 +124,11 @@ class ConsoleViewModel(
     private val openPermissionRequestDialogFlow =
         userPreferencesRepository.getPreferenceFlow("OPEN_PERMISSION_REQUEST_DIALOG", false)
     private val scanDirectoryModsFlow =
-        userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", false)
+        userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", true)
     private val delUnzipDictionaryFlow =
         userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
     private val showCategoryViewFlow =
-        userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", false)
+        userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", true)
     private val userPreferencesState = combine(
         selectedGameFlow, selectedDirectoryFlow
     ) { selectedGame, selectedDirectory ->

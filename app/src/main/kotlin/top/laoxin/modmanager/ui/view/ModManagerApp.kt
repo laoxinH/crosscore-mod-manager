@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -82,8 +82,10 @@ enum class NavigationIndex(
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
     val versionViewModel: VersionViewModel = viewModel(factory = VersionViewModel.Factory)
-    val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory(versionViewModel))
-    val settingViewModel: SettingViewModel = viewModel(factory = SettingViewModel.Factory(versionViewModel))
+    val consoleViewModel: ConsoleViewModel =
+        viewModel(factory = ConsoleViewModel.Factory(versionViewModel))
+    val settingViewModel: SettingViewModel =
+        viewModel(factory = SettingViewModel.Factory(versionViewModel))
     val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
 
@@ -187,7 +189,7 @@ fun ModManagerApp() {
                         page = currentPage,
                         animationSpec = tween(
                             durationMillis = abs(pagerState.currentPage - currentPage) * 100 + 200,
-                            easing = FastOutSlowInEasing
+                            easing = LinearEasing
                         )
                     )
                     if (pagerState.currentPage == currentPage) {

@@ -479,15 +479,6 @@ fun SettingTopBar(
                     Modifier.size(28.dp)
                 )
             }
-            IconButton(onClick = {
-                viewModel.openUrl(context, context.getString(R.string.alipay_url))
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.alipay_icon),
-                    contentDescription = null,
-                    Modifier.size(28.dp)
-                )
-            }
             IconButton(
                 onClick = {
                     viewModel.checkUpdate()
@@ -502,10 +493,3 @@ fun SettingTopBar(
         }
     )
 }
-
-@Preview
-@Composable
-fun PreviewSettingPage() {
-
-}
-

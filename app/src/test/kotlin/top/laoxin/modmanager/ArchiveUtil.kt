@@ -233,8 +233,10 @@ object ArchiveUtil {
                         }
                     } else {
                         val parent = f.parentFile
-                        if (!parent.isDirectory && !parent.mkdirs()) {
-                            throw IOException("failed to create directory $parent")
+                        if (parent != null) {
+                            if (!parent.isDirectory && !parent.mkdirs()) {
+                                throw IOException("failed to create directory $parent")
+                            }
                         }
                         Files.newOutputStream(f.toPath()).use { o ->
                             sZFile.getInputStream(entry).use { i ->
