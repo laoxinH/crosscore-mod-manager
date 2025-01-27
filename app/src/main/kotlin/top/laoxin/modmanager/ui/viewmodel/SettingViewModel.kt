@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
+import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.bean.GameInfoBean
@@ -43,19 +44,23 @@ class SettingViewModel(
     private val backupRepository: BackupRepository,
     private val modRepository: ModRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val versionViewModel: VersionViewModel
 ) : ViewModel() {
     companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application =
-                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App)
-                SettingViewModel(
-                    application.container.backupRepository,
-                    application.container.modRepository,
-                    application.userPreferencesRepository,
-                )
+        fun Factory(versionViewModel: VersionViewModel): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    val application =
+                        (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App)
+                    SettingViewModel(
+                        application.container.backupRepository,
+                        application.container.modRepository,
+                        application.userPreferencesRepository,
+                        versionViewModel
+                    )
+                }
             }
-        }
+
         var gameInfoJob: Job? = null
     }
 
@@ -231,7 +236,8 @@ class SettingViewModel(
             _gameInfo.value = gameInfo
         } else {
             if (PermissionTools.checkPermission(gameInfo.gamePath) == PathType.NULL) {
-                _requestPermissionPath = PermissionTools.getRequestPermissionPath(gameInfo.gamePath)
+                _requestPermissionPath =
+                    PermissionTools.getRequestPermissionPath(gameInfo.gamePath)
                 _uiState.update {
                     it.copy(openPermissionRequestDialog = true)
                 }
@@ -304,6 +310,16 @@ class SettingViewModel(
             if (update != null) {
                 _downloadUrl = update.first
                 _updateContent = update.second
+                var version = update.third
+
+                versionViewModel.updateVersion(version)
+                _updateContent?.let { versionViewModel.updateVersionInfo(it) }
+                _downloadUrl?.let { versionViewModel.updateVersionUrl(it) }
+
+                setShowUpgradeDialog(true)
+            } else if (versionViewModel.loadVersion() != BuildConfig.VERSION_NAME) {
+                _downloadUrl = versionViewModel.loadVersionUrl()
+                _updateContent = versionViewModel.loadVersionInfo()
                 setShowUpgradeDialog(true)
             } else {
                 ToastUtils.longCall(R.string.toast_no_update)

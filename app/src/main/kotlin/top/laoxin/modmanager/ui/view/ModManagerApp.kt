@@ -65,6 +65,7 @@ import top.laoxin.modmanager.ui.view.modView.ModTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
+import top.laoxin.modmanager.ui.viewmodel.VersionViewModel
 import kotlin.math.abs
 
 // 导航栏索引
@@ -80,8 +81,9 @@ enum class NavigationIndex(
 @Composable
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
-    val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory)
-    val settingViewModel: SettingViewModel = viewModel(factory = SettingViewModel.Factory)
+    val versionViewModel: VersionViewModel = viewModel(factory = VersionViewModel.Factory)
+    val consoleViewModel: ConsoleViewModel = viewModel(factory = ConsoleViewModel.Factory(versionViewModel))
+    val settingViewModel: SettingViewModel = viewModel(factory = SettingViewModel.Factory(versionViewModel))
     val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
 

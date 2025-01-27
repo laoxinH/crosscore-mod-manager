@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
+import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.bean.AntiHarmonyBean
 import top.laoxin.modmanager.bean.GameInfoBean
@@ -61,7 +62,8 @@ import java.io.File
 class ConsoleViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val modRepository: ModRepository,
-    private val antiHarmonyRepository: AntiHarmonyRepository
+    private val antiHarmonyRepository: AntiHarmonyRepository,
+    private val versionViewModel: VersionViewModel
 ) : ViewModel() {
 
     // 请求权限路径
@@ -85,16 +87,19 @@ class ConsoleViewModel(
     private val _uiState = MutableStateFlow<ConsoleUiState>(ConsoleUiState())
 
     companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as App)
-                ConsoleViewModel(
-                    application.userPreferencesRepository,
-                    application.container.modRepository,
-                    application.container.antiHarmonyRepository
-                )
+        fun Factory(versionViewModel: VersionViewModel): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    val application = (this[APPLICATION_KEY] as App)
+                    ConsoleViewModel(
+                        application.userPreferencesRepository,
+                        application.container.modRepository,
+                        application.container.antiHarmonyRepository,
+                        versionViewModel
+                    )
+                }
             }
-        }
+
         var updateModCountJob: Job? = null
         var updateAntiHarmonyJob: Job? = null
         var updateEnableModCountJob: Job? = null
@@ -183,6 +188,17 @@ class ConsoleViewModel(
             if (update != null) {
                 _downloadUrl = update.first
                 _updateContent = update.second
+                var version = update.third
+
+                versionViewModel.updateVersion(version)
+                _updateContent?.let { versionViewModel.updateVersionInfo(it) }
+                _downloadUrl?.let { versionViewModel.updateVersionUrl(it) }
+
+                setShowUpgradeDialog(true)
+            }
+            if (versionViewModel.loadVersion() != BuildConfig.VERSION_NAME) {
+                _downloadUrl = versionViewModel.loadVersionUrl()
+                _updateContent = versionViewModel.loadVersionInfo()
                 setShowUpgradeDialog(true)
             }
         }

@@ -1,14 +1,11 @@
 package top.lings.updater
 
 import android.util.Log
-import top.laoxin.modmanager.App
 import top.laoxin.modmanager.BuildConfig
-import top.laoxin.modmanager.R
-import top.laoxin.modmanager.tools.ToastUtils
 import top.lings.updater.util.GithubApi
 
 object Updater {
-    suspend fun checkUpdate(): Pair<String, String>? {
+    suspend fun checkUpdate(): Triple<String, String, String>? {
         kotlin.runCatching {
             GithubApi.retrofitService.getLatestRelease()
         }.onFailure { exception ->
@@ -21,7 +18,7 @@ object Updater {
 
             if (releaseVersion != currentVersion) {
                 Log.d("Updater", "Update available: $release")
-                return Pair(release.getDownloadLink(), release.info)
+                return Triple(release.getDownloadLink(), release.info, releaseVersion)
             } else {
                 Log.d("Updater", "No update available")
             }
