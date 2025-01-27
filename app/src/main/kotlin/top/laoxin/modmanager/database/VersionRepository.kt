@@ -58,7 +58,8 @@ class VersionRepository(context: Context) {
     // 获取版本下载地址
     suspend fun getVersionUrl(): String {
         val preferences = versionDataStore.data.first()
-        return preferences[versionUrlKey] ?: App.get().getString(R.string.github_url)
+        return preferences[versionUrlKey] ?: App.get()
+            .getString(R.string.github_url_releases_latest)
     }
 
     // 存储通用下载地址
@@ -71,6 +72,7 @@ class VersionRepository(context: Context) {
     // 获取通用下载地址
     suspend fun getUniversalUrl(): String {
         val preferences = versionDataStore.data.first()
-        return preferences[universalUrlKey] ?: App.get().getString(R.string.github_url)
+        return preferences[universalUrlKey] ?: App.get()
+            .getString(R.string.github_url_releases_latest)
     }
 }

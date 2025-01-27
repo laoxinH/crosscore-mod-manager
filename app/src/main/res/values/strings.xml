@@ -65,7 +65,9 @@
     <string name="setting_del_cache_dialog_content_txt">清除缓存的图片等文件。App在使用时会试图重新加载，但仍旧可能可能造成异常</string>
     <string name="toast_del_cache_success">删除缓存成功</string>
     <string name="toast_del_cache_filed">删除缓存失败</string>
-    <string name="github_url">https://github.com/laoxinH/crosscore-mod-manager/releases</string>
+    <string name="github_url_releases">https://github.com/laoxinH/crosscore-mod-manager/releases</string>
+    <string name="github_url_releases_latest">https://github.com/laoxinH/crosscore-mod-manager/releases/latest</string>
+    <string name="github_url">https://github.com/laoxinH/crosscore-mod-manager</string>
     <string name="alipay_url">https://qr.alipay.com/fkx13953osk3jretx8ehg48</string>
     <string name="mod_page_no_mod">((٩(//̀Д/́/)۶))这里什么都没有啊</string>
     <string name="mod_page_no_mod_dir">当前路径为空</string>

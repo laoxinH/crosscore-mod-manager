@@ -40,8 +40,8 @@ android {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 35
-        versionCode = 35
-        versionName = "3.3.1"
+        versionCode = 340
+        versionName = "3.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -51,9 +51,8 @@ android {
 
         ndk {
             abiFilters.addAll(supportedAbis)
-            debugSymbolLevel = "FULL"
+            debugSymbolLevel = "NONE"
         }
-
     }
 
     buildTypes {

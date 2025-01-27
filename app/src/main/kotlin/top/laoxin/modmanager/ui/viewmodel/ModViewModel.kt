@@ -121,16 +121,16 @@ class ModViewModel(
     // 选择游戏
     private val selectedGame = userPreferencesRepository.getPreferenceFlow("SELECTED_GAME", 0)
 
-    // 扫描文件夹中的Mods
+    // 扫描文件夹MOD
     private val scanDirectoryMods =
-        userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", false)
+        userPreferencesRepository.getPreferenceFlow("SCAN_DIRECTORY_MODS", true)
 
     private val delUnzipDictionaryFlow =
         userPreferencesRepository.getPreferenceFlow("DELETE_UNZIP_DIRECTORY", false)
 
     // 展示分类视图
     private val showCategoryView =
-        userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", false)
+        userPreferencesRepository.getPreferenceFlow("SHOW_CATEGORY_VIEW", true)
 
     // 生成用户配置对象
     private val userPreferences: StateFlow<UserPreferencesState> = combine(

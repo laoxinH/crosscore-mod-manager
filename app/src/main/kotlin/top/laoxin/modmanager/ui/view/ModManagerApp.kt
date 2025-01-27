@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -189,7 +189,7 @@ fun ModManagerApp() {
                         page = currentPage,
                         animationSpec = tween(
                             durationMillis = abs(pagerState.currentPage - currentPage) * 100 + 200,
-                            easing = LinearEasing
+                            easing = FastOutSlowInEasing
                         )
                     )
                     if (pagerState.currentPage == currentPage) {
