@@ -19,75 +19,65 @@ class StartActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        // 通过背景色使状态栏和导航栏透明
-        window.setBackgroundDrawableResource(android.R.color.transparent)
-        // 启用 Edge-to-Edge 模式
-        enableEdgeToEdge()
-
+        setupWindowConfiguration()
         checkOrientation()
-
+        setupSplashScreen()
         jumpToActivity()
+    }
 
-        // 保持SplashScreen
-        var splashScreen = installSplashScreen().apply {
-            setKeepOnScreenCondition {
-                isKeepOnScreen.get()
+    // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
+    private fun setupWindowConfiguration() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.setBackgroundDrawableResource(android.R.color.transparent)
+        enableEdgeToEdge()
+    }
+
+    // 设置启动画面
+    private fun setupSplashScreen() {
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { isKeepOnScreen.get() }
+            setOnExitAnimationListener { provider ->
+                provider.iconView.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction(provider::remove)
+                    .start()
             }
         }
+    }
 
-        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-            splashScreenViewProvider.iconView.animate()
-                .alpha(0f)
-                .setDuration(300)
-                .withEndAction {
-                    splashScreenViewProvider.remove()
-                }.start()
+    // 检查屏幕方向
+    private fun checkOrientation() {
+        requestedOrientation = when {
+            isTabletScreen() -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    // 检查用户协议状态并跳转到 MainActivity 或 UserAgreementActivity
-    fun jumpToActivity() {
-        val sharedPreferences = getSharedPreferences("AppLaunch", MODE_PRIVATE)
-        val isConfirm = sharedPreferences.getBoolean("isConfirm", false)
-
-        val intent = if (isConfirm) {
-            Intent(this, MainActivity::class.java)
+    // 判断是否为平板屏幕
+    private fun isTabletScreen(): Boolean {
+        val screenWidthDp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            windowManager.currentWindowMetrics.bounds.width() / resources.displayMetrics.density
         } else {
-            Intent(this, UserAgreementActivity::class.java)
+            val metrics = DisplayMetrics().also {
+                @Suppress("DEPRECATION")
+                windowManager.defaultDisplay.getMetrics(it)
+            }
+            metrics.widthPixels / metrics.density
         }
+        return screenWidthDp >= 600
+    }
 
-        startActivity(intent)
+    // 跳转到目标 Activity
+    private fun jumpToActivity() {
+        val targetActivity =
+            if (isUserAgreementConfirmed()) MainActivity::class.java else UserAgreementActivity::class.java
+        startActivity(Intent(this, targetActivity))
         isKeepOnScreen.set(false)
         finish()
     }
 
-    // 检查屏幕方向
-    fun checkOrientation() {
-        // 获取屏幕宽度
-        val screenWidthDp =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                // Android 11
-                val windowMetrics = windowManager.currentWindowMetrics
-                val widthPixels = windowMetrics.bounds.width()
-                widthPixels / resources.displayMetrics.density
-            } else {
-                // Android 10
-                @Suppress("DEPRECATION")
-                windowManager.defaultDisplay.getMetrics(DisplayMetrics())
-                DisplayMetrics().widthPixels / DisplayMetrics().density
-            }
-
-        // 根据屏幕宽度设置屏幕方向
-        requestedOrientation = if (screenWidthDp >= 600) {
-            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        } else {
-            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-    }
+    // 判断用户是否已确认用户协议
+    private fun isUserAgreementConfirmed() =
+        getSharedPreferences("AppLaunch", MODE_PRIVATE).getBoolean("isConfirm", false)
 }

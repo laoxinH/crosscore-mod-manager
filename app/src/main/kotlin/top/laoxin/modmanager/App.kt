@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
@@ -15,14 +16,9 @@ import top.laoxin.modmanager.database.AppDataContainer
 import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.tools.LogTools
 import java.io.File
-import java.io.FileOutputStream
-import java.util.Objects
-
 
 private const val PREFERENCE_NAME = "mod_manager_preferences"
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-    name = PREFERENCE_NAME
-)
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCE_NAME)
 
 class App : Application() {
 
@@ -31,45 +27,22 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        initializeComponents()
+        initializeOsVersion()
+        createTestFile()
+        setupNotificationChannel()
+        setupGlobalExceptionHandler()
+    }
+
+    // 初始化组件
+    private fun initializeComponents() {
         userPreferencesRepository = UserPreferencesRepository(dataStore)
         container = AppDataContainer(this)
         sApp = this
-        checkOsVersion()
-        createFile()
-        registerNotificationService()
-        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            // 这里处理全局异常
-            Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
-            LogTools.logRecord("Uncaught exception in thread ${thread.name}: $throwable")
-        }
     }
 
-    private fun createFile() {
-        try {
-            val path = Objects.requireNonNull(getExternalFilesDir(null))?.getParent()
-            Log.d("Appmy", "createFile: $path")
-            val file = File(path, "test.txt")
-            if (!file.exists()) {
-                file.createNewFile()
-                val fileOutputStream = FileOutputStream(file)
-                fileOutputStream.write("Hello world!".toByteArray())
-                fileOutputStream.close()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    companion object {
-        private lateinit var sApp: App
-        lateinit var osVersion: OSVersion
-        var isHuawei = false
-        fun get(): App {
-            return sApp
-        }
-    }
-
-    private fun checkOsVersion() {
+    // 初始化操作系统版本
+    private fun initializeOsVersion() {
         val sdkVersion = Build.VERSION.SDK_INT
         osVersion = when {
             sdkVersion >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> OSVersion.OS_14
@@ -78,26 +51,65 @@ class App : Application() {
             sdkVersion >= Build.VERSION_CODES.M -> OSVersion.OS_6
             else -> OSVersion.OS_5
         }
-        // 鸿蒙4
-        val version = Build.VERSION.INCREMENTAL
-        Log.d("App初始化", "checkOsVersion: $version")
-        if ((version.contains("104.0") || version.contains("104.2")) && osVersion == OSVersion.OS_11) {
-            // 鸿蒙4目前仅可使用shizuku，故设置为14
+
+        // Check for Huawei/HarmonyOS 4 specific conditions
+        val incrementalVersion = Build.VERSION.INCREMENTAL
+        isHuawei = osVersion == OSVersion.OS_11 &&
+                (incrementalVersion.contains("104.0") || incrementalVersion.contains("104.2"))
+
+        if (isHuawei) {
             osVersion = OSVersion.OS_14
-            isHuawei = true
         }
 
-        Log.d("App", "checkOsVersion: $osVersion")
+        Log.d("App", "Detected OS Version: $osVersion")
     }
 
-    // 注册系统通知服务
-    private fun registerNotificationService() {
+    // 创建测试文件
+    private fun createTestFile() {
+        try {
+            val filesDir = getExternalFilesDir(null)?.parent ?: return
+            val testFile = File(filesDir, "test.txt")
+
+            if (!testFile.exists()) {
+                testFile.createNewFile()
+                testFile.writeBytes("Hello  world!".toByteArray())
+            }
+        } catch (e: Exception) {
+            Log.e("App", "Failed to create test file", e)
+        }
+    }
+
+    // 设置通知渠道
+    private fun setupNotificationChannel() {
         val channelId = getString(R.string.channel_id)
         val channelName = getString(R.string.channel_name)
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(channelId, channelName, importance)
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
+
+        NotificationManagerCompat.from(this).apply {
+            createNotificationChannel(
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            )
+        }
     }
 
+    // 设置全局异常处理
+    private fun setupGlobalExceptionHandler() {
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            handleGlobalException(thread, throwable)
+        }
+    }
+
+    // 处理全局异常
+    private fun handleGlobalException(thread: Thread, throwable: Throwable) {
+        Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
+        LogTools.logRecord("Uncaught  exception in thread ${thread.name}:  ${throwable.message}")
+    }
+
+    // 伴生对象
+    companion object {
+        lateinit var sApp: App
+        var osVersion: OSVersion = OSVersion.OS_5
+        var isHuawei: Boolean = false
+
+        fun get(): App = sApp
+    }
 }

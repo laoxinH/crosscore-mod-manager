@@ -175,10 +175,12 @@ fun ModManagerApp() {
                 shouldScroll = true
             }
 
-            // 监听 HorizontalPager 页面变化时更新 currentPage
-            LaunchedEffect(pagerState.currentPage) {
-                if (pagerState.currentPage != currentPage && !shouldScroll) {
-                    currentPage = pagerState.currentPage // 更新 currentPage
+            // 依赖 pagerState 的滚动状态自动更新 currentPage
+            LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.currentPage }.collect { page ->
+                    if (!shouldScroll) {
+                        currentPage = page
+                    }
                 }
             }
 
@@ -192,9 +194,7 @@ fun ModManagerApp() {
                             easing = FastOutSlowInEasing
                         )
                     )
-                    if (pagerState.currentPage == currentPage) {
-                        shouldScroll = false
-                    }
+                    shouldScroll = false
                 }
             }
 

@@ -1,5 +1,5 @@
 -allowaccessmodification
--repackageclasses
+-repackageclasses ''
 
 -keepclassmembers class * implements android.os.Parcelable {
     public static final ** CREATOR;
@@ -15,22 +15,16 @@
 }
 
 -dontwarn org.slf4j.impl.StaticLoggerBinder
--dontwarn org.conscrypt.Conscrypt
--dontwarn androidx.window.extensions.**
--dontwarn androidx.window.sidecar.Sidecar*
+-dontwarn org.conscrypt.**
+-dontwarn androidx.window.**
+-dontwarn com.squareup.okhttp.**
 
 -keep class net.sf.sevenzipjbinding.** { *; }
--keep class top.laoxin.modmanager.** { *; }
--keep class top.lings.userAgreement.** { *; }
--keep class top.lings.updater.** { *; }
+-keep class top.laoxin.** { *; }
+-keep class top.lings.** { *; }
 -keep class okhttp3.** { *; }
--keep class com.squareup.okhttp.** { *; }
 
 -keep class com.google.gson.** { *; }
--keep class com.google.gson.stream.** { *; }
 -keepclassmembers class * {
-    @com.google.gson.annotations.SerializedName *;
-}
--keepclassmembers class * {
-    @com.google.gson.annotations.Expose *;
+    @com.google.gson.annotations.* <fields>;
 }
