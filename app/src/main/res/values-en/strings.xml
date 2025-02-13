@@ -201,4 +201,7 @@
     <string name="mod_refreshing">Refreshing Readme</string>
     <string name="download">Default</string>
     <string name="download_universal">Universal</string>
+    <string name="toast_start_scan">Start scanning</string>
+    <string name="toast_flash_failed">Failed to refresh MOD</string>
+    <string name="tosat_game_already_update">%1$s has been updated, please re-select the game in the settings and re-execute the prompt action</string>
 </resources>
