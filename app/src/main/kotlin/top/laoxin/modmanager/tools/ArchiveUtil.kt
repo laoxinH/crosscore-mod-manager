@@ -31,33 +31,6 @@ object ArchiveUtil {
     var progressUpdateListener: ProgressUpdateListener? = null
 
 
-    // 测试
-    fun test() {
-        val listInArchiveFiles =
-            listInArchiveFiles(ModTools.ROOT_PATH + "/Download/Telegram/1.7z")
-        decompression(
-            ModTools.ROOT_PATH + "/Download/Telegram/测.rar",
-            ModTools.ROOT_PATH + "/Download/Telegram/全部解压",
-        )
-        decompression(
-            ModTools.ROOT_PATH + "/Download/Telegram/1.7z",
-            ModTools.ROOT_PATH + "/Download/Telegram/密码解压",
-            "12"
-        )
-        Log.i(TAG, listInArchiveFiles.toString())
-        var archiveEncrypted = isArchiveEncrypted(ModTools.ROOT_PATH + "/Download/Telegram/1.7z")
-        Log.i(TAG, "是否加密$archiveEncrypted")
-        archiveEncrypted = isArchiveEncrypted(ModTools.ROOT_PATH + "/Download/Telegram/测.7z")
-        Log.i(TAG, archiveEncrypted.toString())
-        extractSpecificFile(
-            ModTools.ROOT_PATH + "/Download/Telegram/测.rar",
-            listOf("乌丝怀亚_去衣_玩具插入哎嘿颜/预览.png"),
-            ModTools.ROOT_PATH + "/Download/Telegram/部分解压",
-            null
-        )
-
-    }
-
 
     /**
      * 无需密码解压文件
@@ -274,6 +247,7 @@ object ArchiveUtil {
                 zipFile = ZipFile(srcFile)
                 zipFile.charset = Charset.forName("GBK")
             }
+            Log.d(TAG, "extractSpecificZipFile: ${zipFile.fileHeaders.map { it.fileName }}")
             password?.let {
                 zipFile.setPassword(it.toCharArray())
             }

@@ -1,9 +1,9 @@
 package top.laoxin.modmanager.ui.state
 
-import top.laoxin.modmanager.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.bean.InfoBean
-import top.laoxin.modmanager.bean.ThanksBean
+import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.InfoBean
+import top.laoxin.modmanager.data.bean.ThanksBean
 
 data class SettingUiState(
     // 删除备份对话框

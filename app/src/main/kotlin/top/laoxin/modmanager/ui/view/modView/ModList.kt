@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File

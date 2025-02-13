@@ -8,10 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -24,43 +22,45 @@ import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.constant.SpecialGame
-import top.laoxin.modmanager.database.UserPreferencesRepository
-import top.laoxin.modmanager.database.backups.BackupRepository
-import top.laoxin.modmanager.database.mods.ModRepository
-import top.laoxin.modmanager.network.ModManagerApi
-import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.constant.ResultCode
+
+import top.laoxin.modmanager.data.network.ModManagerApi
+import top.laoxin.modmanager.domain.usercase.app.CheckUpdateUserCase
+import top.laoxin.modmanager.domain.usercase.setting.DeleteBackupUserCase
+import top.laoxin.modmanager.domain.usercase.setting.DeleteCacheUserCase
+import top.laoxin.modmanager.domain.usercase.setting.DeleteTempUserCase
+import top.laoxin.modmanager.domain.usercase.setting.DownloadGameConfigUserCase
+import top.laoxin.modmanager.domain.usercase.setting.FlashGameConfigUserCase
+import top.laoxin.modmanager.domain.usercase.setting.SelectGameUserCase
+
+import top.laoxin.modmanager.tools.AppInfoTools
+
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
+import top.laoxin.modmanager.tools.filetools.FileToolsManager
+import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.ui.state.SettingUiState
-import top.lings.updater.Updater
+import javax.inject.Inject
 
-
-class SettingViewModel(
-    private val backupRepository: BackupRepository,
-    private val modRepository: ModRepository,
-    private val userPreferencesRepository: UserPreferencesRepository,
-    private val versionViewModel: VersionViewModel
+@HiltViewModel
+class SettingViewModel @Inject constructor(
+    private val deleteBackupUserCase: DeleteBackupUserCase,
+    private val deleteCacheUserCase: DeleteCacheUserCase,
+    private val deleteTempUserCase: DeleteTempUserCase,
+    private val selectGameUserCase: SelectGameUserCase,
+    private val flashGameConfigUserCase: FlashGameConfigUserCase,
+    private val permissionTools: PermissionTools,
+    private val gameInfoManager: GameInfoManager,
+    private val appInfoManager: AppInfoTools,
+    private val downloadGameConfigUserCase: DownloadGameConfigUserCase,
+    private val checkUpdateUserCase: CheckUpdateUserCase,
+    private val fileToolsManager: FileToolsManager
 ) : ViewModel() {
     companion object {
-        fun Factory(versionViewModel: VersionViewModel): ViewModelProvider.Factory =
-            viewModelFactory {
-                initializer {
-                    val application =
-                        (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App)
-                    SettingViewModel(
-                        application.container.backupRepository,
-                        application.container.modRepository,
-                        application.userPreferencesRepository,
-                        versionViewModel
-                    )
-                }
-            }
-
         var gameInfoJob: Job? = null
     }
 
@@ -87,12 +87,7 @@ class SettingViewModel(
 
     init {
 
-        viewModelScope.launch(Dispatchers.Main.immediate) {
-            userPreferencesRepository.getPreferenceFlow("SELECTED_GAME", 0).collect {
-                _gameInfo.value = GameInfoConstant.gameInfoList[it]
-            }
-        }
-        getGameInfo()
+        loadGameInfo()
         getVersionName()
     }
 
@@ -100,44 +95,23 @@ class SettingViewModel(
     fun deleteAllBackups() {
         gameInfoJob?.cancel()
         setDeleteBackupDialog(false)
-        gameInfoJob = viewModelScope.launch(Dispatchers.IO) {
-
-            if (gameInfo == GameInfoConstant.NO_GAME) {
-                withContext(Dispatchers.Main) {
+        gameInfoJob = viewModelScope.launch() {
+            val result = deleteBackupUserCase()
+            when (result) {
+                ResultCode.NO_SELECTED_GAME -> {
                     ToastUtils.longCall(R.string.toast_please_select_game)
                 }
-                this@launch.cancel()
-            } else {
-                modRepository.getEnableMods(gameInfo.packageName).collect {
-                    if (it.isNotEmpty()) {
-                        // 如果有mod开启则提示
-                        withContext(Dispatchers.Main) {
-                            ToastUtils.longCall(R.string.toast_del_buckup_when_mod_enable)
-                        }
-                        this@launch.cancel()
-                    } else {
-                        val delBackupFile: Boolean = ModTools.deleteBackupFiles(gameInfo)
-                        if (delBackupFile) {
-                            backupRepository.deleteByGamePackageName(gameInfo.packageName)
-                            withContext(Dispatchers.Main) {
-                                ToastUtils.longCall(
-                                    App.get().getString(
-                                        R.string.toast_del_buckup_success,
-                                        gameInfo.gameName,
-                                    )
-                                )
-                            }
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                ToastUtils.longCall(
-                                    App.get().getString(
-                                        R.string.toast_del_buckup_filed,
-                                        gameInfo.gameName,
-                                    )
-                                )
-                            }
-                        }
-                    }
+
+                ResultCode.HAVE_ENABLE_MODS -> {
+                    ToastUtils.longCall(R.string.toast_del_buckup_when_mod_enable)
+                }
+
+                ResultCode.SUCCESS -> {
+                    ToastUtils.longCall(R.string.toast_del_buckup_success)
+                }
+
+                ResultCode.FAIL -> {
+                    ToastUtils.longCall(R.string.toast_del_buckup_filed)
                 }
             }
             gameInfoJob?.cancel()
@@ -157,16 +131,12 @@ class SettingViewModel(
 
     fun deleteCache() {
         setDeleteCacheDialog(false)
-        viewModelScope.launch(Dispatchers.IO) {
-            val delCache = ModTools.deleteCache()
+        viewModelScope.launch() {
+            val delCache = deleteCacheUserCase()
             if (delCache) {
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(R.string.toast_del_cache_success)
-                }
+                ToastUtils.longCall(R.string.toast_del_cache_success)
             } else {
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(R.string.toast_del_cache_filed)
-                }
+                ToastUtils.longCall(R.string.toast_del_cache_filed)
             }
         }
     }
@@ -183,16 +153,12 @@ class SettingViewModel(
     }
 
     fun deleteTemp() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val delTemp: Boolean = ModTools.deleteTempFile()
+        viewModelScope.launch{
+            val delTemp: Boolean = deleteTempUserCase()
             if (delTemp) {
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(R.string.toast_del_temp_success)
-                }
+                ToastUtils.longCall(R.string.toast_del_temp_success)
             } else {
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(R.string.toast_del_temp_filed)
-                }
+                ToastUtils.longCall(R.string.toast_del_temp_filed)
             }
         }
     }
@@ -221,27 +187,23 @@ class SettingViewModel(
         _uiState.value = _uiState.value.copy(showSwitchGame = b)
     }
 
-    // 设置gameInfoList
-    fun setGameInfoList(gameInfoList: List<GameInfoBean>) {
-        _uiState.value = _uiState.value.copy(gameInfoList = gameInfoList)
-    }
 
     // 通过名称软件包名获取软件包信息
-    private fun getGameInfo() {
-        setGameInfoList(GameInfoConstant.gameInfoList)
+    private fun loadGameInfo() {
+        _uiState.value = _uiState.value.copy(gameInfoList = gameInfoManager.getGameInfoList())
     }
 
     //设置游戏信息
     fun setGameInfo(gameInfo: GameInfoBean, isTips: Boolean = false) {
+        _gameInfo.value = gameInfo
         if (gameInfo.tips.isNotEmpty() && !isTips) {
             _uiState.update {
                 it.copy(showGameTipsDialog = true)
             }
-            _gameInfo.value = gameInfo
         } else {
-            if (PermissionTools.checkPermission(gameInfo.gamePath) == PathType.NULL) {
+            if (permissionTools.checkPermission(gameInfo.gamePath) == PathType.NULL) {
                 _requestPermissionPath =
-                    PermissionTools.getRequestPermissionPath(gameInfo.gamePath)
+                    permissionTools.getRequestPermissionPath(gameInfo.gamePath)
                 _uiState.update {
                     it.copy(openPermissionRequestDialog = true)
                 }
@@ -254,79 +216,45 @@ class SettingViewModel(
     }
 
     private fun confirmGameInfo(gameInfo: GameInfoBean) {
-        try {
-            App.get().packageManager.getPackageInfo(gameInfo.packageName, 0)
-            viewModelScope.launch(Dispatchers.IO) {
-                userPreferencesRepository.savePreference(
-                    "SELECTED_GAME",
-                    GameInfoConstant.gameInfoList.indexOf(gameInfo)
-                )
-                SpecialGame.entries.forEach {
-                    if (gameInfo.packageName.contains(it.packageName)) {
-                        Log.d("SettingViewModel", "执行特殊选择: $it")
-                        it.baseSpecialGameTools.specialOperationSelectGame(gameInfo)
-                    }
-                }
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(
-                        App.get().getString(
-                            R.string.toast_setect_game_success,
-                            gameInfo.gameName,
-                            gameInfo.serviceName
-                        )
+
+        viewModelScope.launch {
+            if (selectGameUserCase(gameInfo)) {
+                ToastUtils.longCall(
+                    App.get().getString(
+                        R.string.toast_setect_game_success,
+                        gameInfo.gameName,
+                        gameInfo.serviceName
                     )
-                    showSwitchGame(false)
-                }
-
-            }
-        } catch (e: Exception) {
-            ToastUtils.longCall(
-                App.get().getString(
-                    R.string.toast_set_game_info_failed,
-                    gameInfo.gameName,
-                    gameInfo.serviceName
                 )
-            )
+                showSwitchGame(false)
+            } else {
+                ToastUtils.longCall(
+                    App.get().getString(
+                        R.string.toast_set_game_info_failed,
+                        gameInfo.gameName,
+                        gameInfo.serviceName
+                    )
+                )
+            }
 
-            e.printStackTrace()
         }
     }
 
     fun flashGameConfig() {
         gameInfoJob?.cancel()
         gameInfoJob = viewModelScope.launch {
-            userPreferencesRepository.getPreferenceFlow(
-                "SELECTED_DIRECTORY",
-                ModTools.DOWNLOAD_MOD_PATH
-            ).collectLatest {
-                ModTools.readGameConfig(ModTools.ROOT_PATH + it)
-                ModTools.updateGameConfig()
-                Log.d("设置测试", "切换目录执行")
-                gameInfoJob?.cancel()
-            }
+            flashGameConfigUserCase()
 
         }
     }
 
     fun checkUpdate() {
         viewModelScope.launch {
-            val update = Updater.checkUpdate()
-            if (update != null) {
+            val update = checkUpdateUserCase(BuildConfig.VERSION_NAME)
+            if (update.third) {
                 _downloadUrl = update.first[0]
                 _universalUrl = update.first[1]
-                _updateContent = update.second
-                var version = update.third
-
-                versionViewModel.updateVersion(version)
-                _updateContent?.let { versionViewModel.updateVersionInfo(it) }
-                _downloadUrl?.let { versionViewModel.updateVersionUrl(it) }
-                _universalUrl?.let { versionViewModel.updateUniversalUrl(it) }
-
-                setShowUpgradeDialog(true)
-            } else if (versionViewModel.loadVersion() != BuildConfig.VERSION_NAME) {
-                _downloadUrl = versionViewModel.loadVersionUrl()
-                _updateContent = versionViewModel.loadVersionInfo()
-                _universalUrl = versionViewModel.loadUniversalUrl()
+                _updateContent = update.second[0]
                 setShowUpgradeDialog(true)
             } else {
                 ToastUtils.longCall(R.string.toast_no_update)
@@ -351,7 +279,8 @@ class SettingViewModel(
     // 获取版本号
     fun getVersionName() {
         viewModelScope.launch {
-            ModTools.getVersionName()?.let { setVersionName(it) }
+           val version =  appInfoManager.getVersionName(appInfoManager.getPackageName())
+            setVersionName(version)
         }
     }
 
@@ -390,33 +319,18 @@ class SettingViewModel(
     }
 
     fun downloadGameConfig(downloadGameConfigBean: DownloadGameConfigBean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                val downloadGameConfig =
-                    ModManagerApi.retrofitService.downloadGameConfig(downloadGameConfigBean.packageName)
-                ModTools.writeGameConfigFile(downloadGameConfig)
-            }.onFailure {
-                Log.e("SettingViewModel", "downloadGameConfig: $it")
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(R.string.toast_download_game_config_failed)
-                }
-            }.onSuccess {
-                withContext(Dispatchers.Main) {
-                    ToastUtils.longCall(R.string.toast_download_game_config_success)
-                    // flashGameConfig()
-                    ModTools.updateGameConfig()
-                }
-
-            }
+        viewModelScope.launch {
+            downloadGameConfigUserCase(downloadGameConfigBean)
+            ToastUtils.longCall(R.string.toast_download_game_config_success)
         }
     }
 
     fun requestShizukuPermission() {
-        if (PermissionTools.isShizukuAvailable) {
-            if (PermissionTools.hasShizukuPermission()) {
-                PermissionTools.checkShizukuPermission()
+        if (permissionTools.isShizukuAvailable) {
+            if (permissionTools.hasShizukuPermission()) {
+                permissionTools.checkShizukuPermission()
             } else {
-                PermissionTools.requestShizukuPermission()
+                permissionTools.requestShizukuPermission()
             }
         } else {
             ToastUtils.longCall(R.string.toast_shizuku_not_available)
@@ -452,5 +366,12 @@ class SettingViewModel(
         }
     }
 
+    fun getPermissionTools(): PermissionTools {
+        return permissionTools
+    }
+
+    fun getFileToolsManager(): FileToolsManager {
+        return fileToolsManager
+    }
 
 }

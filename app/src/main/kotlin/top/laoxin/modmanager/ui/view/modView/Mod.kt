@@ -37,7 +37,7 @@ import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.SelectPermissionDialog
@@ -66,7 +66,7 @@ fun ModPage(viewModel: ModViewModel) {
             mods = uiState.delEnableModsList,
             switchMod = { mod, enable -> viewModel.switchMod(mod, enable, true) },
             onConfirmRequest = {
-                viewModel.delMods()
+                viewModel.confirmDeleteMods()
             },
             viewModel = viewModel
         )
@@ -88,7 +88,9 @@ fun ModPage(viewModel: ModViewModel) {
             SelectPermissionDialog(
                 path = viewModel.requestPermissionPath,
                 onDismissRequest = { viewModel.setOpenPermissionRequestDialog(false) },
-                showDialog = uiState.openPermissionRequestDialog
+                showDialog = uiState.openPermissionRequestDialog,
+                permissionTools = viewModel.getPermissionTools(),
+                fileTools = viewModel.getFileToolsManager().getFileTools()
             )
         }
         if (uiState.isLoading) {

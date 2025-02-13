@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.kapt)
+    alias(libs.plugins.hilt)
+
+
 }
 
 val supportedAbis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
@@ -217,4 +221,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar)
     // 启动页
     implementation(libs.androidx.core.splashscreen)
+    // DI依赖注入
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 }

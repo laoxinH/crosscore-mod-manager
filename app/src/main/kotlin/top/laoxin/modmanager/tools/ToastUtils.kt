@@ -3,18 +3,23 @@ package top.laoxin.modmanager.tools
 import android.widget.Toast
 import androidx.annotation.StringRes
 import top.laoxin.modmanager.App
-
+import android.os.Handler
+import android.os.Looper
 
 object ToastUtils {
     private var sToast: Toast? = null
+    private val handler = Handler(Looper.getMainLooper())
     fun shortCall(@StringRes resId: Int) {
         shortCall(App.get().getString(resId))
     }
 
     private fun shortCall(text: String?) {
-        cancelToast()
-        sToast = Toast.makeText(App.get(), text, Toast.LENGTH_SHORT)
-        sToast!!.show()
+        handler.post {
+            cancelToast()
+            sToast = Toast.makeText(App.get(), text, Toast.LENGTH_SHORT)
+            sToast!!.show()
+        }
+
     }
 
     fun longCall(@StringRes resId: Int) {
@@ -22,9 +27,11 @@ object ToastUtils {
     }
 
     fun longCall(text: String?) {
-        cancelToast()
-        sToast = Toast.makeText(App.get(), text, Toast.LENGTH_LONG)
-        sToast!!.show()
+        handler.post {
+            cancelToast()
+            sToast = Toast.makeText(App.get(), text, Toast.LENGTH_LONG)
+            sToast!!.show()
+        }
     }
 
     private fun cancelToast() {

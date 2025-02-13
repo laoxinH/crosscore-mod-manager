@@ -34,10 +34,11 @@ roomVersion = "2.6.1"
 desugar = "2.1.4"
 serialization = "2.1.10"
 ksp = "2.1.10-1.0.29"
-androidxRuntimeLivedata = "1.7.7"
-androidxRuntimeRxjava2 = "1.7.7"
-composeBom = "2025.01.01"
-uiTestManifest = "1.7.7"
+androidxRuntimeLivedata = "1.7.6"
+androidxRuntimeRxjava2 = "1.7.6"
+composeBom = "2025.01.00"
+uiTestManifest = "1.7.6"
+hilt = "2.51.1"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -83,6 +84,8 @@ xz = { module = "org.tukaani:xz", version.ref = "xz" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 androidx-roomcompiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
 desugar = { group = "com.android.tools", name = "desugar_jdk_libs_nio", version.ref = "desugar" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -90,3 +93,5 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kapt = { id = "kotlin-kapt"}

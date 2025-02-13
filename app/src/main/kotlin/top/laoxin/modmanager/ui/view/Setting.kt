@@ -42,9 +42,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.bean.ThanksBean
+import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.ThanksBean
 import top.laoxin.modmanager.ui.state.SettingUiState
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.DialogCommonForUpdate
@@ -83,10 +83,11 @@ fun SettingPage(viewModel: SettingViewModel) {
     )
     if (viewModel.requestPermissionPath.isNotEmpty()) {
         RequestUriPermission(
-            path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog
-        ) {
-            viewModel.setOpenPermissionRequestDialog(false)
-        }
+            path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog,
+            onDismissRequest = {viewModel.setOpenPermissionRequestDialog(false)},
+            permissionTools = viewModel.getPermissionTools(),
+            fileTools = viewModel.getFileToolsManager().getFileTools()
+        )
     }
 
     viewModel.updateContent?.let {

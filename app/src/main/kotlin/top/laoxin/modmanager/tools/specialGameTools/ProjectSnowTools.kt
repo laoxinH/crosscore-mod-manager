@@ -3,29 +3,41 @@ package top.laoxin.modmanager.tools.specialGameTools
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import top.laoxin.modmanager.bean.BackupBean
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.bean.ModBeanTemp
+import top.laoxin.modmanager.data.bean.BackupBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.ModBean
+import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.tools.ModTools
+import top.laoxin.modmanager.tools.AppInfoTools
 import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
+import top.laoxin.modmanager.tools.filetools.BaseFileTools
+import top.laoxin.modmanager.tools.filetools.FileToolsManager
+import top.laoxin.modmanager.tools.filetools.impl.DocumentFileTools
+import top.laoxin.modmanager.tools.filetools.impl.FileTools
+import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
+import top.laoxin.modmanager.tools.manager.AppPathsManager
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object ProjectSnowTools : BaseSpecialGameTools {
+@Singleton
+class ProjectSnowTools  @Inject constructor(
+    private val permissionTools: PermissionTools,
+    private val fileToolsManager: FileToolsManager,
+    private val appPathsManager: AppPathsManager,
+) : BaseSpecialGameTools {
 
     /***
      * 当shizuku服务中执行代码时不能包含任何调用shizuku行为否则报错, 同时也无法访问上下文
      */
     private var check_filepath = ""
-    const val CHECK_FILENAME = "manifest.json"
     private var check_filename_mod_path = ""
     private var check_filename_backup_path = ""
 
+    companion object {
+        const val TAG = "ProjectSnowTools"
+        const val CHECK_FILENAME = "manifest.json"
+    }
     private val gson: Gson = GsonBuilder()
         /*.disableHtmlEscaping()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
@@ -52,7 +64,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
     )
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
-        check_filename_mod_path = ModTools.GAME_CHECK_FILE_PATH + packageName + "/" + CHECK_FILENAME
+        check_filename_mod_path = appPathsManager.getGameCheckFilePath() + packageName + "/" + CHECK_FILENAME
         /* check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
          check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
          val backupCheckFile = File(check_filename_backup_path)
@@ -77,7 +89,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
 
 
         val unZipPath =
-            ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
+            appPathsManager.getModsUnzipPath() + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag: MutableList<Boolean> = mutableListOf()
 
         var paks = mutableListOf<Pak>()
@@ -143,7 +155,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
         packageName: String,
         modBean: ModBean
     ): Boolean {
-        check_filename_mod_path = ModTools.GAME_CHECK_FILE_PATH + packageName + "/" + CHECK_FILENAME
+        check_filename_mod_path = appPathsManager.getGameCheckFilePath() + packageName + "/" + CHECK_FILENAME
         /*        check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
                 check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
                 val backupCheckFile = File(check_filename_backup_path)
@@ -184,22 +196,22 @@ object ProjectSnowTools : BaseSpecialGameTools {
 
     override fun specialOperationStartGame(gameInfo: GameInfoBean): Boolean {
         check_filename_mod_path =
-            ModTools.GAME_CHECK_FILE_PATH + gameInfo.packageName + "/" + CHECK_FILENAME
-        check_filepath = "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/"
+            appPathsManager.getGameCheckFilePath() + gameInfo.packageName + "/" + CHECK_FILENAME
+        check_filepath = "${appPathsManager.getRootPath()}/Android/data/${gameInfo.packageName}/files/"
 
         if (checkPermission(check_filepath) == PathType.NULL) return false
-        val checkPermission = PermissionTools.checkPermission(check_filepath)
+        val checkPermission = permissionTools.checkPermission(check_filepath)
         // 通过documentFile读取文件
         if (checkPermission == PathType.DOCUMENT) {
             fileTools.copyFileByDF(
                 check_filepath + CHECK_FILENAME,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME
             )
 
         } else {
             fileTools.copyFile(
                 check_filepath + CHECK_FILENAME,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME
             )
         }
         val modPaks = gson.fromJson(
@@ -207,7 +219,7 @@ object ProjectSnowTools : BaseSpecialGameTools {
             MainIFest::class.java
         ).paks
         val mainIFest = gson.fromJson(
-            File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME).readText(),
+            File(appPathsManager.getModsUnzipPath() + CHECK_FILENAME).readText(),
             MainIFest::class.java
         )
         if (modPaks.isEmpty()) return true
@@ -248,8 +260,8 @@ object ProjectSnowTools : BaseSpecialGameTools {
     override fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean {
         //Log.d("ProjectSnowTools", "特殊:$gameInfo ")
         if (checkPermission(gameInfo.gamePath) == PathType.NULL) return false
-        val gameFilepath = "${gameInfo.gamePath}/files/${gameInfo.version}"
-        val name = gameInfo.version
+        val gameFilepath = "${gameInfo.gamePath}/files/${getGameFileDir(gameInfo)}/"
+        val name = getGameFileDir(gameInfo)
         //Log.d("ProjectSnowTools", "特殊: $gameFilepath--$name")
         if (!fileTools.createDictionary("$gameFilepath/test")) {
             fileTools.changDictionaryName(gameFilepath, name + "1")
@@ -267,18 +279,30 @@ object ProjectSnowTools : BaseSpecialGameTools {
         return true
     }
 
+    override fun needGameService(): Boolean {
+        return true
+    }
+
+    override fun specialOperationUpdateGameInfo(gameInfo: GameInfoBean): GameInfoBean {
+        return gameInfo.copy(
+            gameFilePath = gameInfo.gameFilePath.map {
+                (it + File.separator + getGameFileDir(gameInfo)).replace("//", "/")
+            }
+        )
+    }
+
     private fun checkPermission(path: String): Int {
-        val checkPermission = PermissionTools.checkPermission(check_filepath)
+        val checkPermission = permissionTools.checkPermission(check_filepath)
         //Log.d("ArknightsTools", "权限类型: $checkPermission--$path")
         if (checkPermission == PathType.FILE) {
             //Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-            fileTools = FileTools
+            fileTools = fileToolsManager.getFileTools()
             return PathType.FILE
         } else if (checkPermission == PathType.DOCUMENT) {
-            fileTools = DocumentFileTools
+            fileTools = fileToolsManager.getDocumentFileTools()
             return PathType.DOCUMENT
         } else if (checkPermission == PathType.SHIZUKU) {
-            fileTools = ShizukuFileTools
+            fileTools = fileToolsManager.getShizukuFileTools()
             return PathType.SHIZUKU
         } else {
             Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
@@ -286,6 +310,17 @@ object ProjectSnowTools : BaseSpecialGameTools {
         }
 
     }
+
+    private fun getGameFileDir(gameInfo: GameInfoBean): String {
+            val version = gameInfo.version
+            val regex = """^(\d+\.\d+\.\d+)""".toRegex()
+            val matchResult = regex.find(version)
+            val result = matchResult?.value ?: ""
+            val modifiedResult = result.split('.').toMutableList().apply { this[2] = "0" }.joinToString(".")
+            return modifiedResult
+
+    }
+
 
 
 }

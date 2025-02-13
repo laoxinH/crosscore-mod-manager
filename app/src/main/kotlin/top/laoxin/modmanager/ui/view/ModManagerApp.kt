@@ -80,12 +80,10 @@ enum class NavigationIndex(
 
 @Composable
 fun ModManagerApp() {
-    val modViewModel: ModViewModel = viewModel(factory = ModViewModel.Factory)
-    val versionViewModel: VersionViewModel = viewModel(factory = VersionViewModel.Factory)
-    val consoleViewModel: ConsoleViewModel =
-        viewModel(factory = ConsoleViewModel.Factory(versionViewModel))
-    val settingViewModel: SettingViewModel =
-        viewModel(factory = SettingViewModel.Factory(versionViewModel))
+    val modViewModel: ModViewModel = viewModel()
+    val versionViewModel: VersionViewModel = viewModel()
+    val consoleViewModel: ConsoleViewModel = viewModel()
+    val settingViewModel: SettingViewModel = viewModel()
     val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
 

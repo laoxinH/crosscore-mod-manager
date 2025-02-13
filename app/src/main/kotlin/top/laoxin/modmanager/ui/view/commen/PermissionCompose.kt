@@ -36,11 +36,14 @@ import com.google.accompanist.permissions.rememberPermissionState
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.OSVersion
-import top.laoxin.modmanager.tools.ModTools
+
+
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
+import top.laoxin.modmanager.tools.filetools.BaseFileTools
+import top.laoxin.modmanager.tools.filetools.impl.FileTools
 import top.laoxin.modmanager.ui.view.SettingItem
+import java.io.File
 
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -62,7 +65,7 @@ fun RequestStoragePermission(
                             if (!Environment.isExternalStorageManager()) {
                                 ToastUtils.longCall(R.string.toast_permission_not_granted)
                             } else {
-                                ModTools.makeModsDirs()
+                                //File("$ROOT_PATH/$DOWNLOAD_MOD_PATH$GAME_CONFIG").mkdirs()
                                 ToastUtils.longCall(R.string.toast_permission_granted)
                                 showDialog = false
                             }
@@ -149,20 +152,25 @@ fun RequestStoragePermission(
 }
 
 @Composable
-fun RequestUriPermission(path: String, showDialog: Boolean, onDismissRequest: () -> Unit) {
+fun RequestUriPermission(
+    path: String, showDialog: Boolean, onDismissRequest: () -> Unit,
+    permissionTools : PermissionTools, fileTools: BaseFileTools
+
+) {
 
     SelectPermissionDialog(
-        path = path, onDismissRequest = { onDismissRequest() }, showDialog = showDialog
+        path = path, onDismissRequest = { onDismissRequest() }, showDialog = showDialog,
+        permissionTools = permissionTools, fileTools = fileTools
     )
 }
 
 
 @Composable
 fun SelectPermissionDialog(
-    path: String, onDismissRequest: () -> Unit, showDialog: Boolean
+    path: String, onDismissRequest: () -> Unit, showDialog: Boolean, permissionTools : PermissionTools, fileTools: BaseFileTools
 ) {
     Log.d("SelectPermissionDialog", "SelectPermissionDialog: $path")
-    val requestPermissionPath = PermissionTools.getRequestPermissionPath(path)
+    val requestPermissionPath = permissionTools.getRequestPermissionPath(path)
     if (showDialog) {
         val context = LocalContext.current
         val startForResult =
@@ -191,7 +199,7 @@ fun SelectPermissionDialog(
             Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
         )
 
-        val treeUri = FileTools.pathToUri(requestPermissionPath)
+        val treeUri = fileTools.pathToUri(requestPermissionPath)
         val df = DocumentFile.fromTreeUri(context, treeUri)
 
         if (df != null) {
@@ -222,11 +230,11 @@ fun SelectPermissionDialog(
                         //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                         onClick = {
                             onDismissRequest()
-                            if (PermissionTools.isShizukuAvailable) {
-                                if (PermissionTools.hasShizukuPermission()) {
+                            if (permissionTools.isShizukuAvailable) {
+                                if (permissionTools.hasShizukuPermission()) {
                                     ToastUtils.longCall(R.string.toast_permission_granted)
                                 } else {
-                                    PermissionTools.requestShizukuPermission()
+                                    permissionTools.requestShizukuPermission()
                                 }
                             } else {
                                 ToastUtils.longCall(R.string.toast_shizuku_not_available)

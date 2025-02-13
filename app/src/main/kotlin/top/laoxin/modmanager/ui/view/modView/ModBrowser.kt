@@ -39,7 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.tools.ModTools
+
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
@@ -47,6 +47,7 @@ import kotlin.collections.set
 
 @Composable
 fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
+    val appPathsManager = viewModel.getAppPathsManager()
     var currentPath by remember { mutableStateOf(uiState.currentPath) }
     val files = uiState.currentFiles
     var previousPath by remember { mutableStateOf(currentPath) }
@@ -54,7 +55,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     val scrollPositions = remember { mutableMapOf<String, Int>() }
     val scrollOffsets = remember { mutableMapOf<String, Int>() }
     val doBackFunction by rememberUpdatedState(uiState.doBackFunction)
-    if (currentPath == ModTools.MOD_PATH) {
+    if (currentPath == appPathsManager.getModPath()) {
         return NoMod()
     }
 

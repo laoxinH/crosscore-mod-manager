@@ -12,12 +12,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import dagger.hilt.android.AndroidEntryPoint
 import rikka.shizuku.Shizuku
 import top.laoxin.modmanager.tools.PermissionTools
+import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
+import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ModManagerApp
+import top.laoxin.modmanager.userservice.shizuku.FileExplorerServiceManager
+import javax.inject.Inject
 
-class MainActivity : ComponentActivity() {
+@AndroidEntryPoint
+class MainActivity (): ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

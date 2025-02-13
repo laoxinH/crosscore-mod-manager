@@ -3,28 +3,20 @@ package top.laoxin.modmanager
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.HiltAndroidApp
 import top.laoxin.modmanager.constant.OSVersion
-import top.laoxin.modmanager.database.AppContainer
-import top.laoxin.modmanager.database.AppDataContainer
-import top.laoxin.modmanager.database.UserPreferencesRepository
 import top.laoxin.modmanager.tools.LogTools
 import java.io.File
+import java.io.FileOutputStream
+import java.util.Objects
 
-private const val PREFERENCE_NAME = "mod_manager_preferences"
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCE_NAME)
 
+
+@HiltAndroidApp
 class App : Application() {
-
-    lateinit var userPreferencesRepository: UserPreferencesRepository
-    lateinit var container: AppContainer
-
     override fun onCreate() {
         super.onCreate()
         initializeComponents()
@@ -36,8 +28,6 @@ class App : Application() {
 
     // 初始化组件
     private fun initializeComponents() {
-        userPreferencesRepository = UserPreferencesRepository(dataStore)
-        container = AppDataContainer(this)
         sApp = this
     }
 

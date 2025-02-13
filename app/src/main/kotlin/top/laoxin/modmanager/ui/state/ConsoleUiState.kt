@@ -1,7 +1,7 @@
 package top.laoxin.modmanager.ui.state
 
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.bean.InfoBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.InfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 
 data class ConsoleUiState(

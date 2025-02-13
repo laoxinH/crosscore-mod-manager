@@ -46,13 +46,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.tools.ModTools
-import top.laoxin.modmanager.tools.ModTools.ROOT_PATH
-import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.PermissionTools.hasShizukuPermission
-import top.laoxin.modmanager.tools.PermissionTools.isShizukuAvailable
+
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
@@ -66,6 +62,9 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 @Composable
 fun ConsoleContent(viewModel: ConsoleViewModel) {
     val context = LocalContext.current
+    val appPathsManager = viewModel.getAppPathsManager()
+    val permissionTools = viewModel.getPermissionTools()
+    val fileToolsManager =  viewModel.getFileToolsManager()
 
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
@@ -86,8 +85,8 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         title = stringResource(id = R.string.console_scan_directory_mods),
         content = stringResource(id = R.string.console_del_unzip_dictionary_content),
         onConfirm = {
-            viewModel.openDelUnzipDialog(true)
-            viewModel.setShowDelUnzipDialog(false)
+            viewModel.switchDelUnzip(true)
+
         },
         onCancel = {
             viewModel.setShowDelUnzipDialog(false)
@@ -139,10 +138,11 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
 
         if (viewModel.requestPermissionPath.isNotEmpty()) {
             RequestUriPermission(
-                path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog
-            ) {
-                viewModel.setOpenPermissionRequestDialog(false)
-            }
+                path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog,
+                onDismissRequest = {viewModel.setOpenPermissionRequestDialog(false)},
+                permissionTools = permissionTools,
+                fileTools = fileToolsManager.getFileTools()
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         // 权限信息
@@ -157,7 +157,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         // 添加一些间距
         Spacer(modifier = Modifier.height(16.dp))
         // 第二部分：包含两个卡片用于展示其他信息
-        SettingInformationCard(uiState)
+        SettingInformationCard(viewModel,uiState)
 
         Spacer(modifier = Modifier.height(16.dp))
         ConfigurationCard(viewModel, uiState)
@@ -182,7 +182,7 @@ fun GameInformationCard(
         ) {
             // 第一个区域：添加一个圆角图片
             Image(
-                bitmap = viewModel.getGameIcon(gameInfo.packageName), // 替换为你的图片资源
+                bitmap = viewModel.getGameIcon(), // 替换为你的图片资源
                 contentDescription = null,
                 modifier = Modifier
                     .size(80.dp)
@@ -229,7 +229,7 @@ fun GameInformationCard(
 
 // 设置信息选项卡
 @Composable
-fun SettingInformationCard(uiState: ConsoleUiState) {
+fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
 
     Row(
         modifier = Modifier.fillMaxWidth()
@@ -271,18 +271,20 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
 
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(14.dp))
+                val permissionTools = viewModel.getPermissionTools()
+                val appPathsManager =  viewModel.getAppPathsManager()
                 Text(
-                    if (isShizukuAvailable && hasShizukuPermission()) {
+                    if (permissionTools.isShizukuAvailable && permissionTools.hasShizukuPermission()) {
                         // 优先检查shizuku
                         stringResource(id = R.string.permission, "SHIZUKU")
                     } else {
                         when (if (uiState.gameInfo.packageName.isNotEmpty()) {
-                            PermissionTools.checkPermission(
-                                ROOT_PATH + "/Android/data/" + uiState.gameInfo.packageName
+                            permissionTools.checkPermission(
+                                appPathsManager.getRootPath() + "/Android/data/" + uiState.gameInfo.packageName
                             )
                         } else {
-                            PermissionTools.checkPermission(
-                                ROOT_PATH + "/Android/data/" + (App.get().packageName ?: "")
+                            permissionTools.checkPermission(
+                                appPathsManager.getRootPath() + "/Android/data/" + (App.get().packageName ?: "")
                             )
                         }) {
                             0 -> stringResource(id = R.string.permission, "FILE")
@@ -313,16 +315,17 @@ fun SettingInformationCard(uiState: ConsoleUiState) {
 @Composable
 fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
     //val uiState by viewModel.uiState.collectAsState()
+    val appPathsManager = viewModel.getAppPathsManager()
     val openDirectoryLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
             // 这里的uri就是用户选择的目录
             // 你可以在这里处理用户选择的目录
             if (uri != null) {
                 // 使用uri
-                val path = uri.path?.split(":")?.last()?.replace("$ROOT_PATH/", "")
+                val path = uri.path?.split(":")?.last()?.replace("${appPathsManager.getRootPath()}/", "")
 
                 viewModel.setSelectedDirectory(
-                    path ?: (ROOT_PATH + "/" + ModTools.DOWNLOAD_MOD_PATH)
+                    path ?: (appPathsManager.getRootPath() + "/" + appPathsManager.getDownloadModPath())
                 )
                 // TODO: 使用path
             }
@@ -425,7 +428,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     style = typography.titleMedium
                 )
                 Switch(checked = uiState.delUnzipDictionary, onCheckedChange = {
-                    viewModel.openDelUnzipDialog(it)
+                    viewModel.switchDelUnzip(it)
                 })
             }
 

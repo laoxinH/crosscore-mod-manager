@@ -1,9 +1,11 @@
 package top.laoxin.modmanager.constant
 
-import top.laoxin.modmanager.tools.ModTools
+import android.os.Environment
+
 
 object ScanModPath {
-    val MOD_PATH_QQ = ModTools.ROOT_PATH + "/Android/data/com.tencent.mobileqq/Tencent/QQfile_recv/"
-    val MOD_PATH_DOWNLOAD = ModTools.ROOT_PATH + "/Download/"
-    val ANDROID_DATA = ModTools.ROOT_PATH + "/Android/data/"
+    val ROOT_PATH = Environment.getExternalStorageDirectory().path
+    val MOD_PATH_QQ = ROOT_PATH + "/Android/data/com.tencent.mobileqq/Tencent/QQfile_recv/"
+    val MOD_PATH_DOWNLOAD = ROOT_PATH + "/Download/"
+    val ANDROID_DATA = ROOT_PATH + "/Android/data/"
 }

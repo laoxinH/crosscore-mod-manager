@@ -2,7 +2,9 @@
 plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
-    // id("com.android.library") version "8.1.4" apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.hilt) apply false
+    //id("com.android.library") version "8.1.4" apply false
 }
 
 buildscript {

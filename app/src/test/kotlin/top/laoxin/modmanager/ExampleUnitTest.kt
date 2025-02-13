@@ -1,5 +1,6 @@
 package top.laoxin.modmanager
 
+import org.junit.Test
 import top.laoxin.modmanager.constant.FileType
 import java.io.File
 import java.io.FileInputStream
@@ -12,6 +13,15 @@ import java.io.IOException
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class ExampleUnitTest {
+    @Test
+    fun test() {
+        val version = "31.12.1.0.13"
+        val regex = """^(\d+\.\d+\.\d+)""".toRegex()
+        val matchResult = regex.find(version)
+        val result = matchResult?.value ?: ""
+        val modifiedResult = result.split('.').toMutableList().apply { this[2] = "0" }.joinToString(".")
+        println(modifiedResult) // Output: 3.0.0
+    }
 
     data class HotUpdate(
         var fullPack: FullPack = FullPack(),

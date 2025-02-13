@@ -1,14 +1,15 @@
 package top.laoxin.modmanager.tools.specialGameTools
 
 import android.util.Log
-import top.laoxin.modmanager.bean.BackupBean
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.bean.ModBeanTemp
+import top.laoxin.modmanager.data.bean.BackupBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.ModBean
+import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.listener.ProgressUpdateListener
 import top.laoxin.modmanager.tools.ArchiveUtil
 import java.io.InputStream
 import java.security.MessageDigest
+
 
 interface BaseSpecialGameTools {
 
@@ -29,6 +30,8 @@ interface BaseSpecialGameTools {
     fun specialOperationScanMods(gameInfo: String, modFileName: String): Boolean
     fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean
     fun specialOperationNeedOpenVpn(): Boolean
+    fun needGameService(): Boolean
+    fun specialOperationUpdateGameInfo(gameInfo: GameInfoBean): GameInfoBean
 
     fun onProgressUpdate(progress: String) {
         progressUpdateListener?.onProgressUpdate(progress)

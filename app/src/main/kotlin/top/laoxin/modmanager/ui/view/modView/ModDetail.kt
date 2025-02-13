@@ -55,7 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.ModBean
+import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
@@ -125,7 +125,7 @@ fun ModDetailPartialBottomSheet(
                     LaunchedEffect(mod.images) {
                         imageBitmaps.clear()
                         mod.images.mapNotNull { path ->
-                            if (File(path).exists()) {
+                            if (File(path.replace("//","/")).exists()) {
                                 loadImageBitmapFromPath(context, path, 1024, 1024)
                             } else {
                                 Log.e("ModDetail", "图片文件不存在: $path")

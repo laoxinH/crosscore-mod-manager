@@ -1,30 +1,19 @@
 package top.laoxin.modmanager.ui.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import top.laoxin.modmanager.App
-import top.laoxin.modmanager.database.VersionRepository
+import top.laoxin.modmanager.data.repository.VersionRepository
+import javax.inject.Inject
 
-class VersionViewModel(application: Application) : ViewModel() {
+@HiltViewModel
+class VersionViewModel @Inject constructor(
+    private val versionRepository: VersionRepository
+)  : ViewModel() {
 
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as App)
-                VersionViewModel(application)
-            }
-        }
-    }
-
-    private val versionRepository = VersionRepository(application)
 
     private val _version = MutableLiveData<String>()
     val version: LiveData<String> = _version

@@ -1,8 +1,7 @@
 // IFileExplorerService.aidl
 package top.laoxin.modmanager.service;
-import top.laoxin.modmanager.bean.BeanFile;
-import top.laoxin.modmanager.bean.ModBean;
-import top.laoxin.modmanager.bean.GameInfoBean;
+import top.laoxin.modmanager.data.bean.ModBean;
+import top.laoxin.modmanager.data.bean.GameInfoBean;
 // Declare any non-default types here with import statements
 
 interface IFileExplorerService {
@@ -20,4 +19,6 @@ interface IFileExplorerService {
     long isFileChanged(String path);
     boolean changDictionaryName (String path, String newName);
     boolean createDictionary (String path);
+    // listfile
+
 }

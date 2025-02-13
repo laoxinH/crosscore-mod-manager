@@ -2,6 +2,7 @@ package top.laoxin.modmanager.tools
 
 import android.content.UriPermission
 import android.content.pm.PackageManager
+import android.os.Environment
 import android.util.Log
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
@@ -12,19 +13,26 @@ import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.RequestCode
 import top.laoxin.modmanager.constant.ScanModPath
-import top.laoxin.modmanager.tools.ModTools.ROOT_PATH
 import top.laoxin.modmanager.userservice.shizuku.FileExplorerServiceManager
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+object PermissionTools  {
+    private val SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api"
+    private val ROOT_PATH = Environment.getExternalStorageDirectory().path
+
+        const val TAG = "PermissionTools"
 
 
-object PermissionTools {
-    private const val SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api"
 
     // shizuku监听器
     var REQUEST_PERMISSION_RESULT_LISTENER =
         OnRequestPermissionResultListener { requestCode, grantResult ->
             if (requestCode == RequestCode.SHIZUKU) {
                 if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                    ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
+                    //ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
+                    Log.d(TAG, "shizuku权限监听: ")
                     FileExplorerServiceManager.bindService()
                     //this.setScanQQDirectory(true)
                     ToastUtils.longCall(R.string.toast_shizuku_permission_granted)
@@ -35,12 +43,13 @@ object PermissionTools {
             }
         }
 
+
     // 检查Shizuku权限 并重新绑定权限
     fun checkShizukuPermission(): Boolean {
         // 安卓11以下不需要Shizuku，使用File接口就能浏览/sdcard全部文件
         return if (isShizukuAvailable) {
             if (hasShizukuPermission()) {
-                ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
+                //ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
                 FileExplorerServiceManager.bindService()
                 true
             } else {

@@ -3,21 +3,27 @@ package top.laoxin.modmanager.userservice.shizuku
 import android.annotation.SuppressLint
 import android.os.RemoteException
 import android.util.Log
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.constant.SpecialGame
+import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
 
 import top.laoxin.modmanager.service.IFileExplorerService
+import top.laoxin.modmanager.tools.PermissionTools
+import top.laoxin.modmanager.tools.filetools.FileToolsManager
+import top.laoxin.modmanager.tools.manager.AppPathsManager
+import top.laoxin.modmanager.tools.specialGameTools.ArknightsTools
+import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
+import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-class FileExplorerService : IFileExplorerService.Stub() {
+class FileExplorerService : IFileExplorerService.Stub()  {
     @Throws(RemoteException::class)
     override fun getFilesNames(path: String?): MutableList<String> {
         val list: MutableList<String> = ArrayList()
@@ -57,9 +63,9 @@ class FileExplorerService : IFileExplorerService.Stub() {
                 File(destPath).parentFile?.mkdirs()
             }
             // 如果目标文件存在, 则删除
-            if (File(destPath).exists()) {
-                File(destPath).delete()
-            }
+           // if (File(destPath).exists()) {
+            //    File(destPath).delete()
+           // }
 
             // 创建目标文件路径
             Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING)
@@ -260,14 +266,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
     }
 
     fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
-        for (specialGame in SpecialGame.entries) {
-            if (packageName.contains(specialGame.packageName)) {
-                return specialGame.baseSpecialGameTools.specialOperationScanMods(
-                    packageName,
-                    modFileName
-                )
-            }
-        }
+
         return false
     }
 

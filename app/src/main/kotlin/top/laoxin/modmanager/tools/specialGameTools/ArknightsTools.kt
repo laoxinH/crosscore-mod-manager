@@ -3,25 +3,33 @@ package top.laoxin.modmanager.tools.specialGameTools
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import top.laoxin.modmanager.bean.BackupBean
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.bean.ModBean
-import top.laoxin.modmanager.bean.ModBeanTemp
+import top.laoxin.modmanager.data.bean.BackupBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.data.bean.ModBean
+import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.tools.LogTools.logRecord
-import top.laoxin.modmanager.tools.ModTools
 import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.fileToolsInterface.BaseFileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.DocumentFileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.FileTools
-import top.laoxin.modmanager.tools.fileToolsInterface.impl.ShizukuFileTools
+import top.laoxin.modmanager.tools.filetools.BaseFileTools
+import top.laoxin.modmanager.tools.filetools.FileToolsManager
+import top.laoxin.modmanager.tools.filetools.impl.DocumentFileTools
+import top.laoxin.modmanager.tools.filetools.impl.FileTools
+import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
+import top.laoxin.modmanager.tools.manager.AppPathsManager
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object ArknightsTools : BaseSpecialGameTools {
+@Singleton
+class ArknightsTools  @Inject constructor(
+    private  val appPathsManager: AppPathsManager,
+    private val permissionTools: PermissionTools,
+    private val fileToolsManager: FileToolsManager
+) : BaseSpecialGameTools {
 
     private var CHECK_FILEPATH = ""
-    private const val CHECK_FILENAME_1 = "persistent_res_list.json"
-    private const val CHECK_FILENAME_2 = "hot_update_list.json"
+    private val CHECK_FILENAME_1 = "persistent_res_list.json"
+    private val CHECK_FILENAME_2 = "hot_update_list.json"
     private val gson: Gson = GsonBuilder()
         /*.disableHtmlEscaping()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
@@ -59,9 +67,9 @@ object ArknightsTools : BaseSpecialGameTools {
     )
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
-        CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
+        CHECK_FILEPATH = "${appPathsManager.getRootPath()}/Android/data/$packageName/files/AB/Android/"
         val unZipPath =
-            ModTools.MODS_UNZIP_PATH + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
+            appPathsManager.getModsUnzipPath() + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag: MutableList<Boolean> = mutableListOf()
         if (!initialFileTools()) {
             throw Exception("初始化文件工具失败")
@@ -111,8 +119,8 @@ object ArknightsTools : BaseSpecialGameTools {
     }
 
     private fun writeCheckFile(): Boolean {
-        val checkFile1 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1)
-        val checkFile2 = File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2)
+        val checkFile1 = File(appPathsManager.getModsUnzipPath() + CHECK_FILENAME_1)
+        val checkFile2 = File(appPathsManager.getModsUnzipPath() + CHECK_FILENAME_2)
         try {
             gson.toJson(persistentRes, PersistentRes::class.java).let { it ->
                 if (checkFile1.exists()) {
@@ -139,11 +147,11 @@ object ArknightsTools : BaseSpecialGameTools {
     private fun loadCheckFile(): Boolean {
         try {
             persistentRes = gson.fromJson(
-                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1).readText(),
+                File(appPathsManager.getModsUnzipPath() + CHECK_FILENAME_1).readText(),
                 PersistentRes::class.java
             )
             hotUpdate = gson.fromJson(
-                File(ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2).readText(),
+                File(appPathsManager.getModsUnzipPath() + CHECK_FILENAME_2).readText(),
                 HotUpdate::class.java
             )
             return true
@@ -159,7 +167,7 @@ object ArknightsTools : BaseSpecialGameTools {
         packageName: String,
         modBean: ModBean
     ): Boolean {
-        CHECK_FILEPATH = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/AB/Android/"
+        CHECK_FILEPATH = "${appPathsManager.getRootPath()}/Android/data/$packageName/files/AB/Android/"
         if (!initialFileTools()) {
             throw Exception("初始化文件工具失败")
         }
@@ -210,6 +218,14 @@ object ArknightsTools : BaseSpecialGameTools {
         return false
     }
 
+    override fun needGameService(): Boolean {
+        return false
+    }
+
+    override fun specialOperationUpdateGameInfo(gameInfo: GameInfoBean): GameInfoBean {
+        return gameInfo
+    }
+
 
     // 修改check文件
     private fun modifyCheckFile(fileName: String, md5: String, fileSize: Long): Boolean {
@@ -245,64 +261,64 @@ object ArknightsTools : BaseSpecialGameTools {
     }
 
     private fun moveCheckFileToGamePath(): Boolean {
-        val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
+        val checkPermission = permissionTools.checkPermission(CHECK_FILEPATH)
         return if (checkPermission == PathType.DOCUMENT) {
             fileTools.copyFileByFD(
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_1,
                 CHECK_FILEPATH + CHECK_FILENAME_1
             )
             fileTools.copyFileByFD(
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_2,
                 CHECK_FILEPATH + CHECK_FILENAME_2
             )
         } else {
             fileTools.copyFile(
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1,
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_1,
                 CHECK_FILEPATH + CHECK_FILENAME_1
             )
             fileTools.copyFile(
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2,
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_2,
                 CHECK_FILEPATH + CHECK_FILENAME_2
             )
         }
     }
 
     private fun moveCheckFileToAppPath(): Boolean {
-        val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
+        val checkPermission = permissionTools.checkPermission(CHECK_FILEPATH)
         Log.d("ArknightsTools", "文件权限: $checkPermission")
         // 通过documentFile读取文件
         return if (checkPermission == PathType.DOCUMENT) {
             fileTools.copyFileByDF(
                 CHECK_FILEPATH + CHECK_FILENAME_1,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_1
             )
             fileTools.copyFileByDF(
                 CHECK_FILEPATH + CHECK_FILENAME_2,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_2
             )
         } else {
             fileTools.copyFile(
                 CHECK_FILEPATH + CHECK_FILENAME_1,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_1
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_1
             )
             fileTools.copyFile(
                 CHECK_FILEPATH + CHECK_FILENAME_2,
-                ModTools.MODS_UNZIP_PATH + CHECK_FILENAME_2
+                appPathsManager.getModsUnzipPath() + CHECK_FILENAME_2
             )
         }
     }
 
     private fun initialFileTools(): Boolean {
-        val checkPermission = PermissionTools.checkPermission(CHECK_FILEPATH)
+        val checkPermission = permissionTools.checkPermission(CHECK_FILEPATH)
         return if (checkPermission == PathType.FILE) {
             Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-            fileTools = FileTools
+            fileTools = fileToolsManager.getFileTools()
             true
         } else if (checkPermission == PathType.DOCUMENT) {
-            fileTools = DocumentFileTools
+            fileTools = fileToolsManager.getDocumentFileTools()
             true
         } else if (checkPermission == PathType.SHIZUKU) {
-            fileTools = ShizukuFileTools
+            fileTools = fileToolsManager.getShizukuFileTools()
             true
         } else {
             Log.e("ArknightsTools", "modifyCheckFile: 没有权限")

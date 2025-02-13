@@ -200,4 +200,6 @@
     <string name="console_top_bar_start_game">启动游戏</string>
     <string name="download">设备版本</string>
     <string name="download_universal">通用版本</string>
+    <string name="toast_start_scan">开始扫描</string>
+    <string name="toast_flash_failed">刷新MOD失败</string>
 </resources>

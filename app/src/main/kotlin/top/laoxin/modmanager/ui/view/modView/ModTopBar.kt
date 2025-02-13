@@ -101,32 +101,6 @@ fun MultiSelectTopBar(
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
             ),
-            navigationIcon = {
-                if (uiState.modsView == NavigationIndex.MODS_BROWSER)
-                    Button(
-                        onClick = {
-                            viewModel.setDoBackFunction(true)
-                        },
-                        modifier = Modifier
-                            .size(35.dp)
-                            .padding(start = 6.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(0.dp),
-                        enabled = uiState.isBackPathExist,
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBackIosNew,
-                                contentDescription = "back",
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                else null
-            },
             title = {
                 Box(
                     contentAlignment = Alignment.CenterStart,
@@ -272,7 +246,8 @@ fun GeneralTopBar(
                         },
                         modifier = Modifier
                             .size(35.dp)
-                            .padding(start = 6.dp),
+                            .padding(start = 6.dp)
+                        .offset(y = 8.dp),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(0.dp),
                         enabled = uiState.isBackPathExist,

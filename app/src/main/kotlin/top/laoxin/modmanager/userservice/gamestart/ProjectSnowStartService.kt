@@ -15,11 +15,19 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.bean.GameInfoBean
-import top.laoxin.modmanager.tools.ModTools
-import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
+import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.tools.manager.AppPathsManager
 
-class ProjectSnowStartService : Service() {
+import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
+import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class ProjectSnowStartService @Inject constructor(
+    private val specialGameToolsManager: SpecialGameToolsManager,
+    private val appPathsManager: AppPathsManager
+) : Service()  {
     companion object {
         const val TAG = "ProjectSnowStartService"
     }
@@ -31,6 +39,7 @@ class ProjectSnowStartService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+        val projectSnowTools = specialGameToolsManager.getProjectSnowTools()
         val gameInfo: GameInfoBean = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
             @Suppress("DEPRECATION")
             intent?.extras?.getParcelable("game_info")!!
@@ -39,7 +48,7 @@ class ProjectSnowStartService : Service() {
         }
 
         val checkFilepath =
-            "${ModTools.ROOT_PATH}/Android/data/${gameInfo.packageName}/files/${ProjectSnowTools.CHECK_FILENAME}"
+            "${appPathsManager.getRootPath()}/Android/data/${gameInfo.packageName}/files/${ProjectSnowTools.CHECK_FILENAME}"
         Log.d("TestService", "onStartCommand: $checkFilepath")
 
         // 显示通知
@@ -63,7 +72,7 @@ class ProjectSnowStartService : Service() {
 
         serviceScope.launch {
 
-            if (ProjectSnowTools.specialOperationStartGame(gameInfo)) {
+            if (projectSnowTools.specialOperationStartGame(gameInfo)) {
                 stopService()
             }
 
