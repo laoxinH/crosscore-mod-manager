@@ -86,9 +86,6 @@ class AppInfoTools @Inject constructor(
 
     fun startService() {
         val intent = Intent(context, ProjectSnowStartService::class.java)
-        intent.putExtras(Bundle().apply {
-            putParcelable("game_info", gameInfoManager.getGameInfo())
-        })
         context.stopService(intent)
         context.startForegroundService(intent)
     }

@@ -74,7 +74,6 @@ abstract class BaseFileTools (
     }
 
     fun isExcludeFileType(filename: String): Boolean {
-
         return (filename.contains(".jpg", ignoreCase = true) ||
                 filename.contains(".png", ignoreCase = true) ||
                 filename.contains(".gif", ignoreCase = true) ||

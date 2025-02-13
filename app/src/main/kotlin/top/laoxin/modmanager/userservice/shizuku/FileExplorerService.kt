@@ -24,7 +24,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 class FileExplorerService : IFileExplorerService.Stub()  {
+    @Inject
+    lateinit var specialGameToolsManager: SpecialGameToolsManager
     @Throws(RemoteException::class)
+
     override fun getFilesNames(path: String?): MutableList<String> {
         val list: MutableList<String> = ArrayList()
         try {
@@ -80,6 +83,7 @@ class FileExplorerService : IFileExplorerService.Stub()  {
 
     override fun writeFile(srcPath: String, name: String, content: String?): Boolean {
         //return false
+        // Log.d(TAG, "writeFile: $srcPath==$name")
         return try {
             val file = File(srcPath, name)
             if (file.exists()) {
@@ -165,7 +169,7 @@ class FileExplorerService : IFileExplorerService.Stub()  {
                         ArchiveUtil.listInArchiveFiles(f.absolutePath).forEach {
                             val modFileName = File(it).name
                             if (gameFiles.contains(modFileName) || specialOperationScanMods(
-                                    gameInfo.packageName,
+                                    gameInfo,
                                     modFileName
                                 )
                             ) {
@@ -265,8 +269,11 @@ class FileExplorerService : IFileExplorerService.Stub()  {
                 name.contains(".apk", ignoreCase = true))
     }
 
-    fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
+    fun specialOperationScanMods(gameInfo: GameInfoBean, modFileName: String): Boolean {
 
+        specialGameToolsManager.getSpecialGameTools(gameInfo.packageName)?.let {
+            return it.specialOperationScanMods(gameInfo.packageName, modFileName)
+        }
         return false
     }
 

@@ -236,7 +236,7 @@ class ProjectSnowTools  @Inject constructor(
         // mainIFest.paks.addAll(0,modPaks)
         val startTime = System.currentTimeMillis()
         while (true) {
-            //Log.d("ProjectSnowTools", "specialOperationStartGame: 开始执行注入")
+           // Log.d("ProjectSnowTools", "specialOperationStartGame: 执行注入")
             fileTools.writeFile(
                 check_filepath,
                 CHECK_FILENAME,
