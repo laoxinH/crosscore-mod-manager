@@ -24,6 +24,8 @@ interface ResultCode {
         const val NO_EXECUTE = -7
         // 存在开启的mods
         const val HAVE_ENABLE_MODS = -8
+        // 游戏已更新
+        const val GAME_UPDATE = -9
 
         // 成功
         const val SUCCESS = 0

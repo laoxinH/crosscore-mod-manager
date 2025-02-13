@@ -8,6 +8,7 @@ import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.PathType
+import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
@@ -224,6 +225,10 @@ class ArknightsTools  @Inject constructor(
 
     override fun specialOperationUpdateGameInfo(gameInfo: GameInfoBean): GameInfoBean {
         return gameInfo
+    }
+
+    override fun specialOperationBeforeStartGame(gameInfo: GameInfoBean): Int {
+        return ResultCode.SUCCESS
     }
 
 

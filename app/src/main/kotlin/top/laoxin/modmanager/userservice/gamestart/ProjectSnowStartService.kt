@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,20 +18,28 @@ import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.tools.manager.AppPathsManager
+import top.laoxin.modmanager.tools.manager.GameInfoManager
 
 import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@AndroidEntryPoint
 @Singleton
-class ProjectSnowStartService @Inject constructor(
-    private val specialGameToolsManager: SpecialGameToolsManager,
-    private val appPathsManager: AppPathsManager
-) : Service()  {
+class ProjectSnowStartService : Service()  {
     companion object {
         const val TAG = "ProjectSnowStartService"
     }
+
+    @Inject
+    lateinit var specialGameToolsManager: SpecialGameToolsManager
+
+    @Inject
+    lateinit var appPathsManager: AppPathsManager
+
+    @Inject
+    lateinit var gameInfoManager: GameInfoManager
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
     // 添加一个无参数的构造函数
@@ -40,12 +49,7 @@ class ProjectSnowStartService @Inject constructor(
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         val projectSnowTools = specialGameToolsManager.getProjectSnowTools()
-        val gameInfo: GameInfoBean = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
-            @Suppress("DEPRECATION")
-            intent?.extras?.getParcelable("game_info")!!
-        } else {
-            intent?.extras?.getParcelable("game_info", GameInfoBean::class.java)!!
-        }
+        val gameInfo = gameInfoManager.getGameInfo()
 
         val checkFilepath =
             "${appPathsManager.getRootPath()}/Android/data/${gameInfo.packageName}/files/${ProjectSnowTools.CHECK_FILENAME}"

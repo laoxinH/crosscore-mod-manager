@@ -16,6 +16,7 @@ import top.laoxin.modmanager.App
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.userservice.gamestart.ProjectSnowStartService
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -97,10 +98,28 @@ class AppInfoTools @Inject constructor(
         val gameInfo = gameInfoManager.getGameInfo()
         val intent = context.packageManager.getLaunchIntentForPackage(gameInfo.packageName)
         if (intent != null) {
+
             specialGameToolsManager.getSpecialGameTools(gameInfo.packageName)?.let { entry ->
-                if (entry.needGameService()) {
-                    startService()
+                when(entry.specialOperationBeforeStartGame(gameInfo)) {
+                    ResultCode.SUCCESS -> {
+                        if (entry.needGameService()) {
+                            startService()
+                        }
+                    }
+                    ResultCode.GAME_UPDATE -> {
+                        ToastUtils.longCall(
+                            context.getString(
+                                R.string.tosat_game_already_update,
+                                gameInfo.gameName
+                            ))
+                        return
+                    }
+                    ResultCode.NO_PERMISSION -> {
+                        ToastUtils.longCall(R.string.toast_has_no_prim)
+                        return
+                    }
                 }
+
             }
 
         }

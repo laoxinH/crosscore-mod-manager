@@ -8,6 +8,7 @@ import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.constant.PathType
+import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.tools.AppInfoTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
@@ -19,6 +20,7 @@ import top.laoxin.modmanager.tools.manager.AppPathsManager
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.log
 
 @Singleton
 class ProjectSnowTools  @Inject constructor(
@@ -195,6 +197,7 @@ class ProjectSnowTools  @Inject constructor(
     }
 
     override fun specialOperationStartGame(gameInfo: GameInfoBean): Boolean {
+        Log.d(TAG, "specialOperationStartGame: 开始执行注入")
         check_filename_mod_path =
             appPathsManager.getGameCheckFilePath() + gameInfo.packageName + "/" + CHECK_FILENAME
         check_filepath = "${appPathsManager.getRootPath()}/Android/data/${gameInfo.packageName}/files/"
@@ -233,7 +236,7 @@ class ProjectSnowTools  @Inject constructor(
         // mainIFest.paks.addAll(0,modPaks)
         val startTime = System.currentTimeMillis()
         while (true) {
-            Log.d("ProjectSnowTools", "specialOperationStartGame: 开始执行注入")
+            //Log.d("ProjectSnowTools", "specialOperationStartGame: 开始执行注入")
             fileTools.writeFile(
                 check_filepath,
                 CHECK_FILENAME,
@@ -242,6 +245,7 @@ class ProjectSnowTools  @Inject constructor(
             // Thread.sleep(50)
             val elapsedTime = System.currentTimeMillis() - startTime
             if (elapsedTime > 40000) {
+                Log.d(TAG, "specialOperationStartGame: 注入结束")
                 break
             }
         }
@@ -258,7 +262,7 @@ class ProjectSnowTools  @Inject constructor(
     }
 
     override fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean {
-        //Log.d("ProjectSnowTools", "特殊:$gameInfo ")
+        Log.d("ProjectSnowTools", "特殊:$gameInfo ")
         if (checkPermission(gameInfo.gamePath) == PathType.NULL) return false
         val gameFilepath = "${gameInfo.gamePath}/files/${getGameFileDir(gameInfo)}/"
         val name = getGameFileDir(gameInfo)
@@ -283,10 +287,19 @@ class ProjectSnowTools  @Inject constructor(
         return true
     }
 
+    override fun specialOperationBeforeStartGame(gameInfo: GameInfoBean) : Int {
+        if (checkPermission(gameInfo.gamePath) == PathType.NULL) return ResultCode.NO_PERMISSION
+        val gameFilepath = "${gameInfo.gamePath}/files/${getGameFileDir(gameInfo)}/"
+        if (!fileTools.createDictionary("$gameFilepath/test")) {
+            return ResultCode.GAME_UPDATE
+        }
+        return ResultCode.SUCCESS
+    }
+
     override fun specialOperationUpdateGameInfo(gameInfo: GameInfoBean): GameInfoBean {
         return gameInfo.copy(
             gameFilePath = gameInfo.gameFilePath.map {
-                (it + File.separator + getGameFileDir(gameInfo)).replace("//", "/")
+                (it + File.separator + getGameFileDir(gameInfo) + File.separator).replace("//", "/")
             }
         )
     }

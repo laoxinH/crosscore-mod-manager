@@ -32,6 +32,7 @@ interface BaseSpecialGameTools {
     fun specialOperationNeedOpenVpn(): Boolean
     fun needGameService(): Boolean
     fun specialOperationUpdateGameInfo(gameInfo: GameInfoBean): GameInfoBean
+    fun specialOperationBeforeStartGame(gameInfo: GameInfoBean) : Int
 
     fun onProgressUpdate(progress: String) {
         progressUpdateListener?.onProgressUpdate(progress)

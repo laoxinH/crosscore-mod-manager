@@ -38,7 +38,7 @@ androidxRuntimeLivedata = "1.7.6"
 androidxRuntimeRxjava2 = "1.7.6"
 composeBom = "2025.01.00"
 uiTestManifest = "1.7.6"
-hilt = "2.51.1"
+hilt = "2.55"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }

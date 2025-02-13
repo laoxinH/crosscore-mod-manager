@@ -202,4 +202,5 @@
     <string name="download_universal">通用版本</string>
     <string name="toast_start_scan">开始扫描</string>
     <string name="toast_flash_failed">刷新MOD失败</string>
+    <string name="tosat_game_already_update">%1$s已更新, 请在设置重新选择游戏并重新执行提示操作</string>
 </resources>

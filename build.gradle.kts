@@ -15,8 +15,10 @@ buildscript {
          val kotlin_version
          classpath ("org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version")
     }*/
+
     dependencies {
         classpath(libs.okhttp3.okhttp)
+
     }
     repositories {
         google()
