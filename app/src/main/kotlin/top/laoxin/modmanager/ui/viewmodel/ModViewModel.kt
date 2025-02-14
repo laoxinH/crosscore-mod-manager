@@ -664,6 +664,7 @@ class ModViewModel @Inject constructor(
 
     override fun onFlash() {
         // 检测到文件变化，自动刷新mods
+        Log.d("ModViewModel", "onFlash: 检测到文件变化，自动刷新mods")
         flashMods(true)
     }
 

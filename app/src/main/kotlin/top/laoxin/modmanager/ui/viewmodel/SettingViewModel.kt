@@ -269,18 +269,14 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    // 设置版本号
-    fun setVersionName(versionName: String) {
-        _uiState.update {
-            it.copy(versionName = versionName)
-        }
-    }
 
     // 获取版本号
     fun getVersionName() {
         viewModelScope.launch {
            val version =  appInfoManager.getVersionName(appInfoManager.getPackageName())
-            setVersionName(version)
+            _uiState.update {
+                it.copy(versionName = version)
+            }
         }
     }
 

@@ -17,8 +17,9 @@ object LogTools {
         startLogcatLogging()
     }
 
-    private const val TAG = "LogTools"
-    private const val LOG_FILE_NAME = "logcat.txt"
+    const val TAG = "LogTools"
+    const val LOG_CAT_NAME = "logcat.txt"
+    const val LOG_FILE_NAME = "log.txt"
 
     fun startLogcatLogging() {
         try {
@@ -26,7 +27,7 @@ object LogTools {
                 Log.e(TAG, "日志路径未设置")
                 return
             }
-            val logFile = File(logPath, LOG_FILE_NAME)
+            val logFile = File(logPath, LOG_CAT_NAME)
             if (!logFile.exists()) {
                 logFile.createNewFile()
             } else {
@@ -67,7 +68,7 @@ object LogTools {
                 Log.i(TAG, "日志路径为空")
                 return
             }
-            val file = File(logPath + "log.txt")
+            val file = File(logPath , LOG_FILE_NAME)
             if (!file.exists()) {
                 file.createNewFile()
             }
