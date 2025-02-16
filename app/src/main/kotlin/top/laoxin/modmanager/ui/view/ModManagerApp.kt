@@ -62,10 +62,11 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.view.modView.ModPage
 import top.laoxin.modmanager.ui.view.modView.ModTopBar
+import top.laoxin.modmanager.ui.view.settingView.SettingPage
+import top.laoxin.modmanager.ui.view.settingView.SettingTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
-import top.laoxin.modmanager.ui.viewmodel.VersionViewModel
 import kotlin.math.abs
 
 // 导航栏索引
@@ -81,7 +82,6 @@ enum class NavigationIndex(
 @Composable
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel()
-    val versionViewModel: VersionViewModel = viewModel()
     val consoleViewModel: ConsoleViewModel = viewModel()
     val settingViewModel: SettingViewModel = viewModel()
     val pageList = NavigationIndex.entries
@@ -364,7 +364,7 @@ private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
         NavigationIndex.CONSOLE.ordinal -> {}
 
         NavigationIndex.MOD.ordinal -> {
-            modViewModel.flashMods(true)
+            modViewModel.flashMods(true, false)
         }
 
         NavigationIndex.SETTINGS.ordinal -> {}

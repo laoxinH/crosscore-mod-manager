@@ -2,17 +2,12 @@ package top.laoxin.modmanager.domain.usercase.mod
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.data.repository.mod.ModRepository
 import top.laoxin.modmanager.observer.FlashModsObserverManager
-import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.filetools.FileToolsManager
-import top.laoxin.modmanager.tools.manager.AppPathsManager
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +18,6 @@ data class DeleteSelectedModsResult(
 )
 @Singleton
 class DeleteSelectedModUserCase @Inject constructor(
-    private val appPathsManager: AppPathsManager,
     private val fileObserverManager: FlashModsObserverManager,
     private val fileToolsManager: FileToolsManager,
     private val modRepository: ModRepository,
