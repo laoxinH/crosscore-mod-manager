@@ -1,11 +1,7 @@
 package top.laoxin.modmanager.tools.filetools
 
-import android.os.Environment
-import top.laoxin.modmanager.App
-import top.laoxin.modmanager.constant.FileType
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.di.FileToolsModule
-import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
 import javax.inject.Inject
 import javax.inject.Singleton
 

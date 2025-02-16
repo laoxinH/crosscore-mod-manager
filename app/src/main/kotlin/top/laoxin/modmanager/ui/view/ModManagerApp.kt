@@ -261,7 +261,7 @@ fun NavigationRail(
     NavigationRail(
         modifier = Modifier
             .fillMaxHeight()
-            .width(80.dp)
+            .width(90.dp)
             .padding(0.dp)
     ) {
         val currentPageName = stringResource(id = NavigationIndex.entries[currentPage].title)

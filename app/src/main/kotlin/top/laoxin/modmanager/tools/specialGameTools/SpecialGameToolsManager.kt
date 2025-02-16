@@ -11,16 +11,16 @@ class SpecialGameToolsManager @Inject constructor(
     @SpecialGameToolsModule.ProjectSnowToolsImpl private val projectSnowTools: BaseSpecialGameTools
 ) {
 
-
-
-    private val specialGameTools : Map<String, BaseSpecialGameTools>  = mapOf(
+    private val specialGameTools: Map<String, BaseSpecialGameTools> = mapOf(
         "hypergryph.arknights" to arknightsTools,
         "com.mrfz" to arknightsTools,
         "projectsnow" to projectSnowTools,
         "snowbreak" to projectSnowTools
     )
+
     companion object {
-       const val TAG = "SpecialGameToolsManager"
+        const val TAG = "SpecialGameToolsManager"
+
     }
 
     fun getSpecialGameTools(packageName: String): BaseSpecialGameTools? {

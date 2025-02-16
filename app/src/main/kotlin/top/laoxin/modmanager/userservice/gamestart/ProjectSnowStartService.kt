@@ -16,10 +16,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
-
 import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 import javax.inject.Inject

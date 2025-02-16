@@ -1,39 +1,22 @@
 package top.laoxin.modmanager.domain.usercase.mod
 
-import android.app.Application
+
 import android.os.RemoteException
 import android.util.Log
-import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
-
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ResultCode
-import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.data.bean.BackupBean
-import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
-import top.laoxin.modmanager.data.bean.ModBeanTemp
-import top.laoxin.modmanager.data.bean.ScanFileBean
-import top.laoxin.modmanager.data.repository.VersionRepository
 import top.laoxin.modmanager.data.repository.backup.BackupRepository
 import top.laoxin.modmanager.data.repository.mod.ModRepository
-import top.laoxin.modmanager.data.repository.scanfile.ScanFileRepository
-import top.laoxin.modmanager.domain.usercase.app.CheckPermissionUserCase
 import top.laoxin.modmanager.exception.CopyStreamFailedException
-import top.laoxin.modmanager.exception.NoSelectedGameException
-import top.laoxin.modmanager.observer.FlashModsObserverManager
 import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
-import top.laoxin.modmanager.tools.LogTools.logRecord
-
-
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.filetools.FileToolsManager
@@ -41,13 +24,7 @@ import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
-import top.laoxin.modmanager.ui.state.UserPreferencesState
-import top.laoxin.modmanager.ui.viewmodel.ModViewModel
-import top.lings.updater.util.GithubApi
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,12 +43,9 @@ data class EnableModResult(
 class EnableModsUserCase @Inject constructor(
     private val gameInfoManager: GameInfoManager,
     private val appPathsManager: AppPathsManager,
-    private val scanFileRepository: ScanFileRepository,
     private val modRepository: ModRepository,
     private val backupRepository: BackupRepository,
-    private val checkPermissionUserCase: CheckPermissionUserCase,
     private val permissionTools: PermissionTools,
-    private val flashModsObserverManager: FlashModsObserverManager,
     private val fileToolsManager: FileToolsManager,
     private val specialGameToolsManager: SpecialGameToolsManager,
 
@@ -85,10 +59,10 @@ class EnableModsUserCase @Inject constructor(
 
     suspend operator fun invoke(
         mods: List<ModBean>,
-        delUnzipDictionary :Boolean,
-        setMultitaskingProgress : (String) -> Unit,
-        setUnzipProgress : (String) -> Unit,
-        setTipsText : (String) -> Unit
+        delUnzipDictionary: Boolean,
+        setMultitaskingProgress: (String) -> Unit,
+        setUnzipProgress: (String) -> Unit,
+        setTipsText: (String) -> Unit
     ): EnableModResult = withContext(Dispatchers.IO) {
         this@EnableModsUserCase.setUnzipProgress = setUnzipProgress
         // 密码检查
@@ -106,8 +80,8 @@ class EnableModsUserCase @Inject constructor(
 
         setMultitaskingProgress("0/${mods.size}")
         val gameInfo = gameInfoManager.getGameInfo()
-        val failMods : MutableList<ModBean> = mutableListOf()
-        val successMods : MutableList<ModBean> = mutableListOf()
+        val failMods: MutableList<ModBean> = mutableListOf()
+        val successMods: MutableList<ModBean> = mutableListOf()
 
         mods.forEachIndexed { index, modBean ->
             kotlin.runCatching {
@@ -119,7 +93,7 @@ class EnableModsUserCase @Inject constructor(
                     val backups = backupGameFiles(
                         gameModPath, modBean, gameInfo.packageName + "/"
                     )
-                    Log.d(TAG, "invoke: " + backups)
+                    Log.d(TAG, "invoke: $backups")
                     backupRepository.insertAll(backups)
                 }
                 // 解压mod压缩包
@@ -133,7 +107,9 @@ class EnableModsUserCase @Inject constructor(
 
                     val decompression = ArchiveUtil.decompression(
                         modBean.path!!,
-                        appPathsManager.getModsUnzipPath() + gameInfo.packageName + "/" + File(modBean.path).nameWithoutExtension + "/",
+                        appPathsManager.getModsUnzipPath() + gameInfo.packageName + "/" + File(
+                            modBean.path
+                        ).nameWithoutExtension + "/",
                         modBean.password,
                     )
                     if (decompression) {
@@ -199,7 +175,10 @@ class EnableModsUserCase @Inject constructor(
         val checkPermission = permissionTools.checkPermission(gameModPath)
         val fileTools = fileToolsManager.getFileTools(checkPermission)
         Log.d(TAG, "游戏mod路径: ${modBean.modFiles}")
-        val backups = backupRepository.getByModNameAndGamePackageName(modBean.name!!, modBean.gamePackageName!!).first()
+        val backups = backupRepository.getByModNameAndGamePackageName(
+            modBean.name!!,
+            modBean.gamePackageName!!
+        ).first()
         modBean.modFiles?.forEachIndexed { index: Int, it: String ->
             val file = File(it)
             val backupPath =
@@ -253,7 +232,7 @@ class EnableModsUserCase @Inject constructor(
         var specialOperationFlag = true
         withContext(Dispatchers.IO) {
             specialOperationFlag = specialGameToolsManager.getSpecialGameTools(packageName)
-                ?.specialOperationEnable(modBean, packageName) ?: true
+                ?.specialOperationEnable(modBean, packageName) != false
 
         }
         if (!specialOperationFlag) {
@@ -289,7 +268,7 @@ class EnableModsUserCase @Inject constructor(
     }
 
     // 通过流写入mod文件
-    suspend fun copyModsByStream(
+    fun copyModsByStream(
         path: String,
         gameModPath: String,
         modFiles: List<String>,
@@ -318,7 +297,7 @@ class EnableModsUserCase @Inject constructor(
 
     }
 
-    suspend fun copyModStreamByShizuku(
+    fun copyModStreamByShizuku(
         modTempPath: String, gameModPath: String, files: List<String>, password: String?
     ): Boolean {
         val fileTools = fileToolsManager.getShizukuFileTools() as ShizukuFileTools
@@ -380,6 +359,7 @@ class EnableModsUserCase @Inject constructor(
         return true
 
     }
+
     private fun deleteTempFile(): Boolean {
         return if (File(appPathsManager.getModsTempPath()).exists()) {
             val fileTools = fileToolsManager.getFileTools(PathType.FILE)

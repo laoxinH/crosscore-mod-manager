@@ -14,16 +14,14 @@ import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.RequestCode
 import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.userservice.shizuku.FileExplorerServiceManager
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-object PermissionTools  {
-    private val SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api"
+object PermissionTools {
+    private const val SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api"
     private val ROOT_PATH = Environment.getExternalStorageDirectory().path
 
-        const val TAG = "PermissionTools"
-
+    const val TAG = "PermissionTools"
 
 
     // shizuku监听器
@@ -113,6 +111,11 @@ object PermissionTools  {
 
     // 检查全权限
     fun checkPermission(path: String): Int {
+
+        if (isShizukuAvailable && checkShizukuPermission()) {
+            return PathType.SHIZUKU
+        }
+
         if (isFromMyPackageNamePath(path) && App.osVersion == OSVersion.OS_11) {
             return PathType.FILE
         }

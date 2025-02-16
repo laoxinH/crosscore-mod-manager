@@ -1,6 +1,5 @@
 package top.laoxin.modmanager.di
 
-import android.app.Application
 import android.content.Context
 import dagger.Module
 import dagger.Provides
@@ -20,13 +19,6 @@ object AppModule {
     fun provideContext(@ApplicationContext context: Context): Context {
         return context
     }
-
-    @Provides
-    @Singleton
-    fun provideApplication(application: Application): Application {
-        return application
-    }
-
 
     @Provides
     @Singleton

@@ -3,29 +3,19 @@ package top.laoxin.modmanager.userservice.shizuku
 import android.annotation.SuppressLint
 import android.os.RemoteException
 import android.util.Log
+import top.laoxin.modmanager.constant.SpecialGame
 import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.service.IFileExplorerService
 import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
-
-import top.laoxin.modmanager.service.IFileExplorerService
-import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.filetools.FileToolsManager
-import top.laoxin.modmanager.tools.manager.AppPathsManager
-import top.laoxin.modmanager.tools.specialGameTools.ArknightsTools
-import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
-import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
-
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import javax.inject.Inject
-import javax.inject.Singleton
 
-class FileExplorerService : IFileExplorerService.Stub()  {
-    @Inject
-    lateinit var specialGameToolsManager: SpecialGameToolsManager
+class FileExplorerService : IFileExplorerService.Stub() {
+
     @Throws(RemoteException::class)
 
     override fun getFilesNames(path: String?): MutableList<String> {
@@ -65,10 +55,6 @@ class FileExplorerService : IFileExplorerService.Stub()  {
             if (File(destPath!!).parentFile?.exists() == false) {
                 File(destPath).parentFile?.mkdirs()
             }
-            // 如果目标文件存在, 则删除
-           // if (File(destPath).exists()) {
-            //    File(destPath).delete()
-           // }
 
             // 创建目标文件路径
             Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING)
@@ -153,6 +139,7 @@ class FileExplorerService : IFileExplorerService.Stub()  {
     }
 
     override fun scanMods(sacnPath: String?, gameInfo: GameInfoBean?): Boolean {
+        Log.d(TAG, "SHIZUKU开始扫描")
         return try {
             if (sacnPath == null || gameInfo == null) return false
             val files = File(sacnPath).listFiles()
@@ -160,7 +147,6 @@ class FileExplorerService : IFileExplorerService.Stub()  {
             gameInfo.gameFilePath.forEach {
                 gameFiles.addAll(getFilesNames(it))
             }
-            Log.d(TAG, "游戏中的文件: $gameFiles")
             if (files != null) {
                 // 判断file是否为压缩文件
                 for (f in files) {
@@ -169,11 +155,11 @@ class FileExplorerService : IFileExplorerService.Stub()  {
                         ArchiveUtil.listInArchiveFiles(f.absolutePath).forEach {
                             val modFileName = File(it).name
                             if (gameFiles.contains(modFileName) || specialOperationScanMods(
-                                    gameInfo,
+                                    gameInfo.packageName,
                                     modFileName
                                 )
                             ) {
-                                Log.d(TAG, "开始移动文件: ${f.name}==${modFileName}")
+                                Log.d(TAG, "开始移动文件(SHIZUKU): ${f.name}==${modFileName}")
                                 moveFile(
                                     f.path,
                                     Paths.get(gameInfo.modSavePath, f.name).toString()
@@ -257,24 +243,35 @@ class FileExplorerService : IFileExplorerService.Stub()  {
     }
 
 
-    // 判断文件类型,如果是图片, 视频, 音频, apk文件则返回false
     private fun isFileType(file: File): Boolean {
-        val name = file.name
-        return (/*name.contains(".jpg", ignoreCase = true) ||
-                name.contains(".png", ignoreCase = true) ||
-                name.contains(".gif", ignoreCase = true) ||
-                name.contains(".jpeg", ignoreCase = true) ||
-                name.contains(".mp4", ignoreCase = true) ||
-                name.contains(".mp3", ignoreCase = true) ||*/
-                name.contains(".apk", ignoreCase = true))
+        val name = file.name.lowercase()
+        // 判断是否是图片、视频、音频或APK文件
+        val imageExtensions = listOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
+        val videoExtensions = listOf("mp4", "mkv", "avi", "mov", "flv", "wmv")
+        val audioExtensions = listOf("mp3", "wav", "aac", "flac", "ogg")
+        val apkExtension = "apk"
+
+        // 检查文件扩展名
+        return imageExtensions.any { name.endsWith(it) } ||
+                videoExtensions.any { name.endsWith(it) } ||
+                audioExtensions.any { name.endsWith(it) } ||
+                name.endsWith(apkExtension)
     }
 
-    fun specialOperationScanMods(gameInfo: GameInfoBean, modFileName: String): Boolean {
-
-        specialGameToolsManager.getSpecialGameTools(gameInfo.packageName)?.let {
-            return it.specialOperationScanMods(gameInfo.packageName, modFileName)
+    fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
+        var l = SpecialGame.specialGameList
+        if (packageName.contains(l[1]) || packageName.contains(l[0])) {
+            return false
+        } else if (packageName.contains(l[2]) || packageName.contains(l[3])) {
+            return modFileName.endsWith(".pak") == true
         }
         return false
+
+        // 上述结果需要确保与下列一致
+        // return specialGameToolsManager.getSpecialGameTools(packageName)?.specialOperationScanMods(
+        //     packageName,
+        //     modFileName
+        // ) == true
     }
 
     companion object {

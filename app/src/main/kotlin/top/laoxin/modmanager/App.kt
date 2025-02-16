@@ -10,25 +10,33 @@ import dagger.hilt.android.HiltAndroidApp
 import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.tools.LogTools
 import java.io.File
-import java.io.FileOutputStream
-import java.util.Objects
-
 
 
 @HiltAndroidApp
 class App : Application() {
+
+    companion object {
+        var osVersion: OSVersion = OSVersion.OS_5
+        var isHuawei: Boolean = false
+
+        @Volatile
+        private var instance: App? = null
+
+        fun get(): App = instance ?: synchronized(this) {
+            instance ?: throw IllegalStateException("Application not initialized!")
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
-        initializeComponents()
+        synchronized(App::class) {
+            instance = this
+        }
+
         initializeOsVersion()
         createTestFile()
         setupNotificationChannel()
         setupGlobalExceptionHandler()
-    }
-
-    // 初始化组件
-    private fun initializeComponents() {
-        sApp = this
     }
 
     // 初始化操作系统版本
@@ -94,12 +102,4 @@ class App : Application() {
         LogTools.logRecord("Uncaught  exception in thread ${thread.name}:  ${throwable.message}")
     }
 
-    // 伴生对象
-    companion object {
-        lateinit var sApp: App
-        var osVersion: OSVersion = OSVersion.OS_5
-        var isHuawei: Boolean = false
-
-        fun get(): App = sApp
-    }
 }

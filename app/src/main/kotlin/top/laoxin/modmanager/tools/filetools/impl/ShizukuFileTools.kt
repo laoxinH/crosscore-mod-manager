@@ -20,17 +20,12 @@ import javax.inject.Singleton
 class ShizukuFileTools @Inject constructor(
     appPathsManager: AppPathsManager
 ) : BaseFileTools(appPathsManager) {
-    //private var iFileExplorerService: IFileExplorerService? = null
 
     companion object {
         const val TAG = "ShizukuFileTools"
         var iFileExplorerService: IFileExplorerService? = null
     }
 
-   /* fun setIFileExplorerService(iFileExplorerService: IFileExplorerService?) {
-        Log.d(TAG, "setIFileExplorerService绑定: " + iFileExplorerService)
-        this.iFileExplorerService = iFileExplorerService
-    }*/
     override fun deleteFile(path: String): Boolean {
         return try {
             iFileExplorerService?.deleteFile(path)
@@ -79,7 +74,6 @@ class ShizukuFileTools @Inject constructor(
     }
 
     override fun isFileExist(path: String): Boolean {
-       // Log.d(TAG, "isFileExist: iFileExplorerService=$iFileExplorerService")
 
         return try {
 
@@ -158,19 +152,17 @@ class ShizukuFileTools @Inject constructor(
         }
     }
 
-    suspend fun unzipFile(
+    fun unzipFile(
         zipPath: String,
         unzipPath: String,
         filename: String,
         password: String?
-    ) : Boolean {
+    ): Boolean {
         return try {
-            iFileExplorerService?.unZipFile(zipPath, unzipPath, filename, password) ?: false
+            iFileExplorerService?.unZipFile(zipPath, unzipPath, filename, password) == true
         } catch (e: RemoteException) {
             e.printStackTrace()
             false
         }
     }
-
-
 }

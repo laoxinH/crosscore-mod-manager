@@ -37,7 +37,7 @@ android {
     namespace = "top.laoxin.modmanager"
     compileSdk = 35
 
-    ndkVersion = "28.0.12433566 rc1"
+    ndkVersion = "28.0.13004108"
 
     defaultConfig {
         applicationId = "com.mod.manager"

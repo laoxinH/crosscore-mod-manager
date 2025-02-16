@@ -20,5 +20,4 @@ interface IFileExplorerService {
     boolean changDictionaryName (String path, String newName);
     boolean createDictionary (String path);
     // listfile
-
 }

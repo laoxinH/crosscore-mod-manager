@@ -28,3 +28,19 @@
 -keepclassmembers class * {
     @com.google.gson.annotations.* <fields>;
 }
+
+-keep class dagger.** { *; }
+-keep interface dagger.** { *; }
+-keep class androidx.lifecycle.** { *; }
+
+-keep class dagger.hilt.** { *; }
+
+-keep class * extends androidx.lifecycle.ViewModel { *; }
+
+-keep class **.Hilt_* { *; }
+-keep class **.HiltInjector { *; }
+
+-keep class javax.inject.** { *; }
+-keep class com.google.inject.** { *; }
+
+-keep @dagger.hilt.android.HiltAndroidApp class *

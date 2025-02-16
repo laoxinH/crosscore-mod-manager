@@ -242,9 +242,7 @@ class ModViewModel @Inject constructor(
         Log.d("ModViewModel", "gameinfo : ${gameInfoManager.getGameInfo()}")
         updateAllModsJob = viewModelScope.launch {
             getGameAllModsUserCase().collectLatest { mods ->
-                //Log.d("ModViewModel", "updateAllMods: $it")
                 _uiState.update {
-                    Log.d("ModViewModel", "updateAllMods: $mods")
                     it.copy(modList = mods)
                 }
             }
@@ -542,15 +540,6 @@ class ModViewModel @Inject constructor(
     private fun setRequestPermissionPath(path: String) {
         _requestPermissionPath = path
     }
-
-// 设置用户提示
-//    fun setUserTipsDialog(b: Boolean) {
-//        viewModelScope.launch {
-//            userPreferencesRepository.savePreference(
-//                "USER_TIPS", b
-//            )
-//        }
-//    }
 
     private fun setShowDisEnableModsDialog(b: Boolean) {
         _uiState.update {
