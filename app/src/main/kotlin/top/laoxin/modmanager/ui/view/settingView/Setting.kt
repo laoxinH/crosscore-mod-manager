@@ -10,6 +10,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,10 +42,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,50 +66,63 @@ import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @Composable
-fun SettingPage(viewModel: SettingViewModel) {
+fun SettingPage(viewModel: SettingViewModel, onHideBottomBar: (Boolean) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    AnimatedContent(
-        targetState = uiState.showAbout,
-        transitionSpec = {
-            if (targetState) {
-                slideInHorizontally { it } + fadeIn() togetherWith
-                        slideOutHorizontally { -it } + fadeOut()
-            } else {
-                slideInHorizontally { -it } + fadeIn() togetherWith
-                        slideOutHorizontally { it } + fadeOut()
-            }.using(SizeTransform(clip = false))
-        }
-    ) { showAbout ->
-        when {
-            showAbout -> {
-                About(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    viewModel = viewModel
-                )
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (uiState.showAbout) {
+                    onHideBottomBar(available.y < 0)
+                }
+                return Offset.Zero
             }
+        }
+    }
 
-            else -> {
-                SettingContent(
-                    uiState,
-                    viewModel,
-                    viewModel::setDeleteBackupDialog,
-                    viewModel::setDeleteCacheDialog,
-                    viewModel::deleteAllBackups,
-                    viewModel::deleteCache,
-                    viewModel::deleteTemp,
-                    viewModel::openUrl,
-                    viewModel::showAcknowledgments,
-                    viewModel::showSwitchGame,
-                    viewModel::flashGameConfig,
-                    viewModel::checkUpdate,
-                    viewModel::checkInformation,
-                    viewModel::setShowDownloadGameConfig,
-                    viewModel::requestShizukuPermission
-                )
+    Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
+        AnimatedContent(
+            targetState = uiState.showAbout,
+            transitionSpec = {
+                if (targetState) {
+                    slideInHorizontally { it } + fadeIn() togetherWith
+                            slideOutHorizontally { -it } + fadeOut()
+                } else {
+                    slideInHorizontally { -it } + fadeIn() togetherWith
+                            slideOutHorizontally { it } + fadeOut()
+                }.using(SizeTransform(clip = false))
+            }
+        ) { showAbout ->
+            when {
+                showAbout -> {
+                    License(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(nestedScrollConnection),
+                        viewModel = viewModel
+                    )
+                }
+
+                else -> {
+                    SettingContent(
+                        uiState,
+                        viewModel,
+                        viewModel::setDeleteBackupDialog,
+                        viewModel::setDeleteCacheDialog,
+                        viewModel::deleteAllBackups,
+                        viewModel::deleteCache,
+                        viewModel::deleteTemp,
+                        viewModel::openUrl,
+                        viewModel::showAcknowledgments,
+                        viewModel::showSwitchGame,
+                        viewModel::flashGameConfig,
+                        viewModel::checkUpdate,
+                        viewModel::checkInformation,
+                        viewModel::setShowDownloadGameConfig,
+                        viewModel::requestShizukuPermission
+                    )
+                }
             }
         }
     }

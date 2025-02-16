@@ -15,7 +15,7 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @Composable
-fun About(modifier: Modifier, viewModel: SettingViewModel) {
+fun License(modifier: Modifier, viewModel: SettingViewModel) {
     val context = LocalContext.current
 
     LibrariesContainer(

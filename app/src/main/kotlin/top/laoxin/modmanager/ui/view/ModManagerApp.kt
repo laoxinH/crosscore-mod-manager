@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -24,8 +25,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -90,6 +93,7 @@ fun ModManagerApp() {
     var exitTime by remember { mutableLongStateOf(0L) }
     var currentPage by remember { mutableIntStateOf(0) }
     var shouldScroll by remember { mutableStateOf(false) }
+    var hideBottomBar by remember { mutableStateOf(false) }
 
     Row {
         // 在横向模式下显示侧边导航栏
@@ -128,14 +132,23 @@ fun ModManagerApp() {
             // 在纵向模式下显示底部导航栏
             bottomBar = {
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    NavigationBar(
-                        currentPage = currentPage,
-                        modViewModel = modViewModel,
-                        onPageSelected = { page ->
-                            currentPage = page
-                            shouldScroll = true
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateContentSize()
+                            .height(if (hideBottomBar) 0.dp else 80.dp)
+                    ) {
+                        if (!hideBottomBar) {
+                            NavigationBar(
+                                currentPage = currentPage,
+                                modViewModel = modViewModel,
+                                onPageSelected = { page ->
+                                    currentPage = page
+                                    shouldScroll = true
+                                }
+                            )
                         }
-                    )
+                    }
                 }
             }
         ) { innerPadding ->
@@ -221,7 +234,9 @@ fun ModManagerApp() {
                     when (page) {
                         NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
                         NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
-                        NavigationIndex.SETTINGS.ordinal -> SettingPage(settingViewModel)
+                        NavigationIndex.SETTINGS.ordinal -> SettingPage(settingViewModel) {
+                            hideBottomBar = it
+                        }
                     }
                 }
             }
@@ -246,6 +261,7 @@ fun NavigationRail(
     NavigationRail(
         modifier = Modifier
             .fillMaxHeight()
+            .width(80.dp)
             .padding(0.dp)
     ) {
         val currentPageName = stringResource(id = NavigationIndex.entries[currentPage].title)
