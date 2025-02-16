@@ -47,7 +47,7 @@
     <string name="mod_page_mod_detail_dialog_detali_author">作者: %1$s</string>
     <string name="mod_page_mod_detail_dialog_detali_perview">预览</string>
     <string name="mod_page_mod_detail_dialog_close">关闭</string>
-    <string name="setting_page_app_title">App</string>
+    <string name="setting_page_app_title">此软件</string>
     <string name="setting_page_app_del_backup">删除备份</string>
     <string name="setting_page_app_del_descript">这将删除所有游戏备份文件!</string>
     <string name="setting_page_app_clean_cache">清除缓存</string>
@@ -76,6 +76,7 @@
     <string name="mod_page_title_enable_mods">已开启</string>
     <string name="mod_page_title_disable_mods">已关闭</string>
     <string name="mod_page_title_search_mods">搜索</string>
+    <string name="mod_page_force_update_mod_warning">是否确认强制扫描，可能会带来不可预料的严重后果</string>
     <string name="toast_password_error">密码错误</string>
     <string name="toast_password_right">密码正确</string>
     <string name="password_dialog_title">请输入密码后重新启用</string>

@@ -1,6 +1,5 @@
 package top.laoxin.modmanager.ui.viewmodel
 
-import android.app.Application
 import android.os.Build
 import android.os.FileObserver
 import android.util.Log
@@ -23,11 +22,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.constant.UserPreferencesKeys
-import top.laoxin.modmanager.data.repository.scanfile.ScanFileRepository
+import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.domain.usercase.gameinfo.UpdateGameInfoUserCase
 import top.laoxin.modmanager.domain.usercase.mod.CheckCanFlashModsUserCase
 import top.laoxin.modmanager.domain.usercase.mod.CheckCanSwitchModsUserCase
@@ -46,7 +44,6 @@ import top.laoxin.modmanager.domain.usercase.repository.GetGameEnableModsUserCas
 import top.laoxin.modmanager.domain.usercase.repository.SearchModsUserCase
 import top.laoxin.modmanager.domain.usercase.repository.UpdateModUserCase
 import top.laoxin.modmanager.domain.usercase.userpreference.GetUserPreferenceUseCase
-
 import top.laoxin.modmanager.listener.ProgressUpdateListener
 import top.laoxin.modmanager.observer.FlashModsObserver
 import top.laoxin.modmanager.observer.FlashModsObserverLow
@@ -247,7 +244,7 @@ class ModViewModel @Inject constructor(
             getGameAllModsUserCase().collectLatest { mods ->
                 //Log.d("ModViewModel", "updateAllMods: $it")
                 _uiState.update {
-                    Log.d("ModViewModel", "updateAllMods: " + mods)
+                    Log.d("ModViewModel", "updateAllMods: $mods")
                     it.copy(modList = mods)
                 }
             }
@@ -284,7 +281,7 @@ class ModViewModel @Inject constructor(
     }
 
 
-    fun flashMods(isLoading: Boolean) {
+    fun flashMods(isLoading: Boolean, forceScan: Boolean) {
         flashModsJob?.cancel()
         val result = checkCanFlashModsUserCase()
         when (result.first) {
@@ -302,9 +299,10 @@ class ModViewModel @Inject constructor(
                 flashModsJob = viewModelScope.launch {
                     setLoading(isLoading)
                     val flashResult = flashModsUserCase(
-                        userPreferences.value,
-                        _uiState.value.modList,
-                        setLoadingPath = { setLoadingPath(it) }
+                        userPreferencesState = userPreferences.value,
+                        mods = _uiState.value.modList,
+                        setLoadingPath = { setLoadingPath(it) },
+                        forceScan = forceScan
                     )
                     when (flashResult.code) {
                         ResultCode.SUCCESS -> {
@@ -339,7 +337,6 @@ class ModViewModel @Inject constructor(
         }
 
     }
-
 
 
     // 打开mod详情
@@ -393,7 +390,7 @@ class ModViewModel @Inject constructor(
     private suspend fun flashModDetail(mods: ModBean): ModBean {
 
         val result = flashModDetailUserCase(mods)
-        when(result.code) {
+        when (result.code) {
             ResultCode.MOD_NEED_PASSWORD -> {
                 setModDetail(result.mod)
                 showPasswordDialog(true)
@@ -414,7 +411,7 @@ class ModViewModel @Inject constructor(
     private fun enableMod(mods: List<ModBean>) {
         enableJob?.cancel()
         Log.d("ModViewModel", "enableMod: 开始执行开启 : $mods")
-        enableJob = viewModelScope.launch() {
+        enableJob = viewModelScope.launch {
             setModSwitchEnable(false)
             setTipsText(App.get().getString(R.string.tips_open_mod))
             setShowTips(true)
@@ -461,7 +458,7 @@ class ModViewModel @Inject constructor(
     // 关闭mod
     fun disableMod(mods: List<ModBean>, isDel: Boolean = false) {
         enableJob?.cancel()
-        enableJob = viewModelScope.launch() {
+        enableJob = viewModelScope.launch {
             setModSwitchEnable(false)
             setTipsText(App.get().getString(R.string.tips_close_mod))
             setShowTips(true)
@@ -665,7 +662,7 @@ class ModViewModel @Inject constructor(
     override fun onFlash() {
         // 检测到文件变化，自动刷新mods
         Log.d("ModViewModel", "onFlash: 检测到文件变化，自动刷新mods")
-        flashMods(true)
+        flashMods(true, false)
     }
 
     fun setModsView(enableMods: NavigationIndex) {
@@ -765,7 +762,7 @@ class ModViewModel @Inject constructor(
             setShowDelSelectModsDialog(true)
         } else {
             setShowDelSelectModsDialog(false)
-            viewModelScope.launch() {
+            viewModelScope.launch {
                 val result = deleteSelectedModUserCase(_uiState.value.modsSelected)
                 when (result.code) {
                     ResultCode.SUCCESS -> {
@@ -826,10 +823,15 @@ class ModViewModel @Inject constructor(
             setShowDelModDialog(false)
             setShowModDetail(false)
             val delMod = _uiState.value.modDetail!!
-            viewModelScope.launch() {
+            viewModelScope.launch {
                 val result = deleteModUserCase(delMod)
                 if (result.code == ResultCode.SUCCESS) {
-                    ToastUtils.longCall(App.get().getString(R.string.toast_del_mods_success, result.delMods.size.toString()))
+                    ToastUtils.longCall(
+                        App.get().getString(
+                            R.string.toast_del_mods_success,
+                            result.delMods.size.toString()
+                        )
+                    )
                     delModsList = result.delEnableMods
                     _uiState.update {
                         it.copy(delEnableModsList = result.delEnableMods)
@@ -921,7 +923,7 @@ class ModViewModel @Inject constructor(
     }
 
 
-    fun  getAppPathsManager(): AppPathsManager {
+    fun getAppPathsManager(): AppPathsManager {
         return appPathsManager
     }
 
@@ -931,6 +933,13 @@ class ModViewModel @Inject constructor(
 
     fun getFileToolsManager(): FileToolsManager {
         return fileToolsManager
+    }
+
+    // 设置是否显示强制扫描对话框
+    fun setShowForceScanDialog(b: Boolean) {
+        _uiState.update {
+            it.copy(showForceScanDialog = b)
+        }
     }
 
 }

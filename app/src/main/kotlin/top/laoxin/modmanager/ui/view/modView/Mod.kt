@@ -38,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.data.bean.ModBean
+import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.SelectPermissionDialog
@@ -61,6 +62,7 @@ fun ModPage(viewModel: ModViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     Box {
+        // 显示无效mod确认对话框
         DisEnableModsDialog(
             showDialog = uiState.showDisEnableModsDialog,
             mods = uiState.delEnableModsList,
@@ -70,6 +72,11 @@ fun ModPage(viewModel: ModViewModel) {
             },
             viewModel = viewModel
         )
+
+        // 显示强制扫描对话框
+        ForceUpdateDialog(uiState.showForceScanDialog, viewModel, uiState)
+
+        // 显示开启失败是否回滚MODS的弹窗
         DialogCommon(
             title = stringResource(R.string.open_mod_failed_dialog_title),
             content = stringResource(
@@ -114,6 +121,26 @@ fun ModPage(viewModel: ModViewModel) {
                 else -> AllModPage(viewModel, uiState)
             }
         }
+    }
+}
+
+@Composable
+fun ForceUpdateDialog(
+    showDialog: Boolean, viewModel: ModViewModel, uiState: ModUiState
+) {
+    if (showDialog) {
+        DialogCommon(
+            title = stringResource(id = R.string.console_scan_directory_mods),
+            content = stringResource(id = R.string.mod_page_force_update_mod_warning),
+            onConfirm = {
+                viewModel.flashMods(true, true)
+                viewModel.setShowForceScanDialog(false)
+            },
+            onCancel = {
+                viewModel.setShowForceScanDialog(false)
+            },
+            showDialog = uiState.showForceScanDialog
+        )
     }
 }
 

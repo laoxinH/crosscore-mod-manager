@@ -49,4 +49,6 @@ data class ModUiState(
     val isBackPathExist: Boolean = false,
     // 执行返回操作
     val doBackFunction: Boolean = false,
+    // 是否显示强制扫描对话框
+    val showForceScanDialog: Boolean = false,
 )

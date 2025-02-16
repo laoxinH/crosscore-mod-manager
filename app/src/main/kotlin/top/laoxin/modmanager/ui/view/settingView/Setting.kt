@@ -1,11 +1,19 @@
-package top.laoxin.modmanager.ui.view
+package top.laoxin.modmanager.ui.view.settingView
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -56,23 +64,50 @@ fun SettingPage(viewModel: SettingViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    SettingContent(
-        uiState,
-        viewModel::setDeleteBackupDialog,
-        viewModel::setDeleteCacheDialog,
-        viewModel::deleteAllBackups,
-        viewModel::deleteCache,
-        viewModel::deleteTemp,
-        viewModel::openUrl,
-        viewModel::showAcknowledgments,
-        viewModel::showSwitchGame,
-        viewModel::flashGameConfig,
-        viewModel::checkUpdate,
-        viewModel::checkInformation,
-        viewModel::setShowDownloadGameConfig,
-        viewModel::requestShizukuPermission
+    AnimatedContent(
+        targetState = uiState.showAbout,
+        transitionSpec = {
+            if (targetState) {
+                slideInHorizontally { it } + fadeIn() togetherWith
+                        slideOutHorizontally { -it } + fadeOut()
+            } else {
+                slideInHorizontally { -it } + fadeIn() togetherWith
+                        slideOutHorizontally { it } + fadeOut()
+            }.using(SizeTransform(clip = false))
+        }
+    ) { showAbout ->
+        when {
+            showAbout -> {
+                About(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    viewModel = viewModel
+                )
+            }
 
-    )
+            else -> {
+                SettingContent(
+                    uiState,
+                    viewModel,
+                    viewModel::setDeleteBackupDialog,
+                    viewModel::setDeleteCacheDialog,
+                    viewModel::deleteAllBackups,
+                    viewModel::deleteCache,
+                    viewModel::deleteTemp,
+                    viewModel::openUrl,
+                    viewModel::showAcknowledgments,
+                    viewModel::showSwitchGame,
+                    viewModel::flashGameConfig,
+                    viewModel::checkUpdate,
+                    viewModel::checkInformation,
+                    viewModel::setShowDownloadGameConfig,
+                    viewModel::requestShizukuPermission
+                )
+            }
+        }
+    }
+
     ThanksDialogCommon(
         title = stringResource(R.string.setting_acknowledgments),
         onConfirm = { viewModel.showAcknowledgments(false) },
@@ -84,7 +119,7 @@ fun SettingPage(viewModel: SettingViewModel) {
     if (viewModel.requestPermissionPath.isNotEmpty()) {
         RequestUriPermission(
             path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog,
-            onDismissRequest = {viewModel.setOpenPermissionRequestDialog(false)},
+            onDismissRequest = { viewModel.setOpenPermissionRequestDialog(false) },
             permissionTools = viewModel.getPermissionTools(),
             fileTools = viewModel.getFileToolsManager().getFileTools()
         )
@@ -145,6 +180,7 @@ fun SettingPage(viewModel: SettingViewModel) {
 @Composable
 fun SettingContent(
     uiState: SettingUiState,
+    viewModel: SettingViewModel,
     setDeleteBackupDialog: (Boolean) -> Unit,
     setDeleteCacheDialog: (Boolean) -> Unit,
     deleteAllBackups: () -> Unit,
@@ -181,8 +217,12 @@ fun SettingContent(
     ) {
         SettingTitle(
             stringResource(R.string.setting_page_app_title), Icons.Default.Settings
-        ) // 添加一个设置项
-        // 添加一个设置项
+        )
+        SettingItem(name = "许可证",
+            description = "查看开源许可证",
+            onClick = {
+                viewModel.setAboutPage(!uiState.showAbout)
+            })
         SettingItem(name = stringResource(R.string.setting_page_app_del_backup),
             description = stringResource(R.string.setting_page_app_del_descript),
             onClick = { setDeleteBackupDialog(true) })
@@ -206,7 +246,9 @@ fun SettingContent(
             description = stringResource(R.string.setting_page_app_swtch_game_descript),
             onClick = { showSwitchGame(true) })
 
-        SettingTitle(stringResource(R.string.setting_page_about_title), Icons.Default.Info)
+        SettingTitle(
+            stringResource(R.string.setting_page_about_title), Icons.Default.Info
+        )
         SettingItem(name = stringResource(R.string.setting_page_about_author),
             description = stringResource(R.string.setting_page_about_github),
             icon = painterResource(id = R.drawable.github_icon),
@@ -233,6 +275,7 @@ fun SettingContent(
             onClick = {
                 checkInformation()
             })
+
         SettingTitle(
             stringResource(R.string.setting_page_app_other), Icons.Default.MoreVert
         )
@@ -468,6 +511,17 @@ fun SettingTopBar(
             }
         },
         actions = {
+            IconButton(
+                onClick = {
+                    viewModel.setAboutPage(!viewModel.uiState.value.showAbout)
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = null,
+                    Modifier.size(28.dp)
+                )
+            }
             IconButton(
                 onClick = {
                     viewModel.openUrl(context, context.getString(R.string.github_url))

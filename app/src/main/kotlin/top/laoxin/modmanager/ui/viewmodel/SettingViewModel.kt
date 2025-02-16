@@ -370,4 +370,11 @@ class SettingViewModel @Inject constructor(
         return fileToolsManager
     }
 
+    // 打开许可证
+    fun setAboutPage(b: Boolean) {
+        _uiState.update {
+            it.copy(showAbout = b)
+        }
+    }
+
 }

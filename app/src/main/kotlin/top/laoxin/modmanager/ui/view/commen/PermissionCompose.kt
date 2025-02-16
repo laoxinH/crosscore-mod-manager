@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.ui.view.commen
 
+
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -36,14 +37,10 @@ import com.google.accompanist.permissions.rememberPermissionState
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.OSVersion
-
-
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
-import top.laoxin.modmanager.tools.filetools.impl.FileTools
-import top.laoxin.modmanager.ui.view.SettingItem
-import java.io.File
+import top.laoxin.modmanager.ui.view.settingView.SettingItem
 
 
 @RequiresApi(Build.VERSION_CODES.R)

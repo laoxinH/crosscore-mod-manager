@@ -31,5 +31,7 @@ data class SettingUiState(
     // 显示通知弹窗
     val showNotificationDialog: Boolean = false,
     // 通知
-    val infoBean: InfoBean = InfoBean(0.0, "")
+    val infoBean: InfoBean = InfoBean(0.0, ""),
+    // 显示关于页面
+    val showAbout: Boolean = false,
 )

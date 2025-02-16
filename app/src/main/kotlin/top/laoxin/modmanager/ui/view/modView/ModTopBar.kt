@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.Button
@@ -247,7 +248,7 @@ fun GeneralTopBar(
                         modifier = Modifier
                             .size(35.dp)
                             .padding(start = 6.dp)
-                        .offset(y = 8.dp),
+                            .offset(y = 8.dp),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(0.dp),
                         enabled = uiState.isBackPathExist,
@@ -313,12 +314,19 @@ fun GeneralTopBar(
                     )
                 }
                 IconButton(onClick = {
-                    viewModel.flashMods(true)
+                    viewModel.flashMods(true, false)
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Refresh, // 使用刷新图标
                         contentDescription = "Refresh", // 为辅助功能提供描述
-                        //tint = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                IconButton(onClick = {
+                    viewModel.setShowForceScanDialog(true)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.RestartAlt, // 使用刷新图标
+                        contentDescription = "ForceRefresh", // 为辅助功能提供描述
                     )
                 }
                 IconButton(onClick = { showMenu = true }, modifier = Modifier) {
