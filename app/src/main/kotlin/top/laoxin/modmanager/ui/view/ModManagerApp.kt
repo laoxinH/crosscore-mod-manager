@@ -93,11 +93,18 @@ fun ModManagerApp() {
     val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
     val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val settingUiState = settingViewModel.uiState.collectAsState().value
 
     var exitTime by remember { mutableLongStateOf(0L) }
     var currentPage by remember { mutableIntStateOf(0) }
     var shouldScroll by remember { mutableStateOf(false) }
     var hideBottomBar by remember { mutableStateOf(false) }
+
+    LaunchedEffect(settingUiState.showAbout) {
+        if (!settingUiState.showAbout) {
+            hideBottomBar = false
+        }
+    }
 
     Row {
         // 在横向模式下显示侧边导航栏
