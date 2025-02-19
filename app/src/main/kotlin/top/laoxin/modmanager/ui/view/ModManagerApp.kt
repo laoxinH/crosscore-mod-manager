@@ -22,10 +22,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -89,6 +92,7 @@ fun ModManagerApp() {
     val settingViewModel: SettingViewModel = viewModel()
     val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
+    val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     var exitTime by remember { mutableLongStateOf(0L) }
     var currentPage by remember { mutableIntStateOf(0) }
@@ -136,7 +140,10 @@ fun ModManagerApp() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateContentSize()
-                            .height(if (hideBottomBar) 0.dp else 80.dp)
+                            .height(
+                                if (hideBottomBar) 0.dp
+                                else 80.dp + navigationBarHeight
+                            )
                     ) {
                         if (!hideBottomBar) {
                             NavigationBar(
@@ -277,7 +284,7 @@ fun NavigationRail(
                     selected = isSelected,
                     onClick = {
                         val currentTime = System.currentTimeMillis()
-                        if ((currentTime - lastClickTime) < 300 && isSelected) {
+                        if (isSelected && (currentTime - lastClickTime) < 300) {
                             refreshCurrentPage(currentPage, modViewModel)
                         } else {
                             // 非双击或者是切换页面时，执行页面切换
@@ -343,7 +350,7 @@ fun NavigationBar(
                 selected = isSelected,
                 onClick = {
                     val currentTime = System.currentTimeMillis()
-                    if ((currentTime - lastClickTime) < 300 && isSelected) {
+                    if (isSelected && (currentTime - lastClickTime) < 300) {
                         refreshCurrentPage(currentPage, modViewModel)
                     } else {
                         // 非双击或者是切换页面时，执行页面切换
