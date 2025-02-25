@@ -95,7 +95,7 @@ class SettingViewModel @Inject constructor(
     fun deleteAllBackups() {
         gameInfoJob?.cancel()
         setDeleteBackupDialog(false)
-        gameInfoJob = viewModelScope.launch() {
+        gameInfoJob = viewModelScope.launch {
             val result = deleteBackupUserCase()
             when (result) {
                 ResultCode.NO_SELECTED_GAME -> {
@@ -131,7 +131,7 @@ class SettingViewModel @Inject constructor(
 
     fun deleteCache() {
         setDeleteCacheDialog(false)
-        viewModelScope.launch() {
+        viewModelScope.launch {
             val delCache = deleteCacheUserCase()
             if (delCache) {
                 ToastUtils.longCall(R.string.toast_del_cache_success)

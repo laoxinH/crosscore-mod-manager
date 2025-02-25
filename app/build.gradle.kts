@@ -54,7 +54,7 @@ android {
 
         ndk {
             abiFilters.addAll(supportedAbis)
-            debugSymbolLevel = "NONE"
+            debugSymbolLevel = "none"
         }
     }
 
@@ -66,12 +66,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            ndk {
-                debugSymbolLevel = "NONE"
-            }
-            signingConfig = signingConfigs.getByName("release")
-        }
-        getByName("debug") {
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -148,33 +142,19 @@ dependencies {
     testImplementation(libs.junit)
     implementation(platform(libs.compose.bom))
     androidTestImplementation(platform(libs.compose.bom))
-    // Choose one of the following:
     // Material Design 3
     implementation(libs.material3)
-    // Material Design 2
-    implementation(libs.androidx.compose.ui.ui)
-    // Android Studio Preview support
-    implementation(libs.androidx.compose.ui.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.ui.tooling)
-    // UI Tests
-    androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.test.manifest)
-    // Optional - Included automatically by material, only add when you need
-    // the icons but not the material library (e.g. when using Material3 or a
-    // custom design system based on Foundation)
+    // Compose Material Design
     implementation(libs.androidx.material.icons.core)
-    // Optional - Add full set of material icons
+    // Compose Material Design Extended
     implementation(libs.androidx.material.icons.extended)
-    // Optional - Add window size utils
-    implementation(libs.androidx.material3.window.size)
-    // Optional - Integration with activities
+    // Compose Activity
     implementation(libs.androidx.activity.compose)
-    // Optional - Integration with ViewModels
+    // ViewModels
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    // Optional - Integration with LiveData
+    // LiveData
     implementation(libs.androidx.runtime.livedata)
-    // Optional - Integration with RxJava
-    implementation(libs.androidx.runtime.rxjava2)
+    // accompanist insets
     implementation(libs.accompanist.permissions)
     // 添加 documentfile 依赖
     implementation(libs.androidx.documentfile)
@@ -207,6 +187,7 @@ dependencies {
     implementation(libs.converter.scalars)
     // 解压库
     implementation(libs.commons.compress)
+    // xz
     implementation(libs.xz)
     // 7z
     implementation(libs.x.zip.jbinding.xandroid)
@@ -224,7 +205,6 @@ dependencies {
     implementation(libs.hilt.android)
     // aboutlibraries
     implementation(libs.aboutlibraries.core)
-    implementation(libs.aboutlibraries.compose.core)
     implementation(libs.aboutlibraries.compose.m3)
 
     kapt(libs.hilt.compiler)

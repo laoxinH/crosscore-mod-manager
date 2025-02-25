@@ -10,7 +10,7 @@ class ReadModReadmeFileUserCase @Inject constructor(
 
 ) {
     // 读取readme文件
-    operator suspend fun invoke(unZipPath: String, modBean: ModBean): ModBean {
+    operator fun invoke(unZipPath: String, modBean: ModBean): ModBean {
         // 判断是否存在readme文件
         val infoMap = mutableMapOf<String, String>()
         if (modBean.readmePath != null) {

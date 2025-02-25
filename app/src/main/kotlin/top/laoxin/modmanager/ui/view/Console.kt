@@ -42,15 +42,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
-
+import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.ui.state.ConsoleUiState
-import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.DialogCommonForUpdate
 import top.laoxin.modmanager.ui.view.commen.RequestNotificationPermission
@@ -62,7 +59,7 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 @Composable
 fun ConsoleContent(viewModel: ConsoleViewModel) {
     val context = LocalContext.current
-    val appPathsManager = viewModel.getAppPathsManager()
+    viewModel.getAppPathsManager()
     val permissionTools = viewModel.getPermissionTools()
     val fileToolsManager =  viewModel.getFileToolsManager()
 
@@ -498,13 +495,4 @@ fun ConsoleTopBar(
 
             // 添加更多的菜单项
         })
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewBottomNavigationBar() {
-    ModManagerTheme {
-
-    }
-
 }

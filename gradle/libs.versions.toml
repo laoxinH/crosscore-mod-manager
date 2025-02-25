@@ -35,9 +35,7 @@ desugar = "2.1.4"
 serialization = "2.1.10"
 ksp = "2.1.10-1.0.30"
 androidxRuntimeLivedata = "1.7.8"
-androidxRuntimeRxjava2 = "1.7.8"
 composeBom = "2025.02.00"
-uiTestManifest = "1.7.8"
 hilt = "2.55"
 aboutLibraries = "11.6.3"
 
@@ -49,20 +47,15 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
-androidx-compose-ui-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-androidx-compose-ui-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-compose-ui-ui = { module = "androidx.compose.ui:ui" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
-androidx-material3-window-size = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "androidxRuntimeLivedata" }
-androidx-runtime-rxjava2 = { module = "androidx.compose.runtime:runtime-rxjava2", version.ref = "androidxRuntimeRxjava2" }
 shizuku = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -77,8 +70,6 @@ okhttp3-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp
 provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
 material3 = { module = "androidx.compose.material3:material3" }
 x-zip-jbinding-xandroid = { module = "com.github.lings03:7-Zip-JBinding-4Android", version.ref = "xZipJbindingXandroid" }
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
@@ -88,7 +79,6 @@ desugar = { group = "com.android.tools", name = "desugar_jdk_libs_nio", version.
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
-aboutlibraries-compose-core = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutLibraries" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
 
 [plugins]
