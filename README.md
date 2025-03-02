@@ -13,11 +13,11 @@
   <a href="https://www.codefactor.io/repository/github/laoxinH/crosscore-mod-manager">
     <img src="https://www.codefactor.io/repository/github/laoxinH/crosscore-mod-manager/badge" alt="CodeFactor">
   </a>
-  <a href="https://github.com/laoxinH/crosscore-mod-manager/releases">
+  <a href="https://github.com/laoxinH/crosscore-mod-manager/releases/latest">
     <img src="https://img.shields.io/github/v/release/laoxinH/crosscore-mod-manager" alt="Release">
   </a>
-  <a href="https://github.com/laoxinH/crosscore-mod-manager/issues">
-    <img src="https://img.shields.io/github/issues/laoxinH/crosscore-mod-manager" alt="Issues">
+  <a href="https://github.com/laoxinH/crosscore-mod-manager/releases">
+    <img src="https://img.shields.io/github/downloads/laoxinH/crosscore-mod-manager/total" alt="Release">
   </a>
 </p>
 
