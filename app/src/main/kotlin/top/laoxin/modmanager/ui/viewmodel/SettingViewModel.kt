@@ -12,22 +12,19 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ResultCode
-
+import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
+import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.network.ModManagerApi
 import top.laoxin.modmanager.domain.usercase.app.CheckUpdateUserCase
 import top.laoxin.modmanager.domain.usercase.setting.DeleteBackupUserCase
@@ -36,9 +33,7 @@ import top.laoxin.modmanager.domain.usercase.setting.DeleteTempUserCase
 import top.laoxin.modmanager.domain.usercase.setting.DownloadGameConfigUserCase
 import top.laoxin.modmanager.domain.usercase.setting.FlashGameConfigUserCase
 import top.laoxin.modmanager.domain.usercase.setting.SelectGameUserCase
-
 import top.laoxin.modmanager.tools.AppInfoTools
-
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.filetools.FileToolsManager

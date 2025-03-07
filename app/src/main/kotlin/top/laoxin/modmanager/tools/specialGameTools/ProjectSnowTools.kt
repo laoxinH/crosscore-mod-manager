@@ -3,24 +3,19 @@ package top.laoxin.modmanager.tools.specialGameTools
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import top.laoxin.modmanager.constant.PathType
+import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.data.bean.BackupBean
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.data.bean.ModBeanTemp
-import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.constant.ResultCode
-import top.laoxin.modmanager.tools.AppInfoTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
 import top.laoxin.modmanager.tools.filetools.FileToolsManager
-import top.laoxin.modmanager.tools.filetools.impl.DocumentFileTools
-import top.laoxin.modmanager.tools.filetools.impl.FileTools
-import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.log
 
 @Singleton
 class ProjectSnowTools  @Inject constructor(

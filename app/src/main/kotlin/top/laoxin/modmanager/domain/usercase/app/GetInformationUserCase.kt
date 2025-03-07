@@ -5,16 +5,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.data.bean.InfoBean
 import top.laoxin.modmanager.data.network.ModManagerApi
-import top.laoxin.modmanager.di.FileToolsModule
 import top.laoxin.modmanager.di.FileToolsModule.FileToolsImpl
-
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
-
 import top.laoxin.modmanager.tools.manager.AppPathsManager
-import java.io.File
+import java.nio.file.Paths
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.nio.file.Paths
+
 @Singleton
 class GetInformationUserCase @Inject constructor(
     @FileToolsImpl private val fileTools: BaseFileTools,

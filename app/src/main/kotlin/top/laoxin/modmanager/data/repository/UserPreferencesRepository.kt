@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import top.laoxin.modmanager.App
 import top.laoxin.modmanager.constant.UserPreferencesKeys
 import java.io.IOException
 import javax.inject.Inject

@@ -1,8 +1,8 @@
 package top.laoxin.modmanager.tools.filetools.impl
 
 import android.util.Log
-import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
+import top.laoxin.modmanager.tools.manager.AppPathsManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

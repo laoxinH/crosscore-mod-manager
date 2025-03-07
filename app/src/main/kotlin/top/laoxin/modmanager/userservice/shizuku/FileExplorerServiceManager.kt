@@ -6,12 +6,12 @@ import android.os.IBinder
 import android.util.Log
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.UserServiceArgs
-import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.App
+import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.service.IFileExplorerService
 import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
-import top.laoxin.modmanager.service.IFileExplorerService
 
 
 object FileExplorerServiceManager {

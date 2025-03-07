@@ -1,31 +1,16 @@
 package top.laoxin.modmanager.domain.usercase.setting
 
 import android.util.Log
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import top.laoxin.modmanager.App
-import top.laoxin.modmanager.R
-import top.laoxin.modmanager.constant.UserPreferencesKeys
 import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.network.ModManagerApi
-import top.laoxin.modmanager.data.repository.UserPreferencesRepository
-import top.laoxin.modmanager.domain.usercase.gameinfo.CheckGameConfigUserCase
 import top.laoxin.modmanager.domain.usercase.gameinfo.LoadGameConfigUserCase
-import top.laoxin.modmanager.tools.AppInfoTools
-
-import top.laoxin.modmanager.tools.ToastUtils
-import top.laoxin.modmanager.tools.filetools.FileToolsManager
 import top.laoxin.modmanager.tools.manager.AppPathsManager
-import top.laoxin.modmanager.tools.manager.GameInfoManager
-import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 import java.io.File
-import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,22 +1,13 @@
 package top.laoxin.modmanager.domain.usercase.setting
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-
 import kotlinx.coroutines.withContext
-import top.laoxin.modmanager.App
-import top.laoxin.modmanager.R
-import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.data.bean.GameInfoBean
-import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.data.repository.backup.BackupRepository
 import top.laoxin.modmanager.data.repository.mod.ModRepository
-import top.laoxin.modmanager.observer.FlashModsObserverManager
-import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.filetools.FileToolsManager
-
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import java.io.File

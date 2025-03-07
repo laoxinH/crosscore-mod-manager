@@ -1,53 +1,28 @@
 package top.laoxin.modmanager.domain.usercase.mod
 
-import android.app.Application
-import android.os.RemoteException
+
 import android.util.Log
-import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
-
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ResultCode
-import top.laoxin.modmanager.constant.ScanModPath
 import top.laoxin.modmanager.data.bean.BackupBean
-import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
-import top.laoxin.modmanager.data.bean.ModBeanTemp
-import top.laoxin.modmanager.data.bean.ScanFileBean
-import top.laoxin.modmanager.data.repository.VersionRepository
 import top.laoxin.modmanager.data.repository.backup.BackupRepository
 import top.laoxin.modmanager.data.repository.mod.ModRepository
 import top.laoxin.modmanager.data.repository.scanfile.ScanFileRepository
 import top.laoxin.modmanager.domain.usercase.app.CheckPermissionUserCase
-import top.laoxin.modmanager.exception.CopyStreamFailedException
-import top.laoxin.modmanager.exception.NoSelectedGameException
 import top.laoxin.modmanager.observer.FlashModsObserverManager
-import top.laoxin.modmanager.tools.ArchiveUtil
 import top.laoxin.modmanager.tools.LogTools
-
-
 import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.filetools.FileToolsManager
-import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
-import top.laoxin.modmanager.ui.state.UserPreferencesState
-import top.laoxin.modmanager.ui.viewmodel.ModViewModel
-import top.lings.updater.util.GithubApi
-import java.io.File
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 

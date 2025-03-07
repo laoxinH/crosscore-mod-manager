@@ -1,10 +1,7 @@
 package top.laoxin.modmanager.domain.usercase.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import top.laoxin.modmanager.data.bean.AntiHarmonyBean
 import top.laoxin.modmanager.data.bean.ModBean
-import top.laoxin.modmanager.data.repository.antiharmony.AntiHarmonyRepository
 import top.laoxin.modmanager.data.repository.mod.ModRepository
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import javax.inject.Inject

@@ -2,14 +2,12 @@ package top.laoxin.modmanager.tools.manager
 
 import android.util.Log
 import com.google.gson.Gson
-import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.GameInfoConstant.CROSSCORE
 import top.laoxin.modmanager.constant.GameInfoConstant.CROSSCOREB
 import top.laoxin.modmanager.constant.GameInfoConstant.NO_GAME
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.di.FileToolsModule
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
-import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 import javax.inject.Inject
 import javax.inject.Singleton
 

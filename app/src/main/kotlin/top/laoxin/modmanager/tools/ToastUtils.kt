@@ -1,10 +1,10 @@
 package top.laoxin.modmanager.tools
 
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.StringRes
 import top.laoxin.modmanager.App
-import android.os.Handler
-import android.os.Looper
 
 object ToastUtils {
     private var sToast: Toast? = null

@@ -3,10 +3,8 @@ package top.laoxin.modmanager.domain.usercase.console
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.UserPreferencesKeys
 import top.laoxin.modmanager.domain.usercase.userpreference.SaveUserPreferenceUseCase
-import top.laoxin.modmanager.tools.ToastUtils
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import java.io.File

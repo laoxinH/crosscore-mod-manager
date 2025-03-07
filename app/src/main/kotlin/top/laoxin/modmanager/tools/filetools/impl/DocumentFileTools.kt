@@ -3,9 +3,9 @@ package top.laoxin.modmanager.tools.filetools.impl
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import top.laoxin.modmanager.App
-import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
+import top.laoxin.modmanager.tools.manager.AppPathsManager
 import java.io.File
 import java.io.InputStream
 import javax.inject.Inject

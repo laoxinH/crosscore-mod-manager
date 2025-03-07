@@ -1,17 +1,15 @@
 package top.laoxin.modmanager.domain.usercase.gameinfo
 
-import android.content.pm.PackageManager
+
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.di.FileToolsModule
 import top.laoxin.modmanager.tools.AppInfoTools
-import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
+import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
-
-
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -7,17 +7,15 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
-import android.os.Bundle
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import dagger.hilt.android.qualifiers.ApplicationContext
-import top.laoxin.modmanager.App
-import top.laoxin.modmanager.tools.manager.GameInfoManager
-import top.laoxin.modmanager.userservice.gamestart.ProjectSnowStartService
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.ResultCode
+import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
+import top.laoxin.modmanager.userservice.gamestart.ProjectSnowStartService
 import javax.inject.Inject
 import javax.inject.Singleton
 
