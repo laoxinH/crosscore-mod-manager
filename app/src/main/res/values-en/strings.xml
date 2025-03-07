@@ -205,4 +205,5 @@
     <string name="toast_start_scan">Scan Starts</string>
     <string name="toast_flash_failed">Failed to Refreash Mods</string>
     <string name="tosat_game_already_update">%1$s has been updated. Please reselect the game in the settings and perform the prompt operation again</string>
+    <string name="mod_page_mod_detail_dialog_detali_password">Password: %1$s</string>
 </resources>

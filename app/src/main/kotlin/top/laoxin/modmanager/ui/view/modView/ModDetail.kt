@@ -125,7 +125,7 @@ fun ModDetailPartialBottomSheet(
                     LaunchedEffect(mod.images) {
                         imageBitmaps.clear()
                         mod.images.mapNotNull { path ->
-                            if (File(path.replace("//","/")).exists()) {
+                            if (File(path.replace("//", "/")).exists()) {
                                 loadImageBitmapFromPath(context, path, 1024, 1024)
                             } else {
                                 Log.e("ModDetail", "图片文件不存在: $path")
@@ -165,6 +165,7 @@ fun ModDetailPartialBottomSheet(
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
+
                         Text(
                             text = stringResource(
                                 R.string.mod_page_mod_detail_dialog_detali_modNums,
@@ -172,6 +173,7 @@ fun ModDetailPartialBottomSheet(
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
+
                         Text(
                             text = stringResource(
                                 R.string.mod_page_mod_detail_dialog_detali_imgs,
@@ -179,6 +181,7 @@ fun ModDetailPartialBottomSheet(
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
+
                         Text(
                             text = stringResource(
                                 R.string.mod_page_mod_detail_dialog_detali_version,
@@ -202,6 +205,7 @@ fun ModDetailPartialBottomSheet(
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
+
                         Text(
                             text = stringResource(
                                 R.string.mod_page_mod_detail_dialog_detali_descript,
@@ -209,6 +213,16 @@ fun ModDetailPartialBottomSheet(
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
+
+                        mod.password?.let {
+                            Text(
+                                text = stringResource(
+                                    R.string.mod_page_mod_detail_dialog_detali_password,
+                                    mod.password
+                                ),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
 
                         Text(
                             text = stringResource(
