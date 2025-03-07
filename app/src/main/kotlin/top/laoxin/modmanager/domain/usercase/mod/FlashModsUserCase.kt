@@ -485,7 +485,7 @@ class FlashModsUserCase @Inject constructor(
     }
 
     // 读取mod文件
-    private suspend fun readModBeans(
+    private fun readModBeans(
         filepath: String?,
         modTempMap: MutableMap<String, ModBeanTemp>,
     ): List<ModBean> {

@@ -151,6 +151,7 @@
     <string name="switch_download_game_tiltle">Download Game Configuration File</string>
     <string name="setting_thinks_link_desc" translatable="false">JOB: %1$s</string>
     <string name="tips_special_operation">Performing special game operation</string>
+    <string name="tips_reload_decrypted_mod_info">Reload mod info</string>
     <string name="toast_decompression_failed">Decompression failed</string>
     <string name="toast_this_dir_has_no_prim_android">Cannot use Android system directory</string>
     <string name="channel_name">Game Launch Service</string>

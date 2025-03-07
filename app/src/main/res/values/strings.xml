@@ -150,6 +150,7 @@
     <string name="switch_download_game_tiltle">下载游戏配置文件</string>
     <string name="setting_thinks_link_desc">JOB: %1$s</string>
     <string name="tips_special_operation">执行特殊游戏操作</string>
+    <string name="tips_reload_decrypted_mod_info">读取解密MOD信息</string>
     <string name="toast_decompression_failed">解压失败</string>
     <string name="toast_this_dir_has_no_prim_android">不能使用安卓系统目录</string>
     <string name="channel_name">游戏启动服务</string>
