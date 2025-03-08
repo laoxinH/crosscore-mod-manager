@@ -12,45 +12,46 @@ import javax.inject.Singleton
 class CheckUpdateUserCase @Inject constructor(
     private val versionRepository: VersionRepository
 ) {
-
-    suspend operator fun invoke(currentVersion: String): Triple<List<String>, List<String>, Boolean> = withContext(Dispatchers.IO) {
-        kotlin.runCatching {
-            GithubApi.retrofitService.getLatestRelease()
-        }.onFailure { exception ->
-            if (versionRepository.getVersion() != currentVersion) {
+    suspend operator fun invoke(currentVersion: String): Triple<List<String>, List<String>, Boolean> =
+        withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                GithubApi.retrofitService.getLatestRelease()
+            }.onFailure { exception ->
+                if (versionRepository.getVersion() != currentVersion) {
+                    return@withContext Triple(
+                        listOf(
+                            versionRepository.getVersionUrl(),
+                            versionRepository.getUniversalUrl()
+                        ),
+                        listOf(versionRepository.getVersionInfo(), versionRepository.getVersion()),
+                        true
+                    )
+                }
                 return@withContext Triple(
-                    listOf(versionRepository.getVersionUrl(), versionRepository.getUniversalUrl()),
-                    listOf(versionRepository.getVersionInfo(),versionRepository.getVersion()),
-                    true
+                    listOf(),
+                    listOf(),
+                    false
                 )
+            }.onSuccess { release ->
+                if (release.version != currentVersion) {
+                    Log.d("Updater", "Update available: $release")
+                    versionRepository.saveVersion(release.version)
+                    versionRepository.saveVersionInfo(release.info)
+                    versionRepository.saveVersionUrl(release.getDownloadLink())
+                    versionRepository.saveUniversalUrl(release.getDownloadLinkUniversal())
+                    return@withContext Triple(
+                        listOf(release.getDownloadLink(), release.getDownloadLinkUniversal()),
+                        listOf(release.info, release.version),
+                        true
+                    )
+                } else {
+                    Log.d("Updater", "No update available")
+                }
             }
             return@withContext Triple(
                 listOf(),
                 listOf(),
                 false
             )
-        }.onSuccess { release ->
-            // version 是版本号，这里进行比较
-            val releaseVersion = release.version
-
-            if (releaseVersion != currentVersion) {
-                Log.d("Updater", "Update available: $release")
-                versionRepository.saveVersionInfo(releaseVersion)
-                versionRepository.saveVersionUrl(release.getDownloadLink())
-                versionRepository.saveUniversalUrl(release.getDownloadLinkUniversal())
-                return@withContext Triple(
-                    listOf(release.getDownloadLink(), release.getDownloadLinkUniversal()),
-                    listOf(release.info,releaseVersion),
-                    true
-                )
-            } else {
-                Log.d("Updater", "No update available")
-            }
         }
-        return@withContext Triple(
-            listOf(),
-            listOf(),
-            false
-        )
-    }
 }
