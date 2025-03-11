@@ -71,7 +71,6 @@ object PermissionTools {
                     return true
                 }
             } catch (_: PackageManager.NameNotFoundException) {
-                Log.e("PermissionTools", "Shizuku/Sui not installed")
             }
             return false
         }

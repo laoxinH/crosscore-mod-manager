@@ -3,6 +3,8 @@ package top.laoxin.modmanager.domain.usercase.mod
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
@@ -32,6 +34,7 @@ import java.nio.file.Paths
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.cancellation.CancellationException
 
 data class FlashModsResult(
     val code: Int,
@@ -78,17 +81,20 @@ class FlashModsUserCase @Inject constructor(
 
             // 扫描QQ
             if (userPreferencesState.scanQQDirectory) {
+                ensureActive()
                 setLoadingPath(ScanModPath.MOD_PATH_QQ)
                 scanMods(ScanModPath.MOD_PATH_QQ, gameInfoManager.getGameInfo())
             }
 
             // 扫描下载目录
             if (userPreferencesState.scanDownload) {
+                ensureActive()
                 setLoadingPath(ScanModPath.MOD_PATH_DOWNLOAD)
                 scanMods(ScanModPath.MOD_PATH_DOWNLOAD, gameInfoManager.getGameInfo())
             }
 
             // 扫描用户选择的目录
+            ensureActive()
             setLoadingPath(appPathsManager.getRootPath() + userPreferencesState.selectedDirectory)
             scanMods(
                 appPathsManager.getRootPath() + userPreferencesState.selectedDirectory,
@@ -99,6 +105,7 @@ class FlashModsUserCase @Inject constructor(
             var scanFiles = scanFileRepository.getAll().first()
             // 判断scanfiles中的文件是否被删除
             scanFiles.filter {
+                ensureActive()
                 !File(it.path).exists() || File(it.path).lastModified() != it.modifyTime || File(
                     it.path
                 ).length() != it.size
@@ -107,7 +114,10 @@ class FlashModsUserCase @Inject constructor(
                 scanFileRepository.delete(it)
             }
             scanFiles =
-                scanFiles.filter { File(it.path).exists() && File(it.path).lastModified() == it.modifyTime }
+                scanFiles.filter {
+                    ensureActive()
+                    File(it.path).exists() && File(it.path).lastModified() == it.modifyTime
+                }
 
             // 创建mods
             val modsScan = createArchiveMods(
@@ -116,6 +126,7 @@ class FlashModsUserCase @Inject constructor(
 
             // 扫描文件夹中的mod文件
             if (userPreferencesState.scanDirectoryMods) {
+                ensureActive()
                 modsScan.addAll(
                     scanDirectoryMods(
                         gameInfo.modSavePath, gameInfo
@@ -124,6 +135,7 @@ class FlashModsUserCase @Inject constructor(
             }
 
             // 在mods中找到和scanFiles中同路径的mod
+            ensureActive()
             val mods1 = mods.filter { mod ->
                 scanFiles.any { it.path == mod.path }
             }
@@ -141,6 +153,7 @@ class FlashModsUserCase @Inject constructor(
 
             // 更新数据库中的Mod
             val updateMods = checkUpdateMods(mods, modsScan)
+            ensureActive()
             modRepository.updateAll(updateMods)
 
             return@withContext FlashModsResult(
@@ -152,6 +165,10 @@ class FlashModsUserCase @Inject constructor(
                 message = ""
             )
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                logRecord("刷新mods任务被取消: $e")
+                throw e
+            }
             logRecord("刷新mods失败: $e")
             return@withContext FlashModsResult(
                 code = ResultCode.FAIL,
@@ -162,7 +179,9 @@ class FlashModsUserCase @Inject constructor(
                 message = e.message ?: ""
             )
         } finally {
-            flashModsObserverManager.startWatching()
+            withContext(NonCancellable) {
+                flashModsObserverManager.startWatching()
+            }
         }
 
     }
