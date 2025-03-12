@@ -660,7 +660,7 @@ class ModViewModel @Inject constructor(
         }
     }
 
-    fun setBackIconVisiable(b: Boolean) {
+    fun setBackIconVisible(b: Boolean) {
         _uiState.update {
             it.copy(isBackPathExist = b)
         }

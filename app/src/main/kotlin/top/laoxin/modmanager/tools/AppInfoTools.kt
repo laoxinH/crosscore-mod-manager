@@ -3,19 +3,19 @@ package top.laoxin.modmanager.tools
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import dagger.hilt.android.qualifiers.ApplicationContext
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
-import top.laoxin.modmanager.userservice.gamestart.ProjectSnowStartService
+import top.laoxin.modmanager.userService.gamestart.ProjectSnowStartService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,7 +35,7 @@ class AppInfoTools @Inject constructor(
         return try {
             context.packageManager.getPackageInfo(packageName, 0)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -45,7 +45,7 @@ class AppInfoTools @Inject constructor(
         return try {
             val packageInfo = context.packageManager.getPackageInfo(packageName, 0)
             packageInfo.versionName ?: "unknown"
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             "unknown"
         }
     }
@@ -58,9 +58,7 @@ class AppInfoTools @Inject constructor(
             val bitmap = when (drawable) {
                 is BitmapDrawable -> drawable.bitmap
                 is AdaptiveIconDrawable -> {
-                    Bitmap.createBitmap(
-                        drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
-                    ).also { bitmap ->
+                    createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight).also { bitmap ->
                         val canvas = Canvas(bitmap)
                         drawable.setBounds(
                             0, 0, canvas.width, canvas.height

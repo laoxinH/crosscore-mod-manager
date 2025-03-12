@@ -1,4 +1,4 @@
-package top.laoxin.modmanager.userservice.shizuku
+package top.laoxin.modmanager.userService.shizuku
 
 import android.annotation.SuppressLint
 import android.os.RemoteException

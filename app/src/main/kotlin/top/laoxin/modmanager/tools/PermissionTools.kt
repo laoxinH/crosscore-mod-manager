@@ -13,7 +13,7 @@ import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.RequestCode
 import top.laoxin.modmanager.constant.ScanModPath
-import top.laoxin.modmanager.userservice.shizuku.FileExplorerServiceManager
+import top.laoxin.modmanager.userService.shizuku.FileExplorerServiceManager
 import javax.inject.Singleton
 
 @Singleton

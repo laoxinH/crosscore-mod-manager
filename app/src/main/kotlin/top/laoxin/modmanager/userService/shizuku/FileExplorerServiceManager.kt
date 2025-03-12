@@ -1,4 +1,4 @@
-package top.laoxin.modmanager.userservice.shizuku
+package top.laoxin.modmanager.userService.shizuku
 
 import android.content.ComponentName
 import android.content.ServiceConnection
@@ -18,7 +18,7 @@ object FileExplorerServiceManager {
     const val TAG = "FileExplorerServiceManager"
     private var isBind = false
 
-    val USER_SERVICE_ARGS = UserServiceArgs(
+    val USER_SERVICE_ARGS: UserServiceArgs = UserServiceArgs(
         ComponentName(App.get().packageName, FileExplorerService::class.java.getName())
     ).daemon(false).debuggable(BuildConfig.DEBUG).processNameSuffix("file_explorer_service")
         .version(1)

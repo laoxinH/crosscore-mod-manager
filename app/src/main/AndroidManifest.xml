@@ -56,7 +56,7 @@
             android:theme="@style/Theme.ModManager" />
 
         <service
-            android:name=".userservice.gamestart.ProjectSnowStartService"
+            android:name=".userService.gamestart.ProjectSnowStartService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="dataSync"

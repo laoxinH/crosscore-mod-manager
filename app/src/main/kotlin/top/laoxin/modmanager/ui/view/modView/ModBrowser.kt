@@ -78,7 +78,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         if (doBackFunction) {
             doBack()
             viewModel.setDoBackFunction(false)
-            viewModel.setBackIconVisiable(false)
+            viewModel.setBackIconVisible(false)
         }
     }
 
@@ -126,7 +126,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
 
             // 空目录的返回上级目录按钮
             if (currentPath != uiState.currentGameModPath && files.isEmpty()) {
-                viewModel.setBackIconVisiable(true)
+                viewModel.setBackIconVisible(true)
             }
 
             if (uiState.currentFiles.isEmpty() && uiState.currentMods.isEmpty()) {
@@ -138,7 +138,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
 
                         // 非空目录的返回上级目录按钮
                         if (!uiState.isBackPathExist && currentPath != uiState.currentGameModPath) {
-                            viewModel.setBackIconVisiable(true)
+                            viewModel.setBackIconVisible(true)
                         }
 
                         // 通过filepath获取mods

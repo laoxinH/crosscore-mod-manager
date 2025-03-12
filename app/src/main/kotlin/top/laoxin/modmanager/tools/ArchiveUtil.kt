@@ -31,18 +31,7 @@ object ArchiveUtil {
     var progressUpdateListener: ProgressUpdateListener? = null
 
 
-
-    /**
-     * 无需密码解压文件
-     */
-    fun decompression(srcFile: String, destDir: String, overwrite: Boolean = false): Boolean {
-        // 判断压缩包类型
-        return decompression(srcFile, destDir, null, overwrite)
-    }
-
-    /**
-     * 带密码解压
-     */
+    // 带密码解压
     fun decompression(
         srcFile: String,
         destDir: String,
@@ -157,12 +146,6 @@ object ArchiveUtil {
             }
         }
     }
-
-    // 不带密码读取指定文件流
-    fun getArchiveItemInputStream(archivePath: String, itemName: String): InputStream? {
-        return getArchiveItemInputStream(archivePath, itemName, null)
-    }
-
 
     /**
      * 通过zip4j解压zip
@@ -398,7 +381,7 @@ object ArchiveUtil {
                     FileOutputStream(path, true).use {
                         it.write(data)
                     }
-                } catch (e: IOException) {
+                } catch (_: IOException) {
                     Log.e(TAG, "IOException while extracting $filePath")
                 }
                 data.size
@@ -487,7 +470,7 @@ object ArchiveUtil {
                                     it.write(data)
                                     it.flush()
                                 }
-                            } catch (e: IOException) {
+                            } catch (_: IOException) {
                                 Log.e(TAG, "IOException while extracting")
                             }
                             data.size
@@ -543,7 +526,7 @@ object ArchiveUtil {
             }
 
             byteArrayOutputStream = ByteArrayOutputStream()
-            val outStream: ISequentialOutStream = ISequentialOutStream { data ->
+            val outStream = ISequentialOutStream { data ->
                 byteArrayOutputStream.write(data)
                 data.size
             }
@@ -554,7 +537,7 @@ object ArchiveUtil {
             randomAccessFile?.close()
         }
 
-        return byteArrayOutputStream?.toByteArray()?.inputStream()
+        return byteArrayOutputStream.toByteArray().inputStream()
     }
 
     // 判断是否加密

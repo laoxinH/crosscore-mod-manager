@@ -1,4 +1,4 @@
-package top.laoxin.modmanager.userservice.gamestart
+package top.laoxin.modmanager.userService.gamestart
 
 import android.app.Notification
 import android.app.NotificationChannel

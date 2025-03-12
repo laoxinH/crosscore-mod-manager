@@ -2,13 +2,12 @@ package top.laoxin.modmanager.ui.viewmodel
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.FileObserver
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,7 +53,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConsoleViewModel @Inject constructor(
-    private val getUserPreferenceUseCase: GetUserPreferenceUseCase,
+    getUserPreferenceUseCase: GetUserPreferenceUseCase,
     private val checkUpdateUserCase: CheckUpdateUserCase,
     private val saveUserPreferenceUseCase: SaveUserPreferenceUseCase,
     private val getInformationUserCase: GetInformationUserCase,
@@ -103,7 +102,6 @@ class ConsoleViewModel @Inject constructor(
         var updateModCountJob: Job? = null
         var updateAntiHarmonyJob: Job? = null
         var updateEnableModCountJob: Job? = null
-        var fileObserver: FileObserver? = null
     }
 
     private val selectedGameFlow = getUserPreferenceUseCase(UserPreferencesKeys.SELECTED_GAME, 0)
@@ -341,7 +339,7 @@ class ConsoleViewModel @Inject constructor(
 
     fun openUrl(context: Context, url: String) {
         val urlIntent = Intent(
-            Intent.ACTION_VIEW, Uri.parse(url)
+            Intent.ACTION_VIEW, url.toUri()
         )
         context.startActivity(urlIntent)
     }
