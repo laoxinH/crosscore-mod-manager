@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.data.network
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -10,47 +11,35 @@ import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.InfoBean
 import top.laoxin.modmanager.data.bean.ThanksBean
 
-private const val BASE_URL =
-    "https://gitee.com"
+private const val API_URL_JSDELIVR =
+    "https://cdn.jsdelivr.net"
 
-/**
- * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
- */
-val gson = GsonBuilder()
-    //.disableHtmlEscaping()
-    .create()
+val gsonForApi: Gson = GsonBuilder().create()
+
 private val retrofit = Retrofit.Builder()
-    //.addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-    .addConverterFactory(GsonConverterFactory.create(gson))
-    .baseUrl(BASE_URL)
+    .addConverterFactory(GsonConverterFactory.create(gsonForApi))
+    .baseUrl(API_URL_JSDELIVR)
     .build()
 
-/**
- * Retrofit service object for creating api calls
- */
 interface ModManagerApiService {
-//    @GET("/laoxinH/Mod_Manager/raw/main/update/update.json")
-//    suspend fun getUpdate(): UpdateBean
-
-    @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/gameConfig.json")
+    // 获取游戏配置列表
+    @GET("gh/laoxinH/crosscore-mod-manager@main/gameConfig/api/gameConfig.json")
     suspend fun getGameConfigs(): List<DownloadGameConfigBean>
 
     // 下载游戏配置
-    @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/{name}.json")
+    @GET("gh/laoxinH/crosscore-mod-manager@main/gameConfig/{name}.json")
     suspend fun downloadGameConfig(@Path("name") name: String): GameInfoBean
 
     // 获取感谢名单
-    @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/thanks.json")
+    @GET("gh/laoxinH/crosscore-mod-manager@main/gameConfig/api/thanks.json")
     suspend fun getThanksList(): List<ThanksBean>
 
-    @GET("/laoxinH/Mod_Manager/raw/main/gameConfig/api/information.json")
+    // 获取最新信息
+    @GET("gh/laoxinH/crosscore-mod-manager@main/gameConfig/api/information.json")
     suspend fun getInfo(): InfoBean
 
 }
 
-/**
- * A public Api object that exposes the lazy-initialized Retrofit service
- */
 object ModManagerApi {
     val retrofitService: ModManagerApiService by lazy {
         retrofit.create(ModManagerApiService::class.java)

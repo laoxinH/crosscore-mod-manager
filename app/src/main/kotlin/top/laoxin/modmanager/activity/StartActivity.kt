@@ -1,4 +1,4 @@
-package top.lings.start
+package top.laoxin.modmanager.activity
 
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -9,8 +9,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import top.laoxin.modmanager.MainActivity
-import top.lings.userAgreement.UserAgreementActivity
+import top.laoxin.modmanager.activity.main.MainActivity
+import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
 import java.util.concurrent.atomic.AtomicBoolean
 
 class StartActivity : ComponentActivity() {

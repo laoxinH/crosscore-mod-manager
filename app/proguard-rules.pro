@@ -21,7 +21,6 @@
 
 -keep class net.sf.sevenzipjbinding.** { *; }
 -keep class top.laoxin.** { *; }
--keep class top.lings.** { *; }
 -keep class okhttp3.** { *; }
 
 -keep class com.google.gson.** { *; }

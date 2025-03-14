@@ -1,4 +1,4 @@
-package top.lings.userAgreement
+package top.laoxin.modmanager.activity.userAgreement
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
+import top.laoxin.modmanager.ui.view.UserAgreement
 
 class UserAgreementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

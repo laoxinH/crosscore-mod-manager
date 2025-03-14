@@ -1,4 +1,4 @@
-package top.lings.userAgreement
+package top.laoxin.modmanager.ui.view
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -32,8 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import top.laoxin.modmanager.MainActivity
+import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.R
+import androidx.core.content.edit
 
 @SuppressLint("AutoboxingStateValueProperty")
 @Composable
@@ -198,9 +199,9 @@ private fun ConfirmedButton(
 
 // 存储用户协议状态
 private fun saveUserAgreement(context: Context) {
-    val editor = context.getSharedPreferences("AppLaunch", MODE_PRIVATE).edit()
-    editor.putBoolean("isConfirm", true)
-    editor.apply()
+    context.getSharedPreferences("AppLaunch", MODE_PRIVATE).edit {
+        putBoolean("isConfirm", true)
+    }
 }
 
 // 导航到主活动

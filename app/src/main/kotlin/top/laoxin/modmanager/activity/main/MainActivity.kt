@@ -1,4 +1,4 @@
-package top.laoxin.modmanager
+package top.laoxin.modmanager.activity.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,7 +19,7 @@ import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ModManagerApp
 
 @AndroidEntryPoint
-class MainActivity (): ComponentActivity() {
+class MainActivity() : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +31,7 @@ class MainActivity (): ComponentActivity() {
         setContent {
             ModManagerTheme {
                 ConfigureSystemBars()
-                Surface(Modifier.fillMaxSize()) {
+                Surface(Modifier.Companion.fillMaxSize()) {
                     ModManagerApp()
                 }
             }

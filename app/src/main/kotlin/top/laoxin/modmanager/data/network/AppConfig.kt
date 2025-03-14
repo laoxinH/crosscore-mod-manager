@@ -1,4 +1,4 @@
-package top.lings.updater.util
+package top.laoxin.modmanager.data.network
 
 import android.os.Build
 

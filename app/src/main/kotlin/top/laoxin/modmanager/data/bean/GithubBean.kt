@@ -1,7 +1,7 @@
 package top.laoxin.modmanager.data.bean
 
 import com.google.gson.annotations.SerializedName
-import top.lings.updater.util.AppConfig
+import top.laoxin.modmanager.data.network.AppConfig
 
 data class GithubBean(
     @SerializedName("tag_name") val version: String,
