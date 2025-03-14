@@ -3,7 +3,6 @@ package top.laoxin.modmanager.ui.view
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
@@ -70,6 +69,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.laoxin.modmanager.App
@@ -185,7 +185,7 @@ fun ModManagerApp() {
                     )
                 }
             val activity = context as? Activity
-            val uiState = modViewModel.uiState.collectAsState().value
+            val modViewUiState = modViewModel.uiState.collectAsState().value
             val pagerState = rememberPagerState(
                 initialPage = currentPage,
                 pageCount = { pageList.size }
@@ -203,10 +203,18 @@ fun ModManagerApp() {
                 }
             }
 
-            // 在其他页面显示返回键返回到 ConsolePage
-            BackHandler(enabled = currentPage != NavigationIndex.CONSOLE.ordinal) {
-                currentPage = NavigationIndex.CONSOLE.ordinal
-                shouldScroll = true
+            // 在 ModPage 显示搜索框时，优先隐藏搜索框，并阻止其他返回逻辑
+            if (currentPage == NavigationIndex.MOD.ordinal && modViewUiState.searchBoxVisible) {
+                BackHandler {
+                    modViewModel.setSearchBoxVisible(false)
+                }
+            }
+            // 在其他页面，返回键跳转到 ConsolePage
+            else if (currentPage != NavigationIndex.CONSOLE.ordinal) {
+                BackHandler {
+                    currentPage = NavigationIndex.CONSOLE.ordinal
+                    shouldScroll = true
+                }
             }
 
             // 依赖 pagerState 的滚动状态自动更新 currentPage
@@ -235,11 +243,11 @@ fun ModManagerApp() {
             // 页面内容
             Box(modifier = Modifier.fillMaxSize()) {
                 // 显示进度
-                if (uiState.showTips) {
+                if (modViewUiState.showTips) {
                     ProcessTips(
-                        text = uiState.tipsText,
+                        text = modViewUiState.tipsText,
                         onDismiss = { modViewModel.setShowTips(false) },
-                        uiState = uiState,
+                        uiState = modViewUiState,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = innerPadding.calculateTopPadding())
@@ -422,11 +430,7 @@ fun getGameIcon(packageName: String): ImageBitmap? {
         val bitmap = when (drawable) {
             is BitmapDrawable -> drawable.bitmap
             is AdaptiveIconDrawable -> {
-                Bitmap.createBitmap(
-                    drawable.intrinsicWidth,
-                    drawable.intrinsicHeight,
-                    Bitmap.Config.ARGB_8888
-                ).also { bitmap ->
+                createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight).also { bitmap ->
                     val canvas = Canvas(bitmap)
                     drawable.setBounds(0, 0, canvas.width, canvas.height)
                     drawable.draw(canvas)
