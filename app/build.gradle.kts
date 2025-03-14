@@ -35,14 +35,14 @@ android {
     }
 
     namespace = "top.laoxin.modmanager"
-    compileSdk = 35
+    compileSdk = 36
 
     ndkVersion = "28.0.13004108"
 
     defaultConfig {
         applicationId = "com.mod.manager"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 353
         versionName = "3.5.3"
 
@@ -81,10 +81,6 @@ android {
         compose = true
         aidl = true
         viewBinding = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "2.0.0"
     }
 
     packaging {
