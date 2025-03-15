@@ -326,9 +326,6 @@ class ProjectSnowTools  @Inject constructor(
             val result = matchResult?.value ?: ""
             val modifiedResult = result.split('.').toMutableList().apply { this[2] = "0" }.joinToString(".")
             return modifiedResult
-
     }
-
-
 
 }

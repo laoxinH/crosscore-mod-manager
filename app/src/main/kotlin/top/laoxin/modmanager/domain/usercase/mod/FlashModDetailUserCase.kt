@@ -23,7 +23,8 @@ data class FlashModDetailResult(
 @Singleton
 class FlashModDetailUserCase @Inject constructor(
     private val appPathsManager: AppPathsManager,
-    private val modRepository: ModRepository
+    private val modRepository: ModRepository,
+    private val readModReadmeFileUserCase: ReadModReadmeFileUserCase,
 
 ) {
     suspend operator fun invoke(modBean: ModBean): FlashModDetailResult {
@@ -99,7 +100,7 @@ class FlashModDetailUserCase @Inject constructor(
             path = getModReadmePath(modBean)
 
             // 读取 README 文件
-            val readmeFile = File(path)
+/*            val readmeFile = File(path)
             if (readmeFile.exists()) {
                 val reader = readmeFile.bufferedReader()
                 val lines = reader.readLines()
@@ -112,17 +113,12 @@ class FlashModDetailUserCase @Inject constructor(
                     }
                 }
             }
-            LogTools.logRecord("info:$infoMap")
+            LogTools.logRecord("info:$infoMap")*/
 
             // 返回更新后的 modBean
 
             return@withContext FlashModDetailResult(
-                ResultCode.SUCCESS, modBean.copy(
-                    name = infoMap["名称"],
-                    description = infoMap["描述"],
-                    author = infoMap["作者"],
-                    version = infoMap["版本"]
-                )
+                ResultCode.SUCCESS, readModReadmeFileUserCase(appPathsManager.getModsUnzipPath(), modBean)
             )
         }
 

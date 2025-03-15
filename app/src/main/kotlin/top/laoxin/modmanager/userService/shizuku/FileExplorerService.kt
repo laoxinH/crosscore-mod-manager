@@ -260,9 +260,9 @@ class FileExplorerService : IFileExplorerService.Stub() {
 
     fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
         var l = SpecialGame.specialGameList
-        if (packageName.contains(l[1]) || packageName.contains(l[0])) {
+        if (packageName.contains(l[1],true) || packageName.contains(l[0],true)) {
             return false
-        } else if (packageName.contains(l[2]) || packageName.contains(l[3])) {
+        } else if (packageName.contains(l[2],true) || packageName.contains(l[3],true)) {
             return modFileName.endsWith(".pak") == true
         }
         return false

@@ -101,14 +101,22 @@
 
 - **如果不存在readme文件，MOD实验室会提示：未适配MOD管理器，可能存在未知问题**
 
-**readme.txt文件内容示例**
+**readme(目前readme文件采用Markdown格式, 文件命名为readme.txt或者readme.md)**
 
-![1715964083599](/image/readme/1715964083599.png?msec=1715965017836)
-
-名称：刃齿爱心眼小玩具
-描述：替换默认和动画
-作者：laoxin
-版本：1.0
+**以下类容仅作为参考(可以自定义任何内容, 请参照markdown语法编写)**
+```markdown
+### 名称：刃齿爱心眼小玩具
+### 描述：替换默认和动画
+### 作者：laoxin
+### 版本：1.0
+**[MOD群组](https://github.com/laoxinH/crosscore-mod-manager/)**
+```
+**显示类容如下**
+### 名称：刃齿爱心眼小玩具
+### 描述：替换默认和动画
+### 作者：laoxin
+### 版本：1.0
+**[MOD群组](https://github.com/laoxinH/crosscore-mod-manager/)**
 
 **注意冒号为中文标点**
 

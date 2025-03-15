@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Refresh
@@ -49,12 +51,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.tools.LogTools.logRecord
@@ -63,7 +70,9 @@ import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
 import java.util.Date
 import java.util.Locale
-
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -183,21 +192,21 @@ fun ModDetailPartialBottomSheet(
                             style = MaterialTheme.typography.bodyMedium
                         )
 
-                        Text(
+                        /*Text(
                             text = stringResource(
                                 R.string.mod_page_mod_detail_dialog_detali_version,
                                 mod.version ?: ""
                             ),
                             style = MaterialTheme.typography.bodyMedium
-                        )
+                        )*/
 
-                        Text(
+                        /*Text(
                             text = stringResource(
                                 R.string.mod_page_mod_detail_dialog_detali_author,
                                 mod.author ?: ""
                             ),
                             style = MaterialTheme.typography.bodyMedium
-                        )
+                        )*/
 
                         Text(
                             text = stringResource(
@@ -207,13 +216,13 @@ fun ModDetailPartialBottomSheet(
                             style = MaterialTheme.typography.bodyMedium
                         )
 
-                        Text(
+                        /*Text(
                             text = stringResource(
                                 R.string.mod_page_mod_detail_dialog_detali_descript,
                                 mod.description ?: ""
                             ),
                             style = MaterialTheme.typography.bodyMedium
-                        )
+                        )*/
 
                         mod.password?.let {
                             Text(
@@ -242,8 +251,33 @@ fun ModDetailPartialBottomSheet(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
+
+
                     }
                 }
+                LabelAndIconButtonGroup(
+                    label = R.string.mod_page_mod_detail_dialog_detali_readme,
+                    icon = Icons.Filled.AttachFile,
+                    showButton = showButton,
+                    viewModel = viewModel
+                )
+                // 文本标签
+
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    MarkdownText(
+                        mod.description ?: stringResource(R.string.mod_bean_no_readme),
+                        Modifier.padding(16.dp),
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            //lineHeight = 10.sp,
+                            textAlign = TextAlign.Justify,
+                        ),
+                    )
+                }
+
+
             }
         }
 
@@ -350,6 +384,24 @@ fun LabelAndIconButtonGroup(
             }
         }
     }
+}
+
+@Composable
+fun Markdown(markdown: String) {
+    MarkdownText(markdown)
+}
+
+// 创建实时预览
+@Preview(showBackground = true)
+@Composable
+fun PreviewModDetailPartialBottomSheet() {
+    // 显示一个文本输入框
+    Markdown(
+        "### 测试" +
+                "" +
+                "/n/n" +
+                "你好"
+    )
 }
 
 

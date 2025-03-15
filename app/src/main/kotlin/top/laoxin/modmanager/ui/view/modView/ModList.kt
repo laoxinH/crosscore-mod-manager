@@ -190,7 +190,6 @@ fun ModListItem(
             }
             Spacer(Modifier.width(16.dp))
             val name = mod.name
-            val description = mod.description
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -204,10 +203,14 @@ fun ModListItem(
                 }
 
                 Spacer(Modifier.height(8.dp))
-                if (description != null) {
+                if (mod.description != null){
                     Text(
-                        text = (/*if (description.length > 10) description.substring(0, 10) + "..." else*/ description),
+                        text = (stringResource(R.string.mod_modlist_item_desrcipt)),
                         style = MaterialTheme.typography.bodySmall
+                    )
+                } else {
+                    Text(
+                        (stringResource(R.string.mod_bean_no_readme))
                     )
                 }
             }

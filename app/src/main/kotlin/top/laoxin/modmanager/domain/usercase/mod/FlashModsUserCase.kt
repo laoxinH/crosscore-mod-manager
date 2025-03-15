@@ -35,6 +35,7 @@ import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.log
 
 data class FlashModsResult(
     val code: Int,
@@ -477,9 +478,12 @@ class FlashModsUserCase @Inject constructor(
         Log.d(TAG, "modBeanTempMap: $modBeanTempMap")
         // 判断是否存在readme.txt文件
         for (file in files) {
+            Log.d(TAG,file.toString())
             val modEntries = File(file.replace(scanPath, ""))
             val key = modEntries.parent ?: archiveFile?.name ?: modEntries.name
-            if (file.substringAfterLast("/").equals("readme.txt", ignoreCase = true)) {
+            if (file.substringAfterLast("/").equals("readme.txt", ignoreCase = true)  ||
+                file.substringAfterLast("/").equals("readme.md", ignoreCase = true)
+                ) {
                 val modBeanTemp = modBeanTempMap[key]
                 if (modBeanTemp != null) {
                     Log.d(TAG, "readmePath: $file")
@@ -519,8 +523,8 @@ class FlashModsUserCase @Inject constructor(
                 id = 0,
                 name = modBeanTemp.name,
                 version = "1.0",
-                description = App.get().getString(R.string.mod_bean_no_readme),
-                author = App.get().getString(R.string.mod_bean_no_author),
+                description = null,
+                author = null,
                 date = archiveFile?.lastModified() ?: Date().time,
                 path = modBeanTemp.modPath,
                 virtualPaths = modBeanTemp.virtualPaths,

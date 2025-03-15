@@ -43,8 +43,8 @@ android {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 36
-        versionCode = 353
-        versionName = "3.5.3"
+        versionCode = 354
+        versionName = "3.5.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -66,6 +66,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -202,6 +207,11 @@ dependencies {
     // aboutlibraries
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
+    implementation(libs.androidx.ui.tooling)
+    // markdown
+    implementation(libs.compose.markdown)
+
+
 
     kapt(libs.hilt.compiler)
 }

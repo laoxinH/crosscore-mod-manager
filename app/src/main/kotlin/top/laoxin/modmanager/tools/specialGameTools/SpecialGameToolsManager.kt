@@ -12,10 +12,11 @@ class SpecialGameToolsManager @Inject constructor(
 ) {
 
     private val specialGameTools: Map<String, BaseSpecialGameTools> = mapOf(
-        "hypergryph.arknights" to arknightsTools,
+        "arknights" to arknightsTools,
         "com.mrfz" to arknightsTools,
         "projectsnow" to projectSnowTools,
-        "snowbreak" to projectSnowTools
+        "snowbreak" to projectSnowTools,
+        "Arknights" to arknightsTools
     )
 
     companion object {

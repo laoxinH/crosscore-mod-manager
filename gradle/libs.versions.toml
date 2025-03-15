@@ -38,6 +38,8 @@ androidxRuntimeLivedata = "1.7.8"
 composeBom = "2025.03.00"
 hilt = "2.55"
 aboutLibraries = "11.6.3"
+uiTooling = "1.7.8"
+markwon = "0.5.7"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -80,7 +82,8 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
-
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
+compose-markdown = {module = "com.github.jeziellago:compose-markdown",version.ref = "markwon"}
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
