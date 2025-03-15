@@ -203,14 +203,15 @@ fun ModListItem(
                 }
 
                 Spacer(Modifier.height(8.dp))
-                if (mod.description != null){
+                if (mod.description != null) {
                     Text(
                         text = (stringResource(R.string.mod_modlist_item_desrcipt)),
                         style = MaterialTheme.typography.bodySmall
                     )
                 } else {
                     Text(
-                        (stringResource(R.string.mod_bean_no_readme))
+                        text = (stringResource(R.string.mod_bean_no_readme)),
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
