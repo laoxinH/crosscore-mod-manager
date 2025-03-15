@@ -182,16 +182,16 @@ fun ModDetailPartialBottomSheet(
 
                         Text(
                             text = stringResource(
-                                R.string.mod_page_mod_detail_dialog_detali_imgs,
-                                mod.images?.size ?: "0"
+                                R.string.mod_page_mod_detail_dialog_detali_create_time,
+                                formatTimestamp(mod.date)
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
 
                         Text(
                             text = stringResource(
-                                R.string.mod_page_mod_detail_dialog_detali_create_time,
-                                formatTimestamp(mod.date)
+                                R.string.mod_page_mod_detail_dialog_detali_path,
+                                mod.path ?: ""
                             ),
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -206,24 +206,27 @@ fun ModDetailPartialBottomSheet(
                             )
                         }
 
-                        Text(
-                            text = stringResource(
-                                R.string.mod_page_mod_detail_dialog_detali_path,
-                                mod.path ?: ""
-                            ),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-
-                        mod.images?.joinToString { it }?.let {
-                            Text(
-                                text = stringResource(
-                                    R.string.mod_page_mod_detail_dialog_detali_path_images,
-                                    it
-                                ),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                        mod.images?.size?.let {
+                            if (it != 0)
+                                Text(
+                                    text = stringResource(
+                                        R.string.mod_page_mod_detail_dialog_detali_imgs,
+                                        it
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                         }
 
+                        mod.images?.joinToString { it }?.let {
+                            if (it.isNotBlank() && it.isNotEmpty())
+                                Text(
+                                    text = stringResource(
+                                        R.string.mod_page_mod_detail_dialog_detali_path_images,
+                                        it
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                        }
 
                     }
                 }
