@@ -160,7 +160,7 @@ fun ModListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .sizeIn(minHeight = 30.dp, maxHeight = 80.dp)
+                .sizeIn(minHeight = 30.dp, /*maxHeight = 80.dp*/)
 
 
         ) {

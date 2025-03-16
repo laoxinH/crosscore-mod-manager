@@ -156,7 +156,8 @@ class FlashModsUserCase @Inject constructor(
             val updateMods = checkUpdateMods(mods, modsScan)
             ensureActive()
             modRepository.updateAll(updateMods)
-
+            // 去重
+            delRepeatMods()
             return@withContext FlashModsResult(
                 code = ResultCode.SUCCESS,
                 newMods = addMods,
@@ -168,7 +169,8 @@ class FlashModsUserCase @Inject constructor(
         } catch (e: Exception) {
             if (e is CancellationException) {
                 logRecord("刷新mods任务被取消: $e")
-                throw e
+                Log.d(TAG, "invoke: $e")
+                //throw e
             }
             logRecord("刷新mods失败: $e")
             return@withContext FlashModsResult(
@@ -185,6 +187,27 @@ class FlashModsUserCase @Inject constructor(
             }
         }
 
+    }
+
+    // 数据库去重
+    private suspend fun delRepeatMods(){
+        val allMods = modRepository.getAllIModsStream().first()
+        val groupedMods = allMods.groupBy { Pair(it.path, it.name) }
+        val filteredMods = mutableListOf<ModBean>()
+        for ((_, sameMods) in groupedMods) {
+            val enabledMods = sameMods.filter { it.isEnable }
+            val chosen = if (enabledMods.isNotEmpty()) {
+                enabledMods.maxByOrNull { it.date }
+            } else {
+                sameMods.maxByOrNull { it.date }
+            }
+            if (chosen != null) {
+                filteredMods.add(chosen)
+            }
+        }
+        // 去重,妈的可以用减法..
+        val duplicates = allMods - filteredMods
+        modRepository.deleteAll(duplicates)
     }
 
     /**

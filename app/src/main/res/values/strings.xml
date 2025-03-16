@@ -76,7 +76,7 @@
     <string name="mod_page_title_enable_mods">已开启</string>
     <string name="mod_page_title_disable_mods">已关闭</string>
     <string name="mod_page_title_search_mods">搜索</string>
-    <string name="mod_page_force_update_mod_warning">是否确认强制扫描，可能会带来不可预料的严重后果</string>
+    <string name="mod_page_force_update_mod_warning">当存在有压缩包MOD没有扫描到的情况下使用此功能可以强制扫描所有压缩包(扫描速度较慢)</string>
     <string name="toast_password_error">密码错误</string>
     <string name="toast_password_right">密码正确</string>
     <string name="password_dialog_title">请输入密码后重新启用</string>
@@ -206,6 +206,6 @@
     <string name="toast_flash_failed">刷新MOD失败</string>
     <string name="tosat_game_already_update">%1$s已更新, 请在设置重新选择游戏并重新执行提示操作</string>
     <string name="mod_page_mod_detail_dialog_detali_password">MOD密码: %1$s</string>
-    <string name="mod_page_mod_detail_dialog_detali_readme">Readme</string>
+    <string name="mod_page_mod_detail_dialog_detali_readme" translatable="false">Readme</string>
     <string name="mod_modlist_item_desrcipt">点击查看详情</string>
 </resources>

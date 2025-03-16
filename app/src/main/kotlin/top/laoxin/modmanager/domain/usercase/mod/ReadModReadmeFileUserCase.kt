@@ -10,30 +10,31 @@ import javax.inject.Singleton
 class ReadModReadmeFileUserCase @Inject constructor() {
     // 读取readme文件
     operator fun invoke(unZipPath: String, modBean: ModBean): ModBean {
-        // 判断是否存在readme文件
-        return  if (modBean.readmePath != null) {
-            val readmeFile = File(if (modBean.isZipFile) unZipPath else "" + modBean.readmePath)
-            if (readmeFile.exists()) {
-                modBean.copy(
-                    description = readmeFile.readText()
-                )
-            }else{
-                modBean
-            }
-        } else if (modBean.fileReadmePath != null) {
-            val readmeFile = File(if (modBean.isZipFile) unZipPath else "" + modBean.fileReadmePath)
-            if (readmeFile.exists()) {
-                // 调用readTxt
-                modBean.copy(
-                    description = readmeFile.readText()
-                )
 
-            } else {
-                modBean
-            }
-        } else {
-            modBean
+        var readmeFile : File? = null
+        if (modBean.isZipFile && modBean.readmePath != null) {
+            val path = unZipPath + modBean.readmePath
+            readmeFile = File(path)
         }
+
+        if (modBean.isZipFile && modBean.fileReadmePath != null) {
+            val path = unZipPath + modBean.fileReadmePath
+            readmeFile = File(path)
+        }
+
+        if (!modBean.isZipFile && modBean.readmePath != null) {
+            readmeFile = File(modBean.readmePath!!)
+        }
+
+        if (!modBean.isZipFile && modBean.fileReadmePath != null) {
+            readmeFile = File(modBean.fileReadmePath!!)
+        }
+        readmeFile?.let {
+            return modBean.copy(
+                description = readmeFile.readText()
+            )
+        }
+        return modBean
     }
     // 读取readme文件
 //    fun invoke1(unZipPath: String, modBean: ModBean): ModBean {
