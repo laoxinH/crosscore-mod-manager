@@ -27,7 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.coroutineScope
@@ -35,6 +37,7 @@ import kotlinx.coroutines.delay
 import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.R
 import androidx.core.content.edit
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @SuppressLint("AutoboxingStateValueProperty")
 @Composable
@@ -103,35 +106,37 @@ private fun UserAgreementContent(state: UserAgreementState, context: Context) {
         ) {
             // 协议内容
             item {
-                Text(
-                    text = stringResource(id = R.string.dialog_info_title),
-                    style = MaterialTheme.typography.titleLarge.copy(
+                MarkdownText(
+                    stringResource(id = R.string.dialog_info_title),
+                    Modifier.padding(bottom = 8.dp, top = 8.dp),
+                    style = TextStyle(
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 32.sp,
                         color = MaterialTheme.colorScheme.onBackground
                     ),
-                    modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
             }
             item {
-                Text(
-                    text = stringResource(id = R.string.dialog_info_important),
-                    style = MaterialTheme.typography.bodyLarge.copy(
+                MarkdownText(
+                    stringResource(id = R.string.dialog_info_important),
+                    Modifier.padding(bottom = 8.dp, top = 8.dp),
+                    style = TextStyle(
                         fontWeight = FontWeight.ExtraBold,
                         lineHeight = 28.sp,
+                        textAlign = TextAlign.Justify,
                         color = MaterialTheme.colorScheme.onBackground
                     ),
-                    modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
             }
             item {
-                Text(
-                    text = stringResource(id = R.string.dialog_info_message),
-                    style = MaterialTheme.typography.bodyLarge.copy(
+                MarkdownText(
+                    stringResource(id = R.string.dialog_info_message),
+                    Modifier.padding(bottom = 8.dp, top = 8.dp),
+                    style = TextStyle(
                         lineHeight = 28.sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Justify,
                     ),
-                    modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                 )
             }
         }
@@ -159,7 +164,6 @@ private fun UserAgreementContent(state: UserAgreementState, context: Context) {
     }
 }
 
-// 禁用按钮
 // 禁用按钮
 @Composable
 private fun DisabledButton(

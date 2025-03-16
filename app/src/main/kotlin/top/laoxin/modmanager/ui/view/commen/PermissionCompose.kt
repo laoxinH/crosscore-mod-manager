@@ -4,7 +4,6 @@ package top.laoxin.modmanager.ui.view.commen
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
@@ -30,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -62,7 +62,6 @@ fun RequestStoragePermission(
                             if (!Environment.isExternalStorageManager()) {
                                 ToastUtils.longCall(R.string.toast_permission_not_granted)
                             } else {
-                                //File("$ROOT_PATH/$DOWNLOAD_MOD_PATH$GAME_CONFIG").mkdirs()
                                 ToastUtils.longCall(R.string.toast_permission_granted)
                                 showDialog = false
                             }
@@ -71,7 +70,7 @@ fun RequestStoragePermission(
 
                 val intent: Intent =
                     Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).setData(
-                        Uri.parse("package:" + context.packageName)
+                        ("package:" + context.packageName).toUri()
                     )
 
                 DialogCommon(
