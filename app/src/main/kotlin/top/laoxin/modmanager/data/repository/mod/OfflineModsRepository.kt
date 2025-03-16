@@ -5,7 +5,7 @@ import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.data.repository.ModManagerDatabase
 import javax.inject.Inject
 
-class OfflineModsRepository @Inject constructor(private val database: ModManagerDatabase):
+class OfflineModsRepository @Inject constructor(private val database: ModManagerDatabase) :
     ModRepository {
     private val modDao = database.modDao()
     override fun getAllIModsStream(): Flow<List<ModBean>> {
@@ -87,5 +87,8 @@ class OfflineModsRepository @Inject constructor(private val database: ModManager
         return modDao.getModsByPath(path)
     }
 
+    override fun deleteDisableMods(gamePackageName: String) {
+        modDao.deleteDisableMods(gamePackageName)
+    }
 
 }

@@ -87,4 +87,8 @@ interface ModDao {
     // 通过modpath 模糊查询mods
     @Query("SELECT * from mods WHERE path LIKE '%' || :path || '%'")
     fun getModsByPath(path: String): Flow<List<ModBean>>
+
+    // 删除数据库中未启用的mod
+    @Query("DELETE FROM mods WHERE isEnable = 0 AND gamePackageName = :gamePackageName")
+    fun deleteDisableMods(gamePackageName: String)
 }

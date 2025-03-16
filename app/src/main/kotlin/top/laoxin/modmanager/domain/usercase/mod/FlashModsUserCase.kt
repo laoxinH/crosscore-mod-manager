@@ -35,20 +35,15 @@ import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.log
 
+// 刷新Mods结果数据类
 data class FlashModsResult(
     val code: Int,
-    // 新增mods
-    val newMods: List<ModBean>,
-    // 删除mods
-    val delMods: List<ModBean>,
-    // 更新mods
-    val updateMods: List<ModBean>,
-    // 删除已启用的mods
-    val delEnableMods: List<ModBean>,
-    // 提示信息
-    val message: String,
+    val newMods: List<ModBean>,     // 新增mods
+    val delMods: List<ModBean>,     // 删除mods
+    val updateMods: List<ModBean>,  // 更新mods
+    val delEnableMods: List<ModBean>, // 删除已启用的mods
+    val message: String,            // 提示信息
 )
 
 @Singleton
@@ -62,65 +57,75 @@ class FlashModsUserCase @Inject constructor(
     private val flashModsObserverManager: FlashModsObserverManager,
     private val fileToolsManager: FileToolsManager,
     private val specialGameToolsManager: SpecialGameToolsManager,
-    private val ensureGameModPathUserCase: EnsureGameModPathUserCase
+    private val ensureGameModPathUserCase: EnsureGameModPathUserCase,
+    private val flashMOdDetailUserCase: FlashModDetailUserCase,
+    private val flashModImageUserCase: FlashModImageUserCase
 ) {
 
     companion object {
         const val TAG = "FlashModsUserCase"
     }
 
+    // 主函数：刷新Mods
     suspend operator fun invoke(
         userPreferencesState: UserPreferencesState,
         mods: List<ModBean>,
         setLoadingPath: (String) -> Unit,
         forceScan: Boolean = false
     ): FlashModsResult = withContext(Dispatchers.IO) {
+        // 停止文件监视
         flashModsObserverManager.stopWatching()
+
         try {
+            // 确保游戏Mod路径存在
             ensureGameModPathUserCase(gameInfoManager.getGameInfo().modSavePath)
             val gameInfo = gameInfoManager.getGameInfo()
 
-            // 扫描QQ
+            // 扫描QQ目录
             if (userPreferencesState.scanQQDirectory) {
                 ensureActive()
                 setLoadingPath(ScanModPath.MOD_PATH_QQ)
-                scanMods(ScanModPath.MOD_PATH_QQ, gameInfoManager.getGameInfo())
+                scanMods(ScanModPath.MOD_PATH_QQ, gameInfo)
             }
 
             // 扫描下载目录
             if (userPreferencesState.scanDownload) {
                 ensureActive()
                 setLoadingPath(ScanModPath.MOD_PATH_DOWNLOAD)
-                scanMods(ScanModPath.MOD_PATH_DOWNLOAD, gameInfoManager.getGameInfo())
+                scanMods(ScanModPath.MOD_PATH_DOWNLOAD, gameInfo)
             }
 
             // 扫描用户选择的目录
             ensureActive()
-            setLoadingPath(appPathsManager.getRootPath() + userPreferencesState.selectedDirectory)
-            scanMods(
-                appPathsManager.getRootPath() + userPreferencesState.selectedDirectory,
-                gameInfoManager.getGameInfo()
-            )
+            val userDir = appPathsManager.getRootPath() + userPreferencesState.selectedDirectory
+            setLoadingPath(userDir)
+            scanMods(userDir, gameInfo)
 
-            // 读取scanfiles
+            // 强制扫描，清空扫描记录
+            if (forceScan) {
+                scanFileRepository.deleteAll()
+            }
+
+            // 获取并过滤已扫描文件列表
             var scanFiles = scanFileRepository.getAll().first()
-            // 判断scanfiles中的文件是否被删除
+            // 过滤掉已删除或修改的文件
+            scanFiles = scanFiles.filter {
+                ensureActive()
+                val file = File(it.path)
+                file.exists() && file.lastModified() == it.modifyTime && file.length() == it.size
+            }
+
+            // 从不存在或已修改的文件中删除扫描记录
             scanFiles.filter {
                 ensureActive()
-                !File(it.path).exists() || File(it.path).lastModified() != it.modifyTime || File(
-                    it.path
-                ).length() != it.size
+                val file = File(it.path)
+                !file.exists() || file.lastModified() != it.modifyTime || file.length() != it.size
             }.forEach {
-                Log.d("ModViewModel", "文件已删除: $it")
+                Log.d("ModViewModel", "文件已删除或修改: $it")
                 scanFileRepository.delete(it)
             }
-            scanFiles =
-                scanFiles.filter {
-                    ensureActive()
-                    File(it.path).exists() && File(it.path).lastModified() == it.modifyTime
-                }
 
-            // 创建mods
+            // 创建压缩包Mods
             val modsScan = createArchiveMods(
                 gameInfo.modSavePath, gameInfo, scanFiles, forceScan
             ).toMutableList()
@@ -128,36 +133,39 @@ class FlashModsUserCase @Inject constructor(
             // 扫描文件夹中的mod文件
             if (userPreferencesState.scanDirectoryMods) {
                 ensureActive()
-                modsScan.addAll(
-                    scanDirectoryMods(
-                        gameInfo.modSavePath, gameInfo
-                    )
-                )
+                modsScan.addAll(scanDirectoryMods(gameInfo.modSavePath, gameInfo))
             }
 
-            // 在mods中找到和scanFiles中同路径的mod
+            // 添加已有的但仍然存在的Mods
             ensureActive()
-            val mods1 = mods.filter { mod ->
-                scanFiles.any { it.path == mod.path }
-            }
-            modsScan.addAll(mods1)
+            modsScan.addAll(mods.filter { mod -> scanFiles.any { it.path == mod.path } })
 
-            // 对比是否有新增的mod
+            // 强制扫描时刷新所有Mod信息和图片
+            if (forceScan) {
+                modsScan.forEach {
+                    flashMOdDetailUserCase(it)
+                    flashModImageUserCase(it)
+                }
+            }
+
+            // 对比新增、删除和更新的Mod
             val addMods = getNewMods(mods, modsScan)
             Log.d("ModViewModel", "添加: $addMods")
 
-            // 对比是否有删除mod
+            // 检查删除的Mod
             val result = checkDelMods(mods, modsScan)
 
-            // 新增数据库中的Mod
-            modRepository.insertAll(addMods)
-
-            // 更新数据库中的Mod
+            // 检查更新的Mod
             val updateMods = checkUpdateMods(mods, modsScan)
             ensureActive()
+
+            // 更新数据库
+            modRepository.insertAll(addMods)
             modRepository.updateAll(updateMods)
+
             // 去重
             delRepeatMods()
+
             return@withContext FlashModsResult(
                 code = ResultCode.SUCCESS,
                 newMods = addMods,
@@ -170,7 +178,6 @@ class FlashModsUserCase @Inject constructor(
             if (e is CancellationException) {
                 logRecord("刷新mods任务被取消: $e")
                 Log.d(TAG, "invoke: $e")
-                //throw e
             }
             logRecord("刷新mods失败: $e")
             return@withContext FlashModsResult(
@@ -182,18 +189,21 @@ class FlashModsUserCase @Inject constructor(
                 message = e.message ?: ""
             )
         } finally {
+            // 无论成功失败，都重新开始监视
             withContext(NonCancellable) {
                 flashModsObserverManager.startWatching()
             }
         }
-
     }
 
-    // 数据库去重
-    private suspend fun delRepeatMods(){
+    // 数据库Mod去重
+    private suspend fun delRepeatMods() {
         val allMods = modRepository.getAllIModsStream().first()
+        // 按路径和名称分组
         val groupedMods = allMods.groupBy { Pair(it.path, it.name) }
         val filteredMods = mutableListOf<ModBean>()
+
+        // 每组保留一个（优先保留已启用且最新的）
         for ((_, sameMods) in groupedMods) {
             val enabledMods = sameMods.filter { it.isEnable }
             val chosen = if (enabledMods.isNotEmpty()) {
@@ -205,39 +215,35 @@ class FlashModsUserCase @Inject constructor(
                 filteredMods.add(chosen)
             }
         }
-        // 去重,妈的可以用减法..
+
+        // 删除重复项
         val duplicates = allMods - filteredMods
         modRepository.deleteAll(duplicates)
     }
 
-    /**
-     * 扫描指定路径的Mod文件
-     * @param scanPath 扫描路径
-     * @param gameInfo 当前游戏配置信息
-     * @return Boolean
-     */
+    // 扫描指定路径的Mod文件
     suspend fun scanMods(scanPath: String, gameInfo: GameInfoBean): Boolean {
         var fileTools = fileToolsManager.getFileTools(permissionTools.checkPermission(scanPath))
-        // shizuku扫描
+
+        // Shizuku模式扫描
         if (permissionTools.checkPermission(scanPath) == PathType.SHIZUKU) {
             Log.d(TAG, "开始扫描Shizuku: $scanPath")
-            var fileTools = fileToolsManager.getFileTools(PathType.SHIZUKU) as ShizukuFileTools
-            return fileTools.scanModsByShizuku(
-                scanPath,
-                gameInfo
-            )
+            val shizukuTools = fileToolsManager.getFileTools(PathType.SHIZUKU) as ShizukuFileTools
+            return shizukuTools.scanModsByShizuku(scanPath, gameInfo)
         }
+
+        // QQ目录特殊处理
         var tempScanPath = scanPath
         if (scanPath == ScanModPath.MOD_PATH_QQ) {
             fileTools = fileToolsManager.getFileTools(PathType.DOCUMENT)
-            Log.d(TAG, "开始扫描QQ: ")
+            Log.d(TAG, "开始扫描QQ")
             tempScanPath = appPathsManager.getModsTempPath() + "Mods/"
             val pathUri = fileTools?.pathToUri(ScanModPath.MOD_PATH_QQ)
             val scanModsFile = DocumentFile.fromTreeUri(App.get(), pathUri!!)
             val documentFiles = scanModsFile?.listFiles()
-            Log.d(TAG, "扫描到的文件们:${documentFiles.toString()} ")
+
+            // 拷贝QQ目录中的文件到临时目录
             for (documentFile in documentFiles!!) {
-                Log.d(TAG, "扫描到的文件: ${documentFile.name}")
                 try {
                     if (isScanFile(documentFile)) {
                         fileTools.copyFileByDF(
@@ -251,40 +257,48 @@ class FlashModsUserCase @Inject constructor(
                 }
             }
         }
+
+        // 处理找到的mod文件
         fileTools = fileToolsManager.getFileTools(PathType.FILE)
         File(tempScanPath).listFiles()?.forEach { file ->
             if (ArchiveUtil.isArchive(file.absolutePath)) {
+                // 检查压缩包中是否包含游戏相关文件
                 for (filename in ArchiveUtil.listInArchiveFiles(file.absolutePath)) {
                     if (gameInfo.gameFilePath.map { it + File(filename).name }.any {
                             fileTools =
                                 fileToolsManager.getFileTools(permissionTools.checkPermission(it))
                             fileTools?.isFileExist(it) == true
                         } || specialOperationScanMods(gameInfo.packageName, filename)) {
+                        // 移动文件到mod保存目录
                         Log.d(TAG, "开始移动文件: ${gameInfo.modSavePath + file.name}")
                         fileTools =
-                            fileToolsManager.getFileTools(PermissionTools.checkPermission(file.absolutePath))
+                            fileToolsManager.getFileTools(permissionTools.checkPermission(file.absolutePath))
                         fileTools?.moveFile(file.absolutePath, gameInfo.modSavePath + file.name)
                         break
                     }
                 }
             }
         }
+
+        // 清理临时目录
         fileTools?.deleteFile(appPathsManager.getModsTempPath() + "Mods/")
         return true
     }
 
-
     // 扫描文件夹mod
     suspend fun scanDirectoryMods(scanPath: String, gameInfo: GameInfoBean): List<ModBean> {
-        // 遍历scanPath及其子目录中的文件
         try {
             val modBeans = mutableListOf<ModBean>()
             val files = mutableListOf<String>()
+
+            // 获取所有文件路径
             withContext(Dispatchers.IO) {
                 Files.walk(Paths.get(scanPath))
             }.sorted(Comparator.reverseOrder()).forEach {
                 files.add(it.toString())
             }
+
+            // 创建临时mod映射
             val createModTempMap = createModTempMap(null, scanPath, files, gameInfo)
             modBeans.addAll(readModBeans(null, createModTempMap))
             return modBeans
@@ -305,32 +319,29 @@ class FlashModsUserCase @Inject constructor(
         val fileTools = fileToolsManager.getFileTools()
         val scanMods = mutableListOf<ModBean>()
         val archiveFiles = mutableListOf<File>()
-        // 收集所有符合条件的压缩包，包含子文件夹
+
+        // 收集所有符合条件的压缩包
         withContext(Dispatchers.IO) {
             Files.walk(Paths.get(scanPath)).use { paths ->
                 paths.filter { path ->
                     val file = path.toFile()
-                    !file.isDirectory && fileTools.isExcludeFileType(file.name) == false && ArchiveUtil.isArchive(
-                        file.absolutePath
-                    )
+                    !file.isDirectory &&
+                            fileTools.isExcludeFileType(file.name) == false &&
+                            ArchiveUtil.isArchive(file.absolutePath)
                 }.forEach { path ->
                     archiveFiles.add(path.toFile())
                 }
             }
         }
 
-        if (forceScan) {
-            // 强制扫描，删除所有scanfile
-            scanFileRepository.deleteAll()
-        }
-
         // 处理收集到的压缩包mod
         for (file in archiveFiles) {
-            // 判断文件是否再scanfiles中
+            // 检查文件是否已扫描
             val scanFile = scanFiles.find { it.path == file.absolutePath }
 
+            // 处理扫描文件记录
             if (!forceScan && scanFile != null) {
-                // 如果文件已经扫描过，判断是否需要更新
+                // 文件已扫描过，检查是否需要更新
                 if (scanFile.modifyTime != file.lastModified() || scanFile.size != file.length()) {
                     scanFileRepository.update(
                         scanFile.copy(
@@ -339,10 +350,10 @@ class FlashModsUserCase @Inject constructor(
                         )
                     )
                 } else {
-                    continue
+                    continue  // 无变化，跳过
                 }
             } else {
-                // 如果文件没有扫描过，插入scanfile表
+                // 新文件，添加扫描记录
                 insertScanFile(
                     ScanFileBean(
                         path = file.absolutePath,
@@ -353,6 +364,7 @@ class FlashModsUserCase @Inject constructor(
                 )
             }
 
+            // 创建Mod临时映射
             val modTempMap = createModTempMap(
                 file.absolutePath,
                 scanPath,
@@ -361,10 +373,8 @@ class FlashModsUserCase @Inject constructor(
             )
             Log.d(TAG, "modTempMap: $modTempMap")
 
-            val mods = readModBeans(
-                file.absolutePath,
-                modTempMap,
-            )
+            // 读取Mod信息
+            val mods = readModBeans(file.absolutePath, modTempMap)
             scanMods.addAll(mods)
         }
 
@@ -372,48 +382,58 @@ class FlashModsUserCase @Inject constructor(
         return scanMods
     }
 
-    // 对比是否有删除mod
+    // 检查已删除的Mod
     private fun checkDelMods(
         mods: List<ModBean>,
         modsScan: MutableList<ModBean>,
     ): Pair<List<ModBean>, List<ModBean>> {
         val delMods = mutableListOf<ModBean>()
+
+        // 比较找出已删除的Mod
         mods.forEach {
             val mod = it.isDelete(modsScan)
             if (mod != null) {
                 delMods.add(mod)
             }
         }
+
         Log.d("ModViewModel", "删除: $delMods")
+        // 找出已删除且启用的Mod
         val delEnableMods = delMods.filter { it.isEnable }
         return Pair(delMods, delEnableMods)
     }
 
-    // 对比是否有更新mod
+    // 检查需要更新的Mod
     private fun checkUpdateMods(
         mods: List<ModBean>, modsScan: List<ModBean>
     ): MutableList<ModBean> {
         val updatedMods = mutableListOf<ModBean>()
+
+        // 比较找出需要更新的Mod
         for (mod in mods) {
             val mod1 = mod.isUpdate(modsScan)
             if (mod1 != null) {
                 updatedMods.add(mod1)
             }
         }
+
         Log.d("ModViewModel", "更新: $updatedMods")
         return updatedMods
     }
 
-    // 获取新增的mods
+    // 获取新增的Mods
     private fun getNewMods(mods: List<ModBean>, modsScan: MutableList<ModBean>): List<ModBean> {
         val newMods = mutableListOf<ModBean>()
+
+        // 找出新增的Mod
         for (modBean in modsScan) {
             modBean.isNew(mods)?.let { newMods.add(it) }
         }
+
         return newMods
     }
 
-    // 创建modTempMap
+    // 创建ModTemp映射
     private fun createModTempMap(
         filepath: String?,
         scanPath: String,
@@ -421,14 +441,19 @@ class FlashModsUserCase @Inject constructor(
         gameInfo: GameInfoBean
     ): MutableMap<String, ModBeanTemp> {
         val archiveFile: File? = filepath?.let { File(it) }
-        val fileTools =
-            fileToolsManager.getFileTools(permissionTools.checkPermission(gameInfo.gamePath))
+        val fileTools = fileToolsManager.getFileTools(
+            permissionTools.checkPermission(gameInfo.gamePath)
+        )
         val modBeanTempMap = mutableMapOf<String, ModBeanTemp>()
+
+        // 遍历文件创建Mod映射
         for (file in files) {
             val modFileName = File(file).name
             val gameFileMap = mutableMapOf<String, String>()
+
+            // 根据游戏文件路径特性创建映射
             if (!gameInfo.isGameFileRepeat) {
-                // 如果游戏文件路径不重复
+                // 游戏文件路径不重复
                 gameFileMap.apply {
                     gameInfo.gameFilePath.forEachIndexed { index, _ ->
                         put(
@@ -438,7 +463,7 @@ class FlashModsUserCase @Inject constructor(
                     }
                 }
             } else {
-                // 如果游戏文件路径重复
+                // 游戏文件路径重复
                 gameFileMap.apply {
                     gameInfo.gameFilePath.forEachIndexed { index, it ->
                         val pathName = File(it).name
@@ -451,18 +476,22 @@ class FlashModsUserCase @Inject constructor(
                     }
                 }
             }
+
+            // 检查文件是否存在于游戏中
             gameFileMap.forEach {
-                if ((fileTools?.isFileExist(it.value) == true && fileTools.isFile(it.value)) || specialOperationScanMods(
-                        gameInfo.packageName,
-                        modFileName
-                    )
+                if ((fileTools?.isFileExist(it.value) == true && fileTools.isFile(it.value)) ||
+                    specialOperationScanMods(gameInfo.packageName, modFileName)
                 ) {
+
                     val modEntries = File(file.replace(scanPath, ""))
                     val key = modEntries.parent ?: archiveFile?.name ?: modEntries.name
                     val modBeanTemp = modBeanTempMap[key]
+
+                    // 创建或更新ModBeanTemp
                     if (modBeanTemp == null) {
-                        val beanTemp = ModBeanTemp(
-                            name = (archiveFile?.nameWithoutExtension + if (modEntries.parentFile == null) {
+                        // 计算Mod名称
+                        val modName =
+                            (archiveFile?.nameWithoutExtension + if (modEntries.parentFile == null) {
                                 if (archiveFile == null) modEntries.name else ""
                             } else "(" + modEntries.parentFile!!.path.replace(
                                 "/",
@@ -470,49 +499,57 @@ class FlashModsUserCase @Inject constructor(
                             ) + ")").replace(
                                 "null",
                                 App.get().getString(R.string.mod_temp_bean_name_dictionary_desc)
-                            ), // 如果是根目录则不加括号
+                            )
+
+                        // 创建新的ModBeanTemp
+                        val beanTemp = ModBeanTemp(
+                            name = modName,
                             iconPath = null,
                             readmePath = null,
                             modFiles = mutableListOf(file),
                             images = mutableListOf(),
                             fileReadmePath = null,
-                            isEncrypted = if (archiveFile == null) false else ArchiveUtil.isArchiveEncrypted(
-                                archiveFile.absolutePath
-                            ),
+                            isEncrypted = if (archiveFile == null) false else
+                                ArchiveUtil.isArchiveEncrypted(archiveFile.absolutePath),
                             gamePackageName = gameInfo.packageName,
                             modType = it.key,
                             gameModPath = gameInfo.gameFilePath[gameInfo.modType.indexOf(it.key)],
-                            isZip = if (archiveFile == null) false else ArchiveUtil.isArchive(
-                                archiveFile.absolutePath
-                            ),
-                            modPath = if (archiveFile == null) File(file).parent
-                                ?: file else archiveFile.absolutePath,
-                            virtualPaths = if (archiveFile == null) "" else archiveFile.absolutePath
-                                    + File(file).parentFile?.absolutePath
+                            isZip = if (archiveFile == null) false else
+                                ArchiveUtil.isArchive(archiveFile.absolutePath),
+                            modPath = if (archiveFile == null) File(file).parent ?: file
+                            else archiveFile.absolutePath,
+                            virtualPaths = if (archiveFile == null) "" else
+                                archiveFile.absolutePath + File(file).parentFile?.absolutePath
                         )
                         modBeanTempMap[key] = beanTemp
                     } else {
+                        // 已存在则添加文件
                         modBeanTemp.modFiles.add(file)
                     }
                 }
-
             }
         }
+
         Log.d(TAG, "modBeanTempMap: $modBeanTempMap")
-        // 判断是否存在readme.txt文件
+
+        // 查找并添加readme和图片文件
         for (file in files) {
-            Log.d(TAG,file.toString())
+            Log.d(TAG, file.toString())
             val modEntries = File(file.replace(scanPath, ""))
             val key = modEntries.parent ?: archiveFile?.name ?: modEntries.name
-            if (file.substringAfterLast("/").equals("readme.txt", ignoreCase = true)  ||
+
+            // 检查readme文件
+            if (file.substringAfterLast("/").equals("readme.txt", ignoreCase = true) ||
                 file.substringAfterLast("/").equals("readme.md", ignoreCase = true)
-                ) {
+            ) {
                 val modBeanTemp = modBeanTempMap[key]
                 if (modBeanTemp != null) {
                     Log.d(TAG, "readmePath: $file")
                     modBeanTemp.readmePath = file
                 }
-            } else if (file.contains(".jpg", ignoreCase = true) ||
+            }
+            // 检查图片文件
+            else if (file.contains(".jpg", ignoreCase = true) ||
                 file.contains(".png", ignoreCase = true) ||
                 file.contains(".gif", ignoreCase = true) ||
                 file.contains(".jpeg", ignoreCase = true)
@@ -520,17 +557,22 @@ class FlashModsUserCase @Inject constructor(
                 val modBeanTemp = modBeanTempMap[key]
                 modBeanTemp?.images?.add(file)
                 modBeanTemp?.iconPath = file
-            } else if (file.equals("readme.txt", ignoreCase = true)) {
+            }
+            // 根目录readme文件
+            else if (file.equals("readme.txt", ignoreCase = true) ||
+                file.equals("readme.md", ignoreCase = true)
+            ) {
                 modBeanTempMap.forEach {
                     val modBeanTemp = it.value
                     modBeanTemp.fileReadmePath = file
                 }
             }
         }
+
         return modBeanTempMap
     }
 
-    // 读取mod文件
+    // 读取Mod详细信息
     private fun readModBeans(
         filepath: String?,
         modTempMap: MutableMap<String, ModBeanTemp>,
@@ -538,10 +580,13 @@ class FlashModsUserCase @Inject constructor(
         if (modTempMap.isEmpty()) {
             return emptyList()
         }
+
         val archiveFile: File? = filepath?.let { File(it) }
         val list = mutableListOf<ModBean>()
+
         for (entry in modTempMap.entries) {
             val modBeanTemp = entry.value
+            // 创建基础ModBean
             val modBean = ModBean(
                 id = 0,
                 name = modBeanTemp.name,
@@ -564,6 +609,8 @@ class FlashModsUserCase @Inject constructor(
                 modType = modBeanTemp.modType,
                 isZipFile = modBeanTemp.isZip
             )
+
+            // 处理加密的Mod
             if (modBeanTemp.isEncrypted) {
                 list.add(
                     modBean.copy(
@@ -574,12 +621,15 @@ class FlashModsUserCase @Inject constructor(
                     )
                 )
             } else {
+                // 处理普通Mod
                 if (archiveFile != null) {
-
                     var mod = modBean
+
+                    // 处理readme文件
                     if (modBeanTemp.fileReadmePath != null || modBeanTemp.readmePath != null) {
                         var readmeFilename = modBeanTemp.fileReadmePath
                         if (modBeanTemp.readmePath != null) readmeFilename = modBeanTemp.readmePath
+
                         // 解压readme
                         ArchiveUtil.extractSpecificFile(
                             archiveFile.absolutePath,
@@ -591,33 +641,37 @@ class FlashModsUserCase @Inject constructor(
                         readmeFile.delete()
                     }
 
+                    // 处理图片文件
                     var icon = modBeanTemp.iconPath
                     var images: List<String> = modBeanTemp.images
                     kotlin.runCatching {
                         ArchiveUtil.extractSpecificFile(
                             archiveFile.absolutePath,
                             modBeanTemp.images,
-                            appPathsManager.getModsImagePath() + archiveFile.nameWithoutExtension,
-
-                            )
-                        icon =
-                            appPathsManager.getModsImagePath() + archiveFile.nameWithoutExtension + "/" + icon
+                            appPathsManager.getModsImagePath() + archiveFile.nameWithoutExtension
+                        )
+                        icon = appPathsManager.getModsImagePath() +
+                                archiveFile.nameWithoutExtension + "/" + icon
                         images = modBeanTemp.images.map {
-                            appPathsManager.getModsImagePath() + archiveFile.nameWithoutExtension + "/" + it
+                            appPathsManager.getModsImagePath() +
+                                    archiveFile.nameWithoutExtension + "/" + it
                         }
                     }.onFailure {
                         Log.e(TAG, "解压图片失败: $it")
                     }
+
                     mod = mod.copy(
                         icon = icon,
                         images = images,
                     )
                     list.add(mod)
                 } else {
+                    // 处理非压缩包Mod
                     list.add(readModReadmeFileUserCase("", modBean))
                 }
             }
         }
+
         return list
     }
 
@@ -631,15 +685,12 @@ class FlashModsUserCase @Inject constructor(
 
     // 特殊游戏扫描操作
     fun specialOperationScanMods(packageName: String, modFileName: String): Boolean {
-        return specialGameToolsManager.getSpecialGameTools(packageName)?.specialOperationScanMods(
-            packageName,
-            modFileName
-        ) == true
+        return specialGameToolsManager.getSpecialGameTools(packageName)
+            ?.specialOperationScanMods(packageName, modFileName) == true
     }
 
     // 向scanfile表中插入数据
     suspend fun insertScanFile(scanFile: ScanFileBean) {
         scanFileRepository.insert(scanFile)
     }
-
 }

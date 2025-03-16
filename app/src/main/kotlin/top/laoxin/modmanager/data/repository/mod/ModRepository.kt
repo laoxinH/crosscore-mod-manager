@@ -61,5 +61,7 @@ interface ModRepository {
     // 通过path查询mods
     fun getModsByPath(path: String): Flow<List<ModBean>>
 
+    // 删除数据库中未启用的mod
+    fun deleteDisableMods(gamePackageName: String)
 
 }
