@@ -163,8 +163,13 @@ class FlashModsUserCase @Inject constructor(
             modRepository.insertAll(addMods)
             modRepository.updateAll(updateMods)
 
-            // 去重
-            delRepeatMods()
+            // 去重名字和路径相同的Mod
+            delRepeatModsByPathAndName()
+
+            // 去重路径相同的Mod
+            if (forceScan) {
+                delDuplicateModsByPathAndVirtualPathsAndModType()
+            }
 
             return@withContext FlashModsResult(
                 code = ResultCode.SUCCESS,
@@ -197,7 +202,7 @@ class FlashModsUserCase @Inject constructor(
     }
 
     // 数据库Mod去重
-    private suspend fun delRepeatMods() {
+    private suspend fun delRepeatModsByPathAndName() {
         val allMods = modRepository.getAllIModsStream().first()
         // 按路径和名称分组
         val groupedMods = allMods.groupBy { Pair(it.path, it.name) }
@@ -217,6 +222,36 @@ class FlashModsUserCase @Inject constructor(
         }
 
         // 删除重复项
+        val duplicates = allMods - filteredMods
+        modRepository.deleteAll(duplicates)
+    }
+
+    private suspend fun delDuplicateModsByPathAndVirtualPathsAndModType() {
+        val allMods = modRepository.getAllIModsStream().first()
+
+        // 按 path 进行分组
+        val groupedMods =
+            allMods.groupBy {
+                Triple(it.path, it.virtualPaths, it.modType)
+            }
+        val filteredMods = mutableListOf<ModBean>()
+
+        for ((_, samePathMods) in groupedMods) {
+            val enabledMods = samePathMods.filter { it.isEnable }
+
+            // 选出要保留的 Mod
+            val chosen = if (enabledMods.isNotEmpty()) {
+                enabledMods.maxByOrNull { it.date }
+            } else {
+                samePathMods.maxByOrNull { it.date }
+            }
+
+            if (chosen != null) {
+                filteredMods.add(chosen)
+            }
+        }
+
+        // 计算需要删除的重复项
         val duplicates = allMods - filteredMods
         modRepository.deleteAll(duplicates)
     }
