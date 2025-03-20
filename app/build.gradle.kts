@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.serialization)
-    alias(libs.plugins.kapt)
     alias(libs.plugins.hilt)
     alias(libs.plugins.aboutLibraries)
 }
@@ -204,6 +203,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     // DI依赖注入
     implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
     // aboutlibraries
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
@@ -211,7 +211,4 @@ dependencies {
     // markdown
     implementation(libs.compose.markdown)
 
-
-
-    kapt(libs.hilt.compiler)
 }

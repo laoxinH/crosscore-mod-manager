@@ -35,11 +35,8 @@ class FlashGameConfigUserCase @Inject constructor(
             appPathsManager.getDownloadModPath()
         ).first()
         readGameConfig(appPathsManager.getRootPath() + first)
-        loadGameConfigUserCase(Paths.get(appPathsManager.getMyAppPath(), appPathsManager.getGameConfig()).toString(),appPathsManager.getRootPath())
-
-
+        loadGameConfigUserCase()
         return@withContext true
-
     }
 
     suspend fun readGameConfig(path: String): List<GameInfoBean> {
@@ -59,7 +56,8 @@ class FlashGameConfigUserCase @Inject constructor(
                                 )
 
                             //val fromJson = Gson().fromJson(listFile.readText(), GameInfo::class.java)
-                            val checkGameInfo = checkGameConfigUserCase(fromJson,appPathsManager.getRootPath())
+                            val checkGameInfo =
+                                checkGameConfigUserCase(fromJson, appPathsManager.getRootPath())
                             if (File(appPathsManager.getMyAppPath() + appPathsManager.getGameConfig() + checkGameInfo.packageName + ".json").exists()) {
                                 Files.delete(
                                     Paths.get(appPathsManager.getMyAppPath() + appPathsManager.getGameConfig() + checkGameInfo.packageName + ".json")

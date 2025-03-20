@@ -10,7 +10,6 @@ import top.laoxin.modmanager.data.network.ModManagerApi
 import top.laoxin.modmanager.domain.usercase.gameinfo.LoadGameConfigUserCase
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import java.io.File
-import java.nio.file.Paths
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,16 +30,8 @@ class DownloadGameConfigUserCase @Inject constructor(
                 Log.e("SettingViewModel", "downloadGameConfig: $it")
                 return@withContext false
             }.onSuccess {
-
-                loadGameConfigUserCase(
-                    Paths.get(
-                        appPathsManager.getMyAppPath(),
-                        appPathsManager.getGameConfig()
-                    ).toString(), appPathsManager.getRootPath()
-                )
+                loadGameConfigUserCase()
                 return@withContext true
-
-
             }
             return@withContext true
 

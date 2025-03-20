@@ -13,27 +13,34 @@ import javax.inject.Singleton
 
 @Singleton
 class GameInfoManager @Inject constructor(
-    @FileToolsModule.FileToolsImpl private val fileTools: BaseFileTools,
+    @param:FileToolsModule.FileToolsImpl private val fileTools: BaseFileTools,
     private val appPathsManager: AppPathsManager,
 ) {
     private val gameInfoList = mutableListOf<GameInfoBean>()
-    private var gameInfo : GameInfoBean = NO_GAME
+    private var gameInfo: GameInfoBean = NO_GAME
 
     init {
         loadGameInfo()
     }
 
-    fun loadGameInfo(){
+    fun loadGameInfo() {
         try {
-            if (this.gameInfoList.isEmpty()) this.gameInfoList.addAll(mutableListOf(NO_GAME, CROSSCORE, CROSSCOREB))
-            val listFiles = fileTools.listFiles(appPathsManager.getMyAppPath() +appPathsManager.getGameConfig())
+            if (this.gameInfoList.isEmpty()) this.gameInfoList.addAll(
+                mutableListOf(
+                    NO_GAME,
+                    CROSSCORE,
+                    CROSSCOREB
+                )
+            )
+            val listFiles =
+                fileTools.listFiles(appPathsManager.getMyAppPath() + appPathsManager.getGameConfig())
             val gameInfoList = mutableListOf<GameInfoBean>()
             for (listFile in listFiles) {
                 if (listFile.name.endsWith(".json")) {
                     try {
                         val fromJson =
                             Gson().fromJson(listFile.readText(), GameInfoBean::class.java)
-                        val checkGameInfo = checkGameConfig(fromJson,appPathsManager.getRootPath())
+                        val checkGameInfo = checkGameConfig(fromJson, appPathsManager.getRootPath())
                         gameInfoList.add(checkGameInfo)
 
                     } catch (e: Exception) {
@@ -54,7 +61,7 @@ class GameInfoManager @Inject constructor(
     }
 
 
-    private fun checkGameConfig(gameInfo: GameInfoBean, rootPath : String) : GameInfoBean  {
+    private fun checkGameConfig(gameInfo: GameInfoBean, rootPath: String): GameInfoBean {
         Log.d("LoadGameConfig", "gameInfo: $gameInfo")
         var result = gameInfo.copy()
         if (gameInfo.gameName.isEmpty()) {

@@ -162,12 +162,7 @@ class ConsoleViewModel @Inject constructor(
         checkUpdate()
         getNewInfo()
         viewModelScope.launch {
-            loadGameConfigUserCase(
-                Paths.get(
-                    appPathsManager.getMyAppPath(),
-                    appPathsManager.getGameConfig()
-                ).toString(), appPathsManager.getRootPath()
-            )
+            loadGameConfigUserCase()
             userPreferencesState.collectLatest {
                 updateLogToolUserCase(appPathsManager.getRootPath() + it.selectedDirectory)
                 updateGameInfo(it)
@@ -197,7 +192,7 @@ class ConsoleViewModel @Inject constructor(
 
     private fun getNewInfo() {
         viewModelScope.launch {
-            getInformationUserCase(appPathsManager.getMyAppPath())?.let { info ->
+            getInformationUserCase()?.let { info ->
                 _uiState.update {
                     it.copy(infoBean = info)
                 }

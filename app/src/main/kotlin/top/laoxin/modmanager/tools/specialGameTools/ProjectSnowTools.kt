@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ProjectSnowTools  @Inject constructor(
+class ProjectSnowTools @Inject constructor(
     private val permissionTools: PermissionTools,
     private val fileToolsManager: FileToolsManager,
     private val appPathsManager: AppPathsManager,
@@ -27,20 +27,15 @@ class ProjectSnowTools  @Inject constructor(
     /***
      * 当shizuku服务中执行代码时不能包含任何调用shizuku行为否则报错, 同时也无法访问上下文
      */
-    private var check_filepath = ""
-    private var check_filename_mod_path = ""
-    private var check_filename_backup_path = ""
+    private var checkFilepath = ""
+    private var checkFilenameModPath = ""
+    private val gson: Gson = GsonBuilder().create()
+    private lateinit var fileTools: BaseFileTools
 
     companion object {
         const val TAG = "ProjectSnowTools"
         const val CHECK_FILENAME = "manifest.json"
     }
-    private val gson: Gson = GsonBuilder()
-        /*.disableHtmlEscaping()
-        .setLongSerializationPolicy(LongSerializationPolicy.STRING)*/
-        .create()
-    private lateinit var fileTools: BaseFileTools
-    // var checkPermission = PermissionTools.checkPermission(check_filepath)
 
     data class MainIFest(
         var version: String,
@@ -61,43 +56,22 @@ class ProjectSnowTools  @Inject constructor(
     )
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
-        check_filename_mod_path = appPathsManager.getGameCheckFilePath() + packageName + "/" + CHECK_FILENAME
-        /* check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
-         check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
-         val backupCheckFile = File(check_filename_backup_path)
-         if (checkPermission(check_filepath) == PathType.NULL) return false
-         if (!backupCheckFile.exists()) {
-             if (backupCheckFile.parentFile?.exists() == false) {
-                 backupCheckFile.parentFile?.mkdirs()
-             }
-             val checkPermission = PermissionTools.checkPermission(check_filepath)
-             when (checkPermission) {
-                 PathType.FILE -> {
-                     fileTools.copyFile(check_filepath, check_filename_backup_path)
-                 }
-                 PathType.DOCUMENT -> {
-                     fileTools.copyFileByDF(check_filepath, check_filename_backup_path)
-                 }
-                 PathType.SHIZUKU -> {
-                     fileTools.copyFile(check_filepath, check_filename_backup_path)
-                 }
-             }
-         }*/
-
+        checkFilenameModPath =
+            appPathsManager.getGameCheckFilePath() + packageName + "/" + CHECK_FILENAME
 
         val unZipPath =
             appPathsManager.getModsUnzipPath() + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag: MutableList<Boolean> = mutableListOf()
 
         var paks = mutableListOf<Pak>()
-        if (File(check_filename_mod_path).exists()) {
+        if (File(checkFilenameModPath).exists()) {
             paks = gson.fromJson(
-                File(check_filename_mod_path).readText(),
+                File(checkFilenameModPath).readText(),
                 MainIFest::class.java
             ).paks
         } else {
-            File(check_filename_mod_path).parentFile?.mkdirs()
-            File(check_filename_mod_path).createNewFile()
+            File(checkFilenameModPath).parentFile?.mkdirs()
+            File(checkFilenameModPath).createNewFile()
         }
         for (modFile in mod.modFiles!!) {
             val modFilePath = if (mod.isZipFile) {
@@ -120,7 +94,7 @@ class ProjectSnowTools  @Inject constructor(
             // 读取文件大小
             var fileSize = try {
                 File(modFilePath).length()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
             if (fileSize == null) {
@@ -140,7 +114,7 @@ class ProjectSnowTools  @Inject constructor(
                 bUserCache = true,
                 paks = paks
             ).let {
-                File(check_filename_mod_path).writeText(gson.toJson(it, MainIFest::class.java))
+                File(checkFilenameModPath).writeText(gson.toJson(it, MainIFest::class.java))
             }
         }
         return flag.all { it }
@@ -152,28 +126,11 @@ class ProjectSnowTools  @Inject constructor(
         packageName: String,
         modBean: ModBean
     ): Boolean {
-        check_filename_mod_path = appPathsManager.getGameCheckFilePath() + packageName + "/" + CHECK_FILENAME
-        /*        check_filepath = "${ModTools.ROOT_PATH}/Android/data/$packageName/files/$CHECK_FILENAME"
-                check_filename_backup_path = ModTools.BACKUP_PATH + packageName + "/backup_" + CHECK_FILENAME
-                val backupCheckFile = File(check_filename_backup_path)
-
-                if (backupCheckFile.exists()) {
-                    when (checkPermission(check_filepath)) {
-                        PathType.FILE -> {
-                            fileTools.copyFile(check_filename_backup_path, check_filepath)
-                        }
-                        PathType.DOCUMENT -> {
-                            fileTools.copyFileByFD(check_filename_backup_path, check_filepath)
-                        }
-                        PathType.SHIZUKU -> {
-                            fileTools.copyFile(check_filename_backup_path, check_filepath)
-                        }
-                        else -> return  false
-                    }
-                }*/
+        checkFilenameModPath =
+            appPathsManager.getGameCheckFilePath() + packageName + "/" + CHECK_FILENAME
 
         val mainIFest = gson.fromJson(
-            File(check_filename_mod_path).readText(),
+            File(checkFilenameModPath).readText(),
             MainIFest::class.java
         )
 
@@ -187,33 +144,34 @@ class ProjectSnowTools  @Inject constructor(
             }
         }
 
-        File(check_filename_mod_path).writeText(gson.toJson(mainIFest, MainIFest::class.java))
+        File(checkFilenameModPath).writeText(gson.toJson(mainIFest, MainIFest::class.java))
         return true
     }
 
     override fun specialOperationStartGame(gameInfo: GameInfoBean): Boolean {
         Log.d(TAG, "specialOperationStartGame: 开始执行注入")
-        check_filename_mod_path =
+        checkFilenameModPath =
             appPathsManager.getGameCheckFilePath() + gameInfo.packageName + "/" + CHECK_FILENAME
-        check_filepath = "${appPathsManager.getRootPath()}/Android/data/${gameInfo.packageName}/files/"
+        checkFilepath =
+            "${appPathsManager.getRootPath()}/Android/data/${gameInfo.packageName}/files/"
 
-        if (checkPermission(check_filepath) == PathType.NULL) return false
-        val checkPermission = permissionTools.checkPermission(check_filepath)
+        if (checkPermission() == PathType.NULL) return false
+        val checkPermission = permissionTools.checkPermission(checkFilepath)
         // 通过documentFile读取文件
         if (checkPermission == PathType.DOCUMENT) {
             fileTools.copyFileByDF(
-                check_filepath + CHECK_FILENAME,
+                checkFilepath + CHECK_FILENAME,
                 appPathsManager.getModsUnzipPath() + CHECK_FILENAME
             )
 
         } else {
             fileTools.copyFile(
-                check_filepath + CHECK_FILENAME,
+                checkFilepath + CHECK_FILENAME,
                 appPathsManager.getModsUnzipPath() + CHECK_FILENAME
             )
         }
         val modPaks = gson.fromJson(
-            File(check_filename_mod_path).readText(),
+            File(checkFilenameModPath).readText(),
             MainIFest::class.java
         ).paks
         val mainIFest = gson.fromJson(
@@ -231,9 +189,9 @@ class ProjectSnowTools  @Inject constructor(
         // mainIFest.paks.addAll(0,modPaks)
         val startTime = System.currentTimeMillis()
         while (true) {
-           // Log.d("ProjectSnowTools", "specialOperationStartGame: 执行注入")
+            // Log.d("ProjectSnowTools", "specialOperationStartGame: 执行注入")
             fileTools.writeFile(
-                check_filepath,
+                checkFilepath,
                 CHECK_FILENAME,
                 mainIFestJson
             )
@@ -258,7 +216,7 @@ class ProjectSnowTools  @Inject constructor(
 
     override fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean {
         Log.d("ProjectSnowTools", "特殊:$gameInfo ")
-        if (checkPermission(gameInfo.gamePath) == PathType.NULL) return false
+        if (checkPermission() == PathType.NULL) return false
         val gameFilepath = "${gameInfo.gamePath}/files/${getGameFileDir(gameInfo)}/"
         val name = getGameFileDir(gameInfo)
         //Log.d("ProjectSnowTools", "特殊: $gameFilepath--$name")
@@ -282,8 +240,8 @@ class ProjectSnowTools  @Inject constructor(
         return true
     }
 
-    override fun specialOperationBeforeStartGame(gameInfo: GameInfoBean) : Int {
-        if (checkPermission(gameInfo.gamePath) == PathType.NULL) return ResultCode.NO_PERMISSION
+    override fun specialOperationBeforeStartGame(gameInfo: GameInfoBean): Int {
+        if (checkPermission() == PathType.NULL) return ResultCode.NO_PERMISSION
         val gameFilepath = "${gameInfo.gamePath}/files/${getGameFileDir(gameInfo)}/"
         if (!fileTools.createDictionary("$gameFilepath/test")) {
             return ResultCode.GAME_UPDATE
@@ -299,11 +257,9 @@ class ProjectSnowTools  @Inject constructor(
         )
     }
 
-    private fun checkPermission(path: String): Int {
-        val checkPermission = permissionTools.checkPermission(check_filepath)
-        //Log.d("ArknightsTools", "权限类型: $checkPermission--$path")
+    private fun checkPermission(): Int {
+        val checkPermission = permissionTools.checkPermission(checkFilepath)
         if (checkPermission == PathType.FILE) {
-            //Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
             fileTools = fileToolsManager.getFileTools()
             return PathType.FILE
         } else if (checkPermission == PathType.DOCUMENT) {
@@ -316,16 +272,16 @@ class ProjectSnowTools  @Inject constructor(
             Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
             return PathType.NULL
         }
-
     }
 
     private fun getGameFileDir(gameInfo: GameInfoBean): String {
-            val version = gameInfo.version
-            val regex = """^(\d+\.\d+\.\d+)""".toRegex()
-            val matchResult = regex.find(version)
-            val result = matchResult?.value ?: ""
-            val modifiedResult = result.split('.').toMutableList().apply { this[2] = "0" }.joinToString(".")
-            return modifiedResult
+        val version = gameInfo.version
+        val regex = """^(\d+\.\d+\.\d+)""".toRegex()
+        val matchResult = regex.find(version)
+        val result = matchResult?.value ?: ""
+        val modifiedResult =
+            result.split('.').toMutableList().apply { this[2] = "0" }.joinToString(".")
+        return modifiedResult
     }
 
 }

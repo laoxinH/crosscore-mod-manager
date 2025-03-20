@@ -17,7 +17,6 @@ class GetInformationUserCase @Inject constructor(
     @param:FileToolsImpl private val fileTools: BaseFileTools,
     private val appPathsManager: AppPathsManager
 ) {
-
     suspend operator fun invoke(): InfoBean? = withContext(Dispatchers.IO) {
         kotlin.runCatching {
             ModManagerApi.retrofitService.getInfo()
