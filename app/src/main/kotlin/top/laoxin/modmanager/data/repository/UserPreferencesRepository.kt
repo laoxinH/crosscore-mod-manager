@@ -24,9 +24,10 @@ private const val PREFERENCE_NAME = "mod_manager_preferences"
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = PREFERENCE_NAME
 )
+
 @Singleton
 class UserPreferencesRepository @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     companion object {
         val PREFERENCES_KEYS = mapOf(
@@ -34,7 +35,9 @@ class UserPreferencesRepository @Inject constructor(
             UserPreferencesKeys.SCAN_QQ_DIRECTORY to booleanPreferencesKey(UserPreferencesKeys.SCAN_QQ_DIRECTORY),
             UserPreferencesKeys.SELECTED_DIRECTORY to stringPreferencesKey(UserPreferencesKeys.SELECTED_DIRECTORY),
             UserPreferencesKeys.SCAN_DOWNLOAD to booleanPreferencesKey(UserPreferencesKeys.SCAN_DOWNLOAD),
-            UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG to booleanPreferencesKey(UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG),
+            UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG to booleanPreferencesKey(
+                UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG
+            ),
             UserPreferencesKeys.SCAN_DIRECTORY_MODS to booleanPreferencesKey(UserPreferencesKeys.SCAN_DIRECTORY_MODS),
             UserPreferencesKeys.DELETE_UNZIP_DIRECTORY to booleanPreferencesKey(UserPreferencesKeys.DELETE_UNZIP_DIRECTORY),
             UserPreferencesKeys.SHOW_CATEGORY_VIEW to booleanPreferencesKey(UserPreferencesKeys.SHOW_CATEGORY_VIEW),

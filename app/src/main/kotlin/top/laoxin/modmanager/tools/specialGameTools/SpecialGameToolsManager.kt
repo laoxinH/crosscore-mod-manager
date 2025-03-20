@@ -7,8 +7,8 @@ import javax.inject.Singleton
 
 @Singleton
 class SpecialGameToolsManager @Inject constructor(
-    @SpecialGameToolsModule.ArknightsToolsImpl private val arknightsTools: BaseSpecialGameTools,
-    @SpecialGameToolsModule.ProjectSnowToolsImpl private val projectSnowTools: BaseSpecialGameTools
+    @param:SpecialGameToolsModule.ArknightsToolsImpl private val arknightsTools: BaseSpecialGameTools,
+    @param:SpecialGameToolsModule.ProjectSnowToolsImpl private val projectSnowTools: BaseSpecialGameTools
 ) {
 
     private val specialGameTools: Map<String, BaseSpecialGameTools> = mapOf(

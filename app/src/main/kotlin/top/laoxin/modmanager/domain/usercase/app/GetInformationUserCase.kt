@@ -14,22 +14,27 @@ import javax.inject.Singleton
 
 @Singleton
 class GetInformationUserCase @Inject constructor(
-    @FileToolsImpl private val fileTools: BaseFileTools,
-    private val  appPathsManager: AppPathsManager
+    @param:FileToolsImpl private val fileTools: BaseFileTools,
+    private val appPathsManager: AppPathsManager
 ) {
 
-    suspend operator fun invoke(myAppPath: String) : InfoBean? = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(): InfoBean? = withContext(Dispatchers.IO) {
         kotlin.runCatching {
             ModManagerApi.retrofitService.getInfo()
         }.onFailure {
             Log.e("ConsoleViewModel", "信息提示: $it")
         }.onSuccess { info ->
             if (info.version > getInfoVersion()) {
-                val path = Paths.get(appPathsManager.getMyAppPath(), "informationVersion").toString()
+                val path =
+                    Paths.get(appPathsManager.getMyAppPath(), "informationVersion").toString()
                 if (fileTools.isFileExist(path)) {
                     fileTools.deleteFile(path)
                 }
-                fileTools.writeFile(appPathsManager.getMyAppPath(), "informationVersion", info.version.toString())
+                fileTools.writeFile(
+                    appPathsManager.getMyAppPath(),
+                    "informationVersion",
+                    info.version.toString()
+                )
                 return@withContext info
             }
         }
@@ -38,11 +43,13 @@ class GetInformationUserCase @Inject constructor(
 
 
     private fun getInfoVersion(): Double {
-        val readFile = fileTools.readFile(Paths.get(appPathsManager.getMyAppPath(), "informationVersion").toString())
-        if (readFile.isEmpty()) {
-            return 0.0
+        val readFile = fileTools.readFile(
+            Paths.get(appPathsManager.getMyAppPath(), "informationVersion").toString()
+        )
+        return if (readFile.isEmpty()) {
+            0.0
         } else {
-            return readFile.toDouble()
+            readFile.toDouble()
         }
     }
 }

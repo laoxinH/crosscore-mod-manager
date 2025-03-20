@@ -41,7 +41,7 @@ import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
 //lateinit var viewModel: ModViewModel
 enum class NavigationIndex(
-    @StringRes val title: Int,
+    @param:StringRes val title: Int,
     val index: Int,
 ) {
     ALL_MODS(R.string.mod_page_title_all_mods, 0),

@@ -10,14 +10,11 @@ import javax.inject.Singleton
 
 @Singleton
 class LoadGameConfigUserCase @Inject constructor(
-    @FileToolsModule.FileToolsImpl private val fileTools: BaseFileTools,
-    private val checkGameConfigUserCase: CheckGameConfigUserCase,
+    @param:FileToolsModule.FileToolsImpl private val fileTools: BaseFileTools,
     private val gameInfoManager: GameInfoManager
 ) {
-    suspend operator fun invoke(path : String, rootPath : String) = withContext(Dispatchers.IO) {
+    suspend operator fun invoke() = withContext(Dispatchers.IO) {
         gameInfoManager.loadGameInfo()
     }
-
-
 
 }

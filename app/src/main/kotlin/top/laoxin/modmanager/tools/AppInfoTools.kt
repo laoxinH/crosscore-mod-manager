@@ -23,7 +23,7 @@ import javax.inject.Singleton
 class AppInfoTools @Inject constructor(
     private val gameInfoManager: GameInfoManager,
     private val specialGameToolsManager: SpecialGameToolsManager,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
 
     fun getPackageName(): String {

@@ -86,7 +86,7 @@ import kotlin.math.abs
 
 // 导航栏索引
 enum class NavigationIndex(
-    @StringRes val title: Int,
+    @param:StringRes val title: Int,
     val icon: ImageVector,
 ) {
     CONSOLE(R.string.console, Icons.Filled.Dashboard),

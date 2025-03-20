@@ -19,8 +19,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ArknightsTools  @Inject constructor(
-    private  val appPathsManager: AppPathsManager,
+class ArknightsTools @Inject constructor(
+    private val appPathsManager: AppPathsManager,
     private val permissionTools: PermissionTools,
     private val fileToolsManager: FileToolsManager
 ) : BaseSpecialGameTools {
@@ -65,7 +65,8 @@ class ArknightsTools  @Inject constructor(
     )
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
-        CHECK_FILEPATH = "${appPathsManager.getRootPath()}/Android/data/$packageName/files/AB/Android/"
+        CHECK_FILEPATH =
+            "${appPathsManager.getRootPath()}/Android/data/$packageName/files/AB/Android/"
         val unZipPath =
             appPathsManager.getModsUnzipPath() + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag: MutableList<Boolean> = mutableListOf()
@@ -161,11 +162,12 @@ class ArknightsTools  @Inject constructor(
     }
 
     override fun specialOperationDisable(
-        backups: List<BackupBean>,
+        backupBeans: List<BackupBean>,
         packageName: String,
         modBean: ModBean
     ): Boolean {
-        CHECK_FILEPATH = "${appPathsManager.getRootPath()}/Android/data/$packageName/files/AB/Android/"
+        CHECK_FILEPATH =
+            "${appPathsManager.getRootPath()}/Android/data/$packageName/files/AB/Android/"
         if (!initialFileTools()) {
             throw Exception("初始化文件工具失败")
         }
@@ -176,7 +178,7 @@ class ArknightsTools  @Inject constructor(
             throw Exception("加载校验文件失败")
         }
         val flag: MutableList<Boolean> = mutableListOf()
-        backups.forEachIndexed { index, backupBean ->
+        backupBeans.forEachIndexed { index, backupBean ->
             // 计算md5
             val md5 = calculateMD5(File(backupBean.backupPath!!).inputStream())
             // 读取文件大小
@@ -184,7 +186,7 @@ class ArknightsTools  @Inject constructor(
             val checkFileName =
                 (File(backupBean.backupPath).parentFile?.name ?: "") + "/" + backupBean.filename
             flag.add(modifyCheckFile(checkFileName, md5!!, fileSize))
-            onProgressUpdate("${index + 1}/${backups.size}")
+            onProgressUpdate("${index + 1}/${backupBeans.size}")
         }
         if (!writeCheckFile()) {
             throw Exception("写入校验JSON失败")

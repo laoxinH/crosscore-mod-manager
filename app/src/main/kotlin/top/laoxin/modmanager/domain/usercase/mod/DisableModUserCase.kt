@@ -13,13 +13,9 @@ import top.laoxin.modmanager.data.bean.BackupBean
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.data.repository.backup.BackupRepository
 import top.laoxin.modmanager.data.repository.mod.ModRepository
-import top.laoxin.modmanager.data.repository.scanfile.ScanFileRepository
-import top.laoxin.modmanager.domain.usercase.app.CheckPermissionUserCase
-import top.laoxin.modmanager.observer.FlashModsObserverManager
 import top.laoxin.modmanager.tools.LogTools
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.filetools.FileToolsManager
-import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 import java.io.IOException
@@ -40,18 +36,12 @@ data class DisableModResult(
 @Singleton
 class DisableModsUserCase @Inject constructor(
     private val gameInfoManager: GameInfoManager,
-    private val appPathsManager: AppPathsManager,
-    private val scanFileRepository: ScanFileRepository,
     private val modRepository: ModRepository,
     private val backupRepository: BackupRepository,
-    private val checkPermissionUserCase: CheckPermissionUserCase,
     private val permissionTools: PermissionTools,
-    private val flashModsObserverManager: FlashModsObserverManager,
     private val fileToolsManager: FileToolsManager,
     private val specialGameToolsManager: SpecialGameToolsManager,
-
-
-    ) {
+) {
 
     companion object {
         const val TAG = "FlashModsUserCase"
@@ -61,15 +51,15 @@ class DisableModsUserCase @Inject constructor(
 
     suspend operator fun invoke(
         mods: List<ModBean>,
-        isDel :Boolean,
-        removeDelEnableModsList : (ModBean) -> Unit,
-        setMultitaskingProgress : (String) -> Unit,
-        setUnzipProgress : (String) -> Unit,
-        setTipsText : (String) -> Unit
+        isDel: Boolean,
+        removeDelEnableModsList: (ModBean) -> Unit,
+        setMultitaskingProgress: (String) -> Unit,
+        setUnzipProgress: (String) -> Unit,
+        setTipsText: (String) -> Unit
     ): DisableModResult = withContext(Dispatchers.IO) {
         this@DisableModsUserCase.setUnzipProgress = setUnzipProgress
-        val failMods : MutableList<ModBean> = mutableListOf()
-        val successMods : MutableList<ModBean> = mutableListOf()
+        val failMods: MutableList<ModBean> = mutableListOf()
+        val successMods: MutableList<ModBean> = mutableListOf()
         val gameInfo = gameInfoManager.getGameInfo()
         setMultitaskingProgress("0/${mods.size}")
         mods.forEachIndexed { index, modBean ->
@@ -140,14 +130,13 @@ class DisableModsUserCase @Inject constructor(
     }
 
 
-
-    private suspend fun specialOperationDisable(
+    private fun specialOperationDisable(
         backupBeans: List<BackupBean>,
         packageName: String,
         modBean: ModBean
     ) {
         var specialOperationFlag = true
-         specialGameToolsManager.getSpecialGameTools(packageName)?.let {
+        specialGameToolsManager.getSpecialGameTools(packageName)?.let {
             specialOperationFlag = it.specialOperationDisable(backupBeans, packageName, modBean)
         }
 

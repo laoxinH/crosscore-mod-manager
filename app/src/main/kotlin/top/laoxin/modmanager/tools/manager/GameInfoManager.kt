@@ -116,10 +116,6 @@ class GameInfoManager @Inject constructor(
         return gameInfoList[index]
     }
 
-    fun getGameInfoByPackageName(packageName: String): GameInfoBean {
-        return gameInfoList.find { it.packageName == packageName } ?: NO_GAME
-    }
-
     // 设置当前游戏
     fun setGameInfo(gameInfo: GameInfoBean) {
         this.gameInfo = gameInfo

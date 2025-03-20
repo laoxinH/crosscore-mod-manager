@@ -7,9 +7,9 @@ import javax.inject.Singleton
 
 @Singleton
 class FileToolsManager @Inject constructor(
-    @FileToolsModule.FileToolsImpl private val fileTools: BaseFileTools,
-    @FileToolsModule.ShizukuFileToolsImpl private val shizukuFileTools: BaseFileTools,
-    @FileToolsModule.DocumentFileToolsImpl private val documentFileTools: BaseFileTools
+    @param:FileToolsModule.FileToolsImpl private val fileTools: BaseFileTools,
+    @param:FileToolsModule.ShizukuFileToolsImpl private val shizukuFileTools: BaseFileTools,
+    @param:FileToolsModule.DocumentFileToolsImpl private val documentFileTools: BaseFileTools
 ) {
     // 通过不同的权限获取方式，获取文件工具
     fun getFileTools(pathType : Int): BaseFileTools? {

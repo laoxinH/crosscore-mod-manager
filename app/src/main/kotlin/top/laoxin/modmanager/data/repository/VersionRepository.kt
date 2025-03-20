@@ -15,9 +15,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "version_data_store")
+
 @Singleton
 class VersionRepository @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     private val versionDataStore = context.dataStore
     private val versionKey = stringPreferencesKey("version")

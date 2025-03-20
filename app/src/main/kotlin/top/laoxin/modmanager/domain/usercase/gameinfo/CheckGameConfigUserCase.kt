@@ -2,16 +2,12 @@ package top.laoxin.modmanager.domain.usercase.gameinfo
 
 import android.util.Log
 import top.laoxin.modmanager.data.bean.GameInfoBean
-import top.laoxin.modmanager.di.FileToolsModule
-import top.laoxin.modmanager.tools.filetools.BaseFileTools
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CheckGameConfigUserCase @Inject constructor(
-    @FileToolsModule.FileToolsImpl private val fileTools: BaseFileTools
-) {
-    operator fun invoke(gameInfo: GameInfoBean, rootPath : String) : GameInfoBean  {
+class CheckGameConfigUserCase @Inject constructor() {
+    operator fun invoke(gameInfo: GameInfoBean, rootPath: String): GameInfoBean {
         Log.d("LoadGameConfig", "gameInfo: $gameInfo")
         var result = gameInfo.copy()
         if (gameInfo.gameName.isEmpty()) {
