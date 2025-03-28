@@ -210,7 +210,7 @@ class FlashModsUserCase @Inject constructor(
 
         // 每组保留一个（优先保留已启用且最新的）
         for ((_, sameMods) in groupedMods) {
-            val enabledMods = sameMods.filter { it.isEnable }
+            val enabledMods = sameMods.filter { it.isEnable == true }
             val chosen = if (enabledMods.isNotEmpty()) {
                 enabledMods.maxByOrNull { it.date }
             } else {

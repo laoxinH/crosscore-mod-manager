@@ -1,6 +1,9 @@
 package top.laoxin.modmanager.activity.main
 
+import StartContent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,15 +30,23 @@ class MainActivity() : ComponentActivity() {
         setupWindow()
         setupShizuku()
         enableEdgeToEdge()
-
         setContent {
             ModManagerTheme {
-                ConfigureSystemBars()
-                Surface(Modifier.Companion.fillMaxSize()) {
-                    ModManagerApp()
+                Surface(Modifier.fillMaxSize()) {
+                    StartContent()
                 }
             }
         }
+        Handler(Looper.getMainLooper()).postDelayed({
+            setContent {
+                ModManagerTheme {
+                    ConfigureSystemBars()
+                    Surface(Modifier.fillMaxSize()) {
+                        ModManagerApp()
+                    }
+                }
+            }
+        }, 1000)
     }
 
     override fun onDestroy() {
