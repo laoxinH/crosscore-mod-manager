@@ -51,9 +51,9 @@ class App : Application() {
         }
 
         // Check for Huawei/HarmonyOS 4 specific conditions
-        val incrementalVersion = Build.VERSION.INCREMENTAL
-        isHuawei = osVersion == OSVersion.OS_11 &&
-                (incrementalVersion.contains("104.0") || incrementalVersion.contains("104.2"))
+        val phoneBrand = Build.MANUFACTURER.lowercase()
+        isHuawei = phoneBrand.contains("harmony") || phoneBrand.contains("oce")
+                || phoneBrand.contains("huawei")
 
         if (isHuawei) {
             osVersion = OSVersion.OS_14
