@@ -48,7 +48,6 @@ import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.state.UserPreferencesState
-import java.nio.file.Paths
 import javax.inject.Inject
 
 @HiltViewModel
@@ -476,7 +475,7 @@ class ConsoleViewModel @Inject constructor(
 
     fun getFileToolsManager(): FileToolsManager {
         return fileToolsManager
-4
+        4
     }
 }
 

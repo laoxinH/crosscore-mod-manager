@@ -10,8 +10,6 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/start</item>
         <item name="windowSplashScreenAnimationDuration">500</item>
         <item name="postSplashScreenTheme">@style/Theme.ModManager</item>
-        // 启动图大小
-
     </style>
 
 </resources>

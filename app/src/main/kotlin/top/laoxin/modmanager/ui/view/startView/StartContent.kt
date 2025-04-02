@@ -1,3 +1,5 @@
+package top.laoxin.modmanager.ui.view.startView
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration

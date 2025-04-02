@@ -1,32 +1,22 @@
 package top.laoxin.modmanager.activity
 
-import StartContent
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.widget.ImageView
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import top.laoxin.modmanager.R
 import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
-import top.laoxin.modmanager.ui.theme.ModManagerTheme
-import top.laoxin.modmanager.ui.view.ModManagerApp
 import java.util.concurrent.atomic.AtomicBoolean
 
 class StartActivity : ComponentActivity() {
     private val isKeepOnScreen = AtomicBoolean(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setupWindowConfiguration()
         checkOrientation()
@@ -79,7 +69,6 @@ class StartActivity : ComponentActivity() {
 
     // 跳转到目标 Activity
     private fun jumpToActivity() {
-
         val targetActivity =
             if (isUserAgreementConfirmed()) MainActivity::class.java else UserAgreementActivity::class.java
         startActivity(Intent(this, targetActivity))

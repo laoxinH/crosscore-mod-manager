@@ -278,7 +278,6 @@ class ModViewModel @Inject constructor(
         flashModsObserverManager.openModDictionaryObserver(userPreferencesState.selectedDirectory + gameInfoManager.getGameInfo().packageName)
     }
 
-
     fun flashMods(isLoading: Boolean, forceScan: Boolean) {
         flashModsJob?.cancel()
         val result = checkCanFlashModsUserCase()
@@ -483,8 +482,6 @@ class ModViewModel @Inject constructor(
 
             setShowTips(false)
             setModSwitchEnable(true)
-
-
         }
     }
 
