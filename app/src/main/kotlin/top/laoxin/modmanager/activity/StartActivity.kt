@@ -8,7 +8,6 @@ import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
@@ -41,18 +40,18 @@ class StartActivity : ComponentActivity() {
     }
 
     // 设置启动画面
-    private fun setupSplashScreen() {
-        installSplashScreen().apply {
-            setKeepOnScreenCondition { isKeepOnScreen.get() }
-            setOnExitAnimationListener { provider ->
-                provider.iconView.animate()
-                    .alpha(0f)
-                    .setDuration(0)
-                    .withEndAction(provider::remove)
-                    .start()
-            }
-        }
-    }
+    //    private fun setupSplashScreen() {
+    //        installSplashScreen().apply {
+    //            setKeepOnScreenCondition { isKeepOnScreen.get() }
+    //            setOnExitAnimationListener { provider ->
+    //                provider.iconView.animate()
+    //                    .alpha(0f)
+    //                    .setDuration(0)
+    //                    .withEndAction(provider::remove)
+    //                    .start()
+    //            }
+    //        }
+    //    }
 
     // 检查屏幕方向
     private fun checkOrientation() {
