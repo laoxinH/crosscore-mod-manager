@@ -182,7 +182,6 @@ dependencies {
     implementation(libs.okhttp3.okhttp)
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
-    // Retrofit
     // Retrofit with Scalar Converter
     implementation(libs.converter.scalars)
     // 解压库
@@ -200,7 +199,7 @@ dependencies {
     // desugar
     coreLibraryDesugaring(libs.desugar)
     // 启动页
-    implementation(libs.androidx.core.splashscreen)
+    // implementation(libs.androidx.core.splashscreen)
     // DI依赖注入
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

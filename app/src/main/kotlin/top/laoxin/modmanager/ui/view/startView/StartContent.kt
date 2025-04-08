@@ -13,6 +13,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,10 +27,12 @@ import kotlin.random.Random
 fun StartContent() {
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthPx = windowInfo.containerSize.width
+    val screenHeightPx = windowInfo.containerSize.height
+    val screenWidth = with(LocalDensity.current) { screenWidthPx.toDp() }
+    val screenHeight = with(LocalDensity.current) { screenHeightPx.toDp() }
 
-    // Calculate the size based on orientation
     val imageSize = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
         screenWidth * 0.8f
     } else {

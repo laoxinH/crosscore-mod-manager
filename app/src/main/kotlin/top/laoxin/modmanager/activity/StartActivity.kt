@@ -6,11 +6,13 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
+import top.laoxin.modmanager.ui.view.startView.StartContent
 import java.util.concurrent.atomic.AtomicBoolean
 
 class StartActivity : ComponentActivity() {
@@ -20,7 +22,14 @@ class StartActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setupWindowConfiguration()
         checkOrientation()
-        setupSplashScreen()
+
+        setContent {
+            StartContent()
+        }
+
+        // 暂时禁用splashscreen
+        // setupSplashScreen()
+
         jumpToActivity()
     }
 
