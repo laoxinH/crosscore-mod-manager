@@ -36,11 +36,10 @@ fun StartContent() {
     val imageSize = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
         screenWidth * 0.8f
     } else {
-        screenHeight * 0.8f
+        screenHeight * 0.6f
     }
 
     val imageResIds = getDrawableResourcesByPattern(context, "start_")
-
 
     val randomImageResId = if (imageResIds.isNotEmpty()) {
         imageResIds[Random.nextInt(imageResIds.size)]
