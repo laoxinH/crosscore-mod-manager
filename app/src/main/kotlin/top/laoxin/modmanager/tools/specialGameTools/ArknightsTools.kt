@@ -55,17 +55,16 @@ class ArknightsTools @Inject constructor(
         val md5: String?,
         val totalSize: Long?,
         val abSize: Long?,
-        val thash: String?,
         val type: String?,
         val pid: String?,
-        val cid: Int?,
-        val cat: Int?,
-        val meta: Int?,
+        val cid: Long?,
+        val cat: Long?,
+        val meta: Long?,
     )
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
         checkFilepath =
-            "${appPathsManager.getRootPath()}/Android/data/$packageName/files/AB/Android/"
+            "${appPathsManager.getRootPath()}/Android/data/$packageName/files/Bundles/"
         val unZipPath =
             appPathsManager.getModsUnzipPath() + packageName + "/" + File(mod.path!!).nameWithoutExtension + "/"
         val flag: MutableList<Boolean> = mutableListOf()
