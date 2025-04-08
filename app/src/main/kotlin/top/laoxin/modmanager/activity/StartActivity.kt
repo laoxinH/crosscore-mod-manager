@@ -4,13 +4,18 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
+import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.startView.StartContent
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -23,13 +28,19 @@ class StartActivity : ComponentActivity() {
         checkOrientation()
 
         setContent {
-            StartContent()
+            ModManagerTheme {
+                Surface(Modifier.fillMaxSize()) {
+                    StartContent()
+                }
+            }
         }
 
         // 暂时禁用splashscreen
         // setupSplashScreen()
 
-        jumpToActivity()
+        Handler.createAsync(mainLooper).postDelayed({
+            jumpToActivity()
+        }, 500)
     }
 
     // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
