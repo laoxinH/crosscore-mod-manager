@@ -1,5 +1,6 @@
 package top.laoxin.modmanager.ui.view.modView
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -43,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
@@ -60,15 +62,11 @@ fun ModList(
     isMultiSelect: Boolean,
     showDialog: (ModBean, Boolean) -> Unit,
     enableMod: (ModBean, Boolean) -> Unit,
-    // 长按
-    onLongClick: (ModBean) -> Unit,  // 长按
-    // 多选点击
-    onMultiSelectClick: (ModBean) -> Unit, // 多选状态下的点击
+    onLongClick: (ModBean) -> Unit,
+    onMultiSelectClick: (ModBean) -> Unit,
     modViewModel: ModViewModel
 ) {
     LazyColumn(
-        // state = state,
-        //columns = GridCells.Adaptive(minSize = 256.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(contentPadding)
@@ -98,10 +96,9 @@ fun ModListItem(
     modifier: Modifier = Modifier,
     mod: ModBean,
     isSelected: Boolean = false,
-    // 长按回调
-    onLongClick: (ModBean) -> Unit,  // 长按
-    onMultiSelectClick: (ModBean) -> Unit, // 多选状态下的点击
-    isMultiSelect: Boolean = false, // 是否多选状态
+    onLongClick: (ModBean) -> Unit,
+    onMultiSelectClick: (ModBean) -> Unit,
+    isMultiSelect: Boolean = false,
     modSwitchEnable: Boolean,
     openModDetail: (ModBean, Boolean) -> Unit,
     enableMod: (ModBean, Boolean) -> Unit,
@@ -111,30 +108,7 @@ fun ModListItem(
     val coroutineScope = rememberCoroutineScope()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    LaunchedEffect(mod.icon) {
-        coroutineScope.launch(Dispatchers.IO) {
-            mod.icon?.let {
-                if (File(mod.icon).exists()) {
-                    imageBitmap = loadImageBitmapFromPath(context, mod.icon, 256, 256)
-                } else {
-                    Log.e("ModList", "ICON文件不存在: ${mod.icon}")
-                    logRecord("ICON文件不存在: ${mod.icon}")
-                    if (mod.icon.substringAfterLast('/') == "null") {
-                        Log.e("ModDetail", "ICON信息异常: ${mod.icon}")
-                        logRecord("ICON信息异常: ${mod.icon}")
-                        modViewModel.setModDetail(mod.copy(icon = null))
-                        modViewModel.updateMod(mod.copy(icon = null))
-                    } else {
-                        modViewModel.flashModImage(mod)
-                        imageBitmap = loadImageBitmapFromPath(context, mod.icon, 256, 256)
-
-                        Log.i("ModList", "已重新解压ICON: ${mod.icon}")
-                        logRecord("已重新解压ICON: ${mod.icon}")
-                    }
-                }
-            }
-        }
-    }
+    imageBitmap = checkIcon(mod, modViewModel, coroutineScope, context, imageBitmap)
 
     Card(
         elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(
@@ -160,9 +134,7 @@ fun ModListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .sizeIn(minHeight = 30.dp, /*maxHeight = 80.dp*/)
-
-
+                .sizeIn(minHeight = 30.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -174,7 +146,7 @@ fun ModListItem(
             ) {
                 if (imageBitmap != null) {
                     Image(
-                        imageBitmap!!, // 从路径获取图片
+                        imageBitmap!!,
                         contentDescription = null,
                         alignment = Alignment.TopCenter,
                         contentScale = ContentScale.Crop
@@ -188,21 +160,23 @@ fun ModListItem(
                     )
                 }
             }
+
             Spacer(Modifier.width(16.dp))
-            val name = mod.name
+
             Column(
                 modifier = Modifier
                     .weight(1f)
             ) {
 
-                if (name != null) {
+                mod.name?.let {
                     Text(
-                        text = /*if (name.length > 10) name.substring(0, 10) + "..." else*/ name,
+                        text = it,
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
 
                 Spacer(Modifier.height(8.dp))
+
                 if (mod.description != null) {
                     Text(
                         text = (stringResource(R.string.mod_modlist_item_desrcipt)),
@@ -214,8 +188,8 @@ fun ModListItem(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+
             }
-            //Spacer(Modifier.width(16.dp))
 
             Box(
                 modifier = Modifier
@@ -230,6 +204,43 @@ fun ModListItem(
             }
         }
     }
+}
+
+// 检查图标是否存在
+@Composable
+fun checkIcon(
+    mod: ModBean,
+    modViewModel: ModViewModel,
+    coroutineScope: CoroutineScope,
+    context: Context,
+    imageBitmap: ImageBitmap?
+): ImageBitmap? {
+    var imageBitmap = remember { imageBitmap }
+    LaunchedEffect(mod.icon) {
+        coroutineScope.launch(Dispatchers.IO) {
+            mod.icon?.let {
+                if (File(mod.icon).exists()) {
+                    imageBitmap = loadImageBitmapFromPath(context, mod.icon, 256, 256)
+                } else {
+                    if (mod.icon.substringAfterLast('/') == "null") {
+                        modViewModel.setModDetail(mod.copy(icon = null))
+                        modViewModel.updateMod(mod.copy(icon = null))
+
+                        Log.e("ModDetail", "ICON信息异常: ${mod.icon}")
+                        logRecord("ICON信息异常: ${mod.icon}")
+                    } else {
+
+                        modViewModel.flashModImage(mod)
+                        imageBitmap = loadImageBitmapFromPath(context, mod.icon, 256, 256)
+
+                        Log.i("ModList", "已重新解压ICON: ${mod.icon}")
+                        logRecord("已重新解压ICON: ${mod.icon}")
+                    }
+                }
+            }
+        }
+    }
+    return imageBitmap
 }
 
 // 输入密码的弹窗

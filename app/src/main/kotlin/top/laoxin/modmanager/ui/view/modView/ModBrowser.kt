@@ -142,23 +142,22 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                         }
 
                         // 通过filepath获取mods
-                        val modsByPath = viewModel.getModsByPathStrict(file.path)
+                        val modsByPath =
+                            remember(file.path) { viewModel.getModsByPath(file.path) }
                         // 通过虚拟路径获取mods
-                        val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
+                        val modsByVirtualPaths =
+                            remember(file.path) { viewModel.getModsByVirtualPaths(file.path) }
 
                         // 设置当前页面的mods
-                        val modCount = if (viewModel.getModsByPath(file.path)
-                                .isNotEmpty()
-                        ) viewModel.getModsByPath(file.path).size else viewModel.getModsByVirtualPaths(
-                            file.path
-                        ).size
+                        val modCount =
+                            if (modsByPath.isNotEmpty()) modsByPath.size
+                            else modsByVirtualPaths.size
 
-                        val modEnableCount = if (viewModel.getModsByPath(file.path)
-                                .isNotEmpty()
-                        ) viewModel.getModsByPath(file.path)
-                            .filter { it.isEnable }.size else viewModel.getModsByVirtualPaths(
-                            file.path
-                        ).filter { it.isEnable }.size
+                        val modEnableCount = (
+                                if (modsByPath.isNotEmpty()) modsByPath
+                                else modsByVirtualPaths)
+                            .filter { it.isEnable }.size
+
                         if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty() && (file.isDirectory || !file.exists())) {
                             FileListItem(
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
