@@ -3,7 +3,6 @@ accompanistPager = "0.36.0"
 accompanistPermissions = "0.37.2"
 accompanistSystemuicontroller = "0.36.0"
 agp = "8.9.1"
-coreSplashscreen = "1.0.1"
 shizuku = "13.1.5"
 coilCompose = "2.7.0"
 commonsCompress = "1.27.1"
@@ -12,7 +11,7 @@ converterScalars = "2.11.0"
 datastorePreferences = "1.1.4"
 documentfile = "1.0.1"
 glide = "4.16.0"
-gson = "2.12.1"
+gson = "2.13.0"
 kotlin = "2.1.20"
 junit = "4.13.2"
 kotlinxSerializationJson = "1.8.1"
@@ -49,7 +48,6 @@ accompanist-pager = { module = "com.google.accompanist:accompanist-pager", versi
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
