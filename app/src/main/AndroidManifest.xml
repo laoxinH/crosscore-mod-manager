@@ -34,16 +34,21 @@
         android:theme="@style/Theme.ModManager"
         tools:targetApi="31">
 
-        <!--启动页-->
+        <!--原生启动页-->
         <activity
-            android:name=".activity.StartActivity"
+            android:name=".activity.SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.ModManager">
+            android:theme="@style/Theme.ModManager.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--启动页-->
+        <activity
+            android:name=".activity.start.StartActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ModManager" />
         <!--用户协议-->
         <activity
             android:name=".activity.userAgreement.UserAgreementActivity"

@@ -7,40 +7,28 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import top.laoxin.modmanager.activity.main.MainActivity
-import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
-import top.laoxin.modmanager.ui.theme.ModManagerTheme
-import top.laoxin.modmanager.ui.view.startView.StartContent
 import java.util.concurrent.atomic.AtomicBoolean
+import top.laoxin.modmanager.activity.start.StartActivity
 
-class StartActivity : ComponentActivity() {
+class SplashActivity : ComponentActivity() {
     private val isKeepOnScreen = AtomicBoolean(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupWindowConfiguration()
         checkOrientation()
+        setupSplashScreen()
+        jumpToStart()
+    }
 
-        setContent {
-            ModManagerTheme {
-                Surface(Modifier.fillMaxSize()) {
-                    StartContent()
-                }
-            }
-        }
-
-        // 暂时禁用splashscreen
-        // setupSplashScreen()
-
+    // 跳转到启动 Activity
+    private fun jumpToStart() {
         Handler.createAsync(mainLooper).postDelayed({
-            jumpToActivity()
-        }, 500)
+            startActivity(Intent(this, StartActivity::class.java))
+        }, 200)
     }
 
     // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
@@ -51,18 +39,19 @@ class StartActivity : ComponentActivity() {
     }
 
     // 设置启动画面
-    //    private fun setupSplashScreen() {
-    //        installSplashScreen().apply {
-    //            setKeepOnScreenCondition { isKeepOnScreen.get() }
-    //            setOnExitAnimationListener { provider ->
-    //                provider.iconView.animate()
-    //                    .alpha(0f)
-    //                    .setDuration(0)
-    //                    .withEndAction(provider::remove)
-    //                    .start()
-    //            }
-    //        }
-    //    }
+    private fun setupSplashScreen() {
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { isKeepOnScreen.get() }
+            setOnExitAnimationListener { provider ->
+                provider.iconView.animate()
+                    .alpha(0f)
+                    .setDuration(0)
+                    .withEndAction(provider::remove)
+                    .start()
+            }
+        }
+        isKeepOnScreen.set(false)
+    }
 
     // 检查屏幕方向
     private fun checkOrientation() {
@@ -85,17 +74,4 @@ class StartActivity : ComponentActivity() {
         }
         return screenWidthDp >= 600
     }
-
-    // 跳转到目标 Activity
-    private fun jumpToActivity() {
-        val targetActivity =
-            if (isUserAgreementConfirmed()) MainActivity::class.java else UserAgreementActivity::class.java
-        startActivity(Intent(this, targetActivity))
-        isKeepOnScreen.set(false)
-        finish()
-    }
-
-    // 判断用户是否已确认用户协议
-    private fun isUserAgreementConfirmed() =
-        getSharedPreferences("AppLaunch", MODE_PRIVATE).getBoolean("isConfirm", false)
 }

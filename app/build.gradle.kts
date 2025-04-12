@@ -199,7 +199,7 @@ dependencies {
     // desugar
     coreLibraryDesugaring(libs.desugar)
     // 启动页
-    // implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.core.splashscreen)
     // DI依赖注入
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -209,5 +209,4 @@ dependencies {
     implementation(libs.androidx.ui.tooling)
     // markdown
     implementation(libs.compose.markdown)
-
 }
