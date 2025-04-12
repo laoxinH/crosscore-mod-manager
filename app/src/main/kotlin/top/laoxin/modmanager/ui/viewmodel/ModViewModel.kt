@@ -121,25 +121,35 @@ class ModViewModel @Inject constructor(
         var flashModsJob: Job? = null
     }
 
+    private val selectedGameFlow =
+        getUserPreferenceUseCase(UserPreferencesKeys.SELECTED_GAME, 0)
 
-    private val selectedGameFlow = getUserPreferenceUseCase(UserPreferencesKeys.SELECTED_GAME, 0)
     private val scanQQDirectoryFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.SCAN_QQ_DIRECTORY, false)
-    private val selectedDirectoryFlow = getUserPreferenceUseCase(
-        UserPreferencesKeys.SELECTED_DIRECTORY,
-        appPathsManager.getDownloadModPath()
-    )
+
+    private val selectedDirectoryFlow =
+        getUserPreferenceUseCase(
+            UserPreferencesKeys.SELECTED_DIRECTORY,
+            appPathsManager.getDownloadModPath()
+        )
+
     private val scanDownloadFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.SCAN_DOWNLOAD, false)
+
     private val openPermissionRequestDialogFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG, false)
+
     private val scanDirectoryModsFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.SCAN_DIRECTORY_MODS, true)
+
     private val delUnzipDictionaryFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.DELETE_UNZIP_DIRECTORY, false)
+
     private val showCategoryViewFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.SHOW_CATEGORY_VIEW, true)
-    private val userTipsFlow = getUserPreferenceUseCase(UserPreferencesKeys.USER_TIPS, true)
+
+    private val userTipsFlow =
+        getUserPreferenceUseCase(UserPreferencesKeys.USER_TIPS, true)
 
     // 生成用户配置对象
     private val userPreferences: StateFlow<UserPreferencesState> = combine(

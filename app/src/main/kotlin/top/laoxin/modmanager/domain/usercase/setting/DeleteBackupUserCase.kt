@@ -16,42 +16,38 @@ import javax.inject.Singleton
 
 @Singleton
 class DeleteBackupUserCase @Inject constructor(
-   private val gameInfoManager: GameInfoManager,
+    private val gameInfoManager: GameInfoManager,
     private val backupRepository: BackupRepository,
     private val modRepository: ModRepository,
     private val fileToolsManager: FileToolsManager,
     private val appPathsManager: AppPathsManager,
 ) {
     // 读取readme文件
-    suspend operator fun invoke(): Int = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(): Pair<Int, String?> = withContext(Dispatchers.IO) {
         val gameInfo = gameInfoManager.getGameInfo()
         if (gameInfo.packageName.isEmpty()) {
-            return@withContext ResultCode.NO_SELECTED_GAME
+            return@withContext Pair(ResultCode.NO_SELECTED_GAME, null)
         }
         modRepository.getEnableMods(gameInfo.packageName).first().let { enableMods ->
             if (enableMods.isNotEmpty()) {
-                return@withContext ResultCode.HAVE_ENABLE_MODS
+                return@withContext Pair(ResultCode.HAVE_ENABLE_MODS, null)
             } else {
                 val delBackupFile: Boolean = deleteBackupFiles(gameInfo)
                 if (delBackupFile) {
                     backupRepository.deleteByGamePackageName(gameInfo.packageName)
-                    return@withContext ResultCode.SUCCESS
+                    return@withContext Pair(ResultCode.SUCCESS, gameInfo.packageName)
                 } else {
-                    return@withContext ResultCode.FAIL
+                    return@withContext Pair(ResultCode.FAIL, gameInfo.packageName)
                 }
             }
         }
     }
 
-    private suspend fun deleteBackupFiles(
-        gameInfo: GameInfoBean
-    ): Boolean {
-
-        return if (File(appPathsManager.getBackupPath() + gameInfo.packageName).exists()) {
+    private fun deleteBackupFiles(gameInfo: GameInfoBean) =
+        if (File(appPathsManager.getBackupPath() + gameInfo.packageName).exists()) {
             val fileTools = fileToolsManager.getFileTools()
             kotlin.runCatching { fileTools.deleteFile(appPathsManager.getBackupPath() + gameInfo.packageName) }.isSuccess
         } else {
             true
         }
-    }
 }

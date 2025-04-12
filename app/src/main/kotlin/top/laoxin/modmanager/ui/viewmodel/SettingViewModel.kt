@@ -2,11 +2,11 @@ package top.laoxin.modmanager.ui.viewmodel
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -91,8 +91,8 @@ class SettingViewModel @Inject constructor(
         gameInfoJob?.cancel()
         setDeleteBackupDialog(false)
         gameInfoJob = viewModelScope.launch {
-            val result = deleteBackupUserCase()
-            when (result) {
+            val (code, name) = deleteBackupUserCase()
+            when (code) {
                 ResultCode.NO_SELECTED_GAME -> {
                     ToastUtils.longCall(R.string.toast_please_select_game)
                 }
@@ -102,11 +102,21 @@ class SettingViewModel @Inject constructor(
                 }
 
                 ResultCode.SUCCESS -> {
-                    ToastUtils.longCall(R.string.toast_del_buckup_success)
+                    ToastUtils.longCall(
+                        App.get().getString(
+                            R.string.toast_del_buckup_success,
+                            name
+                        )
+                    )
                 }
 
                 ResultCode.FAIL -> {
-                    ToastUtils.longCall(R.string.toast_del_buckup_filed)
+                    ToastUtils.longCall(
+                        App.get().getString(
+                            R.string.toast_del_buckup_failed,
+                            name
+                        )
+                    )
                 }
             }
             gameInfoJob?.cancel()
@@ -142,13 +152,13 @@ class SettingViewModel @Inject constructor(
         }
         val urlIntent = Intent(
             Intent.ACTION_VIEW,
-            Uri.parse(url)
+            url.toUri()
         )
         context.startActivity(urlIntent)
     }
 
     fun deleteTemp() {
-        viewModelScope.launch{
+        viewModelScope.launch {
             val delTemp: Boolean = deleteTempUserCase()
             if (delTemp) {
                 ToastUtils.longCall(R.string.toast_del_temp_success)
@@ -268,7 +278,7 @@ class SettingViewModel @Inject constructor(
     // 获取版本号
     fun getVersionName() {
         viewModelScope.launch {
-           val version =  appInfoManager.getVersionName(appInfoManager.getPackageName())
+            val version = appInfoManager.getVersionName(appInfoManager.getPackageName())
             _uiState.update {
                 it.copy(versionName = version)
             }

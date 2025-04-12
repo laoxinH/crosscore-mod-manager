@@ -107,7 +107,7 @@ fun SettingPage(viewModel: SettingViewModel, onHideBottomBar: (Boolean) -> Unit)
                 else -> {
                     SettingContent(
                         uiState,
-                        viewModel,
+                        viewModel::setAboutPage,
                         viewModel::setDeleteBackupDialog,
                         viewModel::setDeleteCacheDialog,
                         viewModel::deleteAllBackups,
@@ -143,7 +143,6 @@ fun SettingPage(viewModel: SettingViewModel, onHideBottomBar: (Boolean) -> Unit)
             fileTools = viewModel.getFileToolsManager().getFileTools()
         )
     }
-
     viewModel.updateContent?.let {
         DialogCommonForUpdate(
             title = stringResource(id = R.string.console_upgrade_title),
@@ -199,7 +198,7 @@ fun SettingPage(viewModel: SettingViewModel, onHideBottomBar: (Boolean) -> Unit)
 @Composable
 fun SettingContent(
     uiState: SettingUiState,
-    viewModel: SettingViewModel,
+    setAboutPage: (Boolean) -> Unit,
     setDeleteBackupDialog: (Boolean) -> Unit,
     setDeleteCacheDialog: (Boolean) -> Unit,
     deleteAllBackups: () -> Unit,
@@ -235,52 +234,64 @@ fun SettingContent(
             .verticalScroll(rememberScrollState())
     ) {
         SettingTitle(
-            stringResource(R.string.setting_page_app_title), Icons.Default.Settings
+            title = stringResource(R.string.setting_page_app_title),
+            icon = Icons.Default.Settings
         )
-        SettingItem(name = "许可证",
-            description = "查看开源许可证",
+        SettingItem(
+            name = stringResource(R.string.lincence),
+            description = stringResource(R.string.show_lincence),
             onClick = {
-                viewModel.setAboutPage(!uiState.showAbout)
+                setAboutPage(!uiState.showAbout)
             })
-        SettingItem(name = stringResource(R.string.setting_page_app_del_backup),
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_del_backup),
             description = stringResource(R.string.setting_page_app_del_descript),
             onClick = { setDeleteBackupDialog(true) })
-        SettingItem(name = stringResource(R.string.setting_page_app_clean_cache),
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_clean_cache),
             description = stringResource(R.string.setting_page_app_clean_cache_descript),
             onClick = { setDeleteCacheDialog(true) })
-        SettingItem(name = stringResource(R.string.setting_page_app_clean_temp),
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_clean_temp),
             description = stringResource(R.string.setting_page_app_clean_temp_descript),
             onClick = { deleteTemp() })
-        SettingItem(name = stringResource(R.string.setting_page_app_download_game_config),
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_download_game_config),
             description = stringResource(R.string.setting_page_app_download_game_config_descript),
             onClick = { showDownloadGameConfig(true) })
-        SettingItem(name = stringResource(R.string.setting_page_app_flash_game_config),
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_flash_game_config),
             description = stringResource(R.string.setting_page_app_flash_game_config_descript),
             onClick = { flashGameConfig() })
-
-        SettingItem(name = stringResource(R.string.setting_page_app_swtch_permission_shizuku),
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_swtch_permission_shizuku),
             description = stringResource(R.string.setting_page_app_swtch_permission_shizuku_desc),
             onClick = { requestShizukuPermission() })
-        SettingItem(name = stringResource(R.string.setting_page_app_swtch_game),
+        SettingItem(
+            name = stringResource(R.string.setting_page_app_swtch_game),
             description = stringResource(R.string.setting_page_app_swtch_game_descript),
             onClick = { showSwitchGame(true) })
 
         SettingTitle(
-            stringResource(R.string.setting_page_about_title), Icons.Default.Info
+            title = stringResource(R.string.setting_page_about_title),
+            icon = Icons.Default.Info
         )
-        SettingItem(name = stringResource(R.string.setting_page_about_author),
+        SettingItem(
+            name = stringResource(R.string.setting_page_about_author),
             description = stringResource(R.string.setting_page_about_github),
             icon = painterResource(id = R.drawable.github_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.github_url_releases_latest))
             })
-        SettingItem(name = stringResource(R.string.setting_page_about_pay),
+        SettingItem(
+            name = stringResource(R.string.setting_page_about_pay),
             description = stringResource(R.string.setting_page_about_pay_descript),
             icon = painterResource(id = R.drawable.alipay_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.alipay_url))
             })
-        SettingItem(name = stringResource(R.string.setting_page_about_update),
+        SettingItem(
+            name = stringResource(R.string.setting_page_about_update),
             description = stringResource(
                 R.string.setting_page_about_update_descript, uiState.versionName
             ),
@@ -288,7 +299,8 @@ fun SettingContent(
             onClick = {
                 checkUpdate()
             })
-        SettingItem(name = stringResource(R.string.setting_page_about_info),
+        SettingItem(
+            name = stringResource(R.string.setting_page_about_info),
             description = stringResource(R.string.setting_page_about_info_descript),
             icon = painterResource(id = R.drawable.notification_icon),
             onClick = {
@@ -296,33 +308,39 @@ fun SettingContent(
             })
 
         SettingTitle(
-            stringResource(R.string.setting_page_app_other), Icons.Default.MoreVert
+            title = stringResource(R.string.setting_page_app_other),
+            icon = Icons.Default.MoreVert
         )
-        SettingItem(name = stringResource(R.string.setting_page_more_shizuku),
+        SettingItem(
+            name = stringResource(R.string.setting_page_more_shizuku),
             description = stringResource(R.string.setting_page_more_shizuku_descript),
             icon = painterResource(id = R.drawable.shizuku_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.shzuiku_url))
             })
-        SettingItem(name = stringResource(R.string.setting_page_more_reference),
+        SettingItem(
+            name = stringResource(R.string.setting_page_more_reference),
             description = stringResource(R.string.setting_page_more_reference_descript),
             icon = painterResource(id = R.drawable.book_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.reference_url))
             })
-        SettingItem(name = stringResource(R.string.setting_page_more_qq),
+        SettingItem(
+            name = stringResource(R.string.setting_page_more_qq),
             description = stringResource(R.string.setting_page_more_qq_descript),
             icon = painterResource(id = R.drawable.qq_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.qq_url))
             })
-        SettingItem(name = stringResource(R.string.setting_page_more_discord),
+        SettingItem(
+            name = stringResource(R.string.setting_page_more_discord),
             description = stringResource(R.string.setting_page_more_discord_descript),
             icon = painterResource(id = R.drawable.discord_icon),
             onClick = {
                 openUrl(context, context.getString(R.string.disscord_url))
             })
-        SettingItem(name = stringResource(R.string.setting_page_more_acknowledgments),
+        SettingItem(
+            name = stringResource(R.string.setting_page_more_acknowledgments),
             description = stringResource(R.string.setting_page_more_acknowledgments_descript),
             icon = painterResource(id = R.drawable.thank_icon),
             onClick = {
@@ -336,10 +354,11 @@ fun SettingContent(
 fun SettingItem(
     name: String, description: String, icon: Painter? = null, onClick: () -> Unit = {}
 ) {
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(bottom = 8.dp)
-        .clickable { onClick() }) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+            .clickable { onClick() }) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -407,7 +426,8 @@ fun SwitchGameDialog(
 
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->
-                        SettingItem(name = gameInfo.gameName + "(${gameInfo.serviceName})",
+                        SettingItem(
+                            name = gameInfo.gameName + "(${gameInfo.serviceName})",
                             description = gameInfo.packageName,
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
@@ -443,7 +463,8 @@ fun DownloadGameConfigDialog(
                 //toMutableList.removeAt(0)
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->
-                        SettingItem(name = gameInfo.gameName + "(${gameInfo.serviceName})",
+                        SettingItem(
+                            name = gameInfo.gameName + "(${gameInfo.serviceName})",
                             description = gameInfo.packageName,
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
@@ -475,11 +496,13 @@ fun ThanksDialogCommon(
 ) {
     if (showDialog) {
         val context = LocalContext.current
-        AlertDialog(onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
+        AlertDialog(
+            onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
             title = { Text(text = title) }, text = {
                 LazyColumn {
                     itemsIndexed(thinks) { index, thank ->
-                        SettingItem(name = thank.name,
+                        SettingItem(
+                            name = thank.name,
                             description = context.getString(
                                 R.string.setting_thinks_link_desc, thank.job
                             ),
@@ -518,8 +541,8 @@ fun SettingTopBar(
         modifier = modifier,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor =
-            if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface
-            else MaterialTheme.colorScheme.surfaceContainer,
+                if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceContainer,
         ),
         title = {
             if (configuration != Configuration.ORIENTATION_LANDSCAPE) {

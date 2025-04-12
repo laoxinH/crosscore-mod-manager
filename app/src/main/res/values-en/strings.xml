@@ -21,7 +21,6 @@
     <string name="console_game_version">Version: %s</string>
     <string name="console_game_service">Server: %s</string>
     <string name="console_setting_info_configuration">Status</string>
-    <string name="console_setting_info_mod" translatable="false">MOD</string>
     <string name="console_setting_info_mod_total">MOD Count: %s</string>
     <string name="console_setting_info_mod_enable">Enabled: %s</string>
     <string name="console_setting_info_configuration_anti_harmony">Anti-Harmony: %s</string>
@@ -60,20 +59,15 @@
     <string name="setting_page_about_github">Go to GitHub for the latest version</string>
     <string name="toast_del_buckup_when_mod_enable">Please disable all mods before deleting backups</string>
     <string name="toast_del_buckup_success">%s: Backup deleted successfully</string>
-    <string name="toast_del_buckup_filed">%s: Failed to delete backup</string>
+    <string name="toast_del_buckup_failed">%s: Failed to delete backup</string>
     <string name="setting_del_backups_dialog_title">Warning</string>
     <string name="setting_del_backups_dialog_content_txt">Deleting backups will prevent normal restoration of game files, please proceed with caution! Please disable all mods before proceeding</string>
     <string name="setting_del_cache_dialog_content_txt">Clear cached images and other files. May cause problem.</string>
     <string name="toast_del_cache_success">Cache deleted successfully</string>
     <string name="toast_del_cache_filed">Failed to delete cache</string>
-    <string name="github_url_releases">https://github.com/laoxinH/crosscore-mod-manager/releases</string>
-    <string name="github_url_releases_latest">https://github.com/laoxinH/crosscore-mod-manager/releases/latest</string>
-    <string name="github_url">https://github.com/laoxinH/crosscore-mod-manager</string>
-    <string name="alipay_url" translatable="false">https://qr.alipay.com/fkx13953osk3jretx8ehg48</string>
     <string name="mod_page_no_mod">((٩(//̀Д/́/)۶)) Nothing here</string>
     <string name="mod_page_no_mod_dir">Nothing here</string>
     <string name="mod_pag_loading">Scanning: %1$s</string>
-    <string name="mod_page_title_all_mods" translatable="false">MOD</string>
     <string name="mod_page_title_enable_mods">Enabled</string>
     <string name="mod_page_title_disable_mods">Disabled</string>
     <string name="mod_page_title_search_mods">Search</string>
@@ -88,11 +82,9 @@
     <string name="dialog_button_info_permission">Agree and Continue</string>
     <string name="setting_page_app_other" translatable="false">More</string>
     <string name="setting_page_more_shizuku">Download Shizuku</string>
-    <string name="shzuiku_url" translatable="false">https://shizuku.rikka.app/zh-hans/download/</string>
     <string name="setting_page_more_shizuku_descript">Go to Shizuku download page</string>
     <string name="setting_page_more_reference">Mod Lab Guide</string>
     <string name="setting_page_more_reference_descript">Go to Gitee for instructions</string>
-    <string name="reference_url" translatable="false">https://gitee.com/laoxinH/Mod_Manager</string>
     <string name="setting_page_app_clean_temp">Delete Unzipped Files</string>
     <string name="setting_page_app_clean_temp_descript">Delete unzipped MOD files (will be recreated when MOD is enabled)</string>
     <string name="toast_del_temp_success">Unzipped MOD directory deleted</string>
@@ -112,7 +104,6 @@
     <string name="setting_page_app_swtch_game_descript">Select the game to manage MODs</string>
     <string name="switch_game_service_tiltle">Select Game</string>
     <string name="setting_page_more_qq">Mod Lab QQ Group</string>
-    <string name="qq_url" translatable="false"><![CDATA[http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=lynCj4WRXPNwATYiZKfYkySm0utpUAAO&authKey=qFoE9Wpp9h5%2FCqMSXF7yQAG%2BG6WSxjGkjU7mwez%2BU%2FO7MpmzSbpivyx1OjCHFldQ&noverify=0&group_code=939934555]]></string>
     <string name="setting_page_more_qq_descript">BUG feedback (Game exchange: 939934555)</string>
     <string name="tips_copy_mod_failed">Failed to copy Mod file, trying stream write</string>
     <string name="choose_method_title">Please select authorization method</string>
@@ -149,13 +140,11 @@
     <string name="toast_get_game_config_failed">Failed to get game configuration</string>
     <string name="toast_special_operation_failed">Anti-detection failed</string>
     <string name="switch_download_game_tiltle">Download Game Configuration File</string>
-    <string name="setting_thinks_link_desc" translatable="false">JOB: %1$s</string>
     <string name="tips_special_operation">Performing special game operation</string>
     <string name="tips_reload_decrypted_mod_info">Reload mod info</string>
     <string name="toast_decompression_failed">Decompression failed</string>
     <string name="toast_this_dir_has_no_prim_android">Cannot use Android system directory</string>
     <string name="channel_name">Game Launch Service</string>
-    <string name="channel_id" translatable="false">114514</string>
     <string name="channel_title">Game MOD Injection Service</string>
     <string name="channel_content">Game MOD Injection Service Notification</string>
     <string name="toast_game_not_found">Failed to launch game</string>
@@ -164,7 +153,6 @@
     <string name="console_game_tips_title">Special Attention!</string>
     <string name="setting_page_more_discord">Discord Server</string>
     <string name="setting_page_more_discord_descript">This is a Discord server for sharing and discussing various game MODs</string>
-    <string name="disscord_url" translatable="false">https://discord.gg/4UJsfDSxZ7</string>
     <string name="mod_temp_bean_name_dictionary_desc">Folder</string>
     <string name="mod_bean_no_readme">No readme file</string>
     <string name="mod_bean_no_author">Unknown</string>
@@ -208,4 +196,6 @@
     <string name="tosat_game_already_update">%1$s has been updated. Please reselect the game in the settings and perform the prompt operation again</string>
     <string name="mod_page_mod_detail_dialog_detali_password">Password: %1$s</string>
     <string name="mod_modlist_item_desrcipt">Click here for details</string>
+    <string name="lincence">Lincence</string>
+    <string name="show_lincence">Show Open Source Lincence</string>
 </resources>
