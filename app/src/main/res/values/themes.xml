@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ModManager" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.ModManager" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowDisablePreview">false</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
     </style>
-
-    <!--    <style name="Theme.ModManager.SplashScreen" parent="Theme.SplashScreen">-->
-    <!--        <item name="windowSplashScreenAnimatedIcon">@drawable/start</item>-->
-    <!--        <item name="windowSplashScreenAnimationDuration">500</item>-->
-    <!--        <item name="postSplashScreenTheme">@style/Theme.ModManager</item>-->
-    <!--    </style>-->
 
 </resources>
