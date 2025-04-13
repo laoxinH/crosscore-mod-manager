@@ -12,6 +12,7 @@ import androidx.core.view.WindowCompat
 import top.laoxin.modmanager.activity.start.StartActivity
 import java.util.concurrent.atomic.AtomicBoolean
 
+// 原生启动页
 class SplashActivity : ComponentActivity() {
     private val isKeepOnScreen = AtomicBoolean(true)
 
