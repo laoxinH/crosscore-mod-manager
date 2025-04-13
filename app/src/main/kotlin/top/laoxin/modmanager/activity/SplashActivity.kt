@@ -4,14 +4,13 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.util.DisplayMetrics
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import java.util.concurrent.atomic.AtomicBoolean
 import top.laoxin.modmanager.activity.start.StartActivity
+import java.util.concurrent.atomic.AtomicBoolean
 
 class SplashActivity : ComponentActivity() {
     private val isKeepOnScreen = AtomicBoolean(true)
@@ -26,9 +25,8 @@ class SplashActivity : ComponentActivity() {
 
     // 跳转到启动 Activity
     private fun jumpToStart() {
-        Handler.createAsync(mainLooper).postDelayed({
-            startActivity(Intent(this, StartActivity::class.java))
-        }, 200)
+        startActivity(Intent(this, StartActivity::class.java))
+        finish()
     }
 
     // 设置全屏模式，使内容可以扩展到状态栏和导航栏区域
