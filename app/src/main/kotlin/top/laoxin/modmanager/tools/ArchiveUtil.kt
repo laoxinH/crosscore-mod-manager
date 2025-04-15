@@ -45,11 +45,7 @@ object ArchiveUtil {
                 extractZip(srcFile, destDir, password, overwrite)
             }
 
-            FileType._7z -> {
-                decompressionBy7z(srcFile, destDir, password, overwrite)
-            }
-
-            FileType.RAR -> {
+            FileType._7z, FileType.RAR -> {
                 decompressionBy7z(srcFile, destDir, password, overwrite)
             }
 
@@ -57,10 +53,7 @@ object ArchiveUtil {
         }
     }
 
-
-    /**
-     * 无密码解压指定文件
-     */
+    // 无密码解压指定文件
     fun extractSpecificFile(
         srcFile: String,
         files: List<String>,
@@ -71,9 +64,7 @@ object ArchiveUtil {
         return extractSpecificFile(srcFile, files, destDir, null, overwrite)
     }
 
-    /**
-     * 有密码解压指定文件
-     */
+    //有密码解压指定文件
     fun extractSpecificFile(
         srcFile: String,
         files: List<String>,
@@ -86,11 +77,7 @@ object ArchiveUtil {
                 extractSpecificZipFile(srcFile, files, destDir, password, overwrite)
             }
 
-            FileType._7z -> {
-                extractSpecificFileBy7z(srcFile, files, destDir, password, overwrite)
-            }
-
-            FileType.RAR -> {
+            FileType._7z, FileType.RAR -> {
                 extractSpecificFileBy7z(srcFile, files, destDir, password, overwrite)
             }
 
@@ -378,12 +365,32 @@ object ArchiveUtil {
 
         return try {
             randomAccessFile = RandomAccessFile(File(srcFile), "r")
-            inArchive =
-                SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
+
+            // 先验证密码是否正确
+            if (!validate7zPassword(srcFile, password)) {
+                throw PasswordErrorException("密码错误")
+            }
+
+            inArchive = SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
             inArchive.extract(null, false, ExtractCallback(inArchive, destDir, password ?: ""))
+
+            // 验证解压后的文件是否存在（至少有一个文件）
+            val extractedFiles = File(destDir).listFiles()
+            if (extractedFiles == null || extractedFiles.isEmpty()) {
+                throw PasswordErrorException("密码错误：解压后未生成文件")
+            }
             true
         } catch (e: Exception) {
-            Log.e(TAG, e.message!!)
+            Log.e(TAG, "7z解压错误: ${e.message}")
+            LogTools.logRecord("解压失败: $e")
+
+            // 特殊处理密码错误的情况
+            if (e is PasswordErrorException ||
+                e.message?.contains("password", ignoreCase = true) == true ||
+                e.message?.contains("Wrong Password", ignoreCase = true) == true
+            ) {
+                throw PasswordErrorException("密码错误")
+            }
             false
         } finally {
             inArchive?.close()
@@ -391,6 +398,144 @@ object ArchiveUtil {
         }
     }
 
+    /**
+     * 验证7z压缩包密码是否正确
+     */
+    fun validate7zPassword(srcFile: String, password: String?): Boolean {
+        if (password.isNullOrEmpty()) {
+            // 如果文件需要密码但未提供，则返回false
+            if (is7zEncrypted(srcFile)) {
+                return false
+            }
+            // 如果文件不需要密码，则返回true
+            return true
+        }
+
+        var inArchive: IInArchive? = null
+        var randomAccessFile: RandomAccessFile? = null
+
+        try {
+            randomAccessFile = RandomAccessFile(File(srcFile), "r")
+            // 尝试使用密码打开档案
+            inArchive = SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
+
+            // 获取第一个文件索引
+            if (inArchive.numberOfItems > 0) {
+                // 创建一个测试解压缓冲区
+                val testBuffer = ByteArrayOutputStream()
+                val outStream = ISequentialOutStream { data ->
+                    testBuffer.write(data)
+                    data.size
+                }
+
+                // 尝试提取第一个加密项目
+                for (i in 0 until inArchive.numberOfItems) {
+                    // 使用正确的API获取加密状态
+                    if (inArchive.getProperty(i, PropID.ENCRYPTED).toString().toBoolean()) {
+                        try {
+                            // 使用ICryptoGetTextPassword接口提供密码
+                            val passwordProvider = object : ICryptoGetTextPassword {
+                                override fun cryptoGetTextPassword(): String = password
+                            }
+                            inArchive.extractSlow(
+                                i,
+                                outStream,
+                                passwordProvider.cryptoGetTextPassword()
+                            )
+
+                            // 如果能成功解压，则密码正确
+                            return true
+                        } catch (e: Exception) {
+                            // 如果解压失败，则密码错误
+                            if (e.message?.contains("password", ignoreCase = true) == true ||
+                                e.message?.contains("Wrong Password", ignoreCase = true) == true
+                            ) {
+                                return false
+                            }
+                            // 如果是其他错误，继续尝试下一个文件
+                        }
+                    }
+                }
+                // 如果没有找到加密项或所有项都成功解压，则密码正确或不需要密码
+                return true
+            }
+
+            // 如果档案为空，则认为不需要密码
+            return true
+        } catch (e: Exception) {
+            // 如果打开档案时出错且与密码相关，则密码错误
+            if (e.message?.contains("password", ignoreCase = true) == true ||
+                e.message?.contains("Wrong Password", ignoreCase = true) == true
+            ) {
+                return false
+            }
+            // 其他错误
+            Log.e(TAG, "验证7z密码失败: ${e.message}")
+            return false
+        } finally {
+            inArchive?.close()
+            randomAccessFile?.close()
+        }
+    }
+
+    /**
+     * 检查7z文件是否加密
+     */
+    fun is7zEncrypted(archiveFile: String): Boolean {
+        var inArchive: IInArchive? = null
+        var randomAccessFile: RandomAccessFile? = null
+
+        try {
+            randomAccessFile = RandomAccessFile(File(archiveFile), "r")
+            inArchive = SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
+
+            // 检查是否有任何加密的项目
+            for (i in 0 until inArchive.numberOfItems) {
+                // 使用正确的API获取加密状态
+                val encrypted = inArchive.getProperty(i, PropID.ENCRYPTED).toString().toBoolean()
+                if (encrypted) {
+                    return true
+                }
+            }
+            return false
+        } catch (e: Exception) {
+            // 如果出现与密码相关的错误，可能是因为文件加密且需要密码
+            if (e.message?.contains("password", ignoreCase = true) == true) {
+                return true
+            }
+            Log.e(TAG, "检查7z加密状态失败: ${e.message}")
+            return false
+        } finally {
+            inArchive?.close()
+            randomAccessFile?.close()
+        }
+    }
+
+    // 判断是否加密
+    fun isArchiveEncrypted(archiveFile: String): Boolean {
+        var randomAccessFile: RandomAccessFile? = null
+        var inArchive: IInArchive? = null
+
+        try {
+            randomAccessFile = RandomAccessFile(File(archiveFile), "r")
+            inArchive = SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
+
+            // 检查是否有任何加密的项目
+            for (i in 0 until inArchive.numberOfItems) {
+                val encrypted = inArchive.getProperty(i, PropID.ENCRYPTED).toString().toBoolean()
+                if (encrypted) {
+                    return true
+                }
+            }
+            return false
+        } catch (e: Exception) {
+            Log.e(TAG, "检查压缩包加密状态失败: ${e.message}")
+            return false
+        } finally {
+            inArchive?.close()
+            randomAccessFile?.close()
+        }
+    }
 
     // 7z解压回调
     private class ExtractCallback(
@@ -599,15 +744,6 @@ object ArchiveUtil {
         }
 
         return byteArrayOutputStream.toByteArray().inputStream()
-    }
-
-    // 判断是否加密
-    fun isArchiveEncrypted(archiveFile: String): Boolean {
-        val randomAccessFile = RandomAccessFile(File(archiveFile), "r")
-        val inArchive = SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
-        inArchive.use {
-            return inArchive.simpleInterface.archiveItems.any { it.isEncrypted }
-        }
     }
 
     /**

@@ -53,16 +53,49 @@ class CheckModPasswordUserCase @Inject constructor(
             )
             val unZipPath =
                 appPathsManager.getModsUnzipPath() + gameInfo.packageName + "/" + File(modBean.path!!).nameWithoutExtension + "/"
+
+            // 创建解压目标目录
+            File(unZipPath).mkdirs()
+
+            // 根据文件类型进行特定的密码验证
+            val fileType = File(modBean.path).extension.lowercase()
+            if (fileType == "7z" || fileType == "rar") {
+                // 对于7z和rar文件，先验证密码
+                if (!ArchiveUtil.validate7zPassword(modBean.path, password)) {
+                    withContext(Dispatchers.Main) {
+                        ToastUtils.longCall(R.string.toast_password_error)
+                    }
+
+                    return@withContext Pair(
+                        ResultCode.FAIL,
+                        App.get().getString(R.string.toast_password_error)
+                    )
+                }
+            }
+
             val decompression = ArchiveUtil.decompression(
                 modBean.path, unZipPath, password, true
             )
 
-            // 立即检查解压结果，密码错误时立即返回错误并显示Toast通知
+            // 检查解压结果
             if (!decompression) {
                 withContext(Dispatchers.Main) {
                     ToastUtils.longCall(R.string.toast_password_error)
                 }
-                LogTools.logRecord("密码验证失败:${modBean.name}--密码错误")
+                LogTools.logRecord("密码验证失败:${modBean.name}--密码错误或解压失败")
+                return@withContext Pair(
+                    ResultCode.FAIL,
+                    App.get().getString(R.string.toast_password_error)
+                )
+            }
+
+            // 进一步验证解压结果：确认解压后的目录不为空
+            val extractedFiles = File(unZipPath).listFiles()
+            if (extractedFiles == null || extractedFiles.isEmpty()) {
+                withContext(Dispatchers.Main) {
+                    ToastUtils.longCall(R.string.toast_password_error)
+                }
+                LogTools.logRecord("密码验证失败:${modBean.name}--解压后目录为空")
                 return@withContext Pair(
                     ResultCode.FAIL,
                     App.get().getString(R.string.toast_password_error)
@@ -139,3 +172,4 @@ class CheckModPasswordUserCase @Inject constructor(
         return bean
     }
 }
+
