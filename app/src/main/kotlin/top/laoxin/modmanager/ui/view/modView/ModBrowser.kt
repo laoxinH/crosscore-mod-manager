@@ -54,7 +54,6 @@ import java.io.File
 
 @Composable
 fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
-    val appPathsManager = viewModel.getAppPathsManager()
     var currentPath by remember { mutableStateOf(uiState.currentPath) }
     val files = remember(uiState.currentFiles) { uiState.currentFiles }
     var previousPath by remember { mutableStateOf(currentPath) }
@@ -67,10 +66,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         derivedStateOf {
             currentPath == uiState.currentGameModPath || currentPath == Environment.getExternalStorageDirectory().path
         }
-    }
-
-    if (currentPath == appPathsManager.getModPath()) {
-        return NoMod()
     }
 
     fun doBack() {
