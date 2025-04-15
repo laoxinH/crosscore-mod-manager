@@ -503,24 +503,39 @@ class ModViewModel @Inject constructor(
     }
 
     fun checkPassword(password: String) {
-
         checkPasswordJob?.cancel()
         checkPasswordJob = viewModelScope.launch {
             setModSwitchEnable(false)
-
             setShowTips(true)
-            checkModPasswordUserCase(
-                _uiState.value.modDetail!!,
-                password,
-                ::setTipsText
-            )
-            setModSwitchEnable(true)
-            setShowTips(false)
-            checkPasswordJob?.cancel()
+
+            // 获取当前MOD详情
+            val modDetail = _uiState.value.modDetail ?: return@launch
+
+            try {
+                val result = checkModPasswordUserCase(
+                    modDetail,
+                    password,
+                    ::setTipsText
+                )
+
+                if (result.first == ResultCode.SUCCESS) {
+                    // 密码验证成功，关闭密码对话框
+                    showPasswordDialog(false)
+
+                    // 更新本地MOD详情密码
+                    val updatedMod = modDetail.copy(password = password)
+                    setModDetail(updatedMod)
+
+                    // 刷新MOD详情以显示新内容
+                    refreshModDetail()
+                }
+            } finally {
+                // 确保无论成功与否都会执行这些操作
+                setShowTips(false)
+                setModSwitchEnable(true)
+            }
         }
-
     }
-
 
     fun setShowTips(b: Boolean) {
         viewModelScope.launch {
@@ -799,16 +814,15 @@ class ModViewModel @Inject constructor(
         }
     }
 
-    fun refreshModDetail() {
-        val modBean = _uiState.value.modDetail!!
+    fun refreshModDetail(): Boolean {
+        val modBean = _uiState.value.modDetail ?: return false
 
         // 启动协程等待解压并读取完成
         viewModelScope.launch {
             val result = flashModDetailUserCase(modBean)
             setModDetail(result.mod)
-            //showPasswordDialog(true)
-
         }
+        return true
     }
 
     fun deleteMod() {
@@ -939,3 +953,4 @@ class ModViewModel @Inject constructor(
     }
 
 }
+

@@ -1,8 +1,8 @@
 package top.laoxin.modmanager.domain.usercase.mod
 
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
@@ -43,7 +43,7 @@ class CheckModPasswordUserCase @Inject constructor(
         password: String,
         setTipsText: (String) -> Unit
     ): Pair<Int, String> = withContext(Dispatchers.IO) {
-        kotlin.runCatching {
+        try {
             setTipsText(
                 App.get().getString(R.string.tips_check_password)
             )
@@ -56,37 +56,55 @@ class CheckModPasswordUserCase @Inject constructor(
             val decompression = ArchiveUtil.decompression(
                 modBean.path, unZipPath, password, true
             )
-            if (!decompression) throw PasswordErrorException(
-                App.get().getString(R.string.toast_password_error)
-            )
-            modRepository.getModsByPathAndGamePackageName(
-                modBean.path, modBean.gamePackageName!!
-            ).collect { mods ->
-                Log.d("ModViewModel", "更新mod: $mods")
-                setTipsText(App.get().getString(R.string.tips_reload_decrypted_mod_info))
-                val newModList: MutableList<ModBean> = mutableListOf()
-                mods.forEach {
-                    val newMod = it.copy(password = password)
-                    val mod: ModBean = readModInfo(unZipPath, newMod)
-                    newModList.add(mod)
+
+            // 立即检查解压结果，密码错误时立即返回错误并显示Toast通知
+            if (!decompression) {
+                withContext(Dispatchers.Main) {
+                    ToastUtils.longCall(R.string.toast_password_error)
                 }
+                LogTools.logRecord("密码验证失败:${modBean.name}--密码错误")
+                return@withContext Pair(
+                    ResultCode.FAIL,
+                    App.get().getString(R.string.toast_password_error)
+                )
+            }
+
+            setTipsText(App.get().getString(R.string.tips_reload_decrypted_mod_info))
+
+            // 获取需要更新的模组列表
+            val mods = modRepository.getModsByPathAndGamePackageName(
+                modBean.path, modBean.gamePackageName!!
+            ).firstOrNull() ?: emptyList()
+
+            val newModList: MutableList<ModBean> = mutableListOf()
+
+            for (mod in mods) {
+                val newMod = mod.copy(password = password)
+                val updatedMod: ModBean = readModInfo(unZipPath, newMod)
+                newModList.add(updatedMod)
+            }
+
+            if (newModList.isNotEmpty()) {
                 modRepository.updateAll(newModList)
             }
-        }.onSuccess {
+
+            // 返回成功结果
             return@withContext Pair(ResultCode.SUCCESS, "")
-        }.onFailure {
+        } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                if (it.message?.contains("StandaloneCoroutine was cancelled") != true) {
-                    if (it.message?.contains("top.laoxin.modmanager") == true) {
+                if (e.message?.contains("StandaloneCoroutine was cancelled") != true) {
+                    if (e is PasswordErrorException || e.message?.contains("top.laoxin.modmanager") == true) {
                         ToastUtils.longCall(R.string.toast_password_error)
                     } else {
-                        ToastUtils.longCall(it.message.toString())
+                        ToastUtils.longCall(e.message.toString())
                     }
                 }
-                LogTools.logRecord("校验密码失败:${modBean.name}--$it")
-                it.printStackTrace()
+
+                LogTools.logRecord("校验密码失败:${modBean.name}--$e")
+                e.printStackTrace()
             }
-            return@withContext Pair(ResultCode.FAIL, "")
+
+            return@withContext Pair(ResultCode.FAIL, e.message ?: "")
         }
         return@withContext Pair(ResultCode.FAIL, "")
     }

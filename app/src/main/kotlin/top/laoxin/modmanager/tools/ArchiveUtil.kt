@@ -2,6 +2,7 @@ package top.laoxin.modmanager.tools
 
 import android.util.Log
 import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.FileHeader
 import net.lingala.zip4j.progress.ProgressMonitor
 import net.sf.sevenzipjbinding.ExtractAskMode
@@ -15,6 +16,7 @@ import net.sf.sevenzipjbinding.SevenZip
 import net.sf.sevenzipjbinding.SevenZipException
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream
 import top.laoxin.modmanager.constant.FileType
+import top.laoxin.modmanager.exception.PasswordErrorException
 import top.laoxin.modmanager.listener.ProgressUpdateListener
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -173,9 +175,33 @@ object ArchiveUtil {
                 zipFile = ZipFile(srcFile)
                 zipFile.charset = Charset.forName("GBK")
             }
+
+            // 设置密码
             password?.let {
                 zipFile.setPassword(it.toCharArray())
             }
+
+            // 尝试检查是否需要密码但没提供有效密码
+            try {
+                // 这将检查是否可以访问文件列表，这通常会在密码错误时失败
+                if (zipFile.isEncrypted && (password.isNullOrEmpty() || !validateZipPassword(
+                        zipFile
+                    ))
+                ) {
+                    LogTools.logRecord("解压失败: 密码错误或缺失")
+                    return false
+                }
+            } catch (e: ZipException) {
+                // 如果出现ZIP异常并且文件是加密的，可能是密码错误
+                if (e.message?.contains("Wrong Password", ignoreCase = true) == true ||
+                    e.message?.contains("password", ignoreCase = true) == true
+                ) {
+                    LogTools.logRecord("解压失败: 密码错误 - ${e.message}")
+                    return false
+                }
+                throw e // 重新抛出其他异常
+            }
+
             zipFile.isRunInThread = true
             zipFile.extractAll(destDir)
             val progressMonitor = zipFile.progressMonitor
@@ -187,16 +213,54 @@ object ArchiveUtil {
                     return true
                 }
                 if (progressMonitor.result == ProgressMonitor.Result.ERROR) {
+                    // 检查错误原因
+                    if (progressMonitor.exception?.message?.contains(
+                            "password",
+                            ignoreCase = true
+                        ) == true
+                    ) {
+                        LogTools.logRecord("解压失败: 密码错误 - ${progressMonitor.exception?.message}")
+                    } else {
+                        LogTools.logRecord("解压失败: ${progressMonitor.exception?.message}")
+                    }
                     return false
                 }
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, e.message!!)
+            Log.e(TAG, e.message ?: "Unknown error")
             LogTools.logRecord("解压失败: $e")
+
+            // 特别处理密码错误的情况
+            if (e.message?.contains("password", ignoreCase = true) == true ||
+                e.message?.contains("Wrong Password", ignoreCase = true) == true
+            ) {
+                throw PasswordErrorException("密码错误")
+            }
             return false
         }
+    }
 
+    // 验证ZIP密码是否正确
+    private fun validateZipPassword(zipFile: ZipFile): Boolean {
+        try {
+            if (!zipFile.isEncrypted) return true
+
+            // 尝试获取第一个文件头，这会在密码错误时抛出异常
+            val fileHeaders = zipFile.fileHeaders
+            if (fileHeaders.isNotEmpty()) {
+                val firstHeader = fileHeaders[0]
+                if (firstHeader.isEncrypted) {
+                    // 尝试用提供的密码打开流，如果密码错误会抛出异常
+                    val inputStream = zipFile.getInputStream(firstHeader)
+                    inputStream.close()
+                }
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Password validation failed: ${e.message}")
+            return false
+        }
     }
 
     // 通过zip4j列出zip文件内容
@@ -318,15 +382,12 @@ object ArchiveUtil {
                 SevenZip.openInArchive(null, RandomAccessFileInStream(randomAccessFile))
             inArchive.extract(null, false, ExtractCallback(inArchive, destDir, password ?: ""))
             true
-        } catch (
-            e: Exception
-        ) {
+        } catch (e: Exception) {
             Log.e(TAG, e.message!!)
             false
         } finally {
             inArchive?.close()
             randomAccessFile?.close()
-
         }
     }
 
@@ -634,3 +695,4 @@ object ArchiveUtil {
         return FileType.UNKNOWN
     }
 }
+
