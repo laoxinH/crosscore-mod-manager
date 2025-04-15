@@ -68,12 +68,22 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         }
     }
 
+    // 确保加载时和每次路径变化时正确更新返回按钮状态
+    LaunchedEffect(isAtRootPath) {
+        viewModel.setBackIconVisible(!isAtRootPath)
+    }
+
     fun doBack() {
         if (!isAtRootPath) {
             scrollPositions[currentPath] = listState.firstVisibleItemIndex
             scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
             previousPath = currentPath
             currentPath = File(currentPath).parent ?: currentPath
+
+            // 更新了返回按钮状态：根据当前路径是否为根路径来设置
+            val nextIsRoot = File(currentPath).path == uiState.currentGameModPath ||
+                    File(currentPath).path == Environment.getExternalStorageDirectory().path
+            viewModel.setBackIconVisible(!nextIsRoot)
         }
     }
 
@@ -89,6 +99,9 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         snapshotFlow { currentPath }
             .distinctUntilChanged()
             .collect { newPath ->
+                val isRoot = newPath == uiState.currentGameModPath ||
+                        newPath == Environment.getExternalStorageDirectory().path
+                viewModel.setBackIconVisible(!isRoot)
                 viewModel.updateFiles(newPath)
             }
     }

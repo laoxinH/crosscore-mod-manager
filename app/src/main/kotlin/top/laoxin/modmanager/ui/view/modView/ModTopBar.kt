@@ -2,6 +2,7 @@ package top.laoxin.modmanager.ui.view.modView
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -48,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -233,6 +235,15 @@ fun GeneralTopBar(
     }
     var showMenu by remember { mutableStateOf(false) }
 
+    // 简化逻辑，直接使用uiState.isBackPathExist
+    val backButtonEnabled = uiState.isBackPathExist
+
+    // 添加按钮透明度动画
+    val backButtonAlpha by animateFloatAsState(
+        targetValue = if (backButtonEnabled) 1f else 0.5f,
+        label = "backButtonAlpha"
+    )
+
     Column {
         TopAppBar(
             modifier = modifier,
@@ -243,15 +254,20 @@ fun GeneralTopBar(
                 if (uiState.modsView == NavigationIndex.MODS_BROWSER)
                     Button(
                         onClick = {
-                            viewModel.setDoBackFunction(true)
+                            // 只在按钮可用时触发返回功能
+                            if (backButtonEnabled) {
+                                viewModel.setDoBackFunction(true)
+                            }
                         },
                         modifier = Modifier
                             .size(35.dp)
                             .padding(start = 6.dp)
-                            .offset(y = 8.dp),
+                            .offset(y = 8.dp)
+                            .alpha(backButtonAlpha),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(0.dp),
-                        enabled = uiState.isBackPathExist,
+                        // 将按钮的启用状态与backButtonEnabled绑定
+                        enabled = backButtonEnabled,
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
@@ -337,22 +353,26 @@ fun GeneralTopBar(
                 }
                 AnimatedVisibility(visible = showMenu, modifier = Modifier.offset(y = 20.dp)) {
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_enable_mods)) },
                             onClick = {
                                 viewModel.setModsView(NavigationIndex.ENABLE_MODS)
                                 showMenu = false
                             })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_disable_mods)) },
                             onClick = {
                                 viewModel.setModsView(NavigationIndex.DISABLE_MODS)
                                 showMenu = false
                             })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.mod_page_dropdownMenu_show_all_mods)) },
                             onClick = {
                                 viewModel.setModsView(NavigationIndex.ALL_MODS)
                                 showMenu = false
                             })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.mod_page_dropdownMenu_mods_browser)) },
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.mod_page_dropdownMenu_mods_browser)) },
                             onClick = {
                                 viewModel.setModsView(NavigationIndex.MODS_BROWSER)
                                 showMenu = false
@@ -461,3 +481,4 @@ fun SearchBox(
         )
     )
 }
+
