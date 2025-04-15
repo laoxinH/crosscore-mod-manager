@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.distinctUntilChanged
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
@@ -54,19 +56,25 @@ import java.io.File
 fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     val appPathsManager = viewModel.getAppPathsManager()
     var currentPath by remember { mutableStateOf(uiState.currentPath) }
-    val files = uiState.currentFiles
+    val files = remember(uiState.currentFiles) { uiState.currentFiles }
     var previousPath by remember { mutableStateOf(currentPath) }
     val listState = rememberLazyListState()
     val scrollPositions = remember { mutableMapOf<String, Int>() }
     val scrollOffsets = remember { mutableMapOf<String, Int>() }
     val doBackFunction by rememberUpdatedState(uiState.doBackFunction)
+
+    val isAtRootPath by remember(currentPath, uiState.currentGameModPath) {
+        derivedStateOf {
+            currentPath == uiState.currentGameModPath || currentPath == Environment.getExternalStorageDirectory().path
+        }
+    }
+
     if (currentPath == appPathsManager.getModPath()) {
         return NoMod()
     }
 
     fun doBack() {
-        if (currentPath != uiState.currentGameModPath && currentPath != Environment.getExternalStorageDirectory().path) {
-            // 记录当前路径的滚动位置
+        if (!isAtRootPath) {
             scrollPositions[currentPath] = listState.firstVisibleItemIndex
             scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
             previousPath = currentPath
@@ -82,30 +90,25 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         }
     }
 
-    // 监听当前路径变化并更新文件列表
     LaunchedEffect(currentPath) {
         snapshotFlow { currentPath }
+            .distinctUntilChanged()
             .collect { newPath ->
                 viewModel.updateFiles(newPath)
             }
     }
 
-    // 监听列表加载状态并在加载完成后滚动到指定位置
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo.totalItemsCount }
-            .collect { itemCount ->
-                if (itemCount > 0) {
-                    listState.scrollToItem(
-                        scrollPositions[currentPath] ?: 0,
-                        scrollOffsets[currentPath] ?: 0
-                    )
-                }
-            }
+    LaunchedEffect(files) {
+        if (files.isNotEmpty()) {
+            listState.scrollToItem(
+                scrollPositions[currentPath] ?: 0,
+                scrollOffsets[currentPath] ?: 0
+            )
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // 监听返回按键事件
-        if (currentPath != uiState.currentGameModPath) {
+        if (!isAtRootPath) {
             BackHandler {
                 viewModel.setDoBackFunction(true)
             }
@@ -117,133 +120,151 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                 EnterTransition.None togetherWith ExitTransition.None
             }
         ) { path ->
-            val mods = files.flatMap { file ->
-                viewModel.getModsByPathStrict(file.path) + viewModel.getModsByVirtualPathsStrict(
-                    file.path
-                )
-            }
-            viewModel.setCurrentMods(mods)
-
-            // 空目录的返回上级目录按钮
-            if (currentPath != uiState.currentGameModPath && files.isEmpty()) {
-                viewModel.setBackIconVisible(true)
-            }
-
-            if (uiState.currentFiles.isEmpty() && uiState.currentMods.isEmpty()) {
-                NoModInDir()
-            } else {
-                LazyColumn(state = listState) {
-
-                    items(files) { file: File ->
-
-                        // 非空目录的返回上级目录按钮
-                        if (!uiState.isBackPathExist && currentPath != uiState.currentGameModPath) {
-                            viewModel.setBackIconVisible(true)
-                        }
-
-                        // 通过filepath获取mods
-                        val modsByPath = viewModel.getModsByPathStrict(file.path)
-                        // 通过虚拟路径获取mods
-                        val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
-
-                        // 设置当前页面的mods
-                        val modCount = if (viewModel.getModsByPath(file.path)
-                                .isNotEmpty()
-                        ) viewModel.getModsByPath(file.path).size else viewModel.getModsByVirtualPaths(
-                            file.path
-                        ).size
-
-                        val modEnableCount = if (viewModel.getModsByPath(file.path)
-                                .isNotEmpty()
-                        ) viewModel.getModsByPath(file.path)
-                            .filter { it.isEnable }.size else viewModel.getModsByVirtualPaths(
-                            file.path
-                        ).filter { it.isEnable }.size
-                        if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty() && (file.isDirectory || !file.exists())) {
-                            FileListItem(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                                name = file.name,
-                                isSelected = false,
-                                onLongClick = {},
-                                onClick = {
-                                    if (file.isDirectory || !file.exists()) {
-                                        // 记录当前路径的滚动位置
-                                        scrollPositions[currentPath] =
-                                            listState.firstVisibleItemIndex
-                                        scrollOffsets[currentPath] =
-                                            listState.firstVisibleItemScrollOffset
-                                        previousPath = currentPath
-                                        currentPath = file.path
-                                    } else {
-                                        // 处理文件点击事件
-                                    }
-                                },
-                                onMultiSelectClick = {},
-                                isMultiSelect = uiState.isMultiSelect,
-                                description = stringResource(
-                                    R.string.mod_browser_file_description, modCount, modEnableCount
-                                ),
-                                iconId = if (modCount > 0) R.drawable.folder_mod_icon else R.drawable.folder_icon
-                            )
-                        }
-                        if (modsByPath.size == 1 || modsByVirtualPaths.size == 1) {
-                            ModListItem(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                                mod = modsByPath.firstOrNull()
-                                    ?: modsByVirtualPaths.firstOrNull()!!,
-                                isSelected = uiState.modsSelected.contains(
-                                    modsByPath.firstOrNull()?.id
-                                        ?: modsByVirtualPaths.firstOrNull()?.id!!
-                                ),
-                                onLongClick = {
-                                    viewModel.modLongClick(
-                                        modsByPath.firstOrNull()
-                                            ?: modsByVirtualPaths.firstOrNull()!!
-                                    )
-                                },
-                                onMultiSelectClick = {
-                                    viewModel.modMultiSelectClick(
-                                        modsByPath.firstOrNull()
-                                            ?: modsByVirtualPaths.firstOrNull()!!
-                                    )
-                                },
-                                isMultiSelect = uiState.isMultiSelect,
-                                modSwitchEnable = uiState.modSwitchEnable,
-                                openModDetail = { mod, _ ->
-                                    viewModel.openModDetail(mod, true)
-                                },
-                                enableMod = { mod, isEnable ->
-                                    viewModel.switchMod(mod, isEnable)
-                                },
-                                modViewModel = viewModel
-                            )
-                        }
-                        if (modsByPath.size > 1 || modsByVirtualPaths.size > 1) {
-                            FileListItem(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                                name = file.name,
-                                isSelected = false,
-                                onLongClick = {},
-                                onClick = {
-                                    // 记录当前路径的滚动位置
-                                    scrollPositions[currentPath] = listState.firstVisibleItemIndex
-                                    scrollOffsets[currentPath] =
-                                        listState.firstVisibleItemScrollOffset
-                                    previousPath = currentPath
-                                    currentPath = file.path
-                                },
-                                onMultiSelectClick = {},
-                                isMultiSelect = uiState.isMultiSelect,
-                                description = stringResource(
-                                    R.string.mod_browser_file_description,
-                                    viewModel.getModsByPath(file.path).size,
-                                    viewModel.getModsByPath(file.path).filter { it.isEnable }.size
-                                ),
-                                iconId = R.drawable.zip_mod_icon
-                            )
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                val mods by remember {
+                    derivedStateOf {
+                        files.flatMap { file ->
+                            viewModel.getModsByPathStrict(file.path) +
+                                    viewModel.getModsByVirtualPathsStrict(file.path)
                         }
                     }
                 }
+
+                LaunchedEffect(mods) {
+                    viewModel.setCurrentMods(mods)
+                }
+
+                LaunchedEffect(currentPath, files.isEmpty()) {
+                    if (!isAtRootPath && files.isEmpty()) {
+                        viewModel.setBackIconVisible(true)
+                    }
+                }
+
+                if (files.isEmpty() && uiState.currentMods.isEmpty() && !isAtRootPath) {
+                    NoModInDir()
+                } else {
+                    FileListContent(
+                        files = files,
+                        uiState = uiState,
+                        listState = listState,
+                        isBackPathExist = uiState.isBackPathExist,
+                        isAtRootPath = isAtRootPath,
+                        viewModel = viewModel,
+                        onFileClick = { file ->
+                            if (file.isDirectory || !file.exists()) {
+                                scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                                scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
+                                previousPath = currentPath
+                                currentPath = file.path
+                            }
+                        },
+                        onFileClickByZip = { file ->
+                            scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                            scrollOffsets[currentPath] =
+                                listState.firstVisibleItemScrollOffset
+                            previousPath = currentPath
+                            currentPath = file.path
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FileListContent(
+    files: List<File>,
+    uiState: ModUiState,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    isBackPathExist: Boolean,
+    isAtRootPath: Boolean,
+    viewModel: ModViewModel,
+    onFileClick: (File) -> Unit,
+    onFileClickByZip: (File) -> Unit
+) {
+    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        items(
+            items = files,
+            key = { file -> file.path }
+        ) { file ->
+            if (!isBackPathExist && !isAtRootPath) {
+                LaunchedEffect(Unit) {
+                    viewModel.setBackIconVisible(true)
+                }
+            }
+
+            val modsByPath = viewModel.getModsByPathStrict(file.path)
+            val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
+
+            val modCount =
+                if (modsByPath.isNotEmpty()) modsByPath.size else viewModel.getModsByVirtualPaths(
+                    file.path
+                ).size
+
+            val modEnableCount = if (modsByPath.isNotEmpty())
+                modsByPath.count { it.isEnable }
+            else
+                viewModel.getModsByVirtualPaths(file.path).count { it.isEnable }
+
+            if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty() && (file.isDirectory || !file.exists())) {
+                FileListItem(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                    name = file.name,
+                    isSelected = false,
+                    onLongClick = {},
+                    onClick = { onFileClick(file) },
+                    onMultiSelectClick = {},
+                    isMultiSelect = uiState.isMultiSelect,
+                    description = stringResource(
+                        R.string.mod_browser_file_description,
+                        modCount,
+                        modEnableCount
+                    ),
+                    iconId = if (modCount > 0) R.drawable.folder_mod_icon else R.drawable.folder_icon
+                )
+            }
+            if (modsByPath.size == 1 || modsByVirtualPaths.size == 1) {
+                val mod = modsByPath.firstOrNull() ?: modsByVirtualPaths.firstOrNull()!!
+                ModListItem(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                    mod = mod,
+                    isSelected = uiState.modsSelected.contains(mod.id),
+                    onLongClick = { viewModel.modLongClick(mod) },
+                    onMultiSelectClick = { viewModel.modMultiSelectClick(mod) },
+                    isMultiSelect = uiState.isMultiSelect,
+                    modSwitchEnable = uiState.modSwitchEnable,
+                    openModDetail = { selectedMod, _ ->
+                        viewModel.openModDetail(
+                            selectedMod,
+                            true
+                        )
+                    },
+                    enableMod = { selectedMod, isEnable ->
+                        viewModel.switchMod(
+                            selectedMod,
+                            isEnable
+                        )
+                    },
+                    modViewModel = viewModel
+                )
+            }
+            if (modsByPath.size > 1 || modsByVirtualPaths.size > 1) {
+                FileListItem(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                    name = file.name,
+                    isSelected = false,
+                    onLongClick = {},
+                    onClick = { onFileClickByZip(file) },
+                    onMultiSelectClick = {},
+                    isMultiSelect = uiState.isMultiSelect,
+                    description = stringResource(
+                        R.string.mod_browser_file_description,
+                        modCount,
+                        modEnableCount
+                    ),
+                    iconId = R.drawable.zip_mod_icon
+                )
             }
         }
     }
@@ -254,33 +275,26 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
 fun FileListItem(
     modifier: Modifier = Modifier,
     name: String,
-
     isSelected: Boolean = false,
-    // 长按回调
-    onLongClick: () -> Unit,  // 长按
+    onLongClick: () -> Unit,
     onClick: () -> Unit,
-    onMultiSelectClick: () -> Unit, // 多选状态下的点击
-    isMultiSelect: Boolean = false, // 是否多选状态
-    // 图标id
+    onMultiSelectClick: () -> Unit,
+    isMultiSelect: Boolean = false,
     @DrawableRes iconId: Int = R.drawable.folder_icon,
-    // 描述
     description: String? = null,
 ) {
     Card(
         elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(
             0.dp
-        ), modifier = modifier
-            .combinedClickable(onClick = {
-                if (isMultiSelect) {
-                    onMultiSelectClick()
-                } else {
-                    onClick()
-                }
-            }, onLongClick = {
-                onLongClick()
-            })
-            .animateContentSize(), colors = CardDefaults.cardColors(
-            containerColor = if (!isSelected) CardDefaults.cardColors().containerColor else MaterialTheme.colorScheme.secondaryContainer,
+        ),
+        modifier = modifier
+            .combinedClickable(
+                onClick = { if (isMultiSelect) onMultiSelectClick() else onClick() },
+                onLongClick = onLongClick
+            )
+            .animateContentSize(),
+        colors = if (!isSelected) CardDefaults.cardColors() else CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
         Row(
@@ -288,16 +302,12 @@ fun FileListItem(
                 .fillMaxWidth()
                 .padding(16.dp)
                 .sizeIn(minHeight = 30.dp, maxHeight = 80.dp)
-
-
         ) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .align(Alignment.CenterVertically)
-
-
             ) {
                 Image(
                     painterResource(id = iconId),
@@ -310,7 +320,6 @@ fun FileListItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-
                 Text(
                     text = name,
                     style = MaterialTheme.typography.titleSmall

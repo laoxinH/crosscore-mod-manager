@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
@@ -51,13 +52,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -72,6 +74,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
@@ -104,8 +107,8 @@ fun ModManagerApp() {
     val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val settingUiState = settingViewModel.uiState.collectAsState().value
 
-    var exitTime by remember { mutableLongStateOf(0L) }
-    var currentPage by remember { mutableIntStateOf(0) }
+    var exitTime by rememberSaveable { mutableLongStateOf(0L) }
+    var currentPage by rememberSaveable { mutableIntStateOf(0) }
     var shouldScroll by remember { mutableStateOf(false) }
     var hideBottomBar by remember { mutableStateOf(false) }
 
@@ -114,6 +117,12 @@ fun ModManagerApp() {
             hideBottomBar = false
         }
     }
+
+    // 创建并记忆 PagerState，避免重组时重新创建
+    val pagerState = rememberPagerState(
+        initialPage = currentPage,
+        pageCount = { pageList.size }
+    )
 
     Row {
         // 在横向模式下显示侧边导航栏
@@ -186,10 +195,6 @@ fun ModManagerApp() {
                 }
             val activity = context as? Activity
             val modViewUiState = modViewModel.uiState.collectAsState().value
-            val pagerState = rememberPagerState(
-                initialPage = currentPage,
-                pageCount = { pageList.size }
-            )
 
             // 在 ConsolePage 显示退出确认
             BackHandler(enabled = currentPage == NavigationIndex.CONSOLE.ordinal) {
@@ -217,26 +222,35 @@ fun ModManagerApp() {
                 }
             }
 
-            // 依赖 pagerState 的滚动状态自动更新 currentPage
-            LaunchedEffect(pagerState) {
-                snapshotFlow { pagerState.currentPage }.collect { page ->
-                    if (!shouldScroll) {
-                        currentPage = page
+            // 优化页面切换逻辑，减少不必要的动画
+            LaunchedEffect(currentPage, shouldScroll) {
+                if (shouldScroll) {
+                    // 添加短暂延迟以确保状态已更新
+                    delay(10)
+                    val targetPage = currentPage
+                    val currentPagerPage = pagerState.currentPage
+                    if (targetPage != currentPagerPage) {
+                        pagerState.animateScrollToPage(
+                            page = targetPage,
+                            animationSpec = tween(
+                                durationMillis = abs(currentPagerPage - targetPage) * 100 + 200,
+                                easing = FastOutSlowInEasing
+                            )
+                        )
                     }
+                    shouldScroll = false
                 }
             }
 
-            // 监听 currentPage 变化并触发页面滚动
-            LaunchedEffect(currentPage) {
-                if (shouldScroll) {
-                    pagerState.animateScrollToPage(
-                        page = currentPage,
-                        animationSpec = tween(
-                            durationMillis = abs(pagerState.currentPage - currentPage) * 100 + 200,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                    shouldScroll = false
+            // 使用derivedStateOf优化，减少不必要的重组
+            val currentPagerPage by remember {
+                derivedStateOf { pagerState.currentPage }
+            }
+
+            // 当PagerState的当前页面改变时更新currentPage
+            LaunchedEffect(currentPagerPage) {
+                if (!shouldScroll && currentPage != currentPagerPage) {
+                    currentPage = currentPagerPage
                 }
             }
 
@@ -256,21 +270,40 @@ fun ModManagerApp() {
                 }
 
                 // 每个页面显示的内容
-                HorizontalPager(
-                    state = pagerState,
+                AppContent(
+                    pagerState = pagerState,
                     modifier = Modifier
                         .padding(innerPadding)
-                        .zIndex(0f)
-                ) { page ->
-                    when (page) {
-                        NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
-                        NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
-                        NavigationIndex.SETTINGS.ordinal -> SettingPage(settingViewModel) {
-                            hideBottomBar = it
-                        }
-                    }
-                }
+                        .zIndex(0f),
+                    consoleViewModel = consoleViewModel,
+                    modViewModel = modViewModel,
+                    settingViewModel = settingViewModel,
+                    onHideBottomBar = { hideBottomBar = it }
+                )
             }
+        }
+    }
+}
+
+@Composable
+fun AppContent(
+    pagerState: PagerState,
+    modifier: Modifier = Modifier,
+    consoleViewModel: ConsoleViewModel,
+    modViewModel: ModViewModel,
+    settingViewModel: SettingViewModel,
+    onHideBottomBar: (Boolean) -> Unit
+) {
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier,
+        // 添加键以优化重组
+        key = { page -> "page_$page" }
+    ) { page ->
+        when (page) {
+            NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
+            NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
+            NavigationIndex.SETTINGS.ordinal -> SettingPage(settingViewModel, onHideBottomBar)
         }
     }
 }
