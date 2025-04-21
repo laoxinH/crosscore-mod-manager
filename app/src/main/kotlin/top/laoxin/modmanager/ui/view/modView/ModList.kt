@@ -25,6 +25,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -96,14 +98,26 @@ fun ModListItem(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val imageBitmap = remember(mod.icon) { mutableStateOf<ImageBitmap?>(null) } // 缓存图片
 
-    LaunchedEffect(mod.icon) {
+    // 使用remember记住图像状态
+    val imageBitmap = remember { mutableStateOf<ImageBitmap?>(null) }
+
+    // 使用derivedStateOf计算图标路径是否有效
+    val iconPath by remember(mod.icon) {
+        derivedStateOf {
+            mod.icon?.takeIf { File(it).exists() }
+        }
+    }
+
+    // 只在初始组合或图标路径变化时加载图像
+    LaunchedEffect(iconPath) {
         coroutineScope.launch(Dispatchers.IO) {
-            mod.icon?.let {
-                if (File(it).exists()) {
-                    imageBitmap.value = loadImageBitmapFromPath(context, it, 256, 256)
-                } else {
+            iconPath?.let {
+                // 仅当图像为空或路径变化时加载
+                imageBitmap.value = loadImageBitmapFromPath(context, it, 256, 256)
+            } ?: run {
+                // 如果图标路径无效，请求刷新图标
+                if (mod.icon != null) {
                     modViewModel.flashModImage(mod)
                 }
             }
@@ -140,19 +154,23 @@ fun ModListItem(
                     .clip(RoundedCornerShape(8.dp))
                     .align(Alignment.CenterVertically)
             ) {
-                imageBitmap.value?.let {
+                // 使用稳定的图像引用
+                val currentImage = imageBitmap.value
+                if (currentImage != null) {
                     Image(
-                        it,
+                        bitmap = currentImage,
                         contentDescription = null,
                         alignment = Alignment.TopCenter,
                         contentScale = ContentScale.Crop
                     )
-                } ?: Image(
-                    painterResource(id = R.drawable.app_icon),
-                    contentDescription = null,
-                    alignment = Alignment.TopCenter,
-                    contentScale = ContentScale.FillWidth
-                )
+                } else {
+                    Image(
+                        painterResource(id = R.drawable.app_icon),
+                        contentDescription = null,
+                        alignment = Alignment.TopCenter,
+                        contentScale = ContentScale.FillWidth
+                    )
+                }
             }
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {

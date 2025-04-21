@@ -1,10 +1,19 @@
 package top.laoxin.modmanager.ui.view.settingView
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -13,6 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -29,7 +40,9 @@ fun SettingTopBar(
     configuration: Int
 ) {
     val context = LocalContext.current
-    val showAbout = viewModel.getAboutPage()
+    val uiState = viewModel.uiState.collectAsState().value
+    val showNavigationIcon = uiState.showAbout
+
     TopAppBar(
         modifier = modifier,
         colors = TopAppBarDefaults.topAppBarColors(
@@ -38,25 +51,39 @@ fun SettingTopBar(
                 else MaterialTheme.colorScheme.surfaceContainer,
         ),
         navigationIcon = {
-            if (showAbout) {
-                IconButton(
+            if (showNavigationIcon) {
+                Button(
                     onClick = {
                         viewModel.setAboutPage(false)
                     },
+                    modifier = Modifier
+                        .size(35.dp)
+                        .padding(start = 6.dp)
+                        .offset(y = 8.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(0.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = null,
-                        Modifier.size(28.dp)
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBackIosNew,
+                            contentDescription = "back",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
-            } else null
+            }
         },
         title = {
             if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
                 Text(
                     stringResource(id = R.string.settings),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .padding(start = 6.dp)
+                        .height(35.dp)
                 )
             }
         },
