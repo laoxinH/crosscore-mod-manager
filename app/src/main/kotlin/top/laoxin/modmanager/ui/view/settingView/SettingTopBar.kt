@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -77,27 +76,28 @@ fun SettingTopBar(
             }
         },
         title = {
-            if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
-                Text(
-                    stringResource(id = R.string.settings),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .padding(start = 6.dp)
-                        .height(35.dp)
-                )
+            if (!showNavigationIcon) {
+                if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
+                    Text(
+                        stringResource(id = R.string.settings),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             }
         },
         actions = {
-            IconButton(
-                onClick = {
-                    viewModel.setAboutPage(!viewModel.uiState.value.showAbout)
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Info,
-                    contentDescription = null,
-                    Modifier.size(28.dp)
-                )
+            if (!showNavigationIcon) {
+                IconButton(
+                    onClick = {
+                        viewModel.setAboutPage(!viewModel.uiState.value.showAbout)
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = null,
+                        Modifier.size(28.dp)
+                    )
+                }
             }
             IconButton(
                 onClick = {
