@@ -24,6 +24,12 @@
         "downloadUrl": ""
     },
     {
+        "gameName": "\u78a7\u84dd\u822a\u7ebf4399\u670d-\u914d\u7f6e\u7248\u672c2.0",
+        "packageName": "com.bilibili.blhx.m4399",
+        "serviceName": "4399\u670d",
+        "downloadUrl": ""
+    },
+    {
         "gameName": "\u5c18\u767d\u7981\u533a",
         "packageName": "com.dragonli.projectsnow.bilibili",
         "serviceName": "B\u670d",

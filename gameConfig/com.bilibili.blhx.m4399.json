@@ -1,0 +1,35 @@
+{
+  "gameName": "碧蓝航线4399服-配置版本2.0",
+  "serviceName": "4399服",
+  "packageName": "com.bilibili.blhx.m4399",
+  "version": "1.0.0",
+  "gamePath": "Android/data/com.bilibili.blhx.m4399/",
+  "antiHarmonyFile": "Android/data/com.bilibili.blhx.m4399/files/localization.txt",
+  "antiHarmonyContent": "Localization = true\nLocalization_skin = true",
+  "gameFilePath": [
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/shipyardicon/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/paintingface/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/painting/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/strategyicon/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/squareicon/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/herohrzicon/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/live2d/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/loadingbg/",
+    "Android/data/com.bilibili.blhx.m4399/files/AssetBundles/spinepainting/"
+  ],
+  "modType": [
+    "shipyardicon",
+    "paintingface",
+    "painting",
+    "strategyicon",
+    "squareicon",
+    "herohrzicon",
+    "live2d",
+    "loadingbg",
+    "spinepainting"
+  ],
+  "modSavePath": "",
+  "isGameFileRepeat": true,
+  "enableBackup": true,
+  "tips": ""
+}

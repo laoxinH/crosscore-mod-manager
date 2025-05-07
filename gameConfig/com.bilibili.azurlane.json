@@ -1,12 +1,12 @@
 {
-  "gameName" : "碧蓝航线-配置版本2.0",
-  "serviceName" : "官服",
+  "gameName": "碧蓝航线-配置版本2.0",
+  "serviceName": "官服",
   "packageName": "com.bilibili.azurlane",
-  "version" : "1.0.0",
-  "gamePath" : "Android/data/com.bilibili.azurlane/",
-  "antiHarmonyFile" : "Android/data/com.bilibili.azurlane/files/localization.txt",
-  "antiHarmonyContent" : "Localization = true\nLocalization_skin = true",
-  "gameFilePath" : [
+  "version": "1.0.0",
+  "gamePath": "Android/data/com.bilibili.azurlane/",
+  "antiHarmonyFile": "Android/data/com.bilibili.azurlane/files/localization.txt",
+  "antiHarmonyContent": "Localization = true\nLocalization_skin = true",
+  "gameFilePath": [
     "Android/data/com.bilibili.azurlane/files/AssetBundles/shipyardicon/",
     "Android/data/com.bilibili.azurlane/files/AssetBundles/paintingface/",
     "Android/data/com.bilibili.azurlane/files/AssetBundles/painting/",
@@ -17,9 +17,19 @@
     "Android/data/com.bilibili.azurlane/files/AssetBundles/loadingbg/",
     "Android/data/com.bilibili.azurlane/files/AssetBundles/spinepainting/"
   ],
-  "modType" : ["shipyardicon","paintingface","painting","strategyicon","squareicon","herohrzicon","live2d","loadingbg","spinepainting"],
-  "modSavePath" : "",
-  "isGameFileRepeat" : true,
-  "enableBackup" : true,
-  "tips" : ""
+  "modType": [
+    "shipyardicon",
+    "paintingface",
+    "painting",
+    "strategyicon",
+    "squareicon",
+    "herohrzicon",
+    "live2d",
+    "loadingbg",
+    "spinepainting"
+  ],
+  "modSavePath": "",
+  "isGameFileRepeat": true,
+  "enableBackup": true,
+  "tips": ""
 }
