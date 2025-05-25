@@ -36,14 +36,14 @@ android {
     namespace = "top.laoxin.modmanager"
     compileSdk = 36
 
-    ndkVersion = "28.0.13004108"
+    ndkVersion = "28.1.13356709"
 
     defaultConfig {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 36
-        versionCode = 370
-        versionName = "3.7.0"
+        versionCode = 371
+        versionName = "3.7.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -84,7 +84,6 @@ android {
         buildConfig = true
         compose = true
         aidl = true
-        viewBinding = true
     }
 
     packaging {
