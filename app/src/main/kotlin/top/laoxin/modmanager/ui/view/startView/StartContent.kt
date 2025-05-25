@@ -25,7 +25,7 @@ import androidx.core.content.res.ResourcesCompat
 import top.laoxin.modmanager.R
 import kotlin.random.Random
 
-@SuppressLint("NewApi")
+@SuppressLint("NewApi", "ConfigurationScreenWidthHeight")
 @Composable
 fun StartContent() {
     val configuration = LocalConfiguration.current
