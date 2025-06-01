@@ -39,7 +39,17 @@ class StartActivity : ComponentActivity() {
             provider.iconView.animate()
                 .alpha(0f)
                 .setDuration(0L)
-                .withEndAction(provider::remove)
+                .withEndAction {
+                    val decor = window.decorView
+                    decor.alpha = 1f
+                    decor.animate()
+                        .alpha(0f)
+                        .setDuration(400L)
+                        .withEndAction {
+                            provider.remove()
+                        }
+                        .start()
+                }
                 .start()
         }
 
@@ -60,7 +70,7 @@ class StartActivity : ComponentActivity() {
 
         Handler.createAsync(mainLooper).postDelayed({
             jumpToActivity()
-        }, 600)
+        }, 700)
     }
 
     // 跳转到目标 Activity
@@ -68,18 +78,10 @@ class StartActivity : ComponentActivity() {
         val targetActivity =
             if (isUserAgreementConfirmed()) MainActivity::class.java else UserAgreementActivity::class.java
         startActivity(Intent(this, targetActivity))
-        // 设置转场动画
-        // API 34+ 用 overrideActivityTransition，否则用 overridePendingTransition
-        if (Build.VERSION.SDK_INT >= 34) {
-            overrideActivityTransition(
-                OVERRIDE_TRANSITION_OPEN,
-                android.R.anim.fade_in,
-                android.R.anim.fade_out
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-        }
+
+        @Suppress("DEPRECATION")
+        overridePendingTransition(android.R.anim.fade_out, 0)
+
         // 结束当前 Activity
         finish()
     }
