@@ -38,17 +38,9 @@ class StartActivity : ComponentActivity() {
         splashScreen.setOnExitAnimationListener { provider ->
             provider.iconView.animate()
                 .alpha(0f)
-                .setDuration(0L)
+                .setDuration(150L)
                 .withEndAction {
-                    val decor = window.decorView
-                    decor.alpha = 1f
-                    decor.animate()
-                        .alpha(0f)
-                        .setDuration(400L)
-                        .withEndAction {
-                            provider.remove()
-                        }
-                        .start()
+                    provider.remove()
                 }
                 .start()
         }
@@ -66,23 +58,25 @@ class StartActivity : ComponentActivity() {
             }
         }
 
-        isKeepOnScreen.set(false)
+        Handler.createAsync(mainLooper).postDelayed({
+            isKeepOnScreen.set(false)
+        }, 150)
 
         Handler.createAsync(mainLooper).postDelayed({
             jumpToActivity()
-        }, 700)
+        }, 600)
     }
 
     // 跳转到目标 Activity
     private fun jumpToActivity() {
         val targetActivity =
             if (isUserAgreementConfirmed()) MainActivity::class.java else UserAgreementActivity::class.java
-        startActivity(Intent(this, targetActivity))
+        val intent = Intent(this, targetActivity)
+        startActivity(intent)
 
         @Suppress("DEPRECATION")
-        overridePendingTransition(android.R.anim.fade_out, 0)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
 
-        // 结束当前 Activity
         finish()
     }
 
