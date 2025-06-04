@@ -4,9 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.mikepenz.aboutlibraries.Libs
+import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
-import com.mikepenz.aboutlibraries.util.withJson
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
@@ -14,13 +13,13 @@ import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 fun License(modifier: Modifier, viewModel: SettingViewModel) {
     val context = LocalContext.current
 
+    val libraries = rememberLibraries(
+        resId = R.raw.aboutlibraries
+    )
+
     LibrariesContainer(
         modifier = modifier,
-        librariesBlock = { ctx ->
-            Libs.Builder()
-                .withJson(ctx, R.raw.aboutlibraries)
-                .build()
-        },
+        libraries = libraries.value,
         onLibraryClick = { library ->
             library.website?.let { website ->
                 viewModel.openUrl(context, website)
