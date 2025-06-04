@@ -309,10 +309,11 @@ fun PageContent(
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (modViewUiState.showTips) {
+                if (modViewUiState.showTips && !modViewUiState.isSnackbarHidden) {
                     ProcessTips(
                         text = modViewUiState.tipsText,
-                        onDismiss = { it -> modViewModel.setShowTips(it) },
+                        setShowTips = { showTips -> modViewModel.setShowTips(showTips) },
+                        setSnackbarHidden = { hidden -> modViewModel.setSnackbarHidden(hidden) },
                         uiState = modViewUiState,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -531,7 +532,8 @@ fun getGameIcon(packageName: String): ImageBitmap? {
 @Composable
 fun ProcessTips(
     text: String,
-    onDismiss: (Boolean) -> Unit,
+    setShowTips: (Boolean) -> Unit,
+    setSnackbarHidden: (Boolean) -> Unit,
     uiState: ModUiState,
     modifier: Modifier
 ) {
@@ -551,21 +553,17 @@ fun ProcessTips(
         }
 
     val tipsContent = "$tipsStart $tipsEnd"
-    val isOperationComplete = remember { mutableStateOf(false) }
-
-    // 检测操作是否完成
-    LaunchedEffect(tipsStart, tipsEnd) {
-        isOperationComplete.value =
-            uiState.unzipProgress.isEmpty() && uiState.multitaskingProgress.isEmpty()
+    val hasActiveOperation = remember(uiState.unzipProgress, uiState.multitaskingProgress) {
+        uiState.unzipProgress.isNotEmpty() || uiState.multitaskingProgress.isNotEmpty()
     }
 
     // 注册广播接收器用于显示Snackbar
-    val currentOnShowTips = rememberUpdatedState(onDismiss)
+    val currentSetSnackbarHidden = rememberUpdatedState(setSnackbarHidden)
     DisposableEffect(Unit) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == TIPS_NOTIFICATION_ACTION) {
-                    currentOnShowTips.value(true)
+                    currentSetSnackbarHidden.value(false)
                 }
             }
         }
@@ -576,19 +574,24 @@ fun ProcessTips(
         }
     }
 
-    // 更新通知或在操作完成时取消通知
-    LaunchedEffect(tipsContent, isOperationComplete.value) {
-        if (isOperationComplete.value) {
-            cancelTipsNotification(context)
-        } else {
+    // 更新通知，只在操作完成时取消通知
+    LaunchedEffect(tipsContent, hasActiveOperation) {
+        if (hasActiveOperation) {
             sendTipsNotification(context, tipsContent)
+        } else {
+            cancelTipsNotification(context)
+            if (uiState.showTips) {
+                setShowTips(false)
+            }
         }
     }
 
-    // 在组件销毁时取消通知
-    DisposableEffect(Unit) {
+    // 在组件销毁时，如果没有活动操作，则取消通知
+    DisposableEffect(hasActiveOperation) {
         onDispose {
-            cancelTipsNotification(context)
+            if (!hasActiveOperation) {
+                cancelTipsNotification(context)
+            }
         }
     }
 
@@ -600,7 +603,7 @@ fun ProcessTips(
             shape = MaterialTheme.shapes.medium,
             action = {
                 Button(
-                    onClick = { onDismiss(false) },
+                    onClick = { setSnackbarHidden(true) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -664,7 +667,7 @@ private fun sendTipsNotification(context: Context, content: String) {
         .setContentIntent(contentPendingIntent)
         .addAction(
             R.drawable.app_icon,
-            context.getString(R.string.setting_page_about_info),
+            context.getString(R.string.show_snackbar),
             actionPendingIntent
         )
         .build()

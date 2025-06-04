@@ -545,6 +545,12 @@ class ModViewModel @Inject constructor(
         }
     }
 
+    fun setSnackbarHidden(b: Boolean) {
+        _uiState.update {
+            it.copy(isSnackbarHidden = b)
+        }
+    }
+
 
     private fun setTipsText(s: String) {
         _uiState.value = _uiState.value.copy(tipsText = s)

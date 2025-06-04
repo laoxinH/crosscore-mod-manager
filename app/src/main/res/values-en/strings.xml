@@ -4,6 +4,7 @@
     <string name="console">Console</string>
     <string name="mod">Mod</string>
     <string name="settings">Settings</string>
+    <string name="show_snackbar">Show Progress</string>
     <string name="permission">Access: %s</string>
     <string name="toast_shizuku_load_file_failed">Failed to read file with Shizuku, please reauthorize</string>
     <string name="toast_shizuku_connected">Shizuku connected</string>

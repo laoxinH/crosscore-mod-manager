@@ -51,4 +51,6 @@ data class ModUiState(
     val doBackFunction: Boolean = false,
     // 是否显示强制扫描对话框
     val showForceScanDialog: Boolean = false,
+    // 是否隐藏Snackbar
+    val isSnackbarHidden: Boolean = false,
 )

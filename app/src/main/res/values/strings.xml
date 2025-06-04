@@ -172,6 +172,7 @@
     <string name="mod_page_mod_detail_dialog_detali_modNums">MOD文件数量: %1$s</string>
     <string name="console_info_title">通知</string>
     <string name="setting_page_about_info">查看通知</string>
+    <string name="show_snackbar">显示进度</string>
     <string name="setting_page_about_info_descript">查看MOD实验室的最新通知</string>
     <string name="mod_page_mod_detail_dialog_detali_imgs">预览图数量: %s</string>
     <string name="mod_page_mod_detail_dialog_detali_create_time">创建时间: %s</string>
