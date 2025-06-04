@@ -422,6 +422,7 @@ class ModViewModel @Inject constructor(
             setModSwitchEnable(false)
             setTipsText(App.get().getString(R.string.tips_open_mod))
             setShowTips(true)
+            setSnackbarHidden(false)
             val result = enableModsUserCase(
                 mods,
                 delUnzipDictionary = userPreferences.value.delUnzipDictionary,
@@ -451,6 +452,7 @@ class ModViewModel @Inject constructor(
                 }
             }
             setShowTips(false)
+            setSnackbarHidden(true)
             setModSwitchEnable(true)
         }
 
@@ -469,6 +471,7 @@ class ModViewModel @Inject constructor(
             setModSwitchEnable(false)
             setTipsText(App.get().getString(R.string.tips_close_mod))
             setShowTips(true)
+            setSnackbarHidden(false)
             val result = disableModsUserCase(
                 mods,
                 isDel,
@@ -491,6 +494,7 @@ class ModViewModel @Inject constructor(
             }
 
             setShowTips(false)
+            setSnackbarHidden(true)
             setModSwitchEnable(true)
         }
     }
@@ -507,6 +511,7 @@ class ModViewModel @Inject constructor(
         checkPasswordJob = viewModelScope.launch {
             setModSwitchEnable(false)
             setShowTips(true)
+            setSnackbarHidden(false)
 
             // 获取当前MOD详情
             val modDetail = _uiState.value.modDetail ?: return@launch
@@ -532,6 +537,7 @@ class ModViewModel @Inject constructor(
             } finally {
                 // 确保无论成功与否都会执行这些操作
                 setShowTips(false)
+                setSnackbarHidden(true)
                 setModSwitchEnable(true)
             }
         }
