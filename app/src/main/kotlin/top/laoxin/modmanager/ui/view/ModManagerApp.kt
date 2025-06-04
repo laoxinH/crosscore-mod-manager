@@ -550,10 +550,18 @@ fun ProcessTips(
             ""
         }
 
-    // 发送通知
+    val tipsContent = "$tipsStart $tipsEnd"
+    val isOperationComplete = remember { mutableStateOf(false) }
+
+    // 检测操作是否完成
+    LaunchedEffect(tipsStart, tipsEnd) {
+        isOperationComplete.value =
+            uiState.unzipProgress.isEmpty() && uiState.multitaskingProgress.isEmpty()
+    }
+
+    // 注册广播接收器用于显示Snackbar
     val currentOnShowTips = rememberUpdatedState(onDismiss)
     DisposableEffect(Unit) {
-        // 注册广播接收器
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == TIPS_NOTIFICATION_ACTION) {
@@ -568,8 +576,20 @@ fun ProcessTips(
         }
     }
 
-    LaunchedEffect(tipsStart, tipsEnd) {
-        sendTipsNotification(context, "$tipsStart $tipsEnd")
+    // 更新通知或在操作完成时取消通知
+    LaunchedEffect(tipsContent, isOperationComplete.value) {
+        if (isOperationComplete.value) {
+            cancelTipsNotification(context)
+        } else {
+            sendTipsNotification(context, tipsContent)
+        }
+    }
+
+    // 在组件销毁时取消通知
+    DisposableEffect(Unit) {
+        onDispose {
+            cancelTipsNotification(context)
+        }
     }
 
     Box(modifier.fillMaxWidth(0.7f)) {
@@ -597,7 +617,7 @@ fun ProcessTips(
             }
         ) {
             Text(
-                text = "$tipsStart $tipsEnd",
+                text = tipsContent,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 textAlign = TextAlign.Center
@@ -639,7 +659,8 @@ private fun sendTipsNotification(context: Context, content: String) {
         .setContentTitle(context.getString(R.string.console_info_title))
         .setContentText(content)
         .setStyle(NotificationCompat.BigTextStyle().bigText(content))
-        .setAutoCancel(true)
+        .setAutoCancel(false)
+        .setOngoing(true)
         .setContentIntent(contentPendingIntent)
         .addAction(
             R.drawable.app_icon,
@@ -649,4 +670,11 @@ private fun sendTipsNotification(context: Context, content: String) {
         .build()
 
     notificationManager.notify(TIPS_NOTIFICATION_ID, notification)
+}
+
+// 取消通知
+private fun cancelTipsNotification(context: Context) {
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.cancel(TIPS_NOTIFICATION_ID)
 }
