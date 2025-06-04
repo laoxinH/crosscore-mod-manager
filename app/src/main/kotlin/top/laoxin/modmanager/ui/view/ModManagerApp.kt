@@ -1,6 +1,13 @@
 package top.laoxin.modmanager.ui.view
 
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Canvas
@@ -50,6 +57,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -58,6 +66,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,6 +80,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -86,6 +97,11 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 import kotlin.math.abs
+
+// 通知相关常量
+private const val TIPS_NOTIFICATION_ID = 1919810
+private const val TIPS_NOTIFICATION_CHANNEL_ID = "tips_channel"
+private const val TIPS_NOTIFICATION_ACTION = "top.laoxin.modmanager.ACTION_SHOW_TIPS"
 
 // 导航栏索引
 enum class NavigationIndex(
@@ -296,7 +312,7 @@ fun PageContent(
                 if (modViewUiState.showTips) {
                     ProcessTips(
                         text = modViewUiState.tipsText,
-                        onDismiss = { modViewModel.setShowTips(false) },
+                        onDismiss = { it -> modViewModel.setShowTips(it) },
                         uiState = modViewUiState,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -515,10 +531,11 @@ fun getGameIcon(packageName: String): ImageBitmap? {
 @Composable
 fun ProcessTips(
     text: String,
-    onDismiss: () -> Unit,
+    onDismiss: (Boolean) -> Unit,
     uiState: ModUiState,
     modifier: Modifier
 ) {
+    val context = LocalContext.current
     val tipsStart =
         if (uiState.unzipProgress.isNotEmpty()) {
             "$text : ${uiState.unzipProgress}"
@@ -533,6 +550,28 @@ fun ProcessTips(
             ""
         }
 
+    // 发送通知
+    val currentOnShowTips = rememberUpdatedState(onDismiss)
+    DisposableEffect(Unit) {
+        // 注册广播接收器
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == TIPS_NOTIFICATION_ACTION) {
+                    currentOnShowTips.value(true)
+                }
+            }
+        }
+        val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+
+    LaunchedEffect(tipsStart, tipsEnd) {
+        sendTipsNotification(context, "$tipsStart $tipsEnd")
+    }
+
     Box(modifier.fillMaxWidth(0.7f)) {
         Snackbar(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -541,7 +580,7 @@ fun ProcessTips(
             shape = MaterialTheme.shapes.medium,
             action = {
                 Button(
-                    onClick = onDismiss,
+                    onClick = { onDismiss(false) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -565,4 +604,49 @@ fun ProcessTips(
             )
         }
     }
+}
+
+// 发送Tips通知
+private fun sendTipsNotification(context: Context, content: String) {
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    val channel = NotificationChannel(
+        TIPS_NOTIFICATION_CHANNEL_ID,
+        context.getString(R.string.console_info_title),
+        NotificationManager.IMPORTANCE_DEFAULT
+    )
+    notificationManager.createNotificationChannel(channel)
+
+    val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+    val contentPendingIntent = PendingIntent.getActivity(
+        context,
+        0,
+        launchIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val actionIntent = Intent(TIPS_NOTIFICATION_ACTION)
+    val actionPendingIntent = PendingIntent.getBroadcast(
+        context,
+        0,
+        actionIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val notification = NotificationCompat.Builder(context, TIPS_NOTIFICATION_CHANNEL_ID)
+        .setSmallIcon(R.drawable.app_icon)
+        .setContentTitle(context.getString(R.string.console_info_title))
+        .setContentText(content)
+        .setStyle(NotificationCompat.BigTextStyle().bigText(content))
+        .setAutoCancel(true)
+        .setContentIntent(contentPendingIntent)
+        .addAction(
+            R.drawable.app_icon,
+            context.getString(R.string.setting_page_about_info),
+            actionPendingIntent
+        )
+        .build()
+
+    notificationManager.notify(TIPS_NOTIFICATION_ID, notification)
 }
