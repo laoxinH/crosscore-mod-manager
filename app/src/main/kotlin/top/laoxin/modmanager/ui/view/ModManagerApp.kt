@@ -188,6 +188,39 @@ fun PageContent(
     hideBottomBar: Boolean,
     onHideBottomBarChange: (Boolean) -> Unit
 ) {
+    val context = LocalContext.current
+    val modViewUiState = modViewModel.uiState.collectAsState().value
+
+    // 分离通知逻辑，只基于实际的操作状态
+    LaunchedEffect(modViewUiState.tipsText, modViewUiState.unzipProgress, modViewUiState.multitaskingProgress) {
+        val tipsStart = if (modViewUiState.unzipProgress.isNotEmpty()) {
+            "${modViewUiState.tipsText} : ${modViewUiState.unzipProgress}"
+        } else {
+            modViewUiState.tipsText
+        }
+
+        val tipsEnd = if (modViewUiState.multitaskingProgress.isNotEmpty()) {
+            context.getString(R.string.mod_top_bar_tips, modViewUiState.multitaskingProgress)
+        } else {
+            ""
+        }
+
+        val tipsContent = "$tipsStart $tipsEnd"
+        val hasActiveOperation = modViewUiState.unzipProgress.isNotEmpty() || modViewUiState.multitaskingProgress.isNotEmpty()
+        
+        // 只要有活动操作就显示/更新通知，操作完成就取消通知
+        if (hasActiveOperation && modViewUiState.showTips) {
+            sendTipsNotification(context, tipsContent)
+        } else if (!hasActiveOperation) {
+            // 操作完成时，无论Snackbar状态如何都取消通知
+            cancelTipsNotification(context)
+            // 如果操作完成且Tips还在显示，则隐藏Tips
+            if (modViewUiState.showTips) {
+                modViewModel.setShowTips(false)
+            }
+        }
+    }
+
     Row {
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
@@ -553,13 +586,10 @@ fun ProcessTips(
         }
 
     val tipsContent = "$tipsStart $tipsEnd"
-    val hasActiveOperation = remember(uiState.unzipProgress, uiState.multitaskingProgress) {
-        uiState.unzipProgress.isNotEmpty() || uiState.multitaskingProgress.isNotEmpty()
-    }
 
     // 注册广播接收器用于显示Snackbar
     val currentSetSnackbarHidden = rememberUpdatedState(setSnackbarHidden)
-    DisposableEffect(Unit) {
+    DisposableEffect(context) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == TIPS_NOTIFICATION_ACTION) {
@@ -570,27 +600,10 @@ fun ProcessTips(
         val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
         ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
         onDispose {
-            context.unregisterReceiver(receiver)
-        }
-    }
-
-    // 更新通知，只在操作完成时取消通知
-    LaunchedEffect(tipsContent, hasActiveOperation) {
-        if (hasActiveOperation) {
-            sendTipsNotification(context, tipsContent)
-        } else {
-            cancelTipsNotification(context)
-            if (uiState.showTips) {
-                setShowTips(false)
-            }
-        }
-    }
-
-    // 在组件销毁时，如果没有活动操作，则取消通知
-    DisposableEffect(hasActiveOperation) {
-        onDispose {
-            if (!hasActiveOperation) {
-                cancelTipsNotification(context)
+            try {
+                context.unregisterReceiver(receiver)
+            } catch (_: Exception) {
+                null
             }
         }
     }
