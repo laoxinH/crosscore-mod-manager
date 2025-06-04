@@ -10,14 +10,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.WindowInsetsCompat
 import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
@@ -91,13 +92,22 @@ class StartActivity : ComponentActivity() {
         enableEdgeToEdge()
     }
 
-    // 设置状态栏和导航栏
+    // 隐藏状态栏和导航栏
     @Composable
     private fun ConfigureSystemBars() {
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightNavigationBars = true
-            @Suppress("DEPRECATION")
-            window.navigationBarColor = MaterialTheme.colorScheme.surfaceContainer.toArgb()
+        val view = LocalView.current
+        DisposableEffect(Unit) {
+            val window = (view.context as ComponentActivity).window
+            val controller = WindowInsetsControllerCompat(window, view)
+
+            controller.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
+
+            onDispose {}
         }
     }
 

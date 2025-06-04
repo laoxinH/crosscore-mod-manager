@@ -97,19 +97,29 @@ enum class NavigationIndex(
     SETTINGS(R.string.settings, Icons.Filled.Settings)
 }
 
+data class PageNavigationState(
+    val pageList: List<NavigationIndex>,
+    val exitTime: Long,
+    val currentPage: Int,
+    val shouldScroll: Boolean,
+    val pagerState: PagerState,
+    val onExitTimeChange: (Long) -> Unit,
+    val onCurrentPageChange: (Int) -> Unit,
+    val onShouldScrollChange: (Boolean) -> Unit
+)
+
 @Composable
 fun ModManagerApp() {
     val modViewModel: ModViewModel = viewModel()
     val consoleViewModel: ConsoleViewModel = viewModel()
     val settingViewModel: SettingViewModel = viewModel()
-    val pageList = NavigationIndex.entries
     val configuration = LocalConfiguration.current
-    val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    // 提取页面状态管理到单独的组合函数
+    val pageNavigationState = rememberPageNavigationState()
     val settingUiState = settingViewModel.uiState.collectAsState().value
 
-    var exitTime by rememberSaveable { mutableLongStateOf(0L) }
-    var currentPage by rememberSaveable { mutableIntStateOf(0) }
-    var shouldScroll by remember { mutableStateOf(false) }
+    // 管理底部栏显示状态
     var hideBottomBar by remember { mutableStateOf(false) }
 
     LaunchedEffect(settingUiState.showAbout) {
@@ -118,20 +128,57 @@ fun ModManagerApp() {
         }
     }
 
-    // 创建并记忆 PagerState，避免重组时重新创建
+    // 页面内容
+    PageContent(
+        modViewModel = modViewModel,
+        consoleViewModel = consoleViewModel,
+        settingViewModel = settingViewModel,
+        pageNavigationState = pageNavigationState,
+        configuration = configuration,
+        hideBottomBar = hideBottomBar,
+        onHideBottomBarChange = { hideBottomBar = it }
+    )
+}
+
+@Composable
+fun rememberPageNavigationState(): PageNavigationState {
+    val pageList = NavigationIndex.entries
+    var exitTime by rememberSaveable { mutableLongStateOf(0L) }
+    var currentPage by rememberSaveable { mutableIntStateOf(0) }
+    var shouldScroll by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(
         initialPage = currentPage,
         pageCount = { pageList.size }
     )
+    return PageNavigationState(
+        pageList = pageList,
+        exitTime = exitTime,
+        currentPage = currentPage,
+        shouldScroll = shouldScroll,
+        pagerState = pagerState,
+        onExitTimeChange = { exitTime = it },
+        onCurrentPageChange = { currentPage = it },
+        onShouldScrollChange = { shouldScroll = it }
+    )
+}
 
+@Composable
+fun PageContent(
+    modViewModel: ModViewModel,
+    consoleViewModel: ConsoleViewModel,
+    settingViewModel: SettingViewModel,
+    pageNavigationState: PageNavigationState,
+    configuration: Configuration,
+    hideBottomBar: Boolean,
+    onHideBottomBarChange: (Boolean) -> Unit
+) {
     Row {
-        // 在横向模式下显示侧边导航栏
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
-                currentPage = currentPage,
+                currentPage = pageNavigationState.currentPage,
                 onPageSelected = { page ->
-                    currentPage = page
-                    shouldScroll = true
+                    pageNavigationState.onCurrentPageChange(page)
+                    pageNavigationState.onShouldScrollChange(true)
                 },
                 modViewModel = modViewModel,
                 consoleViewModel = consoleViewModel
@@ -139,9 +186,8 @@ fun ModManagerApp() {
         }
 
         Scaffold(
-            // 根据当前页面显示不同的顶部工具栏
             topBar = {
-                when (currentPage) {
+                when (pageNavigationState.currentPage) {
                     NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(
                         consoleViewModel,
                         configuration = configuration.orientation
@@ -158,7 +204,6 @@ fun ModManagerApp() {
                     )
                 }
             },
-            // 在纵向模式下显示底部导航栏
             bottomBar = {
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     Box(
@@ -167,16 +212,17 @@ fun ModManagerApp() {
                             .animateContentSize()
                             .height(
                                 if (hideBottomBar) 0.dp
-                                else 80.dp + navigationBarHeight
+                                else 80.dp + WindowInsets.navigationBars.asPaddingValues()
+                                    .calculateBottomPadding()
                             )
                     ) {
                         if (!hideBottomBar) {
                             NavigationBar(
-                                currentPage = currentPage,
+                                currentPage = pageNavigationState.currentPage,
                                 modViewModel = modViewModel,
                                 onPageSelected = { page ->
-                                    currentPage = page
-                                    shouldScroll = true
+                                    pageNavigationState.onCurrentPageChange(page)
+                                    pageNavigationState.onShouldScrollChange(true)
                                 }
                             )
                         }
@@ -196,41 +242,35 @@ fun ModManagerApp() {
             val activity = context as? Activity
             val modViewUiState = modViewModel.uiState.collectAsState().value
 
-            // 在 ConsolePage 显示退出确认
-            BackHandler(enabled = currentPage == NavigationIndex.CONSOLE.ordinal) {
+            BackHandler(enabled = pageNavigationState.currentPage == NavigationIndex.CONSOLE.ordinal) {
                 val currentTime = System.currentTimeMillis()
-                if (currentTime - exitTime > 2000) {
+                if (currentTime - pageNavigationState.exitTime > 2000) {
                     exitToast.show()
-                    exitTime = currentTime
+                    pageNavigationState.onExitTimeChange(currentTime)
                 } else {
                     exitToast.cancel()
                     activity?.finish()
                 }
             }
 
-            // 在 ModPage 显示搜索框时，优先隐藏搜索框，并阻止其他返回逻辑
-            if (currentPage == NavigationIndex.MOD.ordinal && modViewUiState.searchBoxVisible) {
+            if (pageNavigationState.currentPage == NavigationIndex.MOD.ordinal && modViewUiState.searchBoxVisible) {
                 BackHandler {
                     modViewModel.setSearchBoxVisible(false)
                 }
-            }
-            // 在其他页面，返回键跳转到 ConsolePage
-            else if (currentPage != NavigationIndex.CONSOLE.ordinal) {
+            } else if (pageNavigationState.currentPage != NavigationIndex.CONSOLE.ordinal) {
                 BackHandler {
-                    currentPage = NavigationIndex.CONSOLE.ordinal
-                    shouldScroll = true
+                    pageNavigationState.onCurrentPageChange(NavigationIndex.CONSOLE.ordinal)
+                    pageNavigationState.onShouldScrollChange(true)
                 }
             }
 
-            // 优化页面切换逻辑，减少不必要的动画
-            LaunchedEffect(currentPage, shouldScroll) {
-                if (shouldScroll) {
-                    // 添加短暂延迟以确保状态已更新
+            LaunchedEffect(pageNavigationState.currentPage, pageNavigationState.shouldScroll) {
+                if (pageNavigationState.shouldScroll) {
                     delay(10)
-                    val targetPage = currentPage
-                    val currentPagerPage = pagerState.currentPage
+                    val targetPage = pageNavigationState.currentPage
+                    val currentPagerPage = pageNavigationState.pagerState.currentPage
                     if (targetPage != currentPagerPage) {
-                        pagerState.animateScrollToPage(
+                        pageNavigationState.pagerState.animateScrollToPage(
                             page = targetPage,
                             animationSpec = tween(
                                 durationMillis = abs(currentPagerPage - targetPage) * 100 + 200,
@@ -238,25 +278,21 @@ fun ModManagerApp() {
                             )
                         )
                     }
-                    shouldScroll = false
+                    pageNavigationState.onShouldScrollChange(false)
                 }
             }
 
-            // 使用derivedStateOf优化，减少不必要的重组
             val currentPagerPage by remember {
-                derivedStateOf { pagerState.currentPage }
+                derivedStateOf { pageNavigationState.pagerState.currentPage }
             }
 
-            // 当PagerState的当前页面改变时更新currentPage
             LaunchedEffect(currentPagerPage) {
-                if (!shouldScroll && currentPage != currentPagerPage) {
-                    currentPage = currentPagerPage
+                if (!pageNavigationState.shouldScroll && pageNavigationState.currentPage != currentPagerPage) {
+                    pageNavigationState.onCurrentPageChange(currentPagerPage)
                 }
             }
 
-            // 页面内容
             Box(modifier = Modifier.fillMaxSize()) {
-                // 显示进度
                 if (modViewUiState.showTips) {
                     ProcessTips(
                         text = modViewUiState.tipsText,
@@ -269,16 +305,15 @@ fun ModManagerApp() {
                     )
                 }
 
-                // 每个页面显示的内容
                 AppContent(
-                    pagerState = pagerState,
+                    pagerState = pageNavigationState.pagerState,
                     modifier = Modifier
                         .padding(innerPadding)
                         .zIndex(0f),
                     consoleViewModel = consoleViewModel,
                     modViewModel = modViewModel,
                     settingViewModel = settingViewModel,
-                    onHideBottomBar = { hideBottomBar = it }
+                    onHideBottomBar = onHideBottomBarChange
                 )
             }
         }
@@ -297,7 +332,6 @@ fun AppContent(
     HorizontalPager(
         state = pagerState,
         modifier = modifier,
-        // 添加键以优化重组
         key = { page -> "page_$page" }
     ) { page ->
         when (page) {
@@ -344,7 +378,6 @@ fun NavigationRail(
                         if (isSelected && (currentTime - lastClickTime) < 300) {
                             refreshCurrentPage(currentPage, modViewModel)
                         } else {
-                            // 非双击或者是切换页面时，执行页面切换
                             modViewModel.exitSelect()
                             if (!isSelected) {
                                 onPageSelected(index)
@@ -353,11 +386,9 @@ fun NavigationRail(
                         lastClickTime = currentTime
                     },
                     icon = {
-                        // 显示图标
                         Icon(imageVector = navigationItem.icon, contentDescription = null)
                     },
                     label = {
-                        // 标签文字，仅在选中时显示
                         AnimatedVisibility(
                             visible = isSelected,
                             enter = fadeIn(),
@@ -410,7 +441,6 @@ fun NavigationBar(
                     if (isSelected && (currentTime - lastClickTime) < 300) {
                         refreshCurrentPage(currentPage, modViewModel)
                     } else {
-                        // 非双击或者是切换页面时，执行页面切换
                         modViewModel.exitSelect()
                         if (!isSelected) {
                             onPageSelected(index)
@@ -419,11 +449,9 @@ fun NavigationBar(
                     lastClickTime = currentTime
                 },
                 icon = {
-                    // 显示图标
                     Icon(imageVector = navigationItem.icon, contentDescription = null)
                 },
                 label = {
-                    // 标签文字，仅在选中时显示
                     AnimatedVisibility(
                         visible = isSelected,
                         enter = fadeIn(),
@@ -439,7 +467,6 @@ fun NavigationBar(
 }
 
 private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
-    // 根据当前页面的类型，执行相应的刷新逻辑
     when (currentPage) {
         NavigationIndex.CONSOLE.ordinal -> {}
 
@@ -492,7 +519,6 @@ fun ProcessTips(
     uiState: ModUiState,
     modifier: Modifier
 ) {
-    // 构建提示文本
     val tipsStart =
         if (uiState.unzipProgress.isNotEmpty()) {
             "$text : ${uiState.unzipProgress}"
@@ -507,7 +533,6 @@ fun ProcessTips(
             ""
         }
 
-    // 显示提示
     Box(modifier.fillMaxWidth(0.7f)) {
         Snackbar(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -540,5 +565,4 @@ fun ProcessTips(
             )
         }
     }
-
 }
