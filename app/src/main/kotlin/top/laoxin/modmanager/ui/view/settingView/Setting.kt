@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +37,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,11 +67,23 @@ fun SettingPage(viewModel: SettingViewModel, onHideBottomBar: (Boolean) -> Unit)
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
+    // 累计滑动距离
+    val accumulatedScroll = remember { mutableFloatStateOf(0f) }
+    val scrollThreshold = 32f
+
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (uiState.showAbout) {
-                    onHideBottomBar(available.y < 0)
+                    // 只处理竖直方向滑动
+                    accumulatedScroll.floatValue += available.y
+                    if (accumulatedScroll.floatValue <= -scrollThreshold) {
+                        onHideBottomBar(true)
+                        accumulatedScroll.floatValue = 0f
+                    } else if (accumulatedScroll.floatValue >= scrollThreshold) {
+                        onHideBottomBar(false)
+                        accumulatedScroll.floatValue = 0f
+                    }
                 }
                 return Offset.Zero
             }
@@ -423,7 +438,6 @@ fun SwitchGameDialog(
                         SettingItem(
                             name = gameInfo.gameName + "(${gameInfo.serviceName})",
                             description = gameInfo.packageName,
-                            //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
                                 setGameInfo(gameInfo, false)
                                 showSwitchGameInfo(false)
@@ -451,16 +465,15 @@ fun DownloadGameConfigDialog(
 ) {
     if (showDialog) {
         AlertDialog(
+            modifier = Modifier.fillMaxHeight(0.6f),
             onDismissRequest = { showDownloadGameConfigDialog(false) }, // 点击对话框外的区域时关闭对话框
             title = { Text(text = stringResource(R.string.switch_download_game_tiltle)) }, text = {
                 val toMutableList = gameInfoList.toMutableList()
-                //toMutableList.removeAt(0)
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->
                         SettingItem(
                             name = gameInfo.gameName + "(${gameInfo.serviceName})",
                             description = gameInfo.packageName,
-                            //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
                                 downloadGameConfig(gameInfo)
                                 showDownloadGameConfigDialog(false)
@@ -491,7 +504,8 @@ fun ThanksDialogCommon(
     if (showDialog) {
         val context = LocalContext.current
         AlertDialog(
-            onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
+            modifier = Modifier.fillMaxHeight(0.6f),
+            onDismissRequest = {},
             title = { Text(text = title) }, text = {
                 LazyColumn {
                     itemsIndexed(thinks) { index, thank ->
@@ -500,7 +514,6 @@ fun ThanksDialogCommon(
                             description = context.getString(
                                 R.string.setting_thinks_link_desc, thank.job
                             ),
-                            //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
                                 openUrl(context, thank.link)
                             })
