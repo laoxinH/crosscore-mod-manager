@@ -191,8 +191,12 @@ fun PageContent(
     val context = LocalContext.current
     val modViewUiState = modViewModel.uiState.collectAsState().value
 
-    // 分离通知逻辑，只基于实际的操作状态
-    LaunchedEffect(modViewUiState.tipsText, modViewUiState.unzipProgress, modViewUiState.multitaskingProgress) {
+    // 修改通知逻辑，实时显示进度且独立于Snackbar控制
+    LaunchedEffect(
+        modViewUiState.tipsText,
+        modViewUiState.unzipProgress,
+        modViewUiState.multitaskingProgress
+    ) {
         val tipsStart = if (modViewUiState.unzipProgress.isNotEmpty()) {
             "${modViewUiState.tipsText} : ${modViewUiState.unzipProgress}"
         } else {
@@ -206,17 +210,17 @@ fun PageContent(
         }
 
         val tipsContent = "$tipsStart $tipsEnd"
-        val hasActiveOperation = modViewUiState.unzipProgress.isNotEmpty() || modViewUiState.multitaskingProgress.isNotEmpty()
-        
-        // 只要有活动操作就显示/更新通知，操作完成就取消通知
-        if (hasActiveOperation && modViewUiState.showTips) {
+        val hasActiveOperation =
+            modViewUiState.unzipProgress.isNotEmpty() || modViewUiState.multitaskingProgress.isNotEmpty()
+
+        // 有操作时实时显示/更新通知，操作完成时取消通知
+        if (hasActiveOperation) {
             sendTipsNotification(context, tipsContent)
-        } else if (!hasActiveOperation) {
-            // 操作完成时，无论Snackbar状态如何都取消通知
+        } else {
             cancelTipsNotification(context)
-            // 如果操作完成且Tips还在显示，则隐藏Tips
             if (modViewUiState.showTips) {
                 modViewModel.setShowTips(false)
+                modViewModel.setSnackbarHidden(false)
             }
         }
     }
@@ -342,11 +346,14 @@ fun PageContent(
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
+                // 修改Snackbar显示条件，showTips控制是否显示，isSnackbarHidden控制是否被用户隐藏
                 if (modViewUiState.showTips && !modViewUiState.isSnackbarHidden) {
                     ProcessTips(
                         text = modViewUiState.tipsText,
-                        setShowTips = { showTips -> modViewModel.setShowTips(showTips) },
-                        setSnackbarHidden = { hidden -> modViewModel.setSnackbarHidden(hidden) },
+                        setSnackbarHidden = { hidden ->
+                            // 用户点击隐藏按钮时只隐藏Snackbar，不影响showTips状态
+                            modViewModel.setSnackbarHidden(hidden)
+                        },
                         uiState = modViewUiState,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -565,7 +572,6 @@ fun getGameIcon(packageName: String): ImageBitmap? {
 @Composable
 fun ProcessTips(
     text: String,
-    setShowTips: (Boolean) -> Unit,
     setSnackbarHidden: (Boolean) -> Unit,
     uiState: ModUiState,
     modifier: Modifier
@@ -587,12 +593,13 @@ fun ProcessTips(
 
     val tipsContent = "$tipsStart $tipsEnd"
 
-    // 注册广播接收器用于显示Snackbar
+    // 注册广播接收器用于从通知重新显示Snackbar
     val currentSetSnackbarHidden = rememberUpdatedState(setSnackbarHidden)
     DisposableEffect(context) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == TIPS_NOTIFICATION_ACTION) {
+                    // 点击通知按钮时重新显示Snackbar
                     currentSetSnackbarHidden.value(false)
                 }
             }
@@ -616,7 +623,10 @@ fun ProcessTips(
             shape = MaterialTheme.shapes.medium,
             action = {
                 Button(
-                    onClick = { setSnackbarHidden(true) },
+                    onClick = {
+                        // 用户点击隐藏按钮，只隐藏Snackbar，不影响通知
+                        setSnackbarHidden(true)
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -642,7 +652,7 @@ fun ProcessTips(
     }
 }
 
-// 发送Tips通知
+// 修改通知发送函数，确保实时更新内容
 private fun sendTipsNotification(context: Context, content: String) {
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -652,6 +662,9 @@ private fun sendTipsNotification(context: Context, content: String) {
         context.getString(R.string.console_info_title),
         NotificationManager.IMPORTANCE_DEFAULT
     )
+    // 设置通知不发出声音和震动，避免频繁更新时的干扰
+    channel.setSound(null, null)
+    channel.enableVibration(false)
     notificationManager.createNotificationChannel(channel)
 
     val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
@@ -683,6 +696,7 @@ private fun sendTipsNotification(context: Context, content: String) {
             context.getString(R.string.show_snackbar),
             actionPendingIntent
         )
+        .setOnlyAlertOnce(true) // 只在第一次显示时提醒，后续更新不会发出声音
         .build()
 
     notificationManager.notify(TIPS_NOTIFICATION_ID, notification)
