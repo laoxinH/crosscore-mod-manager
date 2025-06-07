@@ -190,12 +190,12 @@ fun PageContent(
 ) {
     val context = LocalContext.current
     val modViewUiState = modViewModel.uiState.collectAsState().value
-
-    // 修改通知逻辑，实时显示进度且独立于Snackbar控制
     LaunchedEffect(
         modViewUiState.tipsText,
         modViewUiState.unzipProgress,
-        modViewUiState.multitaskingProgress
+        modViewUiState.multitaskingProgress,
+        modViewUiState.showTips,
+        modViewUiState.isSnackbarHidden
     ) {
         val tipsStart = if (modViewUiState.unzipProgress.isNotEmpty()) {
             "${modViewUiState.tipsText} : ${modViewUiState.unzipProgress}"
@@ -213,7 +213,6 @@ fun PageContent(
         val hasActiveOperation =
             modViewUiState.unzipProgress.isNotEmpty() || modViewUiState.multitaskingProgress.isNotEmpty()
 
-        // 有操作时实时显示/更新通知，操作完成时取消通知
         if (hasActiveOperation) {
             sendTipsNotification(context, tipsContent)
         } else {
@@ -346,12 +345,10 @@ fun PageContent(
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
-                // 修改Snackbar显示条件，showTips控制是否显示，isSnackbarHidden控制是否被用户隐藏
                 if (modViewUiState.showTips && !modViewUiState.isSnackbarHidden) {
                     ProcessTips(
                         text = modViewUiState.tipsText,
                         setSnackbarHidden = { hidden ->
-                            // 用户点击隐藏按钮时只隐藏Snackbar，不影响showTips状态
                             modViewModel.setSnackbarHidden(hidden)
                         },
                         uiState = modViewUiState,
@@ -592,8 +589,6 @@ fun ProcessTips(
         }
 
     val tipsContent = "$tipsStart $tipsEnd"
-
-    // 注册广播接收器用于从通知重新显示Snackbar
     val currentSetSnackbarHidden = rememberUpdatedState(setSnackbarHidden)
     DisposableEffect(context) {
         val receiver = object : BroadcastReceiver() {
@@ -605,7 +600,18 @@ fun ProcessTips(
             }
         }
         val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
-        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
+
+        try {
+            ContextCompat.registerReceiver(
+                context,
+                receiver,
+                filter,
+                ContextCompat.RECEIVER_EXPORTED
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         onDispose {
             try {
                 context.unregisterReceiver(receiver)
@@ -652,7 +658,6 @@ fun ProcessTips(
     }
 }
 
-// 修改通知发送函数，确保实时更新内容
 private fun sendTipsNotification(context: Context, content: String) {
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -675,10 +680,12 @@ private fun sendTipsNotification(context: Context, content: String) {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val actionIntent = Intent(TIPS_NOTIFICATION_ACTION)
+    val actionIntent = Intent(TIPS_NOTIFICATION_ACTION).apply {
+        putExtra("timestamp", System.currentTimeMillis())
+    }
     val actionPendingIntent = PendingIntent.getBroadcast(
         context,
-        0,
+        1,
         actionIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
@@ -696,7 +703,7 @@ private fun sendTipsNotification(context: Context, content: String) {
             context.getString(R.string.show_snackbar),
             actionPendingIntent
         )
-        .setOnlyAlertOnce(true) // 只在第一次显示时提醒，后续更新不会发出声音
+        .setOnlyAlertOnce(true)
         .build()
 
     notificationManager.notify(TIPS_NOTIFICATION_ID, notification)
