@@ -339,10 +339,8 @@ class ModViewModel @Inject constructor(
                     }
                     setLoading(false)
                 }
-
             }
         }
-
     }
 
 
@@ -375,7 +373,6 @@ class ModViewModel @Inject constructor(
                         disableMod(listOf(modBean), isDel)
                     }
                 }
-
             }
         }
     }
@@ -422,6 +419,7 @@ class ModViewModel @Inject constructor(
             setModSwitchEnable(false)
             setTipsText(App.get().getString(R.string.tips_open_mod))
             setShowTips(true)
+            setSnackbarHidden(false)
 
             val result = enableModsUserCase(
                 mods,
@@ -453,6 +451,11 @@ class ModViewModel @Inject constructor(
             }
 
             setModSwitchEnable(true)
+            // 清空进度状态以触发自动关闭逻辑
+            setShowTips(false)
+            setSnackbarHidden(true)
+            setUnzipProgress("")
+            setMultitaskingProgress("")
         }
 
     }
@@ -470,6 +473,7 @@ class ModViewModel @Inject constructor(
             setModSwitchEnable(false)
             setTipsText(App.get().getString(R.string.tips_close_mod))
             setShowTips(true)
+            setSnackbarHidden(false)
 
             val result = disableModsUserCase(
                 mods,
@@ -493,6 +497,11 @@ class ModViewModel @Inject constructor(
             }
 
             setModSwitchEnable(true)
+            // 清空进度状态以触发自动关闭逻辑
+            setShowTips(false)
+            setSnackbarHidden(true)
+            setUnzipProgress("")
+            setMultitaskingProgress("")
         }
     }
 
@@ -508,6 +517,7 @@ class ModViewModel @Inject constructor(
         checkPasswordJob = viewModelScope.launch {
             setModSwitchEnable(false)
             setShowTips(true)
+            setSnackbarHidden(false)
 
             // 获取当前MOD详情
             val modDetail = _uiState.value.modDetail ?: return@launch
@@ -531,8 +541,12 @@ class ModViewModel @Inject constructor(
                     refreshModDetail()
                 }
             } finally {
-
                 setModSwitchEnable(true)
+                // 清空进度状态以触发自动关闭逻辑
+                setShowTips(false)
+                setSnackbarHidden(true)
+                setUnzipProgress("")
+                setMultitaskingProgress("")
             }
         }
     }
@@ -554,7 +568,6 @@ class ModViewModel @Inject constructor(
 
     private fun setTipsText(s: String) {
         _uiState.value = _uiState.value.copy(tipsText = s)
-
     }
 
     private suspend fun setModSwitchEnable(b: Boolean) {
