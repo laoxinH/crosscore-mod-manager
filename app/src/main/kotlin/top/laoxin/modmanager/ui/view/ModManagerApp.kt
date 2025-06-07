@@ -66,7 +66,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -344,6 +343,46 @@ fun PageContent(
                 }
             }
 
+            // 注册广播接收器
+            DisposableEffect(context) {
+                val receiver = object : BroadcastReceiver() {
+                    override fun onReceive(context: Context?, intent: Intent?) {
+                        if (intent?.action == TIPS_NOTIFICATION_ACTION) {
+                            // 点击通知按钮时重新显示Snackbar
+                            // 检查是否有活跃的操作正在进行
+                            val currentState = modViewModel.uiState.value
+                            val hasActiveOperation = currentState.unzipProgress.isNotEmpty() ||
+                                    currentState.multitaskingProgress.isNotEmpty()
+
+                            if (hasActiveOperation) {
+                                // 如果有活跃操作，确保showTips为true并显示snackbar
+                                modViewModel.setShowTips(true)
+                                modViewModel.setSnackbarHidden(false)
+                            }
+                        }
+                    }
+                }
+                val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
+
+                try {
+                    ContextCompat.registerReceiver(
+                        context,
+                        receiver,
+                        filter,
+                        ContextCompat.RECEIVER_EXPORTED
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                onDispose {
+                    try {
+                        context.unregisterReceiver(receiver)
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
                 if (modViewUiState.showTips && !modViewUiState.isSnackbarHidden) {
                     ProcessTips(
@@ -573,7 +612,6 @@ fun ProcessTips(
     uiState: ModUiState,
     modifier: Modifier
 ) {
-    val context = LocalContext.current
     val tipsStart =
         if (uiState.unzipProgress.isNotEmpty()) {
             "$text : ${uiState.unzipProgress}"
@@ -589,37 +627,6 @@ fun ProcessTips(
         }
 
     val tipsContent = "$tipsStart $tipsEnd"
-    val currentSetSnackbarHidden = rememberUpdatedState(setSnackbarHidden)
-    DisposableEffect(context) {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == TIPS_NOTIFICATION_ACTION) {
-                    // 点击通知按钮时重新显示Snackbar
-                    currentSetSnackbarHidden.value(false)
-                }
-            }
-        }
-        val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
-
-        try {
-            ContextCompat.registerReceiver(
-                context,
-                receiver,
-                filter,
-                ContextCompat.RECEIVER_EXPORTED
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        onDispose {
-            try {
-                context.unregisterReceiver(receiver)
-            } catch (_: Exception) {
-                null
-            }
-        }
-    }
 
     Box(modifier.fillMaxWidth(0.7f)) {
         Snackbar(
