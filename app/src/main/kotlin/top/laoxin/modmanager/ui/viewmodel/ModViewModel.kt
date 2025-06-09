@@ -184,19 +184,26 @@ class ModViewModel @Inject constructor(
 
     init {
         Log.d("ModViewModel", "init: 初始化${userPreferences.value}")
-        //checkPermission()
+
         viewModelScope.launch {
-            userPreferences.collectLatest { it ->
-                updateGameInfo(it)
-                updateAllMods()
-                updateEnableMods()
-                updateDisEnableMods()
-                updateProgressUpdateListener()
-                startFileObserver(it)
-                // 设置当前游戏mod目录
-                updateCurrentGameModPath(it)
-                // 设置当前的视图
-                switchCurrentModsView(it)
+            userPreferences.collectLatest { userPrefs ->
+                try {
+                    // 更新游戏信息
+                    updateGameInfo(userPrefs)
+
+                    // 更新mod数据
+                    updateAllMods()
+                    updateEnableMods()
+                    updateDisEnableMods()
+
+                    // 其他操作
+                    updateProgressUpdateListener()
+                    startFileObserver(userPrefs)
+                    updateCurrentGameModPath(userPrefs)
+                    switchCurrentModsView(userPrefs)
+                } catch (e: Exception) {
+                    Log.e("ModViewModel", "init初始化错误: ${e.message}", e)
+                }
             }
         }
     }
@@ -245,28 +252,50 @@ class ModViewModel @Inject constructor(
         }
     }
 
-
     // 更新所有mods
     private fun updateAllMods() {
         updateAllModsJob?.cancel()
-        Log.d("ModViewModel", "gameinfo : ${gameInfoManager.getGameInfo()}")
+        val gameInfo = gameInfoManager.getGameInfo()
+
+        Log.d("ModViewModel", "updateAllMods - gameinfo: $gameInfo")
+
+        if (gameInfo.packageName.isNullOrEmpty()) {
+            Log.w("ModViewModel", "packageName为空")
+            return
+        }
+
         updateAllModsJob = viewModelScope.launch {
-            getGameAllModsUserCase().collectLatest { mods ->
-                _uiState.update {
-                    it.copy(modList = mods)
+            try {
+                getGameAllModsUserCase().collectLatest { mods ->
+                    Log.d("ModViewModel", "updateAllMods - 获取到${mods.size}个mods")
+                    _uiState.update {
+                        it.copy(modList = mods)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("ModViewModel", "updateAllMods 出错: ${e.message}", e)
             }
         }
     }
 
-    // 更新已开启mods
     private fun updateEnableMods() {
         updateEnableModsJob?.cancel()
+        val gameInfo = gameInfoManager.getGameInfo()
+
+        if (gameInfo.packageName.isNullOrEmpty()) {
+            Log.w("ModViewModel", "packageName为空")
+            return
+        }
+
         updateEnableModsJob = viewModelScope.launch {
-            getGameEnableModsUserCase().collectLatest { mods ->
-                _uiState.update {
-                    it.copy(enableModList = mods)
+            try {
+                getGameEnableModsUserCase().collectLatest { mods ->
+                    _uiState.update {
+                        it.copy(enableModList = mods)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("ModViewModel", "updateEnableMods 出错: ${e.message}", e)
             }
         }
     }
@@ -274,11 +303,22 @@ class ModViewModel @Inject constructor(
 
     private fun updateDisEnableMods() {
         updateDisEnableModsJob?.cancel()
+        val gameInfo = gameInfoManager.getGameInfo()
+
+        if (gameInfo.packageName.isNullOrEmpty()) {
+            Log.w("ModViewModel", "packageName为空")
+            return
+        }
+
         updateDisEnableModsJob = viewModelScope.launch {
-            getGameDisEnableUserCase().collectLatest { mods ->
-                _uiState.update {
-                    it.copy(disableModList = mods)
+            try {
+                getGameDisEnableUserCase().collectLatest { mods ->
+                    _uiState.update {
+                        it.copy(disableModList = mods)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("ModViewModel", "updateDisEnableMods 出错: ${e.message}", e)
             }
         }
     }
