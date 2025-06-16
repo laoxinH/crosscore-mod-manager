@@ -187,8 +187,40 @@ fun PageContent(
     hideBottomBar: Boolean,
     onHideBottomBarChange: (Boolean) -> Unit
 ) {
+    // 处理通知相关逻辑
+    HandleTipsNotification(modViewModel)
+
+    Row {
+        // 横屏时显示侧边导航
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            NavigationRail(
+                currentPage = pageNavigationState.currentPage,
+                onPageSelected = { page ->
+                    pageNavigationState.onCurrentPageChange(page)
+                    pageNavigationState.onShouldScrollChange(true)
+                },
+                modViewModel = modViewModel,
+                consoleViewModel = consoleViewModel
+            )
+        }
+
+        MainScaffold(
+            modViewModel = modViewModel,
+            consoleViewModel = consoleViewModel,
+            settingViewModel = settingViewModel,
+            pageNavigationState = pageNavigationState,
+            configuration = configuration,
+            hideBottomBar = hideBottomBar,
+            onHideBottomBarChange = onHideBottomBarChange
+        )
+    }
+}
+
+@Composable
+private fun HandleTipsNotification(modViewModel: ModViewModel) {
     val context = LocalContext.current
     val modViewUiState = modViewModel.uiState.collectAsState().value
+
     LaunchedEffect(
         modViewUiState.tipsText,
         modViewUiState.unzipProgress,
@@ -222,192 +254,267 @@ fun PageContent(
             }
         }
     }
+}
 
-    Row {
-        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            NavigationRail(
+@Composable
+private fun MainScaffold(
+    modViewModel: ModViewModel,
+    consoleViewModel: ConsoleViewModel,
+    settingViewModel: SettingViewModel,
+    pageNavigationState: PageNavigationState,
+    configuration: Configuration,
+    hideBottomBar: Boolean,
+    onHideBottomBarChange: (Boolean) -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopBarContent(
+                modViewModel = modViewModel,
+                consoleViewModel = consoleViewModel,
+                settingViewModel = settingViewModel,
                 currentPage = pageNavigationState.currentPage,
+                configuration = configuration.orientation
+            )
+        },
+        bottomBar = {
+            BottomBarContent(
+                configuration = configuration,
+                hideBottomBar = hideBottomBar,
+                currentPage = pageNavigationState.currentPage,
+                modViewModel = modViewModel,
                 onPageSelected = { page ->
                     pageNavigationState.onCurrentPageChange(page)
                     pageNavigationState.onShouldScrollChange(true)
+                }
+            )
+        }
+    ) { innerPadding ->
+        ScaffoldContent(
+            modViewModel = modViewModel,
+            consoleViewModel = consoleViewModel,
+            settingViewModel = settingViewModel,
+            pageNavigationState = pageNavigationState,
+            innerPadding = innerPadding,
+            onHideBottomBarChange = onHideBottomBarChange
+        )
+    }
+}
+
+@Composable
+private fun TopBarContent(
+    modViewModel: ModViewModel,
+    consoleViewModel: ConsoleViewModel,
+    settingViewModel: SettingViewModel,
+    currentPage: Int,
+    configuration: Int
+) {
+    when (currentPage) {
+        NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(
+            consoleViewModel,
+            configuration = configuration
+        )
+
+        NavigationIndex.MOD.ordinal -> ModTopBar(
+            modViewModel,
+            configuration = configuration
+        )
+
+        NavigationIndex.SETTINGS.ordinal -> SettingTopBar(
+            settingViewModel,
+            configuration = configuration
+        )
+    }
+}
+
+@Composable
+private fun BottomBarContent(
+    configuration: Configuration,
+    hideBottomBar: Boolean,
+    currentPage: Int,
+    modViewModel: ModViewModel,
+    onPageSelected: (Int) -> Unit
+) {
+    if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .height(
+                    if (hideBottomBar) 0.dp
+                    else 80.dp + WindowInsets.navigationBars.asPaddingValues()
+                        .calculateBottomPadding()
+                )
+        ) {
+            if (!hideBottomBar) {
+                NavigationBar(
+                    currentPage = currentPage,
+                    modViewModel = modViewModel,
+                    onPageSelected = onPageSelected
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScaffoldContent(
+    modViewModel: ModViewModel,
+    consoleViewModel: ConsoleViewModel,
+    settingViewModel: SettingViewModel,
+    pageNavigationState: PageNavigationState,
+    innerPadding: PaddingValues,
+    onHideBottomBarChange: (Boolean) -> Unit
+) {
+    val modViewUiState = modViewModel.uiState.collectAsState().value
+
+    // 处理返回键逻辑
+    HandleBackNavigation(
+        pageNavigationState = pageNavigationState,
+        modViewModel = modViewModel,
+        modViewUiState = modViewUiState
+    )
+
+    // 处理页面滚动
+    HandlePageScrolling(pageNavigationState)
+
+    // 注册广播接收器
+    HandleBroadcastReceiver(modViewModel)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 显示提示信息
+        if (modViewUiState.showTips && !modViewUiState.isSnackbarHidden) {
+            ProcessTips(
+                text = modViewUiState.tipsText,
+                setSnackbarHidden = { hidden ->
+                    modViewModel.setSnackbarHidden(hidden)
                 },
-                modViewModel = modViewModel,
-                consoleViewModel = consoleViewModel
+                uiState = modViewUiState,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .zIndex(10f)
             )
         }
 
-        Scaffold(
-            topBar = {
-                when (pageNavigationState.currentPage) {
-                    NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(
-                        consoleViewModel,
-                        configuration = configuration.orientation
+        AppContent(
+            pagerState = pageNavigationState.pagerState,
+            modifier = Modifier
+                .padding(innerPadding)
+                .zIndex(0f),
+            consoleViewModel = consoleViewModel,
+            modViewModel = modViewModel,
+            settingViewModel = settingViewModel,
+            onHideBottomBar = onHideBottomBarChange
+        )
+    }
+}
+
+@Composable
+private fun HandleBackNavigation(
+    pageNavigationState: PageNavigationState,
+    modViewModel: ModViewModel,
+    modViewUiState: ModUiState
+) {
+    val context = LocalContext.current
+    val exitToast: Toast = remember {
+        Toast.makeText(
+            context,
+            context.getText(R.string.toast_quit_app),
+            Toast.LENGTH_SHORT
+        )
+    }
+    val activity = context as? Activity
+
+    BackHandler(enabled = pageNavigationState.currentPage == NavigationIndex.CONSOLE.ordinal) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - pageNavigationState.exitTime > 2000) {
+            exitToast.show()
+            pageNavigationState.onExitTimeChange(currentTime)
+        } else {
+            exitToast.cancel()
+            activity?.finish()
+        }
+    }
+
+    if (pageNavigationState.currentPage == NavigationIndex.MOD.ordinal && modViewUiState.searchBoxVisible) {
+        BackHandler {
+            modViewModel.setSearchBoxVisible(false)
+        }
+    } else if (pageNavigationState.currentPage != NavigationIndex.CONSOLE.ordinal) {
+        BackHandler {
+            pageNavigationState.onCurrentPageChange(NavigationIndex.CONSOLE.ordinal)
+            pageNavigationState.onShouldScrollChange(true)
+        }
+    }
+}
+
+@Composable
+private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
+    LaunchedEffect(pageNavigationState.currentPage, pageNavigationState.shouldScroll) {
+        if (pageNavigationState.shouldScroll) {
+            delay(10)
+            val targetPage = pageNavigationState.currentPage
+            val currentPagerPage = pageNavigationState.pagerState.currentPage
+            if (targetPage != currentPagerPage) {
+                pageNavigationState.pagerState.animateScrollToPage(
+                    page = targetPage,
+                    animationSpec = tween(
+                        durationMillis = abs(currentPagerPage - targetPage) * 100 + 200,
+                        easing = FastOutSlowInEasing
                     )
-
-                    NavigationIndex.MOD.ordinal -> ModTopBar(
-                        modViewModel,
-                        configuration = configuration.orientation
-                    )
-
-                    NavigationIndex.SETTINGS.ordinal -> SettingTopBar(
-                        settingViewModel,
-                        configuration = configuration.orientation
-                    )
-                }
-            },
-            bottomBar = {
-                if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateContentSize()
-                            .height(
-                                if (hideBottomBar) 0.dp
-                                else 80.dp + WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding()
-                            )
-                    ) {
-                        if (!hideBottomBar) {
-                            NavigationBar(
-                                currentPage = pageNavigationState.currentPage,
-                                modViewModel = modViewModel,
-                                onPageSelected = { page ->
-                                    pageNavigationState.onCurrentPageChange(page)
-                                    pageNavigationState.onShouldScrollChange(true)
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        ) { innerPadding ->
-            val context = LocalContext.current
-            val exitToast: Toast =
-                remember {
-                    Toast.makeText(
-                        context,
-                        context.getText(R.string.toast_quit_app),
-                        Toast.LENGTH_SHORT
-                    )
-                }
-            val activity = context as? Activity
-            val modViewUiState = modViewModel.uiState.collectAsState().value
-
-            BackHandler(enabled = pageNavigationState.currentPage == NavigationIndex.CONSOLE.ordinal) {
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - pageNavigationState.exitTime > 2000) {
-                    exitToast.show()
-                    pageNavigationState.onExitTimeChange(currentTime)
-                } else {
-                    exitToast.cancel()
-                    activity?.finish()
-                }
-            }
-
-            if (pageNavigationState.currentPage == NavigationIndex.MOD.ordinal && modViewUiState.searchBoxVisible) {
-                BackHandler {
-                    modViewModel.setSearchBoxVisible(false)
-                }
-            } else if (pageNavigationState.currentPage != NavigationIndex.CONSOLE.ordinal) {
-                BackHandler {
-                    pageNavigationState.onCurrentPageChange(NavigationIndex.CONSOLE.ordinal)
-                    pageNavigationState.onShouldScrollChange(true)
-                }
-            }
-
-            LaunchedEffect(pageNavigationState.currentPage, pageNavigationState.shouldScroll) {
-                if (pageNavigationState.shouldScroll) {
-                    delay(10)
-                    val targetPage = pageNavigationState.currentPage
-                    val currentPagerPage = pageNavigationState.pagerState.currentPage
-                    if (targetPage != currentPagerPage) {
-                        pageNavigationState.pagerState.animateScrollToPage(
-                            page = targetPage,
-                            animationSpec = tween(
-                                durationMillis = abs(currentPagerPage - targetPage) * 100 + 200,
-                                easing = FastOutSlowInEasing
-                            )
-                        )
-                    }
-                    pageNavigationState.onShouldScrollChange(false)
-                }
-            }
-
-            val currentPagerPage by remember {
-                derivedStateOf { pageNavigationState.pagerState.currentPage }
-            }
-
-            LaunchedEffect(currentPagerPage) {
-                if (!pageNavigationState.shouldScroll && pageNavigationState.currentPage != currentPagerPage) {
-                    pageNavigationState.onCurrentPageChange(currentPagerPage)
-                }
-            }
-
-            // 注册广播接收器
-            DisposableEffect(context) {
-                val receiver = object : BroadcastReceiver() {
-                    override fun onReceive(context: Context?, intent: Intent?) {
-                        if (intent?.action == TIPS_NOTIFICATION_ACTION) {
-                            // 点击通知按钮时重新显示Snackbar
-                            // 检查是否有活跃的操作正在进行
-                            val currentState = modViewModel.uiState.value
-                            val hasActiveOperation = currentState.unzipProgress.isNotEmpty() ||
-                                    currentState.multitaskingProgress.isNotEmpty()
-
-                            if (hasActiveOperation) {
-                                // 如果有活跃操作，确保showTips为true并显示snackbar
-                                modViewModel.setShowTips(true)
-                                modViewModel.setSnackbarHidden(false)
-                            }
-                        }
-                    }
-                }
-                val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
-
-                try {
-                    ContextCompat.registerReceiver(
-                        context,
-                        receiver,
-                        filter,
-                        ContextCompat.RECEIVER_EXPORTED
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-                onDispose {
-                    try {
-                        context.unregisterReceiver(receiver)
-                    } catch (_: Exception) {
-                    }
-                }
-            }
-
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (modViewUiState.showTips && !modViewUiState.isSnackbarHidden) {
-                    ProcessTips(
-                        text = modViewUiState.tipsText,
-                        setSnackbarHidden = { hidden ->
-                            modViewModel.setSnackbarHidden(hidden)
-                        },
-                        uiState = modViewUiState,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = innerPadding.calculateTopPadding())
-                            .zIndex(10f)
-                    )
-                }
-
-                AppContent(
-                    pagerState = pageNavigationState.pagerState,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .zIndex(0f),
-                    consoleViewModel = consoleViewModel,
-                    modViewModel = modViewModel,
-                    settingViewModel = settingViewModel,
-                    onHideBottomBar = onHideBottomBarChange
                 )
+            }
+            pageNavigationState.onShouldScrollChange(false)
+        }
+    }
+
+    val currentPagerPage by remember {
+        derivedStateOf { pageNavigationState.pagerState.currentPage }
+    }
+
+    LaunchedEffect(currentPagerPage) {
+        if (!pageNavigationState.shouldScroll && pageNavigationState.currentPage != currentPagerPage) {
+            pageNavigationState.onCurrentPageChange(currentPagerPage)
+        }
+    }
+}
+
+@Composable
+private fun HandleBroadcastReceiver(modViewModel: ModViewModel) {
+    val context = LocalContext.current
+
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == TIPS_NOTIFICATION_ACTION) {
+                    val currentState = modViewModel.uiState.value
+                    val hasActiveOperation = currentState.unzipProgress.isNotEmpty() ||
+                            currentState.multitaskingProgress.isNotEmpty()
+
+                    if (hasActiveOperation) {
+                        modViewModel.setShowTips(true)
+                        modViewModel.setSnackbarHidden(false)
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
+
+        try {
+            ContextCompat.registerReceiver(
+                context,
+                receiver,
+                filter,
+                ContextCompat.RECEIVER_EXPORTED
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        onDispose {
+            try {
+                context.unregisterReceiver(receiver)
+            } catch (_: Exception) {
             }
         }
     }
