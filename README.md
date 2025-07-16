@@ -188,3 +188,7 @@
 ```
 
 > **命名为*`xxx.json`*放入MOD实验 `配置的MOD目录`里的 `GameConfig`文件夹，再到设置中点击 `读取游戏配置`，然后点击 `选择游戏`即可使用自定义配置文件**
+
+[![image](https://telegraph-image-d9e.pages.dev/file/ad6f059361a133cf60cb5-07048f3234ae745984.png)](https://yxvm.com/)
+
+[NodeSupport](https://github.com/NodeSeekDev/NodeSupport)赞助了本项目
