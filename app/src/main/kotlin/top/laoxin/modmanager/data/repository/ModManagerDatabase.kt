@@ -33,34 +33,34 @@ abstract class ModManagerDatabase : RoomDatabase() {
 
     companion object {
         private val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // 在这里添加创建新表的SQL语句
-                database.execSQL(
+                db.execSQL(
                     "CREATE TABLE antiHarmony (\n" +
                             "    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
                             "    gamePackageName TEXT NOT NULL,\n" +
                             "    isEnable INTEGER NOT NULL\n" +
                             ")"
                 )
-                database.execSQL("CREATE INDEX index_antiHarmony_gamePackageName ON antiHarmony(gamePackageName)")
+                db.execSQL("CREATE INDEX index_antiHarmony_gamePackageName ON antiHarmony(gamePackageName)")
             }
         }
 
         // 数据库迁移3-4
         private val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // mod表添加字段val virtualPaths: String?,
-                database.execSQL("ALTER TABLE mods ADD COLUMN virtualPaths TEXT")
+                db.execSQL("ALTER TABLE mods ADD COLUMN virtualPaths TEXT")
                 // 向所有virtualPaths字段插入""值
-                database.execSQL("UPDATE mods SET virtualPaths = ''")
+                db.execSQL("UPDATE mods SET virtualPaths = ''")
             }
         }
 
         // 数据库迁移4-5
         private val MIGRATION_4_5 = object : Migration(4, 5) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Perform the necessary schema changes
-                database.execSQL("CREATE TABLE IF NOT EXISTS `scanFiles` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `path` TEXT NOT NULL, `name` TEXT NOT NULL, `modifyTime` INTEGER NOT NULL, `size` INTEGER NOT NULL)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `scanFiles` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `path` TEXT NOT NULL, `name` TEXT NOT NULL, `modifyTime` INTEGER NOT NULL, `size` INTEGER NOT NULL)")
             }
         }
 

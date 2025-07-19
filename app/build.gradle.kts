@@ -106,7 +106,7 @@ kotlin {
         freeCompilerArgs = listOf(
             "-progressive",
             "-Xjvm-default=all",
-            "-Xcontext-receivers",
+            "-Xcontext-parameters",
             "-Xwhen-guards",
             "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",

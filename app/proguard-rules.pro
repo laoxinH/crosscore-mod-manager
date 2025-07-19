@@ -14,6 +14,18 @@
     native <methods>;
 }
 
+# kotlinx.serialization rules
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+
+-keep,includedescriptorclasses class top.laoxin.modmanager.**$$serializer { *; }
+-keepclassmembers class top.laoxin.modmanager.** {
+    *** Companion;
+}
+-keepclasseswithmembers class top.laoxin.modmanager.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -dontwarn org.conscrypt.**
 -dontwarn androidx.window.**
