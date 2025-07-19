@@ -1,7 +1,6 @@
 package top.laoxin.modmanager.ui.viewmodel
 
 import android.os.Build
-import android.os.FileObserver
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.constant.UserPreferencesKeys
 import top.laoxin.modmanager.data.bean.ModBean
@@ -42,7 +40,6 @@ import top.laoxin.modmanager.domain.usercase.repository.GetGameAllModsUserCase
 import top.laoxin.modmanager.domain.usercase.repository.GetGameDisEnableUserCase
 import top.laoxin.modmanager.domain.usercase.repository.GetGameEnableModsUserCase
 import top.laoxin.modmanager.domain.usercase.repository.SearchModsUserCase
-import top.laoxin.modmanager.domain.usercase.repository.UpdateModUserCase
 import top.laoxin.modmanager.domain.usercase.userpreference.GetUserPreferenceUseCase
 import top.laoxin.modmanager.listener.ProgressUpdateListener
 import top.laoxin.modmanager.observer.FlashModsObserver
@@ -64,7 +61,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ModViewModel @Inject constructor(
-    private val getUserPreferenceUseCase: GetUserPreferenceUseCase,
+    getUserPreferenceUseCase: GetUserPreferenceUseCase,
     private val getGameEnableModsUserCase: GetGameEnableModsUserCase,
     private val getGameAllModsUserCase: GetGameAllModsUserCase,
     private val getGameDisEnableUserCase: GetGameDisEnableUserCase,
@@ -80,7 +77,6 @@ class ModViewModel @Inject constructor(
     private val searchModsUserCase: SearchModsUserCase,
     private val deleteSelectedModUserCase: DeleteSelectedModUserCase,
     private val deleteModUserCase: DeleteModUserCase,
-    private val updateModUserCase: UpdateModUserCase,
     private val updateGameInfoUserCase: UpdateGameInfoUserCase,
     private val flashModsObserverManager: FlashModsObserverManager,
     private val gameInfoManager: GameInfoManager,
@@ -90,11 +86,11 @@ class ModViewModel @Inject constructor(
 ) : ViewModel(), ProgressUpdateListener, FlashObserverInterface {
     private val _uiState = MutableStateFlow(ModUiState())
 
+    private var isSilentImageExtraction = false
+
     private var _requestPermissionPath by mutableStateOf("")
     val requestPermissionPath: String
         get() = _requestPermissionPath
-
-    private var _gameInfo = GameInfoConstant.gameInfoList[0]
 
     // 删除的mods
     private var delModsList = emptyList<ModBean>()
@@ -117,7 +113,6 @@ class ModViewModel @Inject constructor(
         var updateEnableModsJob: Job? = null
         var updateDisEnableModsJob: Job? = null
         var checkPasswordJob: Job? = null
-        var fileObserver: FileObserver? = null
         var flashModsJob: Job? = null
     }
 
@@ -135,9 +130,6 @@ class ModViewModel @Inject constructor(
 
     private val scanDownloadFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.SCAN_DOWNLOAD, false)
-
-    private val openPermissionRequestDialogFlow =
-        getUserPreferenceUseCase(UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG, false)
 
     private val scanDirectoryModsFlow =
         getUserPreferenceUseCase(UserPreferencesKeys.SCAN_DIRECTORY_MODS, true)
@@ -249,7 +241,7 @@ class ModViewModel @Inject constructor(
     // 更新所有mods
     private fun updateAllMods() {
         updateAllModsJob?.cancel()
-        Log.d("ModViewModel", "gameinfo : ${gameInfoManager.getGameInfo()}")
+        Log.d("ModViewModel", "gameInfo : ${gameInfoManager.getGameInfo()}")
         updateAllModsJob = viewModelScope.launch {
             getGameAllModsUserCase().collectLatest { mods ->
                 _uiState.update {
@@ -364,6 +356,7 @@ class ModViewModel @Inject constructor(
             }
 
             ResultCode.SUCCESS -> {
+                setTipsText("")
                 setUnzipProgress("")
                 setMultitaskingProgress("")
                 viewModelScope.launch {
@@ -383,33 +376,26 @@ class ModViewModel @Inject constructor(
     }
 
     // 刷新mod预览图
-    fun flashModImage(modBean: ModBean) {
-
+    fun flashModImage(modBean: ModBean, silent: Boolean = true) {
         viewModelScope.launch(Dispatchers.IO) {
-            flashModImageUserCase(modBean)
-        }
-    }
-
-    // 刷新readme文件
-    private suspend fun flashModDetail(mods: ModBean): ModBean {
-
-        val result = flashModDetailUserCase(mods)
-        when (result.code) {
-            ResultCode.MOD_NEED_PASSWORD -> {
-                setModDetail(result.mod)
-                showPasswordDialog(true)
+            try {
+                if (silent) {
+                    isSilentImageExtraction = true
+                }
+                flashModImageUserCase(modBean)
+            } finally {
+                if (silent) {
+                    isSilentImageExtraction = false
+                }
+                withContext(Dispatchers.Main) {
+                    setTipsText("")
+                    setUnzipProgress("")
+                    setShowTips(false)
+                    setSnackbarHidden(true)
+                }
             }
         }
-        return result.mod
     }
-
-
-    fun updateMod(mod: ModBean) {
-        viewModelScope.launch {
-            updateModUserCase(mod)
-        }
-    }
-
 
     // 开启mod
     private fun enableMod(mods: List<ModBean>) {
@@ -454,6 +440,7 @@ class ModViewModel @Inject constructor(
             // 清空进度状态以触发自动关闭逻辑
             setShowTips(false)
             setSnackbarHidden(true)
+            setTipsText("")
             setUnzipProgress("")
             setMultitaskingProgress("")
         }
@@ -500,6 +487,7 @@ class ModViewModel @Inject constructor(
             // 清空进度状态以触发自动关闭逻辑
             setShowTips(false)
             setSnackbarHidden(true)
+            setTipsText("")
             setUnzipProgress("")
             setMultitaskingProgress("")
         }
@@ -508,7 +496,7 @@ class ModViewModel @Inject constructor(
     // 移除删除列表
     fun removeDelEnableModsList(mod: ModBean) {
         _uiState.update {
-            it.copy(delEnableModsList = it.delEnableModsList.filter { it.path != mod.path })
+            it.copy(delEnableModsList = it.delEnableModsList.filter { it -> it.path != mod.path })
         }
     }
 
@@ -552,16 +540,18 @@ class ModViewModel @Inject constructor(
     }
 
     fun setShowTips(b: Boolean) {
-        viewModelScope.launch {
-            withContext(Dispatchers.Main) {
-                _uiState.value = _uiState.value.copy(showTips = b)
+        viewModelScope.launch(Dispatchers.Main) {
+            _uiState.update {
+                it.copy(showTips = b)
             }
         }
     }
 
     fun setSnackbarHidden(b: Boolean) {
-        _uiState.update {
-            it.copy(isSnackbarHidden = b)
+        viewModelScope.launch(Dispatchers.Main) {
+            _uiState.update {
+                it.copy(isSnackbarHidden = b)
+            }
         }
     }
 
@@ -673,7 +663,6 @@ class ModViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Main) {
             _uiState.value = _uiState.value.copy(unzipProgress = progress)
         }
-
     }
 
     // 设置总进度
@@ -686,13 +675,27 @@ class ModViewModel @Inject constructor(
 
     override fun onProgressUpdate(progress: String) {
         Log.d("ModViewModel", "onProgressUpdate: $progress")
-        setUnzipProgress(progress)
+        if (!isSilentImageExtraction) {
+            setTipsText("解压压缩文件中")
+            setUnzipProgress(progress)
+            if (progress.isNotEmpty()) {
+                setShowTips(true)
+                setSnackbarHidden(false)
+            } else {
+                setShowTips(false)
+                setSnackbarHidden(true)
+            }
+        } else {
+            setShowTips(false)
+            setSnackbarHidden(true)
+            Log.d("ModViewModel", "忽略静默模式下的进度更新: $progress")
+        }
     }
 
     override fun onFlash() {
         // 检测到文件变化，自动刷新mods
         Log.d("ModViewModel", "onFlash: 检测到文件变化，自动刷新mods")
-        flashMods(true, false)
+        flashMods(isLoading = true, forceScan = false)
     }
 
     fun setModsView(enableMods: NavigationIndex) {
@@ -754,6 +757,7 @@ class ModViewModel @Inject constructor(
             }
 
             ResultCode.SUCCESS -> {
+                setTipsText("")
                 setUnzipProgress("")
                 setMultitaskingProgress("")
                 viewModelScope.launch {
@@ -887,16 +891,6 @@ class ModViewModel @Inject constructor(
         }
     }
 
-    // 通过path获取mods
-    fun getModsByPath(path: String): List<ModBean> {
-        return if (File(path).isDirectory) {
-            _uiState.value.modList.filter { it.path?.contains("$path/") == true }
-        } else {
-            _uiState.value.modList.filter { it.path?.contains(path) == true }
-        }
-
-    }
-
     // 通过path获取mods严格匹配
     fun getModsByPathStrict(path: String): List<ModBean> {
         return _uiState.value.modList.filter { it.path == path }
@@ -949,11 +943,6 @@ class ModViewModel @Inject constructor(
         _uiState.update {
             it.copy(currentMods = mods)
         }
-    }
-
-
-    fun getAppPathsManager(): AppPathsManager {
-        return appPathsManager
     }
 
     fun getPermissionTools(): PermissionTools {

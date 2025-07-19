@@ -85,6 +85,8 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
@@ -224,9 +226,7 @@ private fun HandleTipsNotification(modViewModel: ModViewModel) {
     LaunchedEffect(
         modViewUiState.tipsText,
         modViewUiState.unzipProgress,
-        modViewUiState.multitaskingProgress,
-        modViewUiState.showTips,
-        modViewUiState.isSnackbarHidden
+        modViewUiState.multitaskingProgress
     ) {
         val tipsStart = if (modViewUiState.unzipProgress.isNotEmpty()) {
             "${modViewUiState.tipsText} : ${modViewUiState.unzipProgress}"
@@ -246,11 +246,28 @@ private fun HandleTipsNotification(modViewModel: ModViewModel) {
 
         if (hasActiveOperation) {
             sendTipsNotification(context, tipsContent)
+            if (!modViewUiState.showTips) {
+                modViewModel.setShowTips(true)
+                modViewModel.setSnackbarHidden(false)
+            }
         } else {
             cancelTipsNotification(context)
+
             if (modViewUiState.showTips) {
                 modViewModel.setShowTips(false)
-                modViewModel.setSnackbarHidden(false)
+                if (modViewUiState.tipsText.isNotBlank()) {
+                    delay(2000)
+                    val currentState = modViewModel.uiState.value
+                    val currentlyHasActiveOperation =
+                        currentState.unzipProgress.isNotEmpty() ||
+                                currentState.multitaskingProgress.isNotEmpty()
+
+                    if (!currentlyHasActiveOperation) {
+                        modViewModel.setSnackbarHidden(true)
+                    }
+                } else {
+                    modViewModel.setSnackbarHidden(true)
+                }
             }
         }
     }
@@ -492,8 +509,10 @@ private fun HandleBroadcastReceiver(modViewModel: ModViewModel) {
                             currentState.multitaskingProgress.isNotEmpty()
 
                     if (hasActiveOperation) {
-                        modViewModel.setShowTips(true)
-                        modViewModel.setSnackbarHidden(false)
+                        MainScope().launch {
+                            modViewModel.setShowTips(true)
+                            modViewModel.setSnackbarHidden(false)
+                        }
                     }
                 }
             }
@@ -671,7 +690,7 @@ private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
         NavigationIndex.CONSOLE.ordinal -> {}
 
         NavigationIndex.MOD.ordinal -> {
-            modViewModel.flashMods(true, false)
+            modViewModel.flashMods(isLoading = true, forceScan = false)
         }
 
         NavigationIndex.SETTINGS.ordinal -> {}
@@ -734,6 +753,22 @@ fun ProcessTips(
         }
 
     val tipsContent = "$tipsStart $tipsEnd"
+    val hasActiveOperation =
+        uiState.unzipProgress.isNotEmpty() || uiState.multitaskingProgress.isNotEmpty()
+    DisposableEffect(hasActiveOperation) {
+        val job = if (!hasActiveOperation) {
+            MainScope().launch {
+                if (tipsContent.isNotBlank()) {
+                    delay(2000)
+                    setSnackbarHidden(true)
+                }
+            }
+        } else null
+
+        onDispose {
+            job?.cancel()
+        }
+    }
 
     Box(modifier.fillMaxWidth(0.7f)) {
         Snackbar(
@@ -744,7 +779,6 @@ fun ProcessTips(
             action = {
                 Button(
                     onClick = {
-                        // 用户点击隐藏按钮，只隐藏Snackbar，不影响通知
                         setSnackbarHidden(true)
                     },
                     colors = ButtonDefaults.buttonColors(
