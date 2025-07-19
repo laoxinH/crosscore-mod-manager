@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +54,8 @@ import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
 
 @Composable
-fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
+fun ModsBrowser(viewModel: ModViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
     var currentPath by remember { mutableStateOf(uiState.currentPath) }
     val files = remember(uiState.currentFiles) { uiState.currentFiles }
     val listState = rememberLazyListState()
@@ -202,7 +204,7 @@ private fun FileListContent(
                 }
             }
 
-            val (modsByPath, modsByVirtualPaths) = remember(file.path) {
+            val (modsByPath, modsByVirtualPaths) = remember(file.path, uiState.modList) {
                 Pair(
                     viewModel.getModsByPathStrict(file.path),
                     viewModel.getModsByVirtualPathsStrict(file.path)

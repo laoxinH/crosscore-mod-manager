@@ -116,8 +116,8 @@ fun ModPage(viewModel: ModViewModel) {
                 )
             }
             when (uiState.modsView) {
-                NavigationIndex.MODS_BROWSER -> ModsBrowser(viewModel, uiState)
-                else -> AllModPage(viewModel, uiState)
+                NavigationIndex.MODS_BROWSER -> ModsBrowser(viewModel)
+                else -> AllModPage(viewModel)
             }
         }
     }

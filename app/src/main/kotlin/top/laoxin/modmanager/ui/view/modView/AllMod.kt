@@ -5,18 +5,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
 @Composable
 fun AllModPage(
-    viewModel: ModViewModel,
-    uiState: ModUiState
+    viewModel: ModViewModel
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     if (uiState.modList.isEmpty()) {
         NoMod()
         return

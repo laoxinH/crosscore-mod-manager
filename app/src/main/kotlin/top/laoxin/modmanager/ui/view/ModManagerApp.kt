@@ -469,7 +469,6 @@ private fun HandleBackNavigation(
 private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
     LaunchedEffect(pageNavigationState.currentPage, pageNavigationState.shouldScroll) {
         if (pageNavigationState.shouldScroll) {
-            delay(10)
             val targetPage = pageNavigationState.currentPage
             val currentPagerPage = pageNavigationState.pagerState.currentPage
             if (targetPage != currentPagerPage) {

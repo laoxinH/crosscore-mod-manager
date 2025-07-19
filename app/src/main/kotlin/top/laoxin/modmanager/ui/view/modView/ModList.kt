@@ -60,8 +60,6 @@ fun ModList(
     onMultiSelectClick: (ModBean) -> Unit,
     modViewModel: ModViewModel
 ) {
-    // 确保列表在mod状态变化时重新组合
-    val forceRecompose = remember(mods) { mods.map { it.isEnable } }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -69,8 +67,7 @@ fun ModList(
     ) {
         items(
             items = mods,
-            key = { mod -> mod.id },
-            contentType = { mod -> "mod_item" }
+            key = { mod -> mod.id }
         ) { mod ->
             ModListItem(
                 mod = mod,
@@ -188,9 +185,8 @@ fun ModListItem(
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                val isEnabled = remember(mod.id, mod.isEnable) { mod.isEnable }
                 Switch(
-                    checked = isEnabled,
+                    checked = mod.isEnable,
                     onCheckedChange = onCheckedChange,
                     enabled = modSwitchEnable
                 )

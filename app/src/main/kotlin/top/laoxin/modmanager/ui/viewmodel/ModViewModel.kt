@@ -460,6 +460,22 @@ class ModViewModel @Inject constructor(
                 }
             }
 
+            _uiState.update { currentState ->
+                val successIds = result.successMods.map { it.id }.toSet()
+                val newList = currentState.modList.map { mod ->
+                    if (successIds.contains(mod.id)) mod.copy(isEnable = true) else mod
+                }
+                val newSearchList = currentState.searchModList.map { mod ->
+                    if (successIds.contains(mod.id)) mod.copy(isEnable = true) else mod
+                }
+                currentState.copy(
+                    modList = newList,
+                    enableModList = newList.filter { it.isEnable },
+                    disableModList = newList.filter { !it.isEnable },
+                    searchModList = newSearchList
+                )
+            }
+
             setModSwitchEnable(true)
             // 清空进度状态以触发自动关闭逻辑
             setShowTips(false)
@@ -505,6 +521,22 @@ class ModViewModel @Inject constructor(
                         )
                     )
                 }
+            }
+
+            _uiState.update { currentState ->
+                val successIds = result.successMods.map { it.id }.toSet()
+                val newList = currentState.modList.map { mod ->
+                    if (successIds.contains(mod.id)) mod.copy(isEnable = false) else mod
+                }
+                val newSearchList = currentState.searchModList.map { mod ->
+                    if (successIds.contains(mod.id)) mod.copy(isEnable = false) else mod
+                }
+                currentState.copy(
+                    modList = newList,
+                    enableModList = newList.filter { it.isEnable },
+                    disableModList = newList.filter { !it.isEnable },
+                    searchModList = newSearchList
+                )
             }
 
             setModSwitchEnable(true)
