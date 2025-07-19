@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -104,10 +106,11 @@ class ModViewModel @Inject constructor(
     // 当前研所包的文件列表
     private var _currentFiles by mutableStateOf(emptyList<File>())
 
+    private val _searchQuery = MutableStateFlow("")
+
     // 扫描mod目录列表
     // 从用户配置中读取mod目录
     companion object {
-        var searchJob: Job? = null
         var enableJob: Job? = null
         var updateAllModsJob: Job? = null
         var updateEnableModsJob: Job? = null
@@ -176,7 +179,6 @@ class ModViewModel @Inject constructor(
 
     init {
         Log.d("ModViewModel", "init: 初始化${userPreferences.value}")
-        //checkPermission()
         viewModelScope.launch {
             userPreferences.collectLatest { it ->
                 updateGameInfo(it)
@@ -185,11 +187,33 @@ class ModViewModel @Inject constructor(
                 updateDisEnableMods()
                 updateProgressUpdateListener()
                 startFileObserver(it)
-                // 设置当前游戏mod目录
                 updateCurrentGameModPath(it)
-                // 设置当前的视图
                 switchCurrentModsView(it)
             }
+        }
+
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300)
+                .distinctUntilChanged()
+                .collectLatest { query ->
+                    if (query.isNotEmpty()) {
+                        when (_uiState.value.modsView) {
+                            NavigationIndex.MODS_BROWSER -> {
+                                val searchFiles = _uiState.value.currentFiles.filter {
+                                    it.name.lowercase().contains(query.lowercase())
+                                }
+                                _uiState.update { it.copy(currentFiles = searchFiles) }
+                            }
+
+                            else -> {
+                                searchModsUserCase(query).collect {
+                                    setSearchMods(it)
+                                }
+                            }
+                        }
+                    }
+                }
         }
     }
 
@@ -608,31 +632,20 @@ class ModViewModel @Inject constructor(
     // 设置搜索框内容
     fun setSearchText(searchText: String) {
         _uiState.update { it.copy(searchContent = searchText) }
-        // 取消上一个搜索任务
-        searchJob?.cancel()
-        searchJob = viewModelScope.launch(Dispatchers.IO) {
+        _searchQuery.value = searchText
+
+        if (searchText.isEmpty()) {
             when (_uiState.value.modsView) {
                 NavigationIndex.MODS_BROWSER -> {
-                    if (searchText.isEmpty()) {
+                    viewModelScope.launch {
                         updateFiles(_currentPath)
-                    } else {
-                        val searchFiles =
-                            _uiState.value.currentFiles.filter { it.name.contains(searchText) }
-                        _uiState.update { it.copy(currentFiles = searchFiles) }
                     }
                 }
 
                 else -> {
-                    if (searchText.isEmpty()) {
-                        setSearchMods(emptyList())
-                    } else {
-                        searchModsUserCase(searchText).collect {
-                            setSearchMods(it)
-                        }
-                    }
+                    setSearchMods(emptyList())
                 }
             }
-
         }
     }
 

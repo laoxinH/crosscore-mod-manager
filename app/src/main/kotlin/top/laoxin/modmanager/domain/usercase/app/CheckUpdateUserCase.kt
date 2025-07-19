@@ -3,8 +3,8 @@ package top.laoxin.modmanager.domain.usercase.app
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import top.laoxin.modmanager.data.repository.VersionRepository
 import top.laoxin.modmanager.data.network.GithubApi
+import top.laoxin.modmanager.data.repository.VersionRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

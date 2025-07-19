@@ -32,12 +32,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import top.laoxin.modmanager.activity.main.MainActivity
-import top.laoxin.modmanager.R
 import androidx.core.content.edit
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import top.laoxin.modmanager.R
+import top.laoxin.modmanager.activity.main.MainActivity
 
 @SuppressLint("AutoboxingStateValueProperty")
 @Composable

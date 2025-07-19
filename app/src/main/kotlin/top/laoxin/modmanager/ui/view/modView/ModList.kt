@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -60,12 +60,18 @@ fun ModList(
     onMultiSelectClick: (ModBean) -> Unit,
     modViewModel: ModViewModel
 ) {
+    // 确保列表在mod状态变化时重新组合
+    val forceRecompose = remember(mods) { mods.map { it.isEnable } }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(contentPadding)
     ) {
-        itemsIndexed(mods, key = { _, mod -> mod.id }) { _, mod -> // 添加唯一 key
+        items(
+            items = mods,
+            key = { mod -> mod.id },
+            contentType = { mod -> "mod_item" }
+        ) { mod ->
             ModListItem(
                 mod = mod,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
@@ -98,49 +104,41 @@ fun ModListItem(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-
-    // 使用remember记住图像状态
-    val imageBitmap = remember { mutableStateOf<ImageBitmap?>(null) }
-
-    // 使用derivedStateOf计算图标路径是否有效
+    val imageBitmap = remember(mod.icon) { mutableStateOf<ImageBitmap?>(null) }
     val iconPath by remember(mod.icon) {
-        derivedStateOf {
-            mod.icon?.takeIf { File(it).exists() }
+        derivedStateOf { mod.icon?.takeIf { File(it).exists() } }
+    }
+    val onClick = remember(mod.id, isMultiSelect) {
+        { if (isMultiSelect) onMultiSelectClick(mod) else openModDetail(mod, true) }
+    }
+    val onCheckedChange = remember(mod.id) {
+        { isChecked: Boolean -> enableMod(mod, isChecked) }
+    }
+
+    LaunchedEffect(iconPath) {
+        if (iconPath != null) {
+            coroutineScope.launch(Dispatchers.IO) {
+                imageBitmap.value = loadImageBitmapFromPath(context, iconPath!!, 256, 256)
+            }
+        } else if (mod.icon != null) {
+            modViewModel.flashModImage(mod)
         }
     }
 
-    // 只在初始组合或图标路径变化时加载图像
-    LaunchedEffect(iconPath) {
-        coroutineScope.launch(Dispatchers.IO) {
-            iconPath?.let {
-                // 仅当图像为空或路径变化时加载
-                imageBitmap.value = loadImageBitmapFromPath(context, it, 256, 256)
-            } ?: run {
-                // 如果图标路径无效，请求刷新图标
-                if (mod.icon != null) {
-                    modViewModel.flashModImage(mod)
-                }
-            }
-        }
-    }
+    val cardColors = CardDefaults.cardColors(
+        containerColor = if (!isSelected) CardDefaults.cardColors().containerColor
+        else MaterialTheme.colorScheme.secondaryContainer,
+    )
 
     Card(
         elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(
             0.dp
         ),
         modifier = modifier.combinedClickable(
-            onClick = {
-                if (isMultiSelect) {
-                    onMultiSelectClick(mod)
-                } else {
-                    openModDetail(mod, true)
-                }
-            },
+            onClick = onClick,
             onLongClick = { onLongClick(mod) }
         ),
-        colors = CardDefaults.cardColors(
-            containerColor = if (!isSelected) CardDefaults.cardColors().containerColor else MaterialTheme.colorScheme.secondaryContainer,
-        )
+        colors = cardColors
     ) {
         Row(
             modifier = Modifier
@@ -154,7 +152,6 @@ fun ModListItem(
                     .clip(RoundedCornerShape(8.dp))
                     .align(Alignment.CenterVertically)
             ) {
-                // 使用稳定的图像引用
                 val currentImage = imageBitmap.value
                 if (currentImage != null) {
                     Image(
@@ -165,7 +162,7 @@ fun ModListItem(
                     )
                 } else {
                     Image(
-                        painterResource(id = R.drawable.app_icon),
+                        painter = painterResource(id = R.drawable.app_icon),
                         contentDescription = null,
                         alignment = Alignment.TopCenter,
                         contentScale = ContentScale.FillWidth
@@ -191,9 +188,10 @@ fun ModListItem(
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
+                val isEnabled = remember(mod.id, mod.isEnable) { mod.isEnable }
                 Switch(
-                    checked = mod.isEnable,
-                    onCheckedChange = { enableMod(mod, it) },
+                    checked = isEnabled,
+                    onCheckedChange = onCheckedChange,
                     enabled = modSwitchEnable
                 )
             }

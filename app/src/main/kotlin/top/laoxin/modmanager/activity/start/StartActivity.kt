@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import top.laoxin.modmanager.activity.main.MainActivity
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
 import top.laoxin.modmanager.ui.theme.ModManagerTheme

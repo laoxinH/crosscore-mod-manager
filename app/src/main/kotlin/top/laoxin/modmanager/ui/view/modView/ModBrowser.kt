@@ -56,7 +56,6 @@ import java.io.File
 fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
     var currentPath by remember { mutableStateOf(uiState.currentPath) }
     val files = remember(uiState.currentFiles) { uiState.currentFiles }
-    var previousPath by remember { mutableStateOf(currentPath) }
     val listState = rememberLazyListState()
     val scrollPositions = remember { mutableMapOf<String, Int>() }
     val scrollOffsets = remember { mutableMapOf<String, Int>() }
@@ -68,22 +67,21 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
         }
     }
 
-    // 确保加载时和每次路径变化时正确更新返回按钮状态
     LaunchedEffect(isAtRootPath) {
         viewModel.setBackIconVisible(!isAtRootPath)
     }
 
-    fun doBack() {
-        if (!isAtRootPath) {
-            scrollPositions[currentPath] = listState.firstVisibleItemIndex
-            scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
-            previousPath = currentPath
-            currentPath = File(currentPath).parent ?: currentPath
+    val doBack = remember {
+        {
+            if (!isAtRootPath) {
+                scrollPositions[currentPath] = listState.firstVisibleItemIndex
+                scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
+                currentPath = File(currentPath).parent ?: currentPath
 
-            // 更新了返回按钮状态：根据当前路径是否为根路径来设置
-            val nextIsRoot = File(currentPath).path == uiState.currentGameModPath ||
-                    File(currentPath).path == Environment.getExternalStorageDirectory().path
-            viewModel.setBackIconVisible(!nextIsRoot)
+                val nextIsRoot = File(currentPath).path == uiState.currentGameModPath ||
+                        File(currentPath).path == Environment.getExternalStorageDirectory().path
+                viewModel.setBackIconVisible(!nextIsRoot)
+            }
         }
     }
 
@@ -129,7 +127,7 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
             }
         ) { path ->
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                val mods by remember {
+                val mods by remember(files) {
                     derivedStateOf {
                         files.flatMap { file ->
                             viewModel.getModsByPathStrict(file.path) +
@@ -162,7 +160,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             if (file.isDirectory || !file.exists()) {
                                 scrollPositions[currentPath] = listState.firstVisibleItemIndex
                                 scrollOffsets[currentPath] = listState.firstVisibleItemScrollOffset
-                                previousPath = currentPath
                                 currentPath = file.path
                             }
                         },
@@ -170,7 +167,6 @@ fun ModsBrowser(viewModel: ModViewModel, uiState: ModUiState) {
                             scrollPositions[currentPath] = listState.firstVisibleItemIndex
                             scrollOffsets[currentPath] =
                                 listState.firstVisibleItemScrollOffset
-                            previousPath = currentPath
                             currentPath = file.path
                         }
                     )
@@ -191,10 +187,14 @@ private fun FileListContent(
     onFileClick: (File) -> Unit,
     onFileClickByZip: (File) -> Unit
 ) {
-    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.fillMaxSize()
+    ) {
         items(
             items = files,
-            key = { file -> file.path }
+            key = { file -> file.path },
+            contentType = { file -> if (file.isDirectory) "directory" else "file" }
         ) { file ->
             if (!isBackPathExist && !isAtRootPath) {
                 LaunchedEffect(Unit) {
@@ -202,18 +202,28 @@ private fun FileListContent(
                 }
             }
 
-            val modsByPath = viewModel.getModsByPathStrict(file.path)
-            val modsByVirtualPaths = viewModel.getModsByVirtualPathsStrict(file.path)
+            val (modsByPath, modsByVirtualPaths) = remember(file.path) {
+                Pair(
+                    viewModel.getModsByPathStrict(file.path),
+                    viewModel.getModsByVirtualPathsStrict(file.path)
+                )
+            }
 
-            val modCount =
-                if (modsByPath.isNotEmpty()) modsByPath.size else viewModel.getModsByVirtualPaths(
-                    file.path
-                ).size
+            val modCount = remember(modsByPath, modsByVirtualPaths) {
+                if (modsByPath.isNotEmpty()) modsByPath.size
+                else viewModel.getModsByVirtualPaths(file.path).size
+            }
 
-            val modEnableCount = if (modsByPath.isNotEmpty())
-                modsByPath.count { it.isEnable }
-            else
-                viewModel.getModsByVirtualPaths(file.path).count { it.isEnable }
+            val modEnableCount = remember(modsByPath, modsByVirtualPaths) {
+                if (modsByPath.isNotEmpty())
+                    modsByPath.count { it.isEnable }
+                else
+                    viewModel.getModsByVirtualPaths(file.path).count { it.isEnable }
+            }
+
+            val onClick = remember(file.path) {
+                { onFileClick(file) }
+            }
 
             if (modsByPath.isEmpty() && modsByVirtualPaths.isEmpty() && (file.isDirectory || !file.exists())) {
                 FileListItem(
@@ -221,7 +231,7 @@ private fun FileListContent(
                     name = file.name,
                     isSelected = false,
                     onLongClick = {},
-                    onClick = { onFileClick(file) },
+                    onClick = onClick,
                     onMultiSelectClick = {},
                     isMultiSelect = uiState.isMultiSelect,
                     description = stringResource(
@@ -232,6 +242,7 @@ private fun FileListContent(
                     iconId = if (modCount > 0) R.drawable.folder_mod_icon else R.drawable.folder_icon
                 )
             }
+
             if (modsByPath.size == 1 || modsByVirtualPaths.size == 1) {
                 val mod = modsByPath.firstOrNull() ?: modsByVirtualPaths.firstOrNull()!!
                 ModListItem(
@@ -248,12 +259,7 @@ private fun FileListContent(
                             true
                         )
                     },
-                    enableMod = { selectedMod, isEnable ->
-                        viewModel.switchMod(
-                            selectedMod,
-                            isEnable
-                        )
-                    },
+                    enableMod = viewModel::switchMod,
                     modViewModel = viewModel
                 )
             }

@@ -59,6 +59,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
@@ -415,14 +416,14 @@ fun SearchBox(
     modifier: Modifier = Modifier,
     visible: Boolean
 ) {
-    // 获取键盘控制器
     val keyboardController = LocalSoftwareKeyboardController.current
-    // 创建 FocusRequester 控制焦点
     val focusRequester = remember { FocusRequester() }
+    val onValueChangeCallback = remember(onValueChange) { onValueChange }
+    val onCloseCallback = remember(onClose) { onClose }
 
-    // 每次重新显示搜索框时，请求焦点和显示键盘
     LaunchedEffect(visible) {
         if (visible) {
+            delay(100)
             focusRequester.requestFocus()
             keyboardController?.show()
         } else {
@@ -430,55 +431,52 @@ fun SearchBox(
         }
     }
 
-    // 使用 TextField 组件实现搜索框
+    val textStyle = MaterialTheme.typography.bodyMedium
+    val placeholderStyle = MaterialTheme.typography.bodyMedium.copy(
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+    )
+
+
+    val shape = MaterialTheme.shapes.medium
+    val colors = TextFieldDefaults.colors(
+        focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+        unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+    )
+
+    val keyboardActions = remember {
+        KeyboardActions(onDone = { keyboardController?.hide() })
+    }
+
     TextField(
         value = text,
-        onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                text = hint,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) // 设置透明度
-                )
-            )
-        },
+        onValueChange = onValueChangeCallback,
+        placeholder = { Text(text = hint, style = placeholderStyle) },
         modifier = modifier
             .fillMaxWidth()
             .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 10.dp)
             .height(50.dp)
-            .focusRequester(focusRequester), // 关联 FocusRequester
-        textStyle = MaterialTheme.typography.bodyMedium,
+            .focusRequester(focusRequester),
+        textStyle = textStyle,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
-            // 设置键盘的操作按钮为完成
             imeAction = ImeAction.Done
         ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                // 隐藏键盘
-                keyboardController?.hide()
-            }
-        ),
-        // 设置为单行
+        keyboardActions = keyboardActions,
         singleLine = true,
         trailingIcon = {
-            IconButton(onClick = onClose) {
+            IconButton(onClick = onCloseCallback) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = null
+                    contentDescription = "关闭搜索"
                 )
             }
         },
-        shape = MaterialTheme.shapes.medium,
-        // 使用动态取色
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-        )
+        shape = shape,
+        colors = colors
     )
 }
 
