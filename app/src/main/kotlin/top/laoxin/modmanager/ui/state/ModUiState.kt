@@ -53,4 +53,5 @@ data class ModUiState(
     val showForceScanDialog: Boolean = false,
     // 是否隐藏Snackbar
     val isSnackbarHidden: Boolean = false,
+    val isReady: Boolean = false,
 )

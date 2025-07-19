@@ -232,7 +232,12 @@ class FlashModsUserCase @Inject constructor(
         // 按 path 进行分组
         val groupedMods =
             allMods.groupBy {
-                Triple(it.path, it.virtualPaths, it.modType)
+                // virtualPaths为空时不参与去重
+                if (it.virtualPaths.isNullOrEmpty()) {
+                    Triple(it.path, null, it.modType)
+                } else {
+                    Triple(it.path, it.virtualPaths, it.modType)
+                }
             }
         val filteredMods = mutableListOf<ModBean>()
 

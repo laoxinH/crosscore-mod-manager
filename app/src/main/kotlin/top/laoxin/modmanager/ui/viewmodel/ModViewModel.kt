@@ -187,7 +187,9 @@ class ModViewModel @Inject constructor(
                 updateDisEnableMods()
                 updateProgressUpdateListener()
                 startFileObserver(it)
-                updateCurrentGameModPath(it)
+                if (updateCurrentGameModPath(it)) {
+                    _uiState.update { state -> state.copy(isReady = true) }
+                }
                 switchCurrentModsView(it)
             }
         }
@@ -239,16 +241,20 @@ class ModViewModel @Inject constructor(
     }
 
     // 更新当前游戏mod目录
-    private fun updateCurrentGameModPath(userPreferences: UserPreferencesState) {
+    private fun updateCurrentGameModPath(userPreferences: UserPreferencesState): Boolean {
         val gameInfo = gameInfoManager.getGameInfo()
-        _uiState.update {
-            it.copy(
-                currentGameModPath = appPathsManager.getRootPath() +
-                        userPreferences.selectedDirectory + gameInfo.packageName,
-                currentPath = appPathsManager.getRootPath() +
-                        userPreferences.selectedDirectory + gameInfo.packageName
-            )
+        if (userPreferences.selectedDirectory.isNotEmpty() && gameInfo.packageName.isNotEmpty()) {
+            _uiState.update {
+                it.copy(
+                    currentGameModPath = appPathsManager.getRootPath() +
+                            userPreferences.selectedDirectory + gameInfo.packageName,
+                    currentPath = appPathsManager.getRootPath() +
+                            userPreferences.selectedDirectory + gameInfo.packageName
+                )
+            }
+            return true
         }
+        return false
     }
 
     private fun updateProgressUpdateListener() {

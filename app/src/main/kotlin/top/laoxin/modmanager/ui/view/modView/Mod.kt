@@ -4,6 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +22,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -101,6 +106,13 @@ fun ModPage(viewModel: ModViewModel) {
         }
         if (uiState.isLoading) {
             Loading(uiState.loadingPath)
+        } else if (!uiState.isReady) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         } else {
             uiState.modDetail?.let {
                 ModDetailPartialBottomSheet(
@@ -115,9 +127,16 @@ fun ModPage(viewModel: ModViewModel) {
                     onPasswordSubmit = viewModel::checkPassword
                 )
             }
-            when (uiState.modsView) {
-                NavigationIndex.MODS_BROWSER -> ModsBrowser(viewModel)
-                else -> AllModPage(viewModel)
+            AnimatedContent(
+                targetState = uiState.modsView,
+                transitionSpec = {
+                    EnterTransition.None togetherWith ExitTransition.None
+                }
+            ) { targetState ->
+                when (targetState) {
+                    NavigationIndex.MODS_BROWSER -> ModsBrowser(viewModel)
+                    else -> AllModPage(viewModel)
+                }
             }
         }
     }
