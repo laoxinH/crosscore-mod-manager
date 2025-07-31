@@ -111,7 +111,12 @@ fun ModPage(viewModel: ModViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                //CircularProgressIndicator()
+                Text(
+                    text = stringResource(R.string.mod_page_no_game),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(16.dp)
+                )
             }
         } else {
             uiState.modDetail?.let {
