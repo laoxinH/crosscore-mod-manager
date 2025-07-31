@@ -11,3 +11,4 @@ data class UserPreferencesState(
     val delUnzipDictionary: Boolean = false,
     val showCategoryView: Boolean = true,
 )
+

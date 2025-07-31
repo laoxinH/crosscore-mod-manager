@@ -304,15 +304,19 @@ class FlashModsUserCase @Inject constructor(
             if (ArchiveUtil.isArchive(file.absolutePath)) {
                 // 检查压缩包中是否包含游戏相关文件
                 for (filename in ArchiveUtil.listInArchiveFiles(file.absolutePath)) {
+                    gameInfo.gameFilePath.map { it + File(filename).name }.forEach {
+                        Log.d(TAG, "scanMods压缩中的文件映射: $it")
+                    }
                     if (gameInfo.gameFilePath.map { it + File(filename).name }.any {
                             fileTools =
                                 fileToolsManager.getFileTools(permissionTools.checkPermission(it))
                             fileTools?.isFileExist(it) == true
                         } || specialOperationScanMods(gameInfo.packageName, filename)) {
                         // 移动文件到mod保存目录
-                        Log.d(TAG, "开始移动文件: ${gameInfo.modSavePath + file.name}")
+                       // Log.d(TAG, "开始移动文件: ${gameInfo.modSavePath + file.name}")
                         fileTools =
                             fileToolsManager.getFileTools(permissionTools.checkPermission(file.absolutePath))
+                        //Log.d(TAG, "移动权限: ${permissionTools.checkPermission(file.absolutePath)}")
                         fileTools?.moveFile(file.absolutePath, gameInfo.modSavePath + file.name)
                         break
                     }
@@ -480,6 +484,7 @@ class FlashModsUserCase @Inject constructor(
         files: List<String>,
         gameInfo: GameInfoBean
     ): MutableMap<String, ModBeanTemp> {
+        //Log.d(TAG, "createModTempMap--files: $files")
         val archiveFile: File? = filepath?.let { File(it) }
         val fileTools = fileToolsManager.getFileTools(
             permissionTools.checkPermission(gameInfo.gamePath)
@@ -512,6 +517,11 @@ class FlashModsUserCase @Inject constructor(
                                 gameInfo.modType[index],
                                 File(gameInfo.gameFilePath[index], modFileName).absolutePath
                             )
+                        } else {
+                            put(
+                                gameInfo.modType[index],
+                                File(gameInfo.gameFilePath[index], (File(file).parentFile?.name ?: "") +"/"+ File(file).name).absolutePath
+                            )
                         }
                     }
                 }
@@ -519,6 +529,7 @@ class FlashModsUserCase @Inject constructor(
 
             // 检查文件是否存在于游戏中
             gameFileMap.forEach {
+              // Log.d(TAG, "createModTempMap游戏文件映射: ${it.key} -> ${it.value}")
                 if ((fileTools?.isFileExist(it.value) == true && fileTools.isFile(it.value)) ||
                     specialOperationScanMods(gameInfo.packageName, modFileName)
                 ) {
@@ -526,6 +537,12 @@ class FlashModsUserCase @Inject constructor(
                     val modEntries = File(file.replace(scanPath, ""))
                     val key = modEntries.parent ?: archiveFile?.name ?: modEntries.name
                     val modBeanTemp = modBeanTempMap[key]
+                    var gameModPath = gameInfo.gameFilePath[gameInfo.modType.indexOf(it.key)]
+                    if (!gameModPath.contains(modEntries.parent ?: "")) {
+                        if (fileTools?.isFileExist(File(gameModPath, modEntries.parentFile?.name ?: "").absolutePath) == true) {
+                            gameModPath = File(gameModPath, modEntries.parentFile?.name ?: "").absolutePath + File.separator
+                        }
+                    }
 
                     // 创建或更新ModBeanTemp
                     if (modBeanTemp == null) {
@@ -553,7 +570,7 @@ class FlashModsUserCase @Inject constructor(
                                 ArchiveUtil.isArchiveEncrypted(archiveFile.absolutePath),
                             gamePackageName = gameInfo.packageName,
                             modType = it.key,
-                            gameModPath = gameInfo.gameFilePath[gameInfo.modType.indexOf(it.key)],
+                            gameModPath = gameModPath,
                             isZip = if (archiveFile == null) false else
                                 ArchiveUtil.isArchive(archiveFile.absolutePath),
                             modPath = if (archiveFile == null) File(file).parent ?: file
@@ -620,7 +637,6 @@ class FlashModsUserCase @Inject constructor(
         if (modTempMap.isEmpty()) {
             return emptyList()
         }
-
         val archiveFile: File? = filepath?.let { File(it) }
         val list = mutableListOf<ModBean>()
 

@@ -1,0 +1,19 @@
+{
+  "gameName": "影之诗byd",
+  "serviceName": "网易服",
+  "packageName": "com.netease.yzs",
+  "version": "1.0.0",
+  "gamePath": "Android/data/com.netease.yzs/",
+  "antiHarmonyFile": "",
+  "antiHarmonyContent": "",
+  "gameFilePath": [
+    "Android/data/com.netease.yzs/files/dat/"
+  ],
+  "modType": [
+    "游戏资源"
+  ],
+  "modSavePath": "",
+  "isGameFileRepeat": true,
+  "enableBackup": true,
+  "tips": ""
+}

@@ -44,7 +44,7 @@ fun StartContent() {
     val randomImageResId = if (imageResIds.isNotEmpty()) {
         imageResIds[Random.nextInt(imageResIds.size)]
     } else {
-        R.drawable.start_2 //
+        R.drawable.start_1 //
     }
 
     Column(

@@ -212,13 +212,13 @@ private fun FileListContent(
             }
 
             val modCount = remember(modsByPath, modsByVirtualPaths) {
-                if (modsByPath.isNotEmpty()) modsByPath.size
+                if (viewModel.getModsByPath(file.path).isNotEmpty()) viewModel.getModsByPath(file.path).size
                 else viewModel.getModsByVirtualPaths(file.path).size
             }
 
             val modEnableCount = remember(modsByPath, modsByVirtualPaths) {
-                if (modsByPath.isNotEmpty())
-                    modsByPath.count { it.isEnable }
+                if (viewModel.getModsByPath(file.path).isNotEmpty())
+                    viewModel.getModsByPath(file.path).count { it.isEnable }
                 else
                     viewModel.getModsByVirtualPaths(file.path).count { it.isEnable }
             }

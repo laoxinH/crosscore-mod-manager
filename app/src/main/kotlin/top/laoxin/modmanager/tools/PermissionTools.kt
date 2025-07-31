@@ -30,7 +30,7 @@ object PermissionTools {
             if (requestCode == RequestCode.SHIZUKU) {
                 if (grantResult == PackageManager.PERMISSION_GRANTED) {
                     //ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
-                    Log.d(TAG, "shizuku权限监听: ")
+                    //Log.d(TAG, "shizuku权限监听: ")
                     FileExplorerServiceManager.bindService()
                     //this.setScanQQDirectory(true)
                     ToastUtils.longCall(R.string.toast_shizuku_permission_granted)
@@ -97,8 +97,8 @@ object PermissionTools {
         val uriPermissions = App.get().contentResolver.persistedUriPermissions
         for (uriPermission: UriPermission in uriPermissions) {
             val itemPath = uriPermission.uri.path
-            Log.d("FileTools", "有权的路径: ${uriPermission.uri}")
-            Log.d("FileTools", "权限的路径: $noRootPath")
+            //Log.d("FileTools", "有权的路径: ${uriPermission.uri}")
+            //Log.d("FileTools", "权限的路径: $noRootPath")
 
             if (itemPath != null && ("$itemPath/").contains(noRootPath)) {
                 return true
@@ -110,12 +110,12 @@ object PermissionTools {
 
     // 检查全权限
     fun checkPermission(path: String): Int {
+        Log.d(TAG, "checkPermission: 鉴权路径${path}")
 
         if (isShizukuAvailable && checkShizukuPermission()) {
             return PathType.SHIZUKU
         }
-
-        if (isFromMyPackageNamePath(path) && App.osVersion == OSVersion.OS_11) {
+        if (isFromMyPackageNamePath(path) || path.contains("Download/")) {
             return PathType.FILE
         }
         when (App.osVersion) {

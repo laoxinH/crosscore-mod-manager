@@ -6,6 +6,12 @@
         "downloadUrl": ""
     },
     {
+        "gameName": "影之诗(byd)",
+        "packageName": "com.netease.yzs",
+        "serviceName": "网易服",
+        "downloadUrl": ""
+    },
+    {
         "gameName": "Muv Luv Dimensions",
         "packageName": "jp.co.nextninja.dimensions",
         "serviceName": "日服",

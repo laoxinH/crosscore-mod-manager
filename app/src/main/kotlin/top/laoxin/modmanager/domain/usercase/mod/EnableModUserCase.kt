@@ -86,6 +86,7 @@ class EnableModsUserCase @Inject constructor(
         mods.forEachIndexed { index, modBean ->
             kotlin.runCatching {
                 val gameModPath = modBean.gameModPath!!
+                Log.d(TAG, "游戏文件路径: $gameModPath ")
 
                 // 备份游戏文件
                 if (gameInfo.enableBackup) {

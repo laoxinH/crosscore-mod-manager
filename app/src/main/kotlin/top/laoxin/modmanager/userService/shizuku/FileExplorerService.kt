@@ -24,7 +24,7 @@ class FileExplorerService : IFileExplorerService.Stub() {
             val files = File(path!!).listFiles()
             if (files != null) {
                 for (f in files) {
-                    if (f.isDirectory || isFileType(f)) continue
+                    if (/*f.isDirectory || */isFileType(f)) continue
                     list.add(f.name)
                 }
             }

@@ -117,6 +117,7 @@ class ModViewModel @Inject constructor(
         var updateDisEnableModsJob: Job? = null
         var checkPasswordJob: Job? = null
         var flashModsJob: Job? = null
+        val TAG = "ModViewModel"
     }
 
     private val selectedGameFlow =
@@ -249,7 +250,8 @@ class ModViewModel @Inject constructor(
                     currentGameModPath = appPathsManager.getRootPath() +
                             userPreferences.selectedDirectory + gameInfo.packageName,
                     currentPath = appPathsManager.getRootPath() +
-                            userPreferences.selectedDirectory + gameInfo.packageName
+                            userPreferences.selectedDirectory + gameInfo.packageName,
+                    isReady = true
                 )
             }
             return true
@@ -944,7 +946,15 @@ class ModViewModel @Inject constructor(
 
     // 通过path获取mods严格匹配
     fun getModsByPathStrict(path: String): List<ModBean> {
+        //Log.d(TAG, "getModsByPathStrict: path-${path}")
+        //Log.d(TAG, "getModsByPathStrict: mods${_uiState.value.modList.filter { it.path == path }}")
         return _uiState.value.modList.filter { it.path == path }
+    }
+
+    fun getModsByPath(path: String): List<ModBean> {
+        //Log.d(TAG, "getModsByPath: path-${path}")
+        //Log.d(TAG, "getModsByPath: mods${_uiState.value.modList.filter { it.path?.contains(path) == true && it.path.substringBeforeLast(".") != path }}")
+        return _uiState.value.modList.filter { it.path?.contains(path + File.separator) == true}
     }
 
     private fun getArchiveFiles(path: String) {
@@ -962,7 +972,7 @@ class ModViewModel @Inject constructor(
     fun updateFiles(currentPath: String) {
         _currentPath = currentPath
         _uiState.update { it.copy(currentPath = currentPath) }
-        Log.d("ModViewModel", "updateFiles: 触发跟新文件列表")
+        //Log.d("ModViewModel", "updateFiles: 触发跟新文件列表")
         // 构建当前文件
         viewModelScope.launch {
             if (File(currentPath).isDirectory) {
@@ -987,7 +997,9 @@ class ModViewModel @Inject constructor(
     }
 
     fun getModsByVirtualPaths(path: String): List<ModBean> {
-        return _uiState.value.modList.filter { it.virtualPaths?.contains(path) == true }
+        //Log.d(TAG, "getModsByVirtualPaths: path-${path}")
+        //Log.d(TAG, "getModsByVirtualPaths: mods${_uiState.value.modList.filter { it.virtualPaths?.contains(path) == true }}")
+        return _uiState.value.modList.filter { it.virtualPaths?.contains(path + File.separator) == true }
     }
 
     fun setCurrentMods(mods: List<ModBean>) {
