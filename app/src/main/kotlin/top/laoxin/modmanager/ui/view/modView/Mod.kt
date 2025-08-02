@@ -22,7 +22,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -173,7 +172,7 @@ fun ForceUpdateDialog(
             title = stringResource(id = R.string.console_scan_directory_mods),
             content = stringResource(id = R.string.mod_page_force_update_mod_warning),
             onConfirm = {
-                viewModel.flashMods(true, true)
+                viewModel.flashMods(isLoading = true, forceScan = true)
                 viewModel.setShowForceScanDialog(false)
             },
             onCancel = {

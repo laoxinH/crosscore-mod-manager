@@ -167,7 +167,7 @@ class ModViewModel @Inject constructor(
             showCategoryView = values[6] as Boolean
         )
     }.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesState()
+        viewModelScope, SharingStarted.Eagerly, UserPreferencesState()
     )
 
     val uiState: StateFlow<ModUiState> = combine(
@@ -176,8 +176,8 @@ class ModViewModel @Inject constructor(
         uiState.copy(showUserTipsDialog = userTips)
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        ModUiState(showUserTipsDialog = false, isInitializing = true)
+        SharingStarted.Eagerly,
+        ModUiState(showUserTipsDialog = false, isInitializing = true, isReady = false)
     )
 
     init {
@@ -186,21 +186,37 @@ class ModViewModel @Inject constructor(
             userPreferences.collectLatest { it ->
                 _uiState.update { state -> state.copy(isInitializing = true, isReady = false) }
 
-                updateGameInfo(it)
-                updateAllMods()
-                updateEnableMods()
-                updateDisEnableMods()
-                updateProgressUpdateListener()
-                startFileObserver(it)
+                try {
+                    updateGameInfo(it)
 
-                val gameModPathUpdated = updateCurrentGameModPath(it)
-                switchCurrentModsView(it)
+                    updateAllMods()
+                    updateEnableMods()
+                    updateDisEnableMods()
+                    startFileObserver(it)
 
-                _uiState.update { state ->
-                    state.copy(
-                        isInitializing = false,
-                        isReady = gameModPathUpdated
-                    )
+                    updateProgressUpdateListener()
+
+                    val gameModPathUpdated = updateCurrentGameModPath(it)
+                    switchCurrentModsView(it)
+
+                    _uiState.update { state ->
+                        state.copy(
+                            isInitializing = false,
+                            isReady = gameModPathUpdated
+                        )
+                    }
+
+                    Log.d(TAG, "初始化完成: " +
+                                "isReady = $gameModPathUpdated, " +
+                                "gameInfo = ${gameInfoManager.getGameInfo()}")
+                } catch (e: Exception) {
+                    Log.e(TAG, "初始化失败", e)
+                    _uiState.update { state ->
+                        state.copy(
+                            isInitializing = false,
+                            isReady = false
+                        )
+                    }
                 }
             }
         }
