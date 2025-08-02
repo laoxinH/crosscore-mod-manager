@@ -91,11 +91,22 @@ android {
             useLegacyPackaging = false
         }
         resources {
-            excludes += "/META-INF/DEPENDENCIES"
-            excludes += "/META-INF/LICENSE"
-            excludes += "/META-INF/NOTICE"
-            excludes += "/META-INF/ASL2.0"
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += listOf(
+                "/META-INF/DEPENDENCIES",
+                "/META-INF/LICENSE",
+                "/META-INF/NOTICE",
+                "/META-INF/ASL2.0",
+                "/META-INF/{AL2.0,LGPL2.1}"
+            )
+        }
+        jniLibs {
+            keepDebugSymbols.addAll(
+                listOf(
+                    "**/lib7-Zip-JBinding.so",
+                    "**/libandroidx.graphics.path.so",
+                    "**/libdatastore_shared_counter.so"
+                )
+            )
         }
     }
 }
