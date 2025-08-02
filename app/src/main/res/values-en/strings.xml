@@ -200,4 +200,5 @@
     <string name="lincence">Lincence</string>
     <string name="show_lincence">Show Open Source Lincence</string>
     <string name="mod_page_no_game">No game selected yet(QWQ)</string>
+    <string name="mod_page_initializing">Initializing...</string>
 </resources>

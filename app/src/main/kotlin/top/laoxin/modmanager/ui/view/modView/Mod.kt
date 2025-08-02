@@ -106,12 +106,29 @@ fun ModPage(viewModel: ModViewModel) {
         }
         if (uiState.isLoading) {
             Loading(uiState.loadingPath)
+        } else if (uiState.isInitializing) {
+            // 显示初始化状态
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                    Text(
+                        text = stringResource(R.string.mod_page_initializing),
+                        modifier = Modifier.padding(top = 8.dp),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+            }
         } else if (!uiState.isReady) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                //CircularProgressIndicator()
                 Text(
                     text = stringResource(R.string.mod_page_no_game),
                     style = MaterialTheme.typography.titleLarge,

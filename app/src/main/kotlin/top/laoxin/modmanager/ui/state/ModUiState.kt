@@ -54,4 +54,6 @@ data class ModUiState(
     // 是否隐藏Snackbar
     val isSnackbarHidden: Boolean = false,
     val isReady: Boolean = false,
+    // 是否正在初始化
+    val isInitializing: Boolean = true,
 )

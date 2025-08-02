@@ -117,7 +117,7 @@ class ModViewModel @Inject constructor(
         var updateDisEnableModsJob: Job? = null
         var checkPasswordJob: Job? = null
         var flashModsJob: Job? = null
-        val TAG = "ModViewModel"
+        const val TAG = "ModViewModel"
     }
 
     private val selectedGameFlow =
@@ -175,23 +175,33 @@ class ModViewModel @Inject constructor(
     ) { userTips, uiState ->
         uiState.copy(showUserTipsDialog = userTips)
     }.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), ModUiState()
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        ModUiState(showUserTipsDialog = false, isInitializing = true)
     )
 
     init {
         Log.d("ModViewModel", "init: 初始化${userPreferences.value}")
         viewModelScope.launch {
             userPreferences.collectLatest { it ->
+                _uiState.update { state -> state.copy(isInitializing = true, isReady = false) }
+
                 updateGameInfo(it)
                 updateAllMods()
                 updateEnableMods()
                 updateDisEnableMods()
                 updateProgressUpdateListener()
                 startFileObserver(it)
-                if (updateCurrentGameModPath(it)) {
-                    _uiState.update { state -> state.copy(isReady = true) }
-                }
+
+                val gameModPathUpdated = updateCurrentGameModPath(it)
                 switchCurrentModsView(it)
+
+                _uiState.update { state ->
+                    state.copy(
+                        isInitializing = false,
+                        isReady = gameModPathUpdated
+                    )
+                }
             }
         }
 
@@ -404,7 +414,7 @@ class ModViewModel @Inject constructor(
 
     // 打开密码输入框
     fun showPasswordDialog(b: Boolean) {
-        _uiState.value = _uiState.value.copy(showPasswordDialog = b)
+        _uiState.update { it.copy(showPasswordDialog = b) }
     }
 
     // 刷新mod预览图
@@ -621,12 +631,12 @@ class ModViewModel @Inject constructor(
 
 
     private fun setTipsText(s: String) {
-        _uiState.value = _uiState.value.copy(tipsText = s)
+        _uiState.update { it.copy(tipsText = s) }
     }
 
     private suspend fun setModSwitchEnable(b: Boolean) {
         withContext(Dispatchers.Main) {
-            _uiState.value = _uiState.value.copy(modSwitchEnable = b)
+            _uiState.update { it.copy(modSwitchEnable = b) }
         }
 
     }
@@ -651,22 +661,21 @@ class ModViewModel @Inject constructor(
 
     // 设置搜索mods
     fun setSearchMods(modList: List<ModBean>) {
-        _uiState.value = _uiState.value.copy(searchModList = modList)
+        _uiState.update { it.copy(searchModList = modList) }
     }
 
     fun setOpenPermissionRequestDialog(openPermissionRequestDialog: Boolean) {
-        _uiState.value =
-            _uiState.value.copy(openPermissionRequestDialog = openPermissionRequestDialog)
+        _uiState.update { it.copy(openPermissionRequestDialog = openPermissionRequestDialog) }
     }
 
     // 设置mod详情
     fun setModDetail(modDetail: ModBean) {
-        _uiState.value = _uiState.value.copy(modDetail = modDetail)
+        _uiState.update { it.copy(modDetail = modDetail) }
     }
 
     // 设置是否打开搜索框
     fun setSearchBoxVisible(searchBoxVisible: Boolean) {
-        _uiState.value = _uiState.value.copy(searchBoxVisible = searchBoxVisible)
+        _uiState.update { it.copy(searchBoxVisible = searchBoxVisible) }
     }
 
     // 设置搜索框内容
@@ -691,7 +700,7 @@ class ModViewModel @Inject constructor(
 
     // 设置是否显示mod详情
     fun setShowModDetail(showModDetail: Boolean) {
-        _uiState.value = _uiState.value.copy(showModDetail = showModDetail)
+        _uiState.update { it.copy(showModDetail = showModDetail) }
     }
 
     // 获取输入框内容
@@ -702,26 +711,26 @@ class ModViewModel @Inject constructor(
 
     // 设置正在加载
     private fun setLoading(isLoading: Boolean) {
-        _uiState.value = _uiState.value.copy(isLoading = isLoading)
+        _uiState.update { it.copy(isLoading = isLoading) }
     }
 
     // 设置加载目录
     private fun setLoadingPath(loadingPath: String) {
-        _uiState.value = _uiState.value.copy(loadingPath = loadingPath)
+        _uiState.update { it.copy(loadingPath = loadingPath) }
     }
 
 
     // 设置解压进度
     private fun setUnzipProgress(progress: String) {
         viewModelScope.launch(Dispatchers.Main) {
-            _uiState.value = _uiState.value.copy(unzipProgress = progress)
+            _uiState.update { it.copy(unzipProgress = progress) }
         }
     }
 
     // 设置总进度
     private fun setMultitaskingProgress(progress: String) {
         viewModelScope.launch(Dispatchers.Main) {
-            _uiState.value = _uiState.value.copy(multitaskingProgress = progress)
+            _uiState.update { it.copy(multitaskingProgress = progress) }
         }
 
     }
@@ -1024,4 +1033,3 @@ class ModViewModel @Inject constructor(
     }
 
 }
-

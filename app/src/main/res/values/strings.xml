@@ -212,4 +212,5 @@
     <string name="lincence">许可证</string>
     <string name="show_lincence">查看开源许可证</string>
     <string name="mod_page_no_game">还没有选择游戏(QWQ)</string>
+    <string name="mod_page_initializing">正在初始化...</string>
 </resources>

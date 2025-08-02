@@ -475,7 +475,6 @@ class ConsoleViewModel @Inject constructor(
 
     fun getFileToolsManager(): FileToolsManager {
         return fileToolsManager
-        4
     }
 }
 

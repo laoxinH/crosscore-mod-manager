@@ -381,8 +381,4 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    fun getAboutPage(): Boolean {
-        return _uiState.value.showAbout
-    }
-
 }
