@@ -103,6 +103,7 @@ fun ModPage(viewModel: ModViewModel) {
                 fileTools = viewModel.getFileToolsManager().getFileTools()
             )
         }
+        Log.e("MOD界面加载", "init: 初始化isReady${uiState.isReady}")
         if (uiState.isLoading) {
             Loading(uiState.loadingPath)
         } else if (uiState.isInitializing) {

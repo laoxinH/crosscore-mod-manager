@@ -127,11 +127,11 @@ data class PageNavigationState(
 
 @Composable
 fun ModManagerApp() {
-    val modViewModel: ModViewModel = viewModel()
     val consoleViewModel: ConsoleViewModel = viewModel()
     val settingViewModel: SettingViewModel = viewModel()
+    val modViewModel: ModViewModel = viewModel()
     val configuration = LocalConfiguration.current
-
+// 确保 consoleViewModel 的初始化逻辑先执行
     // 提取页面状态管理到单独的组合函数
     val pageNavigationState = rememberPageNavigationState()
     val settingUiState = settingViewModel.uiState.collectAsState().value
@@ -147,8 +147,8 @@ fun ModManagerApp() {
 
     // 页面内容
     PageContent(
-        modViewModel = modViewModel,
         consoleViewModel = consoleViewModel,
+        modViewModel = modViewModel,
         settingViewModel = settingViewModel,
         pageNavigationState = pageNavigationState,
         configuration = configuration,

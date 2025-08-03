@@ -20,7 +20,7 @@ class SaveSelectModDirectoryUserCase @Inject constructor(
     suspend operator fun invoke(selectedDirectoryPath: String) : Boolean = withContext(Dispatchers.IO) {
         try {
             val gameConfigFile = File(
-                (appPathsManager.getRootPath() + "/$selectedDirectoryPath/" + appPathsManager.getRootPath()).replace(
+                (appPathsManager.getRootPath() + "/$selectedDirectoryPath/" + appPathsManager.getGameConfig()).replace(
                     "tree", ""
                 ).replace("//", "/")
             )

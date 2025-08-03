@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.tools.AppInfoTools
+import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
 import java.io.File
@@ -16,7 +17,8 @@ import javax.inject.Singleton
 class UpdateGameInfoUserCase @Inject constructor(
     private val appInfoTools: AppInfoTools,
     private val gameInfoManager: GameInfoManager,
-    private val specialGameToolsManager: SpecialGameToolsManager
+    private val specialGameToolsManager: SpecialGameToolsManager,
+    private val appPathsManager: AppPathsManager
 ) {
     suspend operator fun invoke(
         selectedGameIndex: Int,
@@ -46,6 +48,7 @@ class UpdateGameInfoUserCase @Inject constructor(
     private fun createModsDirectory(gameInfo: GameInfoBean, path: String) {
         try {
             File(path + gameInfo.packageName).mkdirs()
+            File(path + appPathsManager.getGameConfig()).mkdirs()
         } catch (e: Exception) {
             Log.e("UpdateGameInfoUserCase", "创建文件夹失败: $e")
         }

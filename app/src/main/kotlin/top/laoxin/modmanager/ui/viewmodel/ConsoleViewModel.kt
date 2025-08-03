@@ -37,6 +37,7 @@ import top.laoxin.modmanager.domain.usercase.repository.AddGameToAntiHarmonyUser
 import top.laoxin.modmanager.domain.usercase.repository.GetAntiHarmonyUserCase
 import top.laoxin.modmanager.domain.usercase.repository.GetGameEnableModsCountUserCase
 import top.laoxin.modmanager.domain.usercase.repository.GetGameModsCountUserCase
+import top.laoxin.modmanager.domain.usercase.setting.SelectGameUserCase
 import top.laoxin.modmanager.domain.usercase.userpreference.GetUserPreferenceUseCase
 import top.laoxin.modmanager.domain.usercase.userpreference.SaveUserPreferenceUseCase
 import top.laoxin.modmanager.observer.FlashModsObserverManager
@@ -71,6 +72,7 @@ class ConsoleViewModel @Inject constructor(
     private val fileToolsManager: FileToolsManager,
     private val permissionTools: PermissionTools,
     private val appInfoTools: AppInfoTools,
+    private val selectGameUserCase: SelectGameUserCase,
 ) : ViewModel() {
 
     // 请求权限路径
@@ -158,7 +160,7 @@ class ConsoleViewModel @Inject constructor(
     )
 
     init {
-        checkUpdate()
+        //checkUpdate()
         getNewInfo()
         viewModelScope.launch {
             loadGameConfigUserCase()
@@ -171,6 +173,7 @@ class ConsoleViewModel @Inject constructor(
                 updateModCount()
                 updateAntiHarmony()
                 updateEnableModCount()
+
                 flashModsObserverManager.openSelectedDictionaryObserver(it.selectedDirectory)
             }
         }
@@ -277,6 +280,8 @@ class ConsoleViewModel @Inject constructor(
             appPathsManager.getRootPath() + userPreferencesState.selectedDirectory
         )
         setGameInfo(gameInfo)
+        //selectGameUserCase(gameInfo)
+       // Log.d("主界面更新游戏信息", "更新updateGameInfo: $gameInfo")
     }
 
 

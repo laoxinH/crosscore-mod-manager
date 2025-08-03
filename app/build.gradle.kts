@@ -219,4 +219,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling)
     // markdown
     implementation(libs.compose.markdown)
+    // 携程核心库
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 }

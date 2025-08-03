@@ -162,7 +162,7 @@ fun MultiSelectTopBar(
                 }
                 IconButton(onClick = {
                     // 在这里处理图标按钮的点击事件
-                    viewModel.switchSelectMod(modList, true)
+                    viewModel.switchSelectMod(true)
                 }) {
                     Icon(
                         imageVector = Icons.Default.FlashOn, // 使用信息图标
@@ -171,7 +171,7 @@ fun MultiSelectTopBar(
                     )
                 }
                 IconButton(onClick = {
-                    viewModel.switchSelectMod(modList, false)
+                    viewModel.switchSelectMod(false)
 
                     // 请求焦点
                 }, modifier = Modifier) {

@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CompletableDeferred
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.ResultCode
@@ -58,6 +59,7 @@ import top.laoxin.modmanager.tools.specialGameTools.BaseSpecialGameTools
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.state.UserPreferencesState
 import top.laoxin.modmanager.ui.view.modView.NavigationIndex
+
 import java.io.File
 import javax.inject.Inject
 
@@ -87,7 +89,8 @@ class ModViewModel @Inject constructor(
     private val fileToolsManager: FileToolsManager,
 ) : ViewModel(), ProgressUpdateListener, FlashObserverInterface {
     private val _uiState = MutableStateFlow(ModUiState())
-
+    // 创建携程挂起信号/ Unit
+    private var gameInfoReadySignal = CompletableDeferred<Unit>()
     private var isSilentImageExtraction = false
 
     private var _requestPermissionPath by mutableStateOf("")
@@ -184,39 +187,20 @@ class ModViewModel @Inject constructor(
         Log.d("ModViewModel", "init: 初始化${userPreferences.value}")
         viewModelScope.launch {
             userPreferences.collectLatest { it ->
-                _uiState.update { state -> state.copy(isInitializing = true, isReady = false) }
-
+                // 每次 collect 时，重置信号
+                gameInfoReadySignal = CompletableDeferred()
                 try {
                     updateGameInfo(it)
-
                     updateAllMods()
                     updateEnableMods()
                     updateDisEnableMods()
                     startFileObserver(it)
-
                     updateProgressUpdateListener()
-
-                    val gameModPathUpdated = updateCurrentGameModPath(it)
+                    gameInfoReadySignal.await() // 协程会在这里挂起，直到 updateGameInfo 调用 complete()
+                    updateCurrentGameModPath(it)
                     switchCurrentModsView(it)
-
-                    _uiState.update { state ->
-                        state.copy(
-                            isInitializing = false,
-                            isReady = gameModPathUpdated
-                        )
-                    }
-
-                    Log.d(TAG, "初始化完成: " +
-                                "isReady = $gameModPathUpdated, " +
-                                "gameInfo = ${gameInfoManager.getGameInfo()}")
                 } catch (e: Exception) {
-                    Log.e(TAG, "初始化失败", e)
-                    _uiState.update { state ->
-                        state.copy(
-                            isInitializing = false,
-                            isReady = false
-                        )
-                    }
+
                 }
             }
         }
@@ -248,27 +232,32 @@ class ModViewModel @Inject constructor(
 
     // 更新游戏信息
     private suspend fun updateGameInfo(userPreferencesState: UserPreferencesState) {
-        val gameInfo = updateGameInfoUserCase(
-            userPreferencesState.selectedGameIndex,
-            appPathsManager.getRootPath() + userPreferencesState.selectedDirectory
-        )
-        gameInfoManager.setGameInfo(gameInfo)
+        try {
+            val gameInfo = updateGameInfoUserCase(
+                userPreferencesState.selectedGameIndex,
+                appPathsManager.getRootPath() + userPreferencesState.selectedDirectory
+            )
+            gameInfoManager.setGameInfo(gameInfo)
+        } finally {
+            // 无论成功还是失败，都必须发送完成信号，否则 await() 会永远等待下去！
+            gameInfoReadySignal.complete(Unit)
+        }
     }
 
     private fun switchCurrentModsView(it: UserPreferencesState) {
         if (it.showCategoryView) {
             _uiState.update {
-                it.copy(modsView = NavigationIndex.MODS_BROWSER)
+                it.copy(modsView = NavigationIndex.MODS_BROWSER, isInitializing = false)
             }
         } else {
             _uiState.update {
-                it.copy(modsView = NavigationIndex.ALL_MODS)
+                it.copy(modsView = NavigationIndex.ALL_MODS,isInitializing = false)
             }
         }
     }
 
     // 更新当前游戏mod目录
-    private fun updateCurrentGameModPath(userPreferences: UserPreferencesState): Boolean {
+    private suspend fun updateCurrentGameModPath(userPreferences: UserPreferencesState): Boolean {
         val gameInfo = gameInfoManager.getGameInfo()
         if (userPreferences.selectedDirectory.isNotEmpty() && gameInfo.packageName.isNotEmpty()) {
             _uiState.update {
@@ -281,6 +270,9 @@ class ModViewModel @Inject constructor(
                 )
             }
             return true
+        }else {
+            Log.d(TAG, "init: 初始化失败选择文件为${userPreferences.selectedDirectory},游戏为: ${gameInfo}")
+
         }
         return false
     }
@@ -817,11 +809,14 @@ class ModViewModel @Inject constructor(
         }
     }
 
-    fun switchSelectMod(modList: List<ModBean>, b: Boolean) {
+    fun switchSelectMod(b: Boolean) {
         if (_uiState.value.modsSelected.isEmpty()) return
-        val modsSelected = modList.filter {
+        val allMods = _uiState.value.modList
+       //allMods = modList
+        val modsSelected = allMods.filter {
             uiState.value.modsSelected.contains(it.id) && it.isEnable != b && (!it.isEncrypted || !it.password.isNullOrEmpty())
         }
+        //Log.d(TAG, "switchSelectMod: ${modsSelected}")
         if (modsSelected.isEmpty()) return
         val checkCanSwitchModsResult = checkCanSwitchModsUserCase()
         when (checkCanSwitchModsResult.first) {
@@ -840,9 +835,9 @@ class ModViewModel @Inject constructor(
                 setMultitaskingProgress("")
                 viewModelScope.launch {
                     if (b) {
-                        enableMod(modList)
+                        enableMod(modsSelected)
                     } else {
-                        disableMod(modList)
+                        disableMod(modsSelected)
                     }
                 }
 
@@ -1049,3 +1044,4 @@ class ModViewModel @Inject constructor(
     }
 
 }
+
