@@ -20,6 +20,7 @@ class FileTools @Inject constructor(
     companion object {
         const val TAG = "FileTools"
     }
+
     override fun deleteFile(path: String): Boolean {
         return try {
             Files.walk(Paths.get(path))

@@ -23,7 +23,10 @@ class FlashModImageUserCase @Inject constructor(
                 ArchiveUtil.extractSpecificFile(
                     modBean.path!!,
                     modBean.images.orEmpty().map {
-                        it.replace(appPathsManager.getModsImagePath() + File(modBean.path).nameWithoutExtension + File.separator,"")
+                        it.replace(
+                            appPathsManager.getModsImagePath() + File(modBean.path).nameWithoutExtension + File.separator,
+                            ""
+                        )
                     },
                     appPathsManager.getModsImagePath() + File(modBean.path).nameWithoutExtension,
                     modBean.password,

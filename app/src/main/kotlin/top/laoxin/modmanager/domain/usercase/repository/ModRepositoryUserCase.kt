@@ -13,7 +13,7 @@ class GetGameModsCountUserCase @Inject constructor(
     private val gameInfoManager: GameInfoManager
 
 ) {
-     operator fun invoke(): Flow<Int> {
+    operator fun invoke(): Flow<Int> {
         return modRepository.getModsCountByGamePackageName(gameInfoManager.getGameInfo().packageName)
     }
 }
@@ -64,11 +64,10 @@ class GetGameDisEnableUserCase @Inject constructor(
 
 @Singleton
 class DeleteModsUserCase @Inject constructor(
-    private val modRepository: ModRepository,
-    private val gameInfoManager: GameInfoManager
+    private val modRepository: ModRepository
 
 ) {
-    suspend operator fun invoke(delModsList : List<ModBean>){
+    suspend operator fun invoke(delModsList: List<ModBean>) {
         return modRepository.deleteAll(delModsList)
     }
 }
@@ -79,18 +78,7 @@ class SearchModsUserCase @Inject constructor(
     private val gameInfoManager: GameInfoManager
 
 ) {
-    suspend operator fun invoke(searchText: String): Flow<List<ModBean>> {
+    operator fun invoke(searchText: String): Flow<List<ModBean>> {
         return modRepository.search(searchText, gameInfoManager.getGameInfo().packageName)
-    }
-}
-
-@Singleton
-class UpdateModUserCase @Inject constructor(
-    private val modRepository: ModRepository,
-    private val gameInfoManager: GameInfoManager
-
-) {
-    suspend operator fun invoke(mod : ModBean) {
-        return modRepository.updateMod(mod)
     }
 }

@@ -12,7 +12,7 @@ import java.io.File
 import java.io.InputStream
 
 
-abstract class BaseFileTools (
+abstract class BaseFileTools(
     private val appPathsManager: AppPathsManager
 ) {
 
@@ -38,7 +38,11 @@ abstract class BaseFileTools (
     abstract fun isFile(filename: String): Boolean
 
     // 通过流创建文件
-    abstract fun createFileByStream(path: String, filename: String, inputStream: InputStream?): Boolean
+    abstract fun createFileByStream(
+        path: String,
+        filename: String,
+        inputStream: InputStream?
+    ): Boolean
 
     // 监听文件变化
     abstract fun isFileChanged(path: String): Long
@@ -157,8 +161,10 @@ abstract class BaseFileTools (
 
     abstract fun changDictionaryName(path: String, name: String): Boolean
     abstract fun createDictionary(path: String): Boolean
+
     // 读取文件字符
     abstract fun readFile(path: String): String
+
     // 列出文件夹下所有文件
     abstract fun listFiles(path: String): MutableList<File>
 

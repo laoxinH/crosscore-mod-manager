@@ -93,20 +93,23 @@ class AppInfoTools @Inject constructor(
         if (intent != null) {
 
             specialGameToolsManager.getSpecialGameTools(gameInfo.packageName)?.let { entry ->
-                when(entry.specialOperationBeforeStartGame(gameInfo)) {
+                when (entry.specialOperationBeforeStartGame(gameInfo)) {
                     ResultCode.SUCCESS -> {
                         if (entry.needGameService()) {
                             startService()
                         }
                     }
+
                     ResultCode.GAME_UPDATE -> {
                         ToastUtils.longCall(
                             context.getString(
                                 R.string.tosat_game_already_update,
                                 gameInfo.gameName
-                            ))
+                            )
+                        )
                         return
                     }
+
                     ResultCode.NO_PERMISSION -> {
                         ToastUtils.longCall(R.string.toast_has_no_prim)
                         return

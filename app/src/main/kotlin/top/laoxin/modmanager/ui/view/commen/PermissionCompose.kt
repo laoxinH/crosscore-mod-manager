@@ -97,7 +97,6 @@ fun RequestStoragePermission(
             val context = LocalContext.current
             when (permissionState.status) {
                 PermissionStatus.Granted -> {//已授权
-                    showDialog = false
                 }
 
                 is PermissionStatus.Denied -> {
@@ -150,7 +149,7 @@ fun RequestStoragePermission(
 @Composable
 fun RequestUriPermission(
     path: String, showDialog: Boolean, onDismissRequest: () -> Unit,
-    permissionTools : PermissionTools, fileTools: BaseFileTools
+    permissionTools: PermissionTools, fileTools: BaseFileTools
 
 ) {
 
@@ -163,7 +162,11 @@ fun RequestUriPermission(
 
 @Composable
 fun SelectPermissionDialog(
-    path: String, onDismissRequest: () -> Unit, showDialog: Boolean, permissionTools : PermissionTools, fileTools: BaseFileTools
+    path: String,
+    onDismissRequest: () -> Unit,
+    showDialog: Boolean,
+    permissionTools: PermissionTools,
+    fileTools: BaseFileTools
 ) {
     Log.d("SelectPermissionDialog", "SelectPermissionDialog: $path")
     val requestPermissionPath = permissionTools.getRequestPermissionPath(path)
@@ -205,14 +208,16 @@ fun SelectPermissionDialog(
 
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, df.uri)
         }
-        AlertDialog(onDismissRequest = {}, // 点击对话框外的区域时关闭对话框
+        AlertDialog(
+            onDismissRequest = {}, // 点击对话框外的区域时关闭对话框
             title = { Text(stringResource(R.string.choose_method_title)) }, text = {
                 Column {
                     Text(stringResource(R.string.select_permission_dialog_descript))
                     Spacer(modifier = Modifier.height(10.dp))
                     if (App.osVersion == OSVersion.OS_11 || App.osVersion == OSVersion.OS_13) {
 
-                        SettingItem(name = stringResource(R.string.select_permission_dialog_by_file),
+                        SettingItem(
+                            name = stringResource(R.string.select_permission_dialog_by_file),
                             description = stringResource(R.string.select_permission_dialog_by_file_descript),
                             //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                             onClick = {
@@ -221,7 +226,8 @@ fun SelectPermissionDialog(
                             })
 
                     }
-                    SettingItem(name = stringResource(R.string.select_permission_dialog_by_shizuku),
+                    SettingItem(
+                        name = stringResource(R.string.select_permission_dialog_by_shizuku),
                         description = stringResource(R.string.select_permission_dialog_by_shizuku_descript),
                         //icon = painterResource(id = R.drawable.ic_launcher_foreground),
                         onClick = {
@@ -261,8 +267,7 @@ fun RequestNotificationPermission() {
             permission = Manifest.permission.POST_NOTIFICATIONS
         )
         when (permissionState.status) {
-            PermissionStatus.Granted -> {
-                showDialog = false
+            is PermissionStatus.Granted -> {
             }
 
             is PermissionStatus.Denied -> {

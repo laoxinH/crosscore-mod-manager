@@ -21,6 +21,7 @@ data class DeleteModResult(
     // 删除的全部mods
     val delMods: List<ModBean>,
 )
+
 @Singleton
 class DeleteModUserCase @Inject constructor(
     private val appPathsManager: AppPathsManager,

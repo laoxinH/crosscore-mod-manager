@@ -61,7 +61,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
     val context = LocalContext.current
     viewModel.getAppPathsManager()
     val permissionTools = viewModel.getPermissionTools()
-    val fileToolsManager =  viewModel.getFileToolsManager()
+    val fileToolsManager = viewModel.getFileToolsManager()
 
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
@@ -136,7 +136,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         if (viewModel.requestPermissionPath.isNotEmpty()) {
             RequestUriPermission(
                 path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog,
-                onDismissRequest = {viewModel.setOpenPermissionRequestDialog(false)},
+                onDismissRequest = { viewModel.setOpenPermissionRequestDialog(false) },
                 permissionTools = permissionTools,
                 fileTools = fileToolsManager.getFileTools()
             )
@@ -154,7 +154,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         // 添加一些间距
         Spacer(modifier = Modifier.height(16.dp))
         // 第二部分：包含两个卡片用于展示其他信息
-        SettingInformationCard(viewModel,uiState)
+        SettingInformationCard(viewModel, uiState)
 
         Spacer(modifier = Modifier.height(16.dp))
         ConfigurationCard(viewModel, uiState)
@@ -269,7 +269,7 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(14.dp))
                 val permissionTools = viewModel.getPermissionTools()
-                val appPathsManager =  viewModel.getAppPathsManager()
+                val appPathsManager = viewModel.getAppPathsManager()
                 Text(
                     if (permissionTools.isShizukuAvailable && permissionTools.hasShizukuPermission()) {
                         // 优先检查shizuku
@@ -281,7 +281,8 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
                             )
                         } else {
                             permissionTools.checkPermission(
-                                appPathsManager.getRootPath() + "/Android/data/" + (App.get().packageName ?: "")
+                                appPathsManager.getRootPath() + "/Android/data/" + (App.get().packageName
+                                    ?: "")
                             )
                         }) {
                             0 -> stringResource(id = R.string.permission, "FILE")
@@ -319,10 +320,12 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
             // 你可以在这里处理用户选择的目录
             if (uri != null) {
                 // 使用uri
-                val path = uri.path?.split(":")?.last()?.replace("${appPathsManager.getRootPath()}/", "")
+                val path =
+                    uri.path?.split(":")?.last()?.replace("${appPathsManager.getRootPath()}/", "")
 
                 viewModel.setSelectedDirectory(
-                    path ?: (appPathsManager.getRootPath() + "/" + appPathsManager.getDownloadModPath())
+                    path
+                        ?: (appPathsManager.getRootPath() + "/" + appPathsManager.getDownloadModPath())
                 )
                 // TODO: 使用path
             }
@@ -353,7 +356,8 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                         text = stringResource(id = R.string.console_configuration_anti_harmony),
                         style = typography.titleMedium
                     )
-                    Switch(checked = uiState.antiHarmony,
+                    Switch(
+                        checked = uiState.antiHarmony,
                         onCheckedChange = { viewModel.openAntiHarmony(it) })
                 }
             }

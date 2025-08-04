@@ -68,7 +68,7 @@ object LogTools {
                 Log.i(TAG, "日志路径为空")
                 return
             }
-            val file = File(logPath , LOG_FILE_NAME)
+            val file = File(logPath, LOG_FILE_NAME)
             if (!file.exists()) {
                 file.createNewFile()
             }

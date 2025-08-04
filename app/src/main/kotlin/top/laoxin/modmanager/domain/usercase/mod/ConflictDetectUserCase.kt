@@ -23,7 +23,7 @@ data class ConflictDetectResult(
 class ConflictDetectUserCase @Inject constructor(
     private val gameInfoManager: GameInfoManager,
     private val modRepository: ModRepository,
-    ) {
+) {
 
     companion object {
         const val TAG = "ConflictDetectUserCase"
@@ -33,7 +33,9 @@ class ConflictDetectUserCase @Inject constructor(
     suspend operator fun invoke(
         mods: List<ModBean>,
     ): ConflictDetectResult = withContext(Dispatchers.IO) {
-        val currentGameMods = modRepository.getModsByGamePackageName(gameInfoManager.getGameInfo().packageName).first()
+        val currentGameMods =
+            modRepository.getModsByGamePackageName(gameInfoManager.getGameInfo().packageName)
+                .first()
         // 获取已开启的mod
         val enabledMods = currentGameMods.filter { it.isEnable }
         // 获取mods中所有modfile
@@ -41,7 +43,7 @@ class ConflictDetectUserCase @Inject constructor(
         // 根据allModFiles获取冲突的mod
         val conflictMods = enabledMods.filter { mod ->
             allModFiles.any { modFile ->
-                 mod.modFiles?.contains(modFile) == true
+                mod.modFiles?.contains(modFile) == true
             }
         }
         // 如果冲突的mod不为空

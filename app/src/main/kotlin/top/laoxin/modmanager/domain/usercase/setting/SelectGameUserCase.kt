@@ -8,7 +8,6 @@ import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.repository.UserPreferencesRepository
 import top.laoxin.modmanager.domain.usercase.mod.EnsureGameModPathUserCase
 import top.laoxin.modmanager.tools.AppInfoTools
-import top.laoxin.modmanager.tools.filetools.FileToolsManager
 import top.laoxin.modmanager.tools.manager.AppPathsManager
 import top.laoxin.modmanager.tools.manager.GameInfoManager
 import top.laoxin.modmanager.tools.specialGameTools.SpecialGameToolsManager
@@ -18,7 +17,6 @@ import javax.inject.Singleton
 
 @Singleton
 class SelectGameUserCase @Inject constructor(
-    private val fileToolsManager: FileToolsManager,
     private val appPathsManager: AppPathsManager,
     private val appInfoTools: AppInfoTools,
     private val specialGameToolsManager: SpecialGameToolsManager,
@@ -30,8 +28,16 @@ class SelectGameUserCase @Inject constructor(
     suspend operator fun invoke(gameInfo: GameInfoBean): Boolean = withContext(Dispatchers.IO) {
         val result = appInfoTools.isAppInstalled(gameInfo.packageName)
         if (result) {
-            ensureGameModPathUserCase(appPathsManager.getRootPath() + userPreferencesRepository.getPreferenceFlow(UserPreferencesKeys.SELECTED_DIRECTORY, "").first() + gameInfo.packageName + File.separator)
-            userPreferencesRepository.savePreference(UserPreferencesKeys.SELECTED_GAME, gameInfoManager.getGameInfoList().indexOf(gameInfo))
+            ensureGameModPathUserCase(
+                appPathsManager.getRootPath() + userPreferencesRepository.getPreferenceFlow(
+                    UserPreferencesKeys.SELECTED_DIRECTORY,
+                    ""
+                ).first() + gameInfo.packageName + File.separator
+            )
+            userPreferencesRepository.savePreference(
+                UserPreferencesKeys.SELECTED_GAME,
+                gameInfoManager.getGameInfoList().indexOf(gameInfo)
+            )
             val modifyGameInfo = gameInfo.copy(
                 version = appInfoTools.getVersionName(gameInfo.packageName),
             )
