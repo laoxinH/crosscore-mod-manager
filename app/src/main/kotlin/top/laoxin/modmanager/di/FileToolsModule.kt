@@ -9,6 +9,7 @@ import top.laoxin.modmanager.tools.filetools.impl.DocumentFileTools
 import top.laoxin.modmanager.tools.filetools.impl.FileTools
 import top.laoxin.modmanager.tools.filetools.impl.ShizukuFileTools
 import javax.inject.Qualifier
+
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class FileToolsModule {
@@ -24,6 +25,7 @@ abstract class FileToolsModule {
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class DocumentFileToolsImpl
+
     @Binds
     @FileToolsImpl
     abstract fun bindFileTools(fileTools: FileTools): BaseFileTools

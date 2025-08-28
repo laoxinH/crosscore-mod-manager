@@ -1,14 +1,15 @@
 package top.laoxin.modmanager.tools.specialGameTools
 
 import android.util.Log
+import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.Strictness
 import top.laoxin.modmanager.constant.PathType
 import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.data.bean.BackupBean
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
-import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.tools.LogTools.logRecord
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
@@ -29,7 +30,10 @@ class ArknightsTools @Inject constructor(
     private val checkFile1 = "persistent_res_list.json"
     private val checkFile2 = "hot_update_list.json"
 
-    private val gson: Gson = GsonBuilder().create()
+    private val gson: Gson = GsonBuilder()
+        .setStrictness(Strictness.LENIENT)
+        .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+        .create()
 
     private lateinit var fileTools: BaseFileTools
     private lateinit var hotUpdate: HotUpdate
@@ -44,22 +48,22 @@ class ArknightsTools @Inject constructor(
     )
 
     data class PersistentRes(
-        val manifestName: String = "",
-        val manifestVersion: String = "",
-        val abInfos: MutableList<AbInfo> = mutableListOf(),
+        var manifestName: String = "",
+        var manifestVersion: String = "",
+        var abInfos: MutableList<AbInfo> = mutableListOf(),
     )
 
     data class AbInfo(
-        val name: String?,
-        val hash: String?,
-        val md5: String?,
-        val totalSize: Long?,
-        val abSize: Long?,
-        val type: String?,
-        val pid: String?,
-        val cid: Long?,
-        val cat: Long?,
-        val meta: Long?,
+        var name: String? = null,
+        var hash: String? = null,
+        var md5: String? = null,
+        var totalSize: Long? = null,
+        var abSize: Long? = null,
+        var type: String? = null,
+        var pid: String? = null,
+        var cid: Long? = null,
+        var cat: Long? = null,
+        var meta: Long? = null,
     )
 
     override fun specialOperationEnable(mod: ModBean, packageName: String): Boolean {
@@ -200,10 +204,6 @@ class ArknightsTools @Inject constructor(
         return true
     }
 
-    override fun specialOperationCreateMods(gameInfo: GameInfoBean): List<ModBeanTemp> {
-        TODO("Not yet implemented")
-    }
-
     override fun specialOperationScanMods(gameInfo: String, modFileName: String): Boolean {
         return false
     }
@@ -312,19 +312,26 @@ class ArknightsTools @Inject constructor(
 
     private fun initialFileTools(): Boolean {
         val checkPermission = permissionTools.checkPermission(checkFilepath)
-        return if (checkPermission == PathType.FILE) {
-            Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-            fileTools = fileToolsManager.getFileTools()
-            true
-        } else if (checkPermission == PathType.DOCUMENT) {
-            fileTools = fileToolsManager.getDocumentFileTools()
-            true
-        } else if (checkPermission == PathType.SHIZUKU) {
-            fileTools = fileToolsManager.getShizukuFileTools()
-            true
-        } else {
-            Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-            false
+        return when (checkPermission) {
+            PathType.FILE -> {
+                fileTools = fileToolsManager.getFileTools()
+                true
+            }
+
+            PathType.DOCUMENT -> {
+                fileTools = fileToolsManager.getDocumentFileTools()
+                true
+            }
+
+            PathType.SHIZUKU -> {
+                fileTools = fileToolsManager.getShizukuFileTools()
+                true
+            }
+
+            else -> {
+                Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
+                false
+            }
         }
     }
 }

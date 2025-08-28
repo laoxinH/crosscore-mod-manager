@@ -28,7 +28,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun  providePermissionTools(): PermissionTools {
+    fun providePermissionTools(): PermissionTools {
         return PermissionTools
     }
 }

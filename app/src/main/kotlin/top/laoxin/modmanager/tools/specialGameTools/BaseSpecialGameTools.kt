@@ -4,7 +4,6 @@ import android.util.Log
 import top.laoxin.modmanager.data.bean.BackupBean
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
-import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.listener.ProgressUpdateListener
 import top.laoxin.modmanager.tools.ArchiveUtil
 import java.io.InputStream
@@ -26,18 +25,16 @@ interface BaseSpecialGameTools {
     ): Boolean
 
     fun specialOperationStartGame(gameInfo: GameInfoBean): Boolean
-    fun specialOperationCreateMods(gameInfo: GameInfoBean): List<ModBeanTemp>
     fun specialOperationScanMods(gameInfo: String, modFileName: String): Boolean
     fun specialOperationSelectGame(gameInfo: GameInfoBean): Boolean
     fun specialOperationNeedOpenVpn(): Boolean
     fun needGameService(): Boolean
     fun specialOperationUpdateGameInfo(gameInfo: GameInfoBean): GameInfoBean
-    fun specialOperationBeforeStartGame(gameInfo: GameInfoBean) : Int
+    fun specialOperationBeforeStartGame(gameInfo: GameInfoBean): Int
 
     fun onProgressUpdate(progress: String) {
         progressUpdateListener?.onProgressUpdate(progress)
     }
-
 
     fun calculateMD5(inputStream: InputStream): String? {
         try {

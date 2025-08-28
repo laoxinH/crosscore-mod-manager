@@ -5,7 +5,7 @@ import top.laoxin.modmanager.data.bean.BackupBean
 import top.laoxin.modmanager.data.repository.ModManagerDatabase
 import javax.inject.Inject
 
-class OfflineBackupRepository @Inject constructor(private val database: ModManagerDatabase):
+class OfflineBackupRepository @Inject constructor(database: ModManagerDatabase) :
     BackupRepository {
 
     private val backupDao = database.backupDao()

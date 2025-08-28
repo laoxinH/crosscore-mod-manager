@@ -12,7 +12,7 @@ class FileToolsManager @Inject constructor(
     @param:FileToolsModule.DocumentFileToolsImpl private val documentFileTools: BaseFileTools
 ) {
     // 通过不同的权限获取方式，获取文件工具
-    fun getFileTools(pathType : Int): BaseFileTools? {
+    fun getFileTools(pathType: Int): BaseFileTools? {
         return when (pathType) {
             PathType.FILE -> fileTools
             PathType.DOCUMENT -> documentFileTools
@@ -20,6 +20,7 @@ class FileToolsManager @Inject constructor(
             else -> null
         }
     }
+
     // 获取fileTools
     fun getFileTools(): BaseFileTools {
         return fileTools

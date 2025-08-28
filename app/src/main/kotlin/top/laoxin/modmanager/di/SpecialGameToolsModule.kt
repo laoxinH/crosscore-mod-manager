@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package top.laoxin.modmanager.di
 
 import dagger.Binds
@@ -8,6 +10,7 @@ import top.laoxin.modmanager.tools.specialGameTools.ArknightsTools
 import top.laoxin.modmanager.tools.specialGameTools.BaseSpecialGameTools
 import top.laoxin.modmanager.tools.specialGameTools.ProjectSnowTools
 import javax.inject.Qualifier
+
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class SpecialGameToolsModule {
@@ -19,7 +22,6 @@ abstract class SpecialGameToolsModule {
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class ProjectSnowToolsImpl
-
 
     @Binds
     @ArknightsToolsImpl

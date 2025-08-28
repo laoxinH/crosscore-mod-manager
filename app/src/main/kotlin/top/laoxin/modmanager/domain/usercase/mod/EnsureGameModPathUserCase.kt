@@ -13,7 +13,7 @@ class EnsureGameModPathUserCase @Inject constructor(
 ) {
     // 读取readme文件
     suspend operator fun invoke(path: String) = withContext(Dispatchers.IO) {
-       val fileTools =  fileToolsManager.getFileTools()
+        val fileTools = fileToolsManager.getFileTools()
         fileTools.createDictionary(path)
     }
 

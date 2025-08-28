@@ -14,16 +14,16 @@ class CheckCanSwitchModsUserCase @Inject constructor(
     private val appPathsManager: AppPathsManager
 
 ) {
-     operator fun invoke(): Pair<Int,String> {
-         return if (checkPermissionUserCase(gameInfoManager.getGameInfo().gamePath)) {
-             if (checkPermissionUserCase(appPathsManager.getMyAppPath())) {
-                 Pair(ResultCode.SUCCESS, "")
-             } else {
-                 Pair(ResultCode.NO_PERMISSION, appPathsManager.getMyAppPath())
-             }
-         } else {
-             Pair(ResultCode.NO_PERMISSION, gameInfoManager.getGameInfo().gamePath)
-         }
+    operator fun invoke(): Pair<Int, String> {
+        return if (checkPermissionUserCase(gameInfoManager.getGameInfo().gamePath)) {
+            if (checkPermissionUserCase(appPathsManager.getMyAppPath())) {
+                Pair(ResultCode.SUCCESS, "")
+            } else {
+                Pair(ResultCode.NO_PERMISSION, appPathsManager.getMyAppPath())
+            }
+        } else {
+            Pair(ResultCode.NO_PERMISSION, gameInfoManager.getGameInfo().gamePath)
+        }
     }
 
 }

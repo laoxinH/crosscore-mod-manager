@@ -20,15 +20,15 @@ import javax.inject.Singleton
 
 @Singleton
 class SwitchAntiHarmonyUserCase @Inject constructor(
-    private val  appPathsManager: AppPathsManager,
+    private val appPathsManager: AppPathsManager,
     private val antiHarmonyRepository: AntiHarmonyRepository,
     private val permissionTools: PermissionTools,
     private val gameInfoManager: GameInfoManager,
     private val fileToolsManager: FileToolsManager
 ) {
-    private var fileTools : BaseFileTools?  = null
+    private var fileTools: BaseFileTools? = null
 
-    suspend operator fun invoke(b: Boolean) : Int = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(b: Boolean): Int = withContext(Dispatchers.IO) {
         val gameInfo = gameInfoManager.getGameInfo()
         if (gameInfo.antiHarmonyFile.isEmpty() || gameInfo.antiHarmonyContent.isEmpty()) {
             return@withContext ResultCode.NOT_SUPPORT
@@ -52,7 +52,12 @@ class SwitchAntiHarmonyUserCase @Inject constructor(
     fun antiHarmony(gameInfo: GameInfoBean, b: Boolean): Boolean {
         return try {
             if (b) {
-                if (fileTools?.isFileExist(appPathsManager.getBackupPath() + gameInfo.modSavePath + File(gameInfo.antiHarmonyFile).name) != true) {
+                if (fileTools?.isFileExist(
+                        appPathsManager.getBackupPath() + gameInfo.modSavePath + File(
+                            gameInfo.antiHarmonyFile
+                        ).name
+                    ) != true
+                ) {
                     fileTools?.copyFile(
                         gameInfo.antiHarmonyFile,
                         appPathsManager.getBackupPath() + gameInfo.packageName + "/" + File(gameInfo.antiHarmonyFile).name

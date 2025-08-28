@@ -29,14 +29,10 @@ object PermissionTools {
         OnRequestPermissionResultListener { requestCode, grantResult ->
             if (requestCode == RequestCode.SHIZUKU) {
                 if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                    //ModTools.setModsToolsSpecialPathReadType(PathType.SHIZUKU)
-                    //Log.d(TAG, "shizuku权限监听: ")
                     FileExplorerServiceManager.bindService()
-                    //this.setScanQQDirectory(true)
                     ToastUtils.longCall(R.string.toast_shizuku_permission_granted)
                 } else {
                     ToastUtils.longCall(R.string.toast_shizuku_permission_denied)
-                    //this.setScanQQDirectory(false)
                 }
             }
         }

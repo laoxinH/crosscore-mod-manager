@@ -16,18 +16,18 @@ class CheckCanFlashModsUserCase @Inject constructor(
     private val gameInfoManager: GameInfoManager,
     private val checkPermissionUserCase: CheckPermissionUserCase,
 ) {
-     operator fun invoke(): Pair<Int,String> {
-         return if (checkSelectGame()) {
-             if (!checkPermissionUserCase(gameInfoManager.getGameInfo().gamePath)){
-                 Pair(ResultCode.NO_PERMISSION, gameInfoManager.getGameInfo().gamePath)
-             } else if (!checkPermissionUserCase(ScanModPath.MOD_PATH_QQ)){
-                 Pair(ResultCode.NO_PERMISSION, ScanModPath.MOD_PATH_QQ)
-             } else {
-                 Pair(ResultCode.SUCCESS, "")
-             }
-         } else {
-             Pair(ResultCode.NO_SELECTED_GAME, "")
-         }
+    operator fun invoke(): Pair<Int, String> {
+        return if (checkSelectGame()) {
+            if (!checkPermissionUserCase(gameInfoManager.getGameInfo().gamePath)) {
+                Pair(ResultCode.NO_PERMISSION, gameInfoManager.getGameInfo().gamePath)
+            } else if (!checkPermissionUserCase(ScanModPath.MOD_PATH_QQ)) {
+                Pair(ResultCode.NO_PERMISSION, ScanModPath.MOD_PATH_QQ)
+            } else {
+                Pair(ResultCode.SUCCESS, "")
+            }
+        } else {
+            Pair(ResultCode.NO_SELECTED_GAME, "")
+        }
     }
 
     private fun checkSelectGame(): Boolean {

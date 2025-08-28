@@ -25,7 +25,7 @@ import javax.inject.Singleton
 
 @AndroidEntryPoint
 @Singleton
-class ProjectSnowStartService : Service()  {
+class ProjectSnowStartService : Service() {
     companion object {
         const val TAG = "ProjectSnowStartService"
     }

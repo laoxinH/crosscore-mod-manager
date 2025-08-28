@@ -18,6 +18,7 @@ class FlashModsObserverManager @Inject constructor(
     companion object {
         private const val TAG = "FlashModsObserverManager"
     }
+
     fun openSelectedDictionaryObserver(selectedDirectory: String) {
         selectedDictionaryFileObserver?.stopWatching()
 

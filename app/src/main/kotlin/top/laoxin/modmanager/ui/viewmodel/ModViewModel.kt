@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.CompletableDeferred
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.ResultCode
@@ -59,7 +59,6 @@ import top.laoxin.modmanager.tools.specialGameTools.BaseSpecialGameTools
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.state.UserPreferencesState
 import top.laoxin.modmanager.ui.view.modView.NavigationIndex
-
 import java.io.File
 import javax.inject.Inject
 
@@ -89,6 +88,7 @@ class ModViewModel @Inject constructor(
     private val fileToolsManager: FileToolsManager,
 ) : ViewModel(), ProgressUpdateListener, FlashObserverInterface {
     private val _uiState = MutableStateFlow(ModUiState())
+
     // 创建携程挂起信号/ Unit
     private var gameInfoReadySignal = CompletableDeferred<Unit>()
     private var isSilentImageExtraction = false
@@ -199,7 +199,7 @@ class ModViewModel @Inject constructor(
                     gameInfoReadySignal.await() // 协程会在这里挂起，直到 updateGameInfo 调用 complete()
                     updateCurrentGameModPath(it)
                     switchCurrentModsView(it)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
 
                 }
             }
@@ -251,13 +251,13 @@ class ModViewModel @Inject constructor(
             }
         } else {
             _uiState.update {
-                it.copy(modsView = NavigationIndex.ALL_MODS,isInitializing = false)
+                it.copy(modsView = NavigationIndex.ALL_MODS, isInitializing = false)
             }
         }
     }
 
     // 更新当前游戏mod目录
-    private suspend fun updateCurrentGameModPath(userPreferences: UserPreferencesState): Boolean {
+    private fun updateCurrentGameModPath(userPreferences: UserPreferencesState): Boolean {
         val gameInfo = gameInfoManager.getGameInfo()
         if (userPreferences.selectedDirectory.isNotEmpty() && gameInfo.packageName.isNotEmpty()) {
             _uiState.update {
@@ -270,8 +270,11 @@ class ModViewModel @Inject constructor(
                 )
             }
             return true
-        }else {
-            Log.d(TAG, "init: 初始化失败选择文件为${userPreferences.selectedDirectory},游戏为: ${gameInfo}")
+        } else {
+            Log.d(
+                TAG,
+                "init: 初始化失败选择文件为${userPreferences.selectedDirectory},游戏为: $gameInfo"
+            )
 
         }
         return false
@@ -812,7 +815,7 @@ class ModViewModel @Inject constructor(
     fun switchSelectMod(b: Boolean) {
         if (_uiState.value.modsSelected.isEmpty()) return
         val allMods = _uiState.value.modList
-       //allMods = modList
+        //allMods = modList
         val modsSelected = allMods.filter {
             uiState.value.modsSelected.contains(it.id) && it.isEnable != b && (!it.isEncrypted || !it.password.isNullOrEmpty())
         }
@@ -974,7 +977,7 @@ class ModViewModel @Inject constructor(
     fun getModsByPath(path: String): List<ModBean> {
         //Log.d(TAG, "getModsByPath: path-${path}")
         //Log.d(TAG, "getModsByPath: mods${_uiState.value.modList.filter { it.path?.contains(path) == true && it.path.substringBeforeLast(".") != path }}")
-        return _uiState.value.modList.filter { it.path?.contains(path + File.separator) == true}
+        return _uiState.value.modList.filter { it.path?.contains(path + File.separator) == true }
     }
 
     private fun getArchiveFiles(path: String) {

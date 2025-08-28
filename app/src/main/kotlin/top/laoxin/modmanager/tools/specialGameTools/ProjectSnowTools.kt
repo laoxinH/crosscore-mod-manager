@@ -8,7 +8,6 @@ import top.laoxin.modmanager.constant.ResultCode
 import top.laoxin.modmanager.data.bean.BackupBean
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ModBean
-import top.laoxin.modmanager.data.bean.ModBeanTemp
 import top.laoxin.modmanager.tools.PermissionTools
 import top.laoxin.modmanager.tools.filetools.BaseFileTools
 import top.laoxin.modmanager.tools.filetools.FileToolsManager
@@ -206,10 +205,6 @@ class ProjectSnowTools @Inject constructor(
         return true
     }
 
-    override fun specialOperationCreateMods(gameInfo: GameInfoBean): List<ModBeanTemp> {
-        TODO("Not yet implemented")
-    }
-
     override fun specialOperationScanMods(gameInfo: String, modFileName: String): Boolean {
         return modFileName.endsWith(".pak")
     }
@@ -259,18 +254,26 @@ class ProjectSnowTools @Inject constructor(
 
     private fun checkPermission(): Int {
         val checkPermission = permissionTools.checkPermission(checkFilepath)
-        if (checkPermission == PathType.FILE) {
-            fileTools = fileToolsManager.getFileTools()
-            return PathType.FILE
-        } else if (checkPermission == PathType.DOCUMENT) {
-            fileTools = fileToolsManager.getDocumentFileTools()
-            return PathType.DOCUMENT
-        } else if (checkPermission == PathType.SHIZUKU) {
-            fileTools = fileToolsManager.getShizukuFileTools()
-            return PathType.SHIZUKU
-        } else {
-            Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
-            return PathType.NULL
+        when (checkPermission) {
+            PathType.FILE -> {
+                fileTools = fileToolsManager.getFileTools()
+                return PathType.FILE
+            }
+
+            PathType.DOCUMENT -> {
+                fileTools = fileToolsManager.getDocumentFileTools()
+                return PathType.DOCUMENT
+            }
+
+            PathType.SHIZUKU -> {
+                fileTools = fileToolsManager.getShizukuFileTools()
+                return PathType.SHIZUKU
+            }
+
+            else -> {
+                Log.e("ArknightsTools", "modifyCheckFile: 没有权限")
+                return PathType.NULL
+            }
         }
     }
 

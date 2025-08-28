@@ -281,7 +281,7 @@ class ConsoleViewModel @Inject constructor(
         )
         setGameInfo(gameInfo)
         //selectGameUserCase(gameInfo)
-       // Log.d("主界面更新游戏信息", "更新updateGameInfo: $gameInfo")
+        // Log.d("主界面更新游戏信息", "更新updateGameInfo: $gameInfo")
     }
 
 
