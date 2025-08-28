@@ -76,6 +76,23 @@
         "packageName": "com.YostarJP.BlueArchive",
         "serviceName": "\u65e5\u670d",
         "downloadUrl": ""
+    },
+    {
+        "gameName": "Arknights(B服)",
+        "packageName": "com.hypergryph.arknights.bilibili",
+        "serviceName": "B服",
+        "downloadUrl": ""
+    },
+    {
+        "gameName": "Arknights(官服)",
+        "packageName": "com.hypergryph.arknights",
+        "serviceName": "官服",
+        "downloadUrl": ""
+    },
+    {
+        "gameName": "Arknights(国际服)",
+        "packageName": "com.YoStarEN.Arknights",
+        "serviceName": "国际服",
+        "downloadUrl": ""
     }
-
 ]
