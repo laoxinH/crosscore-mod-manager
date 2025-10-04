@@ -40,8 +40,8 @@ android {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 36
-        versionCode = 382
-        versionName = "3.8.2"
+        versionCode = 390
+        versionName = "3.9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -73,8 +73,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
         isCoreLibraryDesugaringEnabled = true
     }
 
@@ -110,7 +110,7 @@ android {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(24)
     compilerOptions {
         freeCompilerArgs = listOf(
             "-progressive",
