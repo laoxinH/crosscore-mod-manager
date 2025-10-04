@@ -201,4 +201,6 @@
     <string name="show_lincence">Show Open Source Lincence</string>
     <string name="mod_page_no_game">No game selected yet(QWQ)</string>
     <string name="mod_page_initializing">Initializing…</string>
+    <string name="uninstall_title">Do you really want to uninstall ModManager?</string>
+    <string name="uninstall_summary">Uninstalling the MOD Manager will not automatically close the active mods. Since the database is lost, reinstalling the manager will not be able to recognize or disable the enabled mods, and you’ll need to uninstall and reinstall the game to resolve the issue.</string>
 </resources>

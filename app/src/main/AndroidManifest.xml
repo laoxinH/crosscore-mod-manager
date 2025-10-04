@@ -71,6 +71,12 @@
         <meta-data
             android:name="moe.shizuku.client.V3_SUPPORT"
             android:value="true" />
+        <meta-data
+            android:name="app_description_title"
+            android:resource="@string/uninstall_title" />
+        <meta-data
+            android:name="app_description_content"
+            android:resource="@string/uninstall_summary" />
     </application>
     <!-- 需要添加这个才能获取到完整的应用程序列表 -->
     <queries>
