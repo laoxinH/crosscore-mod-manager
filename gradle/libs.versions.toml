@@ -20,25 +20,25 @@ activityCompose = "1.11.0"
 lifecycleViewmodelCompose = "2.9.4"
 navigationCompose = "2.9.5"
 navigationRuntimeKtx = "2.9.5"
-okhttpVersion = "5.1.0"
+okhttpVersion = "5.2.1"
 provider = "13.1.5"
 retrofit = "3.0.0"
 retrofit2KotlinxSerializationConverter = "1.0.0"
-roomKtx = "2.8.1"
-roomRuntime = "2.8.1"
+roomKtx = "2.8.2"
+roomRuntime = "2.8.2"
 rules = "1.7.0"
 xz = "1.10"
 xZipJbindingXandroid = "2025.06.13"
 zip4j = "2.11.5"
-roomVersion = "2.8.1"
+roomVersion = "2.8.2"
 desugar = "2.1.5"
 serialization = "2.2.20"
-ksp = "2.2.20-2.0.3"
-androidxRuntimeLivedata = "1.9.2"
-composeBom = "2025.09.01"
+ksp = "2.2.20-2.0.4"
+androidxRuntimeLivedata = "1.9.3"
+composeBom = "2025.10.00"
 hilt = "2.57.2"
-aboutLibraries = "12.2.4"
-uiTooling = "1.9.2"
+aboutLibraries = "13.0.0"
+uiTooling = "1.9.3"
 markwon = "0.5.7"
 material3 = "1.4.0"
 materialIcon = "1.7.8"
@@ -94,6 +94,7 @@ compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+aboutLibrariesAndroid = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
