@@ -94,6 +94,7 @@ compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+aboutLibrariesAndroid = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.aboutLibraries)
+    alias(libs.plugins.aboutLibrariesAndroid)
 }
 
 val supportedAbis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
