@@ -12,6 +12,10 @@ plugins {
 val supportedAbis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 android {
+    namespace = "top.laoxin.modmanager"
+    compileSdk = 36
+    ndkVersion = "29.0.14206865"
+
     signingConfigs {
         create("release") {
             storeFile = file("${projectDir}/keystore/androidkey.jks")
@@ -23,20 +27,6 @@ android {
         }
     }
 
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = true
-        }
-    }
-
-    namespace = "top.laoxin.modmanager"
-    compileSdk = 36
-
-    ndkVersion = "28.1.13356709"
-
     defaultConfig {
         applicationId = "com.mod.manager"
         minSdk = 28
@@ -45,14 +35,20 @@ android {
         versionName = "3.9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
         signingConfig = signingConfigs.getByName("release")
 
         ndk {
             abiFilters.addAll(supportedAbis)
             debugSymbolLevel = "none"
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include(*supportedAbis)
+            isUniversalApk = true
         }
     }
 
@@ -67,22 +63,19 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
         debug {
-            isMinifyEnabled = false
-            isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_24
-        targetCompatibility = JavaVersion.VERSION_24
-        isCoreLibraryDesugaringEnabled = true
     }
 
     buildFeatures {
         buildConfig = true
         compose = true
         aidl = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
     }
 
     packaging {
@@ -145,80 +138,90 @@ androidComponents {
 }
 
 dependencies {
-
-    implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.rules)
+    // Testing
     testImplementation(libs.junit)
-    implementation(platform(libs.compose.bom))
-    androidTestImplementation(platform(libs.compose.bom))
-    // Material Design 3
-    implementation(libs.material3)
-    // Compose Material Design
-    implementation(libs.androidx.material.icons.core)
-    // Compose Material Design Extended
-    implementation(libs.androidx.material.icons.extended)
-    // Compose Activity
-    implementation(libs.androidx.activity.compose)
-    // ViewModels
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    // LiveData
-    implementation(libs.androidx.runtime.livedata)
-    // accompanist insets
-    implementation(libs.accompanist.permissions)
-    // 添加 documentfile 依赖
-    implementation(libs.androidx.documentfile)
-    // 添加shizuku 依赖
-    implementation(libs.shizuku)
-    implementation(libs.provider)
-    // 添加datastore 依赖储存用户配置
-    implementation(libs.androidx.datastore.preferences)
-    // 添加zip4j 依赖
-    implementation(libs.zip4j)
-    //Room
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.roomcompiler)
-    implementation(libs.androidx.room.ktx)
-    // Navigation
-    implementation(libs.androidx.navigation.compose)
-    // gson
-    implementation(libs.gson)
-    //添加 documentfile 依赖 (SDK自带的那个版本有问题):
-    implementation(libs.androidx.documentfile)
-    // Retrofit
-    implementation(libs.retrofit2.kotlinx.serialization.converter)
-    implementation(libs.converter.gson)
-    implementation(libs.retrofit)
-    implementation(libs.okhttp3.okhttp)
-    implementation(libs.coil.compose)
-    implementation(libs.kotlinx.serialization.json)
-    // Retrofit with Scalar Converter
-    implementation(libs.converter.scalars)
-    // 解压库
-    implementation(libs.commons.compress)
-    // xz
-    implementation(libs.xz)
-    // 7z
-    implementation(libs.x.zip.jbinding.xandroid)
-    // 系统UI控制库，实现沉浸式状态栏
-    implementation(libs.accompanist.systemuicontroller)
-    // Glide实现预览图压缩
-    implementation(libs.glide)
-    // pager2
-    implementation(libs.accompanist.pager)
-    // desugar
-    coreLibraryDesugaring(libs.desugar)
-    // 启动页
-    implementation(libs.androidx.core.splashscreen)
-    // DI依赖注入
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    // aboutlibraries
-    implementation(libs.aboutlibraries.core)
-    implementation(libs.aboutlibraries.compose.m3)
-    implementation(libs.androidx.ui.tooling)
-    // markdown
-    implementation(libs.compose.markdown)
-    // 携程核心库
+    androidTestImplementation(libs.androidx.rules)
+
+    // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+
+    // Compose UI
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+
+    // Compose Foundation & Layout
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.foundation.layout)
+
+    // Compose Runtime & Animation
+    implementation(libs.compose.runtime)
+    implementation(libs.compose.animation)
+    implementation(libs.compose.animation.core)
+    implementation(libs.androidx.runtime.livedata)
+
+    // Material Design
+    implementation(libs.material3)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
+
+    // Accompanist
+    implementation(libs.accompanist.permissions)
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.accompanist.pager)
+
+    // AndroidX Core
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.documentfile)
+
+    // AndroidX Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.process)
+
+    // AndroidX Navigation
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.runtime.ktx)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.roomcompiler)
+
+    // Network
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.converter.scalars)
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.okhttp3.okhttp)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.gson)
+
+    // Image Loading
+    implementation(libs.coil.compose)
+    implementation(libs.glide)
+
+    // Dependency Injection
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Compression & Archives
+    implementation(libs.commons.compress)
+    implementation(libs.xz)
+    implementation(libs.zip4j)
+    implementation(libs.x.zip.jbinding.xandroid)
+
+    // Shizuku
+    implementation(libs.shizuku)
+    implementation(libs.provider)
+
+    // UI Components
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose.m3)
+    implementation(libs.compose.markdown)
 }

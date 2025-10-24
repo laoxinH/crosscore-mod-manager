@@ -203,4 +203,8 @@
     <string name="mod_page_initializing">Initializing…</string>
     <string name="uninstall_title">Do you really want to uninstall ModManager?</string>
     <string name="uninstall_summary">Uninstalling the MOD Manager will not automatically close the active mods. Since the database is lost, reinstalling the manager will not be able to recognize or disable the enabled mods, and you’ll need to uninstall and reinstall the game to resolve the issue.</string>
+    <string name="log_path_empty">Log path is empty</string>
+    <string name="log_path_not_writable">Log directory not writable</string>
+    <string name="log_create_dir_failed">Failed to create log directory</string>
+    <string name="log_logcat_running">Logcat already running</string>
 </resources>

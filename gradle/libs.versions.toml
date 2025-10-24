@@ -1,102 +1,181 @@
 [versions]
-accompanistPager = "0.36.0"
-accompanistPermissions = "0.37.3"
-accompanistSystemuicontroller = "0.36.0"
+# Build Tools
 agp = "8.13.0"
-coreSplashscreen = "1.0.1"
-shizuku = "13.1.5"
-coilCompose = "2.7.0"
-commonsCompress = "1.28.0"
-converterGson = "3.0.0"
-converterScalars = "3.0.0"
-datastorePreferences = "1.2.0-alpha02"
-documentfile = "1.1.0"
-glide = "5.0.5"
-gson = "2.13.2"
-kotlin = "2.2.20"
-junit = "4.13.2"
-kotlinxSerializationJson = "1.9.0"
-activityCompose = "1.11.0"
-lifecycleViewmodelCompose = "2.9.4"
-navigationCompose = "2.9.5"
-navigationRuntimeKtx = "2.9.5"
-okhttpVersion = "5.2.1"
-provider = "13.1.5"
-retrofit = "3.0.0"
-retrofit2KotlinxSerializationConverter = "1.0.0"
-roomKtx = "2.8.2"
-roomRuntime = "2.8.2"
-rules = "1.7.0"
-xz = "1.10"
-xZipJbindingXandroid = "2025.06.13"
-zip4j = "2.11.5"
-roomVersion = "2.8.2"
-desugar = "2.1.5"
-serialization = "2.2.20"
-ksp = "2.2.20-2.0.4"
-androidxRuntimeLivedata = "1.9.3"
-composeBom = "2025.10.00"
-hilt = "2.57.2"
-aboutLibraries = "13.0.0"
-uiTooling = "1.9.3"
-markwon = "0.5.7"
+kotlin = "2.2.21"
+ksp = "2.3.0"
+serialization = "2.2.21"
+
+# Compose
+composeUi = "1.9.4"
+composeFoundation = "1.9.4"
+composeRuntime = "1.9.4"
+composeAnimation = "1.9.4"
 material3 = "1.4.0"
 materialIcon = "1.7.8"
 materialIconExtended = "1.7.8"
+uiTooling = "1.9.4"
+
+# Accompanist
+accompanistPager = "0.36.0"
+accompanistPermissions = "0.37.3"
+accompanistSystemuicontroller = "0.36.0"
+
+# AndroidX
+activityCompose = "1.11.0"
+androidxRuntimeLivedata = "1.9.4"
+coreSplashscreen = "1.0.1"
+datastorePreferences = "1.2.0-beta01"
+documentfile = "1.1.0"
+lifecycleViewmodelCompose = "2.9.4"
+lifecycleProcess = "2.9.4"
+navigationCompose = "2.9.5"
+navigationRuntimeKtx = "2.9.5"
+rules = "1.7.0"
+
+# Room
+roomVersion = "2.8.3"
+roomKtx = "2.8.3"
+roomRuntime = "2.8.3"
+
+# Coroutines
 coroutines = "1.10.2"
 
+# Network
+retrofit = "3.0.0"
+converterGson = "3.0.0"
+converterScalars = "3.0.0"
+retrofit2KotlinxSerializationConverter = "1.0.0"
+okhttpVersion = "5.2.1"
+
+# Serialization
+kotlinxSerializationJson = "1.9.0"
+gson = "2.13.2"
+
+# Image Loading
+coilCompose = "2.7.0"
+glide = "5.0.5"
+
+# Dependency Injection
+hilt = "2.57.2"
+
+# Compression & Archives
+commonsCompress = "1.28.0"
+xz = "1.10"
+zip4j = "2.11.5"
+xZipJbindingXandroid = "2025.06.13"
+
+# Shizuku
+shizuku = "13.1.5"
+provider = "13.1.5"
+
+# UI & Markdown
+markwon = "0.5.7"
+aboutLibraries = "13.1.0"
+
+# Testing
+junit = "4.13.2"
+
 [libraries]
+# Coroutines
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# Compose UI
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "composeUi" }
+compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "composeUi" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "composeUi" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
+
+# Compose Foundation
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "composeFoundation" }
+compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout", version.ref = "composeFoundation" }
+
+# Compose Runtime & Animation
+compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "composeRuntime" }
+compose-animation = { module = "androidx.compose.animation:animation", version.ref = "composeAnimation" }
+compose-animation-core = { module = "androidx.compose.animation:animation-core", version.ref = "composeAnimation" }
+androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "androidxRuntimeLivedata" }
+
+# Material Design
+material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIcon" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconExtended" }
+
+# Accompanist
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
+
+# AndroidX Core
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
-androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
-androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
+
+# AndroidX Lifecycle
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
-androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIcon" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconExtended" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
+
+# AndroidX Navigation
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+
+# Room Database
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
-androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "androidxRuntimeLivedata" }
-shizuku = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
-commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-roomcompiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
+
+# Network
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterScalars" }
-glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-okhttp3-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttpVersion" }
-provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
-x-zip-jbinding-xandroid = { module = "com.github.lings03:7-Zip-JBinding-4Android", version.ref = "xZipJbindingXandroid" }
+okhttp3-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttpVersion" }
+
+# Serialization
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+# Image Loading
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+
+# Dependency Injection
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+
+# Compression & Archives
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
-androidx-roomcompiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
-desugar = { group = "com.android.tools", name = "desugar_jdk_libs_nio", version.ref = "desugar" }
-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+x-zip-jbinding-xandroid = { module = "com.github.lings03:7-Zip-JBinding-4Android", version.ref = "xZipJbindingXandroid" }
+
+# Shizuku
+shizuku = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
+provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
+
+# UI Components
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
-androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "markwon" }
 
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
+
 [plugins]
+# Build Tools
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
-aboutLibrariesAndroid = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
+
+# Compose
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+# Dependency Injection
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+
+# Libraries
+aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+aboutLibrariesAndroid = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }

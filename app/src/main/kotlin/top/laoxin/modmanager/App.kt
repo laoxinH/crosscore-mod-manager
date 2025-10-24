@@ -6,6 +6,9 @@ import android.app.NotificationManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import dagger.hilt.android.HiltAndroidApp
 import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.tools.LogTools
@@ -37,6 +40,25 @@ class App : Application() {
         createTestFile()
         setupNotificationChannel()
         setupGlobalExceptionHandler()
+        setupLifecycleObserver()
+    }
+
+    private fun setupLifecycleObserver() {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStop(owner: LifecycleOwner) {
+                LogTools.flushAll()
+            }
+        })
+
+        try {
+            Runtime.getRuntime().addShutdownHook(Thread {
+                try {
+                    LogTools.shutdown()
+                } catch (_: Exception) {
+                }
+            })
+        } catch (_: Exception) {
+        }
     }
 
     // 初始化操作系统版本
@@ -89,17 +111,23 @@ class App : Application() {
         }
     }
 
-    // 设置全局异常处理
     private fun setupGlobalExceptionHandler() {
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             handleGlobalException(thread, throwable)
+            defaultHandler?.uncaughtException(thread, throwable)
         }
     }
 
-    // 处理全局异常
     private fun handleGlobalException(thread: Thread, throwable: Throwable) {
-        Log.e("GlobalException", "Uncaught exception in thread ${thread.name}", throwable)
-        LogTools.logRecord("Uncaught  exception in thread ${thread.name}:  ${throwable.message}")
+        val deviceInfo =
+            "Device: ${Build.MANUFACTURER} ${Build.MODEL}, Android: ${Build.VERSION.RELEASE}, SDK: ${Build.VERSION.SDK_INT}"
+        val exceptionInfo =
+            "Thread: ${thread.name}\nException: ${throwable::class.java.simpleName}\nMessage: ${throwable.message}"
+        val stackTrace = throwable.stackTraceToString()
+
+        Log.e("GlobalException", "$deviceInfo\n$exceptionInfo", throwable)
+        LogTools.logRecord("=== Crash Report ===\n$deviceInfo\n$exceptionInfo\n\nStack Trace:\n$stackTrace")
     }
 
 }

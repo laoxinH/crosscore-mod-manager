@@ -34,9 +34,9 @@
         android:theme="@style/Theme.ModManager"
         tools:targetApi="36">
 
-        <!--启动页-->
+        <!--主页面-->
         <activity
-            android:name=".activity.start.StartActivity"
+            android:name=".activity.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ModManager.SplashScreen">
             <intent-filter>
@@ -47,11 +47,6 @@
         <!--用户协议-->
         <activity
             android:name=".activity.userAgreement.UserAgreementActivity"
-            android:exported="true"
-            android:theme="@style/Theme.ModManager" />
-        <!--主页面-->
-        <activity
-            android:name=".activity.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ModManager" />
 

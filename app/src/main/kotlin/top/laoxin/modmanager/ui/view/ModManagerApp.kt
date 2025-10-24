@@ -550,6 +550,7 @@ fun AppContent(
     HorizontalPager(
         state = pagerState,
         modifier = modifier,
+        beyondViewportPageCount = 0,
         key = { page -> "page_$page" }
     ) { page ->
         when (page) {
