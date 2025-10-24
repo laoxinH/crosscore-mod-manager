@@ -24,7 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -99,11 +101,23 @@ fun ModListItem(
     // 使用新的图片加载器，自动处理缓存
     val imageBitmap by rememberImageBitmap(path = iconPath)
 
+    var localIsEnable by remember(mod.id) { mutableStateOf<Boolean?>(null) }
+    val displayIsEnable = localIsEnable ?: mod.isEnable
+
+    LaunchedEffect(mod.isEnable) {
+        if (localIsEnable != null && localIsEnable == mod.isEnable) {
+            localIsEnable = null
+        }
+    }
+
     val onClick = remember(mod.id, isMultiSelect) {
         { if (isMultiSelect) onMultiSelectClick(mod) else openModDetail(mod, true) }
     }
-    val onCheckedChange = remember(mod.id, mod.isEnable) {
-        { isChecked: Boolean -> enableMod(mod, isChecked) }
+    val onCheckedChange = remember(mod.id) {
+        { isChecked: Boolean ->
+            localIsEnable = isChecked
+            enableMod(mod, isChecked)
+        }
     }
 
     // 如果图标路径不存在但 mod.icon 不为空，触发重新解压
@@ -189,7 +203,7 @@ fun ModListItem(
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
                 ExpressiveSwitch(
-                    checked = mod.isEnable,
+                    checked = displayIsEnable,
                     onCheckedChange = onCheckedChange,
                     enabled = modSwitchEnable
                 )

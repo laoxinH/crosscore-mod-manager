@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,14 +24,12 @@ fun AllModPage(
         return
     }
     
-    val modList = remember(uiState.modsView, uiState.modList, uiState.enableModList, uiState.disableModList, uiState.searchModList) {
-        when (uiState.modsView) {
-            NavigationIndex.ALL_MODS -> uiState.modList
-            NavigationIndex.ENABLE_MODS -> uiState.enableModList
-            NavigationIndex.DISABLE_MODS -> uiState.disableModList
-            NavigationIndex.SEARCH_MODS -> uiState.searchModList
-            else -> uiState.modList
-        }
+    val modList = when (uiState.modsView) {
+        NavigationIndex.ALL_MODS -> uiState.modList
+        NavigationIndex.ENABLE_MODS -> uiState.enableModList
+        NavigationIndex.DISABLE_MODS -> uiState.disableModList
+        NavigationIndex.SEARCH_MODS -> uiState.searchModList
+        else -> uiState.modList
     }
 
     if (modList.isEmpty()) {
