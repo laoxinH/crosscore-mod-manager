@@ -18,12 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +40,9 @@ import kotlinx.coroutines.withContext
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.ui.state.ModUiState
+import top.laoxin.modmanager.ui.theme.ExpressiveCircularProgressIndicator
+import top.laoxin.modmanager.ui.theme.ExpressiveOutlinedTextField
+import top.laoxin.modmanager.ui.theme.ExpressiveTextButton
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.SelectPermissionDialog
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
@@ -116,10 +116,10 @@ fun ModPage(viewModel: ModViewModel) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    CircularProgressIndicator()
+                    ExpressiveCircularProgressIndicator()
                     Text(
                         text = stringResource(R.string.mod_page_initializing),
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = 16.dp),
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
@@ -197,6 +197,7 @@ fun DisEnableModsDialog(
         if (mods.isNotEmpty()) {
             AlertDialog(
                 onDismissRequest = {},
+                shape = MaterialTheme.shapes.extraLarge,
                 title = {
                     Text(
                         stringResource(id = R.string.dialog_dis_enable_mods_title),
@@ -221,7 +222,7 @@ fun DisEnableModsDialog(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
+                    ExpressiveTextButton(onClick = {
                         onConfirmRequest()
                     }) {
                         Text(stringResource(id = R.string.dialog_button_confirm))
@@ -270,10 +271,10 @@ fun Loading(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        CircularProgressIndicator()
+        ExpressiveCircularProgressIndicator()
         Text(
             text = stringResource(R.string.mod_pag_loading, loadingPath),
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = 16.dp),
             style = MaterialTheme.typography.titleSmall
         )
     }
@@ -291,22 +292,22 @@ fun PasswordInputDialog(
 
         AlertDialog(
             onDismissRequest = onDismiss,
+            shape = MaterialTheme.shapes.extraLarge,
             title = {
                 Text(
                     text = stringResource(R.string.password_dialog_title),
                     style = MaterialTheme.typography.titleLarge
                 )
             },
-
             text = {
-                OutlinedTextField(
+                ExpressiveOutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text(stringResource(R.string.password_dialog_label)) },
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
+                ExpressiveTextButton(onClick = {
                     onPasswordSubmit(password)
                     onDismiss()
                 }) {
@@ -314,7 +315,7 @@ fun PasswordInputDialog(
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss) {
+                ExpressiveTextButton(onClick = onDismiss) {
                     Text(text = stringResource(id = R.string.dialog_button_request_close))
                 }
             }

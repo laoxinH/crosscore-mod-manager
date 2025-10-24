@@ -11,6 +11,8 @@ composeFoundation = "1.9.4"
 composeRuntime = "1.9.4"
 composeAnimation = "1.9.4"
 material3 = "1.4.0"
+material3Adaptive = "1.1.0"
+material3AdaptiveNavigationSuite = "1.4.0-alpha04"
 materialIcon = "1.7.8"
 materialIconExtended = "1.7.8"
 uiTooling = "1.9.4"
@@ -98,6 +100,8 @@ androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedat
 
 # Material Design
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "material3Adaptive" }
+material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIcon" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconExtended" }
 

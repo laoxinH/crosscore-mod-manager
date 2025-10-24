@@ -164,6 +164,8 @@ dependencies {
 
     // Material Design
     implementation(libs.material3)
+    implementation(libs.material3.adaptive)
+    implementation(libs.material3.adaptive.navigation.suite)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
 

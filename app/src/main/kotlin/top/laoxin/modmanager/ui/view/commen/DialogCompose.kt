@@ -2,8 +2,8 @@ package top.laoxin.modmanager.ui.view.commen
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.ui.theme.ExpressiveTextButton
 
-// 通用对话框
 @Composable
 fun DialogCommon(
     title: String,
@@ -25,8 +25,9 @@ fun DialogCommon(
 ) {
     if (showDialog) {
         AlertDialog(
-            onDismissRequest = {}, // 空的 lambda 函数，表示点击对话框外的区域不会关闭对话框
+            onDismissRequest = {},
             title = { Text(text = title) },
+            shape = MaterialTheme.shapes.extraLarge,
             text = {
                 MarkdownText(
                     content,
@@ -38,14 +39,14 @@ fun DialogCommon(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
+                ExpressiveTextButton(onClick = {
                     onConfirm()
                 }) {
                     Text(stringResource(id = R.string.dialog_button_confirm))
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                ExpressiveTextButton(onClick = {
                     onCancel()
                 }) {
                     Text(stringResource(id = R.string.dialog_button_request_close))

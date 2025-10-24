@@ -17,11 +17,9 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.data.bean.ModBean
+import top.laoxin.modmanager.ui.theme.ExpressiveSwitch
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
 
@@ -135,7 +134,8 @@ fun ModListItem(
             onClick = onClick,
             onLongClick = { onLongClick(mod) }
         ),
-        colors = cardColors
+        colors = cardColors,
+        shape = MaterialTheme.shapes.large
     ) {
         Row(
             modifier = Modifier
@@ -143,12 +143,12 @@ fun ModListItem(
                 .padding(16.dp)
                 .sizeIn(minHeight = 30.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .align(Alignment.CenterVertically)
-            ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(MaterialTheme.shapes.extraSmall)
+                .align(Alignment.CenterVertically)
+        ) {
                 val currentImage = imageBitmap.value
                 if (currentImage != null) {
                     Image(
@@ -185,7 +185,7 @@ fun ModListItem(
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                Switch(
+                ExpressiveSwitch(
                     checked = mod.isEnable,
                     onCheckedChange = onCheckedChange,
                     enabled = modSwitchEnable

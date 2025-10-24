@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Update
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.ui.theme.ExpressiveButton
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +50,7 @@ fun SettingTopBar(
         ),
         navigationIcon = {
             if (showNavigationIcon) {
-                Button(
+                ExpressiveButton(
                     onClick = {
                         viewModel.setAboutPage(false)
                     },
@@ -59,7 +58,6 @@ fun SettingTopBar(
                         .size(35.dp)
                         .padding(start = 6.dp)
                         .offset(y = 8.dp),
-                    shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(0.dp),
                 ) {
                     Box(

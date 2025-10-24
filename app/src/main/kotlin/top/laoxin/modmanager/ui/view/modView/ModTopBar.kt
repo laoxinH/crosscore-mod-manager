@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
@@ -28,7 +26,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -55,13 +51,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
+import top.laoxin.modmanager.ui.theme.ExpressiveButton
+import top.laoxin.modmanager.ui.theme.ExpressiveTextField
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 
@@ -253,9 +249,8 @@ fun GeneralTopBar(
             ),
             navigationIcon = {
                 if (uiState.modsView == NavigationIndex.MODS_BROWSER)
-                    Button(
+                    ExpressiveButton(
                         onClick = {
-                            // 只在按钮可用时触发返回功能
                             if (backButtonEnabled) {
                                 viewModel.setDoBackFunction(true)
                             }
@@ -265,9 +260,7 @@ fun GeneralTopBar(
                             .padding(start = 6.dp)
                             .offset(y = 8.dp)
                             .alpha(backButtonAlpha),
-                        shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(0.dp),
-                        // 将按钮的启用状态与backButtonEnabled绑定
                         enabled = backButtonEnabled,
                     ) {
                         Box(
@@ -451,7 +444,7 @@ fun SearchBox(
         KeyboardActions(onDone = { keyboardController?.hide() })
     }
 
-    TextField(
+    ExpressiveTextField(
         value = text,
         onValueChange = onValueChangeCallback,
         placeholder = { Text(text = hint, style = placeholderStyle) },
@@ -460,12 +453,6 @@ fun SearchBox(
             .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 10.dp)
             .height(50.dp)
             .focusRequester(focusRequester),
-        textStyle = textStyle,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = keyboardActions,
         singleLine = true,
         trailingIcon = {
             IconButton(onClick = onCloseCallback) {
@@ -475,7 +462,6 @@ fun SearchBox(
                 )
             }
         },
-        shape = shape,
         colors = colors
     )
 }

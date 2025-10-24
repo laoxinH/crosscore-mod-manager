@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -311,7 +310,8 @@ fun FileListItem(
             .animateContentSize(),
         colors = if (!isSelected) CardDefaults.cardColors() else CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
+        ),
+        shape = MaterialTheme.shapes.large
     ) {
         Row(
             modifier = Modifier
@@ -322,7 +322,7 @@ fun FileListItem(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .align(Alignment.CenterVertically)
             ) {
                 Image(

@@ -18,7 +18,6 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -45,8 +44,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ImagesearchRoller
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -90,6 +87,9 @@ import kotlinx.coroutines.launch
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.ModUiState
+import top.laoxin.modmanager.ui.theme.ExpressiveFilledTonalButton
+import top.laoxin.modmanager.ui.theme.MotionDuration
+import top.laoxin.modmanager.ui.theme.MotionEasing
 import top.laoxin.modmanager.ui.view.modView.ModPage
 import top.laoxin.modmanager.ui.view.modView.ModTopBar
 import top.laoxin.modmanager.ui.view.settingView.SettingPage
@@ -481,8 +481,8 @@ private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
                 pageNavigationState.pagerState.animateScrollToPage(
                     page = targetPage,
                     animationSpec = tween(
-                        durationMillis = abs(currentPagerPage - targetPage) * 100 + 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = abs(currentPagerPage - targetPage) * 100 + MotionDuration.Medium,
+                        easing = MotionEasing.Emphasized
                     )
                 )
             }
@@ -780,20 +780,17 @@ fun ProcessTips(
         Snackbar(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.padding(16.dp),
-            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier
+                .padding(16.dp)
+                .animateContentSize(),
+            shape = MaterialTheme.shapes.large,
             action = {
-                Button(
+                ExpressiveFilledTonalButton(
                     onClick = {
                         setSnackbarHidden(true)
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    shape = MaterialTheme.shapes.small,
                     modifier = Modifier.padding(4.dp),
-                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp)
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.tips_btn_close),

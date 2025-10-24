@@ -33,7 +33,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,6 +55,7 @@ import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.data.bean.ThanksBean
 import top.laoxin.modmanager.ui.state.SettingUiState
+import top.laoxin.modmanager.ui.theme.ExpressiveTextButton
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.DialogCommonForUpdate
 import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
@@ -366,7 +366,9 @@ fun SettingItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .clickable { onClick() }) {
+            .clickable { onClick() },
+        shape = MaterialTheme.shapes.large
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -427,8 +429,10 @@ fun SwitchGameDialog(
 ) {
     if (showDialog) {
         AlertDialog(
-            onDismissRequest = { showSwitchGameInfo(false) }, // 点击对话框外的区域时关闭对话框
-            title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) }, text = {
+            onDismissRequest = { showSwitchGameInfo(false) },
+            title = { Text(text = stringResource(R.string.switch_game_service_tiltle)) },
+            shape = MaterialTheme.shapes.extraLarge,
+            text = {
                 val toMutableList = gameInfoList.toMutableList()
                 toMutableList.removeAt(0)
 
@@ -445,7 +449,7 @@ fun SwitchGameDialog(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
+                ExpressiveTextButton(onClick = {
                     showSwitchGameInfo(false)
                 }) {
                     Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
@@ -465,8 +469,10 @@ fun DownloadGameConfigDialog(
     if (showDialog) {
         AlertDialog(
             modifier = Modifier.fillMaxHeight(0.6f),
-            onDismissRequest = { showDownloadGameConfigDialog(false) }, // 点击对话框外的区域时关闭对话框
-            title = { Text(text = stringResource(R.string.switch_download_game_tiltle)) }, text = {
+            onDismissRequest = { showDownloadGameConfigDialog(false) },
+            title = { Text(text = stringResource(R.string.switch_download_game_tiltle)) },
+            shape = MaterialTheme.shapes.extraLarge,
+            text = {
                 val toMutableList = gameInfoList.toMutableList()
                 LazyColumn {
                     itemsIndexed(toMutableList) { index, gameInfo ->
@@ -481,7 +487,7 @@ fun DownloadGameConfigDialog(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
+                ExpressiveTextButton(onClick = {
                     showDownloadGameConfigDialog(false)
                 }) {
                     Text(text = stringResource(R.string.mod_page_mod_detail_dialog_close))
@@ -519,13 +525,13 @@ fun ThanksDialogCommon(
                     }
                 }
             }, confirmButton = {
-                TextButton(onClick = {
+                ExpressiveTextButton(onClick = {
                     onConfirm()
                 }) {
                     Text(stringResource(id = R.string.dialog_button_confirm))
                 }
             }, dismissButton = {
-                TextButton(onClick = {
+                ExpressiveTextButton(onClick = {
                     onCancel()
                 }) {
                     Text(stringResource(id = R.string.dialog_button_request_close))

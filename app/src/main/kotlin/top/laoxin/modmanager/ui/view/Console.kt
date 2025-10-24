@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -29,9 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,6 +45,8 @@ import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.data.bean.GameInfoBean
 import top.laoxin.modmanager.ui.state.ConsoleUiState
+import top.laoxin.modmanager.ui.theme.ExpressiveSwitch
+import top.laoxin.modmanager.ui.theme.ExpressiveTextButton
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.view.commen.DialogCommonForUpdate
 import top.laoxin.modmanager.ui.view.commen.RequestNotificationPermission
@@ -167,9 +166,9 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
 fun GameInformationCard(
     viewModel: ConsoleViewModel, gameInfo: GameInfoBean, modifier: Modifier = Modifier
 ) {
-    // 第一部分：一个卡片展示当前设置项目的一些信息
     Card(
-        modifier = modifier
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large
     ) {
         Row(
             modifier = Modifier
@@ -179,11 +178,11 @@ fun GameInformationCard(
         ) {
             // 第一个区域：添加一个圆角图片
             Image(
-                bitmap = viewModel.getGameIcon(), // 替换为你的图片资源
+                bitmap = viewModel.getGameIcon(),
                 contentDescription = null,
                 modifier = Modifier
                     .size(80.dp)
-                    .clip(RoundedCornerShape(40.dp)) // 设置图片的圆角
+                    .clip(MaterialTheme.shapes.extraLarge)
             )
 
             // 添加一些间距
@@ -231,11 +230,13 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Card(modifier = Modifier.weight(1f)) {
+        Card(
+            modifier = Modifier.weight(1f),
+            shape = MaterialTheme.shapes.large
+        ) {
             Column(Modifier.padding(16.dp)) {
                 Text(
                     text = stringResource(id = R.string.console_setting_info_mod),
-                    //modifier = Modifier.padding(16.dp),
                     style = typography.titleLarge
                 )
                 // 添加一些间距
@@ -255,14 +256,15 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
 
         }
 
-        // 添加一些间距
         Spacer(modifier = Modifier.width(16.dp))
 
-        Card(modifier = Modifier.weight(1f)) {
+        Card(
+            modifier = Modifier.weight(1f),
+            shape = MaterialTheme.shapes.large
+        ) {
             Column(Modifier.padding(16.dp)) {
                 Text(
                     text = stringResource(id = R.string.console_setting_info_configuration),
-                    //modifier = Modifier.padding(16.dp),
                     style = typography.titleLarge
                 )
 
@@ -356,7 +358,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                         text = stringResource(id = R.string.console_configuration_anti_harmony),
                         style = typography.titleMedium
                     )
-                    Switch(
+                    ExpressiveSwitch(
                         checked = uiState.antiHarmony,
                         onCheckedChange = { viewModel.openAntiHarmony(it) })
                 }
@@ -371,7 +373,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     text = stringResource(id = R.string.console_configuration_disable_browswer),
                     style = typography.titleMedium
                 )
-                Switch(checked = !uiState.showCategoryView, onCheckedChange = {
+                ExpressiveSwitch(checked = !uiState.showCategoryView, onCheckedChange = {
                     viewModel.setShowCategoryView(!it)
                 })
             }
@@ -385,7 +387,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     text = stringResource(id = R.string.console_configuration_disable_scan_dictionary),
                     style = typography.titleMedium
                 )
-                Switch(checked = !uiState.scanDirectoryMods, onCheckedChange = {
+                ExpressiveSwitch(checked = !uiState.scanDirectoryMods, onCheckedChange = {
                     viewModel.openScanDirectoryMods(!it)
                 })
             }
@@ -399,7 +401,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     text = stringResource(id = R.string.console_configuration_scanQQ),
                     style = typography.titleMedium
                 )
-                Switch(checked = uiState.scanQQDirectory, onCheckedChange = {
+                ExpressiveSwitch(checked = uiState.scanQQDirectory, onCheckedChange = {
 
                     viewModel.openScanQQDirectoryDialog(it)
                 })
@@ -414,7 +416,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     text = stringResource(id = R.string.console_configuration_scan_download),
                     style = typography.titleMedium
                 )
-                Switch(checked = uiState.scanDownload, onCheckedChange = {
+                ExpressiveSwitch(checked = uiState.scanDownload, onCheckedChange = {
                     viewModel.openScanDownloadDirectoryDialog(it)
                 })
             }
@@ -428,7 +430,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     text = stringResource(id = R.string.console_configuration_del_unzip),
                     style = typography.titleMedium
                 )
-                Switch(checked = uiState.delUnzipDictionary, onCheckedChange = {
+                ExpressiveSwitch(checked = uiState.delUnzipDictionary, onCheckedChange = {
                     viewModel.switchDelUnzip(it)
                 })
             }
@@ -438,7 +440,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(
+                ExpressiveTextButton(
                     onClick = { openDirectoryLauncher.launch(null) },
                     contentPadding = PaddingValues(0.dp)
                 ) {

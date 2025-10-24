@@ -22,7 +22,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
@@ -30,7 +29,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -64,6 +62,7 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.tools.LogTools.logRecord
+import top.laoxin.modmanager.ui.theme.ExpressiveAssistChip
 import top.laoxin.modmanager.ui.view.commen.DialogCommon
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
@@ -236,10 +235,9 @@ fun ModDetailPartialBottomSheet(
                     showButton = false,
                     viewModel = viewModel
                 )
-                // 文本标签
-
                 Card(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large
                 ) {
                     MarkdownText(
                         mod.description ?: stringResource(R.string.mod_bean_no_readme),
@@ -275,11 +273,11 @@ fun ImageCarouselWithIndicator(images: List<ImageBitmap>) {
 
     Column {
         HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-        ) { page ->
+        state = pagerState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+    ) { page ->
             Image(
                 bitmap = images[page],
                 contentDescription = "Image $page",
@@ -320,7 +318,7 @@ fun LabelAndIconButtonGroup(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        AssistChip(
+        ExpressiveAssistChip(
             onClick = { },
             label = { Text(stringResource(id = label)) },
 

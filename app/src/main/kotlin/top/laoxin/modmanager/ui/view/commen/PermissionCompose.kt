@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -209,8 +210,10 @@ fun SelectPermissionDialog(
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, df.uri)
         }
         AlertDialog(
-            onDismissRequest = {}, // 点击对话框外的区域时关闭对话框
-            title = { Text(stringResource(R.string.choose_method_title)) }, text = {
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.choose_method_title)) },
+            shape = MaterialTheme.shapes.extraLarge,
+            text = {
                 Column {
                     Text(stringResource(R.string.select_permission_dialog_descript))
                     Spacer(modifier = Modifier.height(10.dp))
