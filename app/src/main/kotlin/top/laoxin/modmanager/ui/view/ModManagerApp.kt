@@ -442,6 +442,23 @@ private fun HandleBackNavigation(
     }
     val activity = context as? Activity
 
+    val isOnModPageWithSearchVisible =
+        pageNavigationState.currentPage == NavigationIndex.MOD.ordinal &&
+                modViewUiState.searchBoxVisible
+    val isNotOnConsolePage = pageNavigationState.currentPage != NavigationIndex.CONSOLE.ordinal
+
+    // MOD页面搜索框可见时，隐藏搜索框
+    BackHandler(enabled = isOnModPageWithSearchVisible) {
+        modViewModel.setSearchBoxVisible(false)
+    }
+
+    // 非CONSOLE页面时，返回CONSOLE（排除搜索框可见情况）
+    BackHandler(enabled = isNotOnConsolePage && !isOnModPageWithSearchVisible) {
+        pageNavigationState.onCurrentPageChange(NavigationIndex.CONSOLE.ordinal)
+        pageNavigationState.onShouldScrollChange(true)
+    }
+
+    // CONSOLE页面双击退出
     BackHandler(enabled = pageNavigationState.currentPage == NavigationIndex.CONSOLE.ordinal) {
         val currentTime = System.currentTimeMillis()
         if (currentTime - pageNavigationState.exitTime > 2000) {
@@ -450,17 +467,6 @@ private fun HandleBackNavigation(
         } else {
             exitToast.cancel()
             activity?.finish()
-        }
-    }
-
-    if (pageNavigationState.currentPage == NavigationIndex.MOD.ordinal && modViewUiState.searchBoxVisible) {
-        BackHandler {
-            modViewModel.setSearchBoxVisible(false)
-        }
-    } else if (pageNavigationState.currentPage != NavigationIndex.CONSOLE.ordinal) {
-        BackHandler {
-            pageNavigationState.onCurrentPageChange(NavigationIndex.CONSOLE.ordinal)
-            pageNavigationState.onShouldScrollChange(true)
         }
     }
 }

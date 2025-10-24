@@ -116,10 +116,8 @@ fun ModsBrowser(viewModel: ModViewModel) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (!isAtRootPath) {
-            BackHandler {
-                viewModel.setDoBackFunction(true)
-            }
+        BackHandler(enabled = !isAtRootPath) {
+            viewModel.setDoBackFunction(true)
         }
 
         AnimatedContent(
