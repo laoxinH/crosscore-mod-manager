@@ -131,12 +131,9 @@ fun ModManagerApp() {
     val settingViewModel: SettingViewModel = viewModel()
     val modViewModel: ModViewModel = viewModel()
     val configuration = LocalConfiguration.current
-// 确保 consoleViewModel 的初始化逻辑先执行
-    // 提取页面状态管理到单独的组合函数
     val pageNavigationState = rememberPageNavigationState()
     val settingUiState = settingViewModel.uiState.collectAsState().value
 
-    // 管理底部栏显示状态
     var hideBottomBar by remember { mutableStateOf(false) }
 
     LaunchedEffect(settingUiState.showAbout) {
@@ -473,12 +470,15 @@ private fun HandleBackNavigation(
 
 @Composable
 private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
+    val pagerState = pageNavigationState.pagerState
+
+    // 点击导航栏时触发页面切换
     LaunchedEffect(pageNavigationState.currentPage, pageNavigationState.shouldScroll) {
         if (pageNavigationState.shouldScroll) {
             val targetPage = pageNavigationState.currentPage
-            val currentPagerPage = pageNavigationState.pagerState.currentPage
+            val currentPagerPage = pagerState.currentPage
             if (targetPage != currentPagerPage) {
-                pageNavigationState.pagerState.animateScrollToPage(
+                pagerState.animateScrollToPage(
                     page = targetPage,
                     animationSpec = tween(
                         durationMillis = abs(currentPagerPage - targetPage) * 100 + MotionDuration.Medium,
@@ -490,13 +490,15 @@ private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
         }
     }
 
-    val currentPagerPage by remember {
-        derivedStateOf { pageNavigationState.pagerState.currentPage }
+    // 使用 settledPage 而不是 currentPage，避免动画过程中的中间状态
+    val settledPage by remember {
+        derivedStateOf { pagerState.settledPage }
     }
 
-    LaunchedEffect(currentPagerPage) {
-        if (!pageNavigationState.shouldScroll && pageNavigationState.currentPage != currentPagerPage) {
-            pageNavigationState.onCurrentPageChange(currentPagerPage)
+    // 只在页面完全停止后才同步状态
+    LaunchedEffect(settledPage) {
+        if (!pageNavigationState.shouldScroll && pageNavigationState.currentPage != settledPage) {
+            pageNavigationState.onCurrentPageChange(settledPage)
         }
     }
 }
@@ -576,6 +578,7 @@ fun NavigationRail(
     consoleViewModel: ConsoleViewModel
 ) {
     var lastClickTime by remember { mutableLongStateOf(0L) }
+    var isNavigating by remember { mutableStateOf(false) }
     val packageName = consoleViewModel.uiState.collectAsState().value.gameInfo.packageName
     val gameIcon = remember(packageName) {
         getGameIcon(packageName)
@@ -600,14 +603,28 @@ fun NavigationRail(
                     selected = isSelected,
                     onClick = {
                         val currentTime = System.currentTimeMillis()
-                        if (isSelected && (currentTime - lastClickTime) < 300) {
+                        val timeSinceLastClick = currentTime - lastClickTime
+
+                        // 双击刷新当前页面
+                        if (isSelected && timeSinceLastClick < 300) {
                             refreshCurrentPage(currentPage, modViewModel)
-                        } else {
+                            lastClickTime = currentTime
+                            return@NavigationRailItem
+                        }
+
+                        // 防抖：防止快速点击和动画进行中的点击
+                        if (!isNavigating && !isSelected && timeSinceLastClick > 100) {
+                            isNavigating = true
                             modViewModel.exitSelect()
-                            if (!isSelected) {
-                                onPageSelected(index)
+                            onPageSelected(index)
+
+                            // 动画时间后重置导航状态
+                            MainScope().launch {
+                                delay(abs(currentPage - index) * 100L + MotionDuration.Medium.toLong())
+                                isNavigating = false
                             }
                         }
+
                         lastClickTime = currentTime
                     },
                     icon = {
@@ -654,6 +671,7 @@ fun NavigationBar(
     onPageSelected: (Int) -> Unit
 ) {
     var lastClickTime by remember { mutableLongStateOf(0L) }
+    var isNavigating by remember { mutableStateOf(false) }
 
     NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
@@ -663,14 +681,28 @@ fun NavigationBar(
                 selected = isSelected,
                 onClick = {
                     val currentTime = System.currentTimeMillis()
-                    if (isSelected && (currentTime - lastClickTime) < 300) {
+                    val timeSinceLastClick = currentTime - lastClickTime
+
+                    // 双击刷新当前页面
+                    if (isSelected && timeSinceLastClick < 300) {
                         refreshCurrentPage(currentPage, modViewModel)
-                    } else {
+                        lastClickTime = currentTime
+                        return@NavigationBarItem
+                    }
+
+                    // 防抖：防止快速点击和动画进行中的点击
+                    if (!isNavigating && !isSelected && timeSinceLastClick > 100) {
+                        isNavigating = true
                         modViewModel.exitSelect()
-                        if (!isSelected) {
-                            onPageSelected(index)
+                        onPageSelected(index)
+
+                        // 动画时间后重置导航状态
+                        MainScope().launch {
+                            delay(abs(currentPage - index) * 100L + MotionDuration.Medium.toLong())
+                            isNavigating = false
                         }
                     }
+
                     lastClickTime = currentTime
                 },
                 icon = {

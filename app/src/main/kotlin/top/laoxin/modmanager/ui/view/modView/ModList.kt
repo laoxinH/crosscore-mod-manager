@@ -23,23 +23,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.ui.theme.ExpressiveSwitch
@@ -66,7 +59,8 @@ fun ModList(
     ) {
         items(
             items = mods,
-            key = { mod -> mod.id }
+            key = { mod -> mod.id },
+            contentType = { "modItem" }
         ) { mod ->
             ModListItem(
                 mod = mod,
@@ -98,41 +92,51 @@ fun ModListItem(
     enableMod: (ModBean, Boolean) -> Unit,
     modViewModel: ModViewModel
 ) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val imageBitmap = remember(mod.icon) { mutableStateOf<ImageBitmap?>(null) }
-    val iconPath by remember(mod.icon) {
-        derivedStateOf { mod.icon?.takeIf { File(it).exists() } }
+    val iconPath = remember(mod.icon) {
+        mod.icon?.takeIf { File(it).exists() }
     }
+
+    // 使用新的图片加载器，自动处理缓存
+    val imageBitmap by rememberImageBitmap(path = iconPath)
+
     val onClick = remember(mod.id, isMultiSelect) {
         { if (isMultiSelect) onMultiSelectClick(mod) else openModDetail(mod, true) }
     }
-    val onCheckedChange = remember(mod.id) {
+    val onCheckedChange = remember(mod.id, mod.isEnable) {
         { isChecked: Boolean -> enableMod(mod, isChecked) }
     }
 
-    LaunchedEffect(iconPath) {
-        if (iconPath != null) {
-            coroutineScope.launch(Dispatchers.IO) {
-                imageBitmap.value = loadImageBitmapFromPath(context, iconPath!!, 256, 256)
-            }
-        } else if (mod.icon != null) {
+    // 如果图标路径不存在但 mod.icon 不为空，触发重新解压
+    // 使用 key 参数确保只在 icon 变化时触发
+    LaunchedEffect(key1 = mod.icon, key2 = iconPath) {
+        if (mod.icon != null && iconPath == null) {
             modViewModel.flashModImage(mod)
         }
     }
 
-    val cardColors = CardDefaults.cardColors(
-        containerColor = if (!isSelected) CardDefaults.cardColors().containerColor
-        else MaterialTheme.colorScheme.secondaryContainer,
-    )
+    val cardColors = if (!isSelected) {
+        CardDefaults.cardColors()
+    } else {
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    }
+
+    val elevation = if (isSelected) {
+        CardDefaults.cardElevation(2.dp)
+    } else {
+        CardDefaults.cardElevation(0.dp)
+    }
+
+    val onLongClickCallback = remember(mod.id) {
+        { onLongClick(mod) }
+    }
 
     Card(
-        elevation = if (isSelected) CardDefaults.cardElevation(2.dp) else CardDefaults.cardElevation(
-            0.dp
-        ),
+        elevation = elevation,
         modifier = modifier.combinedClickable(
             onClick = onClick,
-            onLongClick = { onLongClick(mod) }
+            onLongClick = onLongClickCallback
         ),
         colors = cardColors,
         shape = MaterialTheme.shapes.large
@@ -143,21 +147,20 @@ fun ModListItem(
                 .padding(16.dp)
                 .sizeIn(minHeight = 30.dp)
         ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(MaterialTheme.shapes.extraSmall)
-                .align(Alignment.CenterVertically)
-        ) {
-                val currentImage = imageBitmap.value
-                if (currentImage != null) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(MaterialTheme.shapes.extraSmall)
+                    .align(Alignment.CenterVertically)
+            ) {
+                imageBitmap?.let {
                     Image(
-                        bitmap = currentImage,
+                        bitmap = it,
                         contentDescription = null,
                         alignment = Alignment.TopCenter,
                         contentScale = ContentScale.Crop
                     )
-                } else {
+                } ?: run {
                     Image(
                         painter = painterResource(id = R.drawable.app_icon),
                         contentDescription = null,

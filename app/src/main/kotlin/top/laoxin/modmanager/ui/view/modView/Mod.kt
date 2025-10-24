@@ -153,7 +153,8 @@ fun ModPage(viewModel: ModViewModel) {
                 targetState = uiState.modsView,
                 transitionSpec = {
                     EnterTransition.None togetherWith ExitTransition.None
-                }
+                },
+                label = "ModViewAnimation"
             ) { targetState ->
                 when (targetState) {
                     NavigationIndex.MODS_BROWSER -> ModsBrowser(viewModel)
@@ -238,27 +239,15 @@ fun DisEnableModsDialog(
     }
 }
 
-// 使用 Glide 加载 Bitmap，同时保持图片比例
+// 使用缓存加载图片，保持向后兼容
+@Deprecated("使用 loadImageBitmapWithCache 或 rememberImageBitmap 代替")
 suspend fun loadImageBitmapFromPath(
     context: Context,
     path: String,
     reqWidth: Int,
     reqHeight: Int
 ): ImageBitmap? {
-    return withContext(Dispatchers.IO) {
-        try {
-            val bitmap: Bitmap = Glide.with(context)
-                .asBitmap()
-                .load(path)
-                .apply(RequestOptions().override(reqWidth, reqHeight))  // 指定最大宽度和高度，保持图片比例
-                .submit()
-                .get()
-            bitmap.asImageBitmap()
-        } catch (e: Exception) {
-            Log.e("loadImageBitmapFromPath", "加载图片失败: $e")
-            null
-        }
-    }
+    return loadImageBitmapWithCache(context, path, reqWidth, reqHeight)
 }
 
 // 创建一个全屏的加载动画

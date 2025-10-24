@@ -124,32 +124,44 @@ fun ModDetailPartialBottomSheet(
                         viewModel = viewModel
                     )
 
-                    // 使用 Glide 异步加载图片
+                    // 使用优化的图片加载
                     val imageBitmaps = remember { mutableStateListOf<ImageBitmap>() }
+                    val loadedImages = remember { mutableStateListOf<String>() }
 
                     LaunchedEffect(mod.images) {
+                        if (mod.images == loadedImages) return@LaunchedEffect
+                        
                         imageBitmaps.clear()
-                        mod.images.mapNotNull { path ->
-                            if (File(path.replace("//", "/")).exists()) {
-                                loadImageBitmapFromPath(context, path, 1024, 1024)
+                        loadedImages.clear()
+                        
+                        mod.images.forEach { path ->
+                            val normalizedPath = path.replace("//", "/")
+                            if (File(normalizedPath).exists()) {
+                                loadImageBitmapWithCache(context, normalizedPath, 1024, 1024)?.let {
+                                    imageBitmaps.add(it)
+                                    loadedImages.add(path)
+                                }
                             } else {
                                 Log.e("ModDetail", "图片文件不存在: $path")
                                 logRecord("图片文件不存在: $path")
-
+                                
                                 viewModel.flashModImage(mod)
-
+                                
                                 Log.e("ModDetail", "图片文件已重新解压: $path")
                                 logRecord("图片文件已重新解压: $path")
-
-                                loadImageBitmapFromPath(context, path, 1024, 1024)
+                                
+                                loadImageBitmapWithCache(context, normalizedPath, 1024, 1024)?.let {
+                                    imageBitmaps.add(it)
+                                    loadedImages.add(path)
+                                }
                             }
-                        }.also { loadedBitmaps ->
-                            imageBitmaps.addAll(loadedBitmaps)
                         }
                     }
 
                     // 显示图片轮播
-                    ImageCarouselWithIndicator(imageBitmaps)
+                    if (imageBitmaps.isNotEmpty()) {
+                        ImageCarouselWithIndicator(imageBitmaps)
+                    }
                 }
 
 

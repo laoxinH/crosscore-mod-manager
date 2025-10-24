@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.data.bean.ModBean
 import top.laoxin.modmanager.ui.state.ModUiState
 import top.laoxin.modmanager.ui.viewmodel.ModViewModel
 import java.io.File
@@ -123,15 +124,14 @@ fun ModsBrowser(viewModel: ModViewModel) {
             targetState = currentPath,
             transitionSpec = {
                 EnterTransition.None togetherWith ExitTransition.None
-            }
+            },
+            label = "PathAnimation"
         ) { path ->
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                val mods by remember(files) {
-                    derivedStateOf {
-                        files.flatMap { file ->
-                            viewModel.getModsByPathStrict(file.path) +
-                                    viewModel.getModsByVirtualPathsStrict(file.path)
-                        }
+                val mods = remember(path, files) {
+                    files.flatMap { file ->
+                        viewModel.getModsByPathStrict(file.path) +
+                                viewModel.getModsByVirtualPathsStrict(file.path)
                     }
                 }
 
@@ -193,7 +193,13 @@ private fun FileListContent(
         items(
             items = files,
             key = { file -> file.path },
-            contentType = { file -> if (file.isDirectory) "directory" else "file" }
+            contentType = { file ->
+                when {
+                    file.isDirectory -> "directory"
+                    !file.exists() -> "archive"
+                    else -> "file"
+                }
+            }
         ) { file ->
             if (!isBackPathExist && !isAtRootPath) {
                 LaunchedEffect(Unit) {
@@ -201,28 +207,24 @@ private fun FileListContent(
                 }
             }
 
-            val (modsByPath, modsByVirtualPaths) = remember(file.path, uiState.modList) {
+            val filePath = file.path
+
+            val (modsByPath, modsByVirtualPaths) = remember(filePath, uiState.modList.size) {
                 Pair(
-                    viewModel.getModsByPathStrict(file.path),
-                    viewModel.getModsByVirtualPathsStrict(file.path)
+                    viewModel.getModsByPathStrict(filePath),
+                    viewModel.getModsByVirtualPathsStrict(filePath)
                 )
             }
 
-            val modCount = remember(modsByPath, modsByVirtualPaths) {
-                if (viewModel.getModsByPath(file.path)
-                        .isNotEmpty()
-                ) viewModel.getModsByPath(file.path).size
-                else viewModel.getModsByVirtualPaths(file.path).size
+            val modsByFullPath = remember(filePath, uiState.modList.size) {
+                viewModel.getModsByPath(filePath)
+                    .ifEmpty { viewModel.getModsByVirtualPaths(filePath) }
             }
 
-            val modEnableCount = remember(modsByPath, modsByVirtualPaths) {
-                if (viewModel.getModsByPath(file.path).isNotEmpty())
-                    viewModel.getModsByPath(file.path).count { it.isEnable }
-                else
-                    viewModel.getModsByVirtualPaths(file.path).count { it.isEnable }
-            }
+            val modCount = remember(modsByFullPath) { modsByFullPath.size }
+            val modEnableCount = remember(modsByFullPath) { modsByFullPath.count { it.isEnable } }
 
-            val onClick = remember(file.path) {
+            val onClick = remember(filePath) {
                 { onFileClick(file) }
             }
 
@@ -246,20 +248,27 @@ private fun FileListContent(
 
             if (modsByPath.size == 1 || modsByVirtualPaths.size == 1) {
                 val mod = modsByPath.firstOrNull() ?: modsByVirtualPaths.firstOrNull()!!
+                val onModLongClick: (ModBean) -> Unit = remember(mod.id) {
+                    { viewModel.modLongClick(mod) }
+                }
+                val onModMultiSelectClick: (ModBean) -> Unit = remember(mod.id) {
+                    { viewModel.modMultiSelectClick(mod) }
+                }
+                val openModDetailCallback = remember(mod.id) {
+                    { selectedMod: ModBean, _: Boolean ->
+                        viewModel.openModDetail(selectedMod, true)
+                    }
+                }
+
                 ModListItem(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                     mod = mod,
                     isSelected = uiState.modsSelected.contains(mod.id),
-                    onLongClick = { viewModel.modLongClick(mod) },
-                    onMultiSelectClick = { viewModel.modMultiSelectClick(mod) },
+                    onLongClick = onModLongClick,
+                    onMultiSelectClick = onModMultiSelectClick,
                     isMultiSelect = uiState.isMultiSelect,
                     modSwitchEnable = uiState.modSwitchEnable,
-                    openModDetail = { selectedMod, _ ->
-                        viewModel.openModDetail(
-                            selectedMod,
-                            true
-                        )
-                    },
+                    openModDetail = openModDetailCallback,
                     enableMod = viewModel::switchMod,
                     modViewModel = viewModel
                 )
