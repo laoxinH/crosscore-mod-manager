@@ -99,7 +99,7 @@
 
 ![1715963940732](/image/readme/1715963940732.png?msec=1715965017840)
 
-- **如果不存在readme文件，MOD实验室会提示：未适配MOD管理器，可能存在未知问题**
+- **如果不存在readme文件，MOD实验室会提示：未适配MOD实验室，可能存在未知问题**
 
 **readme(目前readme文件采用Markdown格式, 文件命名为readme.txt或者readme.md)**
 
