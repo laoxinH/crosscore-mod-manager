@@ -47,7 +47,7 @@ retrofit = "3.0.0"
 converterGson = "3.0.0"
 converterScalars = "3.0.0"
 retrofit2KotlinxSerializationConverter = "1.0.0"
-okhttpVersion = "5.2.1"
+okhttpVersion = "5.3.0"
 
 # Serialization
 kotlinxSerializationJson = "1.9.0"
