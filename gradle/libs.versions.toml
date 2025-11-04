@@ -2,7 +2,7 @@
 # Build Tools
 agp = "8.13.0"
 kotlin = "2.2.21"
-ksp = "2.3.0"
+ksp = "2.3.1"
 serialization = "2.2.21"
 
 # Compose
