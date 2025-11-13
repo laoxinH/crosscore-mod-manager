@@ -71,7 +71,7 @@ shizuku = "13.1.5"
 provider = "13.1.5"
 
 # UI & Markdown
-markwon = "0.5.7"
+markwon = "0.5.8"
 aboutLibraries = "13.1.0"
 
 # Testing
