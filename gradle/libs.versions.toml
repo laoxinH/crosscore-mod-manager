@@ -1,8 +1,8 @@
 [versions]
 # Build Tools
-agp = "8.13.0"
+agp = "8.13.1"
 kotlin = "2.2.21"
-ksp = "2.3.0"
+ksp = "2.3.2"
 serialization = "2.2.21"
 
 # Compose
@@ -25,13 +25,13 @@ accompanistSystemuicontroller = "0.36.0"
 # AndroidX
 activityCompose = "1.11.0"
 androidxRuntimeLivedata = "1.9.4"
-coreSplashscreen = "1.0.1"
-datastorePreferences = "1.2.0-beta01"
+coreSplashscreen = "1.2.0"
+datastorePreferences = "1.2.0-rc01"
 documentfile = "1.1.0"
 lifecycleViewmodelCompose = "2.9.4"
 lifecycleProcess = "2.9.4"
-navigationCompose = "2.9.5"
-navigationRuntimeKtx = "2.9.5"
+navigationCompose = "2.9.6"
+navigationRuntimeKtx = "2.9.6"
 rules = "1.7.0"
 
 # Room
@@ -47,7 +47,7 @@ retrofit = "3.0.0"
 converterGson = "3.0.0"
 converterScalars = "3.0.0"
 retrofit2KotlinxSerializationConverter = "1.0.0"
-okhttpVersion = "5.2.1"
+okhttpVersion = "5.3.0"
 
 # Serialization
 kotlinxSerializationJson = "1.9.0"
@@ -71,7 +71,7 @@ shizuku = "13.1.5"
 provider = "13.1.5"
 
 # UI & Markdown
-markwon = "0.5.7"
+markwon = "0.5.8"
 aboutLibraries = "13.1.0"
 
 # Testing

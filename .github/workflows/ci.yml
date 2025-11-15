@@ -35,31 +35,31 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Upload ARM64
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: arm64-v8a
           path: app/build/outputs/apk/release/app-arm64-v8a-release.apk
 
       - name: Upload ARM32
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: armeabi-v7a
           path: app/build/outputs/apk/release/app-armeabi-v7a-release.apk
 
       - name: Upload x86
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: x86
           path: app/build/outputs/apk/release/app-x86-release.apk
 
       - name: Upload x86_64
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: x86_64
           path: app/build/outputs/apk/release/app-x86_64-release.apk
 
       - name: Upload universal
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: universal
           path: app/build/outputs/apk/release/app-universal-release.apk
