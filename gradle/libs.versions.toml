@@ -23,13 +23,13 @@ accompanistPermissions = "0.37.3"
 accompanistSystemuicontroller = "0.36.0"
 
 # AndroidX
-activityCompose = "1.11.0"
+activityCompose = "1.12.0"
 androidxRuntimeLivedata = "1.9.5"
 coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.0-rc01"
 documentfile = "1.1.0"
-lifecycleViewmodelCompose = "2.9.4"
-lifecycleProcess = "2.9.4"
+lifecycleViewmodelCompose = "2.10.0"
+lifecycleProcess = "2.10.0"
 navigationCompose = "2.9.6"
 navigationRuntimeKtx = "2.9.6"
 rules = "1.7.0"
@@ -62,7 +62,7 @@ hilt = "2.57.2"
 
 # Compression & Archives
 commonsCompress = "1.28.0"
-xz = "1.10"
+xz = "1.11"
 zip4j = "2.11.5"
 xZipJbindingXandroid = "2025.06.13"
 
