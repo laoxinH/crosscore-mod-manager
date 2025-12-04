@@ -6,16 +6,16 @@ ksp = "2.3.3"
 serialization = "2.2.21"
 
 # Compose
-composeUi = "1.9.5"
-composeFoundation = "1.9.5"
-composeRuntime = "1.9.5"
-composeAnimation = "1.9.5"
+composeUi = "1.10.0"
+composeFoundation = "1.10.0"
+composeRuntime = "1.10.0"
+composeAnimation = "1.10.0"
 material3 = "1.4.0"
 material3Adaptive = "1.2.0"
 material3AdaptiveNavigationSuite = "1.4.0"
 materialIcon = "1.7.8"
 materialIconExtended = "1.7.8"
-uiTooling = "1.9.5"
+uiTooling = "1.10.0"
 
 # Accompanist
 accompanistPager = "0.36.0"
@@ -24,7 +24,7 @@ accompanistSystemuicontroller = "0.36.0"
 
 # AndroidX
 activityCompose = "1.12.1"
-androidxRuntimeLivedata = "1.9.5"
+androidxRuntimeLivedata = "1.10.0"
 coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.0"
 documentfile = "1.1.0"
