@@ -2,20 +2,20 @@
 # Build Tools
 agp = "8.13.1"
 kotlin = "2.2.21"
-ksp = "2.3.2"
+ksp = "2.3.3"
 serialization = "2.2.21"
 
 # Compose
-composeUi = "1.9.4"
-composeFoundation = "1.9.4"
-composeRuntime = "1.9.4"
-composeAnimation = "1.9.4"
+composeUi = "1.10.0"
+composeFoundation = "1.10.0"
+composeRuntime = "1.10.0"
+composeAnimation = "1.10.0"
 material3 = "1.4.0"
 material3Adaptive = "1.2.0"
 material3AdaptiveNavigationSuite = "1.4.0"
 materialIcon = "1.7.8"
 materialIconExtended = "1.7.8"
-uiTooling = "1.9.4"
+uiTooling = "1.10.0"
 
 # Accompanist
 accompanistPager = "0.36.0"
@@ -23,21 +23,21 @@ accompanistPermissions = "0.37.3"
 accompanistSystemuicontroller = "0.36.0"
 
 # AndroidX
-activityCompose = "1.11.0"
-androidxRuntimeLivedata = "1.9.4"
+activityCompose = "1.12.1"
+androidxRuntimeLivedata = "1.10.0"
 coreSplashscreen = "1.2.0"
-datastorePreferences = "1.2.0-rc01"
+datastorePreferences = "1.2.0"
 documentfile = "1.1.0"
-lifecycleViewmodelCompose = "2.9.4"
-lifecycleProcess = "2.9.4"
+lifecycleViewmodelCompose = "2.10.0"
+lifecycleProcess = "2.10.0"
 navigationCompose = "2.9.6"
 navigationRuntimeKtx = "2.9.6"
 rules = "1.7.0"
 
 # Room
-roomVersion = "2.8.3"
-roomKtx = "2.8.3"
-roomRuntime = "2.8.3"
+roomVersion = "2.8.4"
+roomKtx = "2.8.4"
+roomRuntime = "2.8.4"
 
 # Coroutines
 coroutines = "1.10.2"
@@ -47,7 +47,7 @@ retrofit = "3.0.0"
 converterGson = "3.0.0"
 converterScalars = "3.0.0"
 retrofit2KotlinxSerializationConverter = "1.0.0"
-okhttpVersion = "5.3.0"
+okhttpVersion = "5.3.2"
 
 # Serialization
 kotlinxSerializationJson = "1.9.0"
@@ -62,7 +62,7 @@ hilt = "2.57.2"
 
 # Compression & Archives
 commonsCompress = "1.28.0"
-xz = "1.10"
+xz = "1.11"
 zip4j = "2.11.5"
 xZipJbindingXandroid = "2025.06.13"
 
