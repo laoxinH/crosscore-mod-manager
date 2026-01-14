@@ -3,6 +3,7 @@ package top.laoxin.modmanager.data.repository
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import top.laoxin.modmanager.domain.bean.ModForm
 
 class Converters {
 
@@ -16,5 +17,19 @@ class Converters {
     fun fromList(list: List<String>): String {
         val gson = Gson()
         return gson.toJson(list)
+    }
+
+    @TypeConverter
+    fun fromModForm(value: ModForm): String {
+        return value.name
+    }
+
+    @TypeConverter
+    fun toModForm(value: String): ModForm {
+        return try {
+            ModForm.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            ModForm.TRADITIONAL
+        }
     }
 }

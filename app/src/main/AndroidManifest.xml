@@ -50,12 +50,6 @@
             android:exported="true"
             android:theme="@style/Theme.ModManager" />
 
-        <service
-            android:name=".userService.gamestart.ProjectSnowStartService"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="dataSync"
-            android:permission="android.permission.INTERNET" />
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
             android:authorities="${applicationId}.shizuku"

@@ -6,10 +6,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
-import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.data.bean.GameInfoBean
-import top.laoxin.modmanager.data.bean.InfoBean
-import top.laoxin.modmanager.data.bean.ThanksBean
+import top.laoxin.modmanager.domain.bean.DownloadGameConfigBean
+import top.laoxin.modmanager.domain.bean.GameInfoBean
+import top.laoxin.modmanager.domain.bean.InfoBean
+import top.laoxin.modmanager.domain.bean.ThanksBean
 
 private const val API_URL_JSDELIVR =
     "https://cdn.jsdelivr.net"

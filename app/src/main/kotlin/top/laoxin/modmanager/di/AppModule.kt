@@ -6,8 +6,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import top.laoxin.modmanager.data.repository.ModManagerDatabase
-import top.laoxin.modmanager.tools.PermissionTools
 import javax.inject.Singleton
 
 @Module
@@ -22,13 +24,16 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideModManagerDatabase(@ApplicationContext context: Context): ModManagerDatabase {
-        return ModManagerDatabase.getDatabase(context)
+    fun provideApplicationScope(): CoroutineScope {
+         // SupervisorJob() //确保一个子协程的失败不会导致整个 Scope 被取消
+        return CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }
 
     @Provides
     @Singleton
-    fun providePermissionTools(): PermissionTools {
-        return PermissionTools
+    fun provideModManagerDatabase(@ApplicationContext context: Context): ModManagerDatabase {
+        return ModManagerDatabase.getDatabase(context)
     }
+
+
 }

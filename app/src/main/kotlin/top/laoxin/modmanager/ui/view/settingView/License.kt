@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.ui.view.common.openUrl
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @Composable
@@ -21,7 +22,7 @@ fun License(modifier: Modifier, viewModel: SettingViewModel) {
         libraries = libraries,
         onLibraryClick = { library ->
             library.website?.let { website ->
-                viewModel.openUrl(context, website)
+                context.openUrl(website)
             }
         },
     )

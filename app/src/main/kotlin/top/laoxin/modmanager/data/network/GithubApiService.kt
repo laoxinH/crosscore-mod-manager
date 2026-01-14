@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import top.laoxin.modmanager.data.bean.GithubBean
+import top.laoxin.modmanager.domain.bean.GithubBean
 
 private const val GITHUB_URL =
     "https://api.github.com"

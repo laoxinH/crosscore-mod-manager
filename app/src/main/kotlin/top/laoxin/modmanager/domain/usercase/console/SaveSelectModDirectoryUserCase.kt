@@ -1,51 +1,23 @@
 package top.laoxin.modmanager.domain.usercase.console
 
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import top.laoxin.modmanager.constant.UserPreferencesKeys
-import top.laoxin.modmanager.domain.usercase.userpreference.SaveUserPreferenceUseCase
-import top.laoxin.modmanager.tools.manager.AppPathsManager
-import top.laoxin.modmanager.tools.manager.GameInfoManager
-import java.io.File
+import top.laoxin.modmanager.domain.bean.GameInfoBean
+import top.laoxin.modmanager.domain.model.Result
+import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SaveSelectModDirectoryUserCase @Inject constructor(
-    private val appPathsManager: AppPathsManager,
-    private val gameInfoManager: GameInfoManager,
-    private val saveUserPreferenceUseCase: SaveUserPreferenceUseCase
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) {
-    suspend operator fun invoke(selectedDirectoryPath: String): Boolean =
-        withContext(Dispatchers.IO) {
-            try {
-                val gameConfigFile = File(
-                    (appPathsManager.getRootPath() + "/$selectedDirectoryPath/" + appPathsManager.getGameConfig()).replace(
-                        "tree", ""
-                    ).replace("//", "/")
-                )
-                val gameModsFile = File(
-                    (appPathsManager.getRootPath() + "/$selectedDirectoryPath/" + gameInfoManager.getGameInfo().packageName).replace(
-                        "tree", ""
-                    ).replace("//", "/")
-                )
-                if (!gameConfigFile.absolutePath.contains("${appPathsManager.getRootPath()}/Android")) {
-                    gameConfigFile.mkdirs()
-                    if (gameInfoManager.getGameInfo().packageName != "") {
-                        gameModsFile.mkdirs()
-                    }
-                    saveUserPreferenceUseCase(
-                        UserPreferencesKeys.SELECTED_DIRECTORY,
-                        "/$selectedDirectoryPath/".replace("tree", "").replace("//", "/")
-                    )
-                    return@withContext true
-                } else {
-                    return@withContext false
-                }
-            } catch (e: Exception) {
-                Log.e("ConsoleViewModel", "setSelectedDirectory: $e")
-                return@withContext false
-            }
-        }
+    /**
+     * 指示 Repository 去准备并设置一个新的 Mod 目录。
+     * @return Boolean: 操作是否成功。
+     */
+    suspend operator fun invoke(selectedDirectoryPath: String, currentGame: GameInfoBean): Result<Unit> {
+
+
+        // 2. The UseCase then calls a simpler method on the repository, passing in all required data.
+        return userPreferencesRepository.prepareAndSetModDirectory(selectedDirectoryPath)
+    }
 }

@@ -1,37 +1,46 @@
 package top.laoxin.modmanager.ui.state
 
 import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.data.bean.GameInfoBean
-import top.laoxin.modmanager.data.bean.InfoBean
+import top.laoxin.modmanager.domain.bean.GameInfoBean
+import top.laoxin.modmanager.domain.bean.InfoBean
+import top.laoxin.modmanager.domain.repository.UpdateInfo
 
+/**
+ * 更新信息的数据载体
+ */
+
+
+/**
+ * 控制台（主页）UI 状态
+ */
 data class ConsoleUiState(
-    var antiHarmony: Boolean = false,
-    var scanQQDirectory: Boolean = false,
-    var selectedDirectory: String = "未选择",
-    val scanDownload: Boolean = false,
-    val openPermissionRequestDialog: Boolean = false,
-    // mod数量
-    val modCount: Int = 0,
-    // 已开启mod数量
-    val enableModCount: Int = 0,
-    // 扫描文件夹中的Mods
-    val scanDirectoryMods: Boolean = true,
-    // 游戏信息
-    val gameInfo: GameInfoBean = GameInfoConstant.gameInfoList[0],
-    // 是否可以安装mod
-    val canInstallMod: Boolean = false,
-    // 是否显示扫描文件夹中的Mods对话框
-    val showScanDirectoryModsDialog: Boolean = false,
-    // 显示升级弹窗
-    val showUpgradeDialog: Boolean = false,
-    // 显示信息弹窗
+    // App/Update Info
+    val infoBean: InfoBean? = null,
+    val updateInfo: UpdateInfo? = null, // Grouped update info
     val showInfoDialog: Boolean = false,
-    // 信息弹窗内容
-    val infoBean: InfoBean = InfoBean(0.0, ""),
-    // 显示删除解压目录弹窗
+    val showUpgradeDialog: Boolean = false,
+
+    // Game Info
+    val gameInfo: GameInfoBean = GameInfoConstant.NO_GAME, // Non-nullable
+    val antiHarmony: Boolean = false,
+    val canInstallMod: Boolean = false,
+    val modCount: Int = 0,
+    val enableModCount: Int = 0,
+
+    // Dialogs & Permissions
+    val showScanDirectoryModsDialog: Boolean = false,
+    val openPermissionRequestDialog: Boolean = false,
     val showDeleteUnzipDialog: Boolean = false,
-    // 自动删除解压目录
+    val requestPermissionPath: String = "",
+
+    // User Preferences (mirrored from settings)
+    val scanQQDirectory: Boolean = false,
+    val selectedDirectory: String = "",
+    val scanDownload: Boolean = false,
+    val scanDirectoryMods: Boolean = true,
     val delUnzipDictionary: Boolean = false,
-    // 展示分类视图
     val showCategoryView: Boolean = true,
+
+    // Loading state
+    val isLoading: Boolean = true
 )

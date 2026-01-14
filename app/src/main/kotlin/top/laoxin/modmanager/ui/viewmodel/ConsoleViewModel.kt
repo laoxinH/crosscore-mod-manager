@@ -3,485 +3,359 @@ package top.laoxin.modmanager.ui.viewmodel
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.constant.ResultCode
-import top.laoxin.modmanager.constant.ScanModPath
-import top.laoxin.modmanager.constant.UserPreferencesKeys
-import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.constant.FileAccessType
+import top.laoxin.modmanager.constant.PathConstants
+import top.laoxin.modmanager.domain.bean.GameInfoBean
+import top.laoxin.modmanager.data.service.AppInfoService
+import top.laoxin.modmanager.domain.model.AppError
+import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
+import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.domain.usercase.app.CheckUpdateUserCase
-import top.laoxin.modmanager.domain.usercase.app.GetInformationUserCase
-import top.laoxin.modmanager.domain.usercase.app.UpdateLogToolUserCase
-import top.laoxin.modmanager.domain.usercase.console.SaveSelectModDirectoryUserCase
+import top.laoxin.modmanager.domain.usercase.app.GetCurrentInformationUserCase
+import top.laoxin.modmanager.domain.usercase.app.UpdateLogServiceUserCase
+import top.laoxin.modmanager.domain.usercase.console.CheckInstallModUseCase
 import top.laoxin.modmanager.domain.usercase.console.SwitchAntiHarmonyUserCase
-import top.laoxin.modmanager.domain.usercase.gameinfo.LoadGameConfigUserCase
-import top.laoxin.modmanager.domain.usercase.gameinfo.UpdateGameInfoUserCase
-import top.laoxin.modmanager.domain.usercase.repository.AddGameToAntiHarmonyUserCase
-import top.laoxin.modmanager.domain.usercase.repository.GetAntiHarmonyUserCase
-import top.laoxin.modmanager.domain.usercase.repository.GetGameEnableModsCountUserCase
-import top.laoxin.modmanager.domain.usercase.repository.GetGameModsCountUserCase
-import top.laoxin.modmanager.domain.usercase.setting.SelectGameUserCase
-import top.laoxin.modmanager.domain.usercase.userpreference.GetUserPreferenceUseCase
-import top.laoxin.modmanager.domain.usercase.userpreference.SaveUserPreferenceUseCase
-import top.laoxin.modmanager.observer.FlashModsObserverManager
-import top.laoxin.modmanager.tools.AppInfoTools
-import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.ToastUtils
-import top.laoxin.modmanager.tools.filetools.FileToolsManager
-import top.laoxin.modmanager.tools.manager.AppPathsManager
-import top.laoxin.modmanager.tools.manager.GameInfoManager
+import top.laoxin.modmanager.domain.usercase.console.GetCurrentGameAntiHarmonyStateUserCase
+import top.laoxin.modmanager.domain.usercase.mod.GetGameEnableModsCountUserCase
+import top.laoxin.modmanager.domain.usercase.mod.GetGameModsCountUserCase
 import top.laoxin.modmanager.ui.state.ConsoleUiState
+import top.laoxin.modmanager.ui.state.PermissionRequestState
+import top.laoxin.modmanager.ui.state.PermissionType
+import top.laoxin.modmanager.ui.state.SnackbarManager
 import top.laoxin.modmanager.ui.state.UserPreferencesState
-import javax.inject.Inject
 
 @HiltViewModel
-class ConsoleViewModel @Inject constructor(
-    getUserPreferenceUseCase: GetUserPreferenceUseCase,
+class ConsoleViewModel
+@Inject
+constructor(
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val checkUpdateUserCase: CheckUpdateUserCase,
-    private val saveUserPreferenceUseCase: SaveUserPreferenceUseCase,
-    private val getInformationUserCase: GetInformationUserCase,
-    private val updateGameInfoUserCase: UpdateGameInfoUserCase,
-    private val loadGameConfigUserCase: LoadGameConfigUserCase,
-    private val updateLogToolUserCase: UpdateLogToolUserCase,
-    private val getAntiHarmonyUserCase: GetAntiHarmonyUserCase,
-    private val addGameToAntiHarmonyUserCase: AddGameToAntiHarmonyUserCase,
-    private val saveSelectModDirectoryUserCase: SaveSelectModDirectoryUserCase,
+    private val getCurrentInformationUserCase: GetCurrentInformationUserCase,
+    private val checkInstallModUseCase: CheckInstallModUseCase,
+    private val updateLogServiceUserCase: UpdateLogServiceUserCase,
+    private val getCurrentGameAntiHarmonyStateUserCase: GetCurrentGameAntiHarmonyStateUserCase,
     private val switchAntiHarmonyUserCase: SwitchAntiHarmonyUserCase,
     private val getGameModsCountUserCase: GetGameModsCountUserCase,
     private val getGameEnableModsCountUserCase: GetGameEnableModsCountUserCase,
-    private val appPathsManager: AppPathsManager,
-    private val gameInfoManager: GameInfoManager,
-    private val flashModsObserverManager: FlashModsObserverManager,
-    private val fileToolsManager: FileToolsManager,
-    private val permissionTools: PermissionTools,
-    private val appInfoTools: AppInfoTools,
-    private val selectGameUserCase: SelectGameUserCase,
+    private val permissionService: PermissionService,
+    private val snackbarManager: SnackbarManager,
+    private val appInfoService: AppInfoService,
 ) : ViewModel() {
 
-    // 请求权限路径
-    private var _requestPermissionPath by mutableStateOf("")
 
-    // 下载地址
-    private var _downloadUrl: String? by mutableStateOf("")
-    val downloadUrl: String?
-        get() = _downloadUrl
+    // 内部 UI 状态
+    private val _uiState = MutableStateFlow(ConsoleUiState())
 
-    private var _universalUrl: String? by mutableStateOf("")
-    val universalUrl: String?
-        get() = _universalUrl
+    // 权限请求状态
+    private val _permissionState = MutableStateFlow(PermissionRequestState())
+    val permissionState: StateFlow<PermissionRequestState> = _permissionState.asStateFlow()
 
-    // 更新内容
-    private var _updateContent: String? by mutableStateOf("")
-    val updateContent: String?
-        get() = _updateContent
+    private val userPreferencesState: StateFlow<UserPreferencesState> =
+        combine(
+            userPreferencesRepository.selectedGame,
+            userPreferencesRepository.scanQQDirectory,
+            userPreferencesRepository.selectedDirectory,
+            userPreferencesRepository.scanDownload,
+            combine(
+                userPreferencesRepository.scanDirectoryMods,
+                userPreferencesRepository.deleteUnzipDirectory,
+                userPreferencesRepository.showCategoryView
+            ) { scanMods, delUnzip, category ->
+                Triple(scanMods, delUnzip, category)
+            }
+        ) { game, qq, dir, download, lastThree ->
+            UserPreferencesState(
+                selectedGame = game,
+                scanQQDirectory = qq,
+                selectedDirectory = dir,
+                scanDownload = download,
+                scanDirectoryMods = lastThree.first,
+                delUnzipDictionary = lastThree.second,
+                showCategoryView = lastThree.third
+            )
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = UserPreferencesState()
+            )
 
-
-    val requestPermissionPath: String
-        get() = _requestPermissionPath
-
-
-    private val _uiState = MutableStateFlow<ConsoleUiState>(ConsoleUiState())
-
-    companion object {
-        var updateModCountJob: Job? = null
-        var updateAntiHarmonyJob: Job? = null
-        var updateEnableModCountJob: Job? = null
-    }
-
-    private val selectedGameFlow = getUserPreferenceUseCase(UserPreferencesKeys.SELECTED_GAME, 0)
-    private val scanQQDirectoryFlow =
-        getUserPreferenceUseCase(UserPreferencesKeys.SCAN_QQ_DIRECTORY, false)
-    private val selectedDirectoryFlow = getUserPreferenceUseCase(
-        UserPreferencesKeys.SELECTED_DIRECTORY,
-        appPathsManager.getDownloadModPath()
-    )
-    private val scanDownloadFlow =
-        getUserPreferenceUseCase(UserPreferencesKeys.SCAN_DOWNLOAD, false)
-    private val openPermissionRequestDialogFlow =
-        getUserPreferenceUseCase(UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG, false)
-    private val scanDirectoryModsFlow =
-        getUserPreferenceUseCase(UserPreferencesKeys.SCAN_DIRECTORY_MODS, true)
-    private val delUnzipDictionaryFlow =
-        getUserPreferenceUseCase(UserPreferencesKeys.DELETE_UNZIP_DIRECTORY, false)
-    private val showCategoryViewFlow =
-        getUserPreferenceUseCase(UserPreferencesKeys.SHOW_CATEGORY_VIEW, true)
-
-
-    private val userPreferencesState = combine(
-        selectedGameFlow, selectedDirectoryFlow
-    ) { selectedGame, selectedDirectory ->
-        UserPreferencesState(
-            selectedGameIndex = selectedGame, selectedDirectory = selectedDirectory
-        )
-    }.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesState()
-    )
-
-
-    val uiState = combine(
-        scanQQDirectoryFlow,
-        selectedDirectoryFlow,
-        scanDownloadFlow,
-        openPermissionRequestDialogFlow,
-        scanDirectoryModsFlow,
-        delUnzipDictionaryFlow,
-        showCategoryViewFlow,
-        _uiState
-    ) { values ->
-        (values[7] as ConsoleUiState).copy(
-            scanQQDirectory = values[0] as Boolean,
-            selectedDirectory = values[1] as String,
-            scanDownload = values[2] as Boolean,
-            openPermissionRequestDialog = values[3] as Boolean,
-            scanDirectoryMods = values[4] as Boolean,
-            delUnzipDictionary = values[5] as Boolean,
-            showCategoryView = values[6] as Boolean
-        )
-
-    }.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), ConsoleUiState()
-    )
+    val uiState: StateFlow<ConsoleUiState> =
+        combine(
+            _uiState,
+            getCurrentGameAntiHarmonyStateUserCase(),
+            userPreferencesState,
+            combine(
+                getGameModsCountUserCase(),
+                getGameEnableModsCountUserCase(),
+                checkInstallModUseCase()
+            ) { modCount, enableCount, canInstall ->
+                Triple(modCount, enableCount, canInstall)
+            },
+        ) { uiState, antiHarmonyBean, prefs, lastThree ->
+            ConsoleUiState(
+                infoBean = uiState.infoBean,
+                updateInfo = uiState.updateInfo,
+                showInfoDialog = uiState.showInfoDialog,
+                showUpgradeDialog = uiState.showUpgradeDialog,
+                gameInfo = prefs.selectedGame,
+                canInstallMod = lastThree.third,
+                showScanDirectoryModsDialog = uiState.showScanDirectoryModsDialog,
+                openPermissionRequestDialog = uiState.openPermissionRequestDialog,
+                requestPermissionPath = uiState.requestPermissionPath,
+                modCount = lastThree.first,
+                enableModCount = lastThree.second,
+                antiHarmony = antiHarmonyBean?.isEnable ?: false,
+                scanQQDirectory = prefs.scanQQDirectory,
+                selectedDirectory = prefs.selectedDirectory,
+                scanDownload = prefs.scanDownload,
+                scanDirectoryMods = prefs.scanDirectoryMods,
+                delUnzipDictionary = prefs.delUnzipDictionary,
+                showCategoryView = prefs.showCategoryView,
+                isLoading = false
+            )
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = ConsoleUiState(isLoading = true)
+            )
 
     init {
-        //checkUpdate()
+        checkStoragePermission()
+        checkUpdate()
         getNewInfo()
         viewModelScope.launch {
-            loadGameConfigUserCase()
-            userPreferencesState.collectLatest {
-                updateLogToolUserCase(appPathsManager.getRootPath() + it.selectedDirectory)
-                updateGameInfo(it)
-                //updateModTools(it.selectedDirectory)
-                appPathsManager.setModPath(it.selectedDirectory)
-                checkInstallMod()
-                updateModCount()
-                updateAntiHarmony()
-                updateEnableModCount()
-
-                flashModsObserverManager.openSelectedDictionaryObserver(it.selectedDirectory)
+            // reLoadGameConfigUserCase()
+            userPreferencesState.collectLatest { prefs ->
+                updateLogServiceUserCase(prefs.selectedDirectory)
+                checkInstallMod(prefs.selectedGame.gamePath)
             }
         }
     }
 
+    /**
+     * 检查全局存储权限
+     * 如果没有权限则显示权限请求对话框
+     */
+    private fun checkStoragePermission() {
+        if (!permissionService.hasStoragePermission()) {
+            _permissionState.update {
+                PermissionRequestState(
+                    showDialog = true,
+                    requestPath = "",
+                    permissionType = PermissionType.STORAGE
+                )
+            }
+        }
+    }
 
     private fun checkUpdate() {
         viewModelScope.launch {
-            val update = checkUpdateUserCase(BuildConfig.VERSION_NAME)
-            if (update.third) {
-                _downloadUrl = update.first[0]
-                _universalUrl = update.first[1]
-                _updateContent = update.second[0]
-                setShowUpgradeDialog(true)
+            checkUpdateUserCase(BuildConfig.VERSION_NAME).let { updateInfo ->
+                _uiState.update { it.copy(updateInfo = updateInfo, showUpgradeDialog = true) }
             }
         }
     }
 
     private fun getNewInfo() {
         viewModelScope.launch {
-            getInformationUserCase()?.let { info ->
-                _uiState.update {
-                    it.copy(infoBean = info)
-                }
-                setShowInfoDialog(true)
-            }
-        }
-    }
-
-    fun setShowInfoDialog(b: Boolean) {
-        _uiState.update {
-            it.copy(showInfoDialog = b)
-        }
-    }
-
-    private fun updateAntiHarmony() {
-        updateAntiHarmonyJob?.cancel()
-        updateAntiHarmonyJob = viewModelScope.launch {
-            getAntiHarmonyUserCase().collectLatest { antiHarmonyBean ->
-                if (antiHarmonyBean == null) {
-                    addGameToAntiHarmonyUserCase()
-                    _uiState.update {
-                        it.copy(antiHarmony = false)
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(antiHarmony = antiHarmonyBean.isEnable)
-                    }
+            getCurrentInformationUserCase()?.let { info ->
+                if (info.version > userPreferencesRepository.cachedInformationVision.first()) {
+                    _uiState.update { it.copy(infoBean = info, showInfoDialog = true) }
                 }
             }
         }
-
     }
 
-    private fun setScanQQDirectory(scanQQDirectory: Boolean) {
+    private fun checkInstallMod(gamePath: String) {
+        val checkPermission = permissionService.getFileAccessType(gamePath)
+        val canInstall = checkPermission != FileAccessType.NONE && gamePath.isNotEmpty()
+        _uiState.update { it.copy(canInstallMod = canInstall) }
+    }
+
+    fun openAntiHarmony(flag: Boolean) {
         viewModelScope.launch {
-            saveUserPreferenceUseCase(UserPreferencesKeys.SCAN_QQ_DIRECTORY, scanQQDirectory)
+            switchAntiHarmonyUserCase(flag).onSuccess { /* 成功处理 */ }.onError { error ->
+                when (error) {
+                    is AppError.AntiHarmonyError.NotSupported ->
+                        snackbarManager.showMessage(R.string.toast_game_not_suppose_anti)
+                    // ToastUtils.longCall(R.string.toast_game_not_suppose_anti)
+                    is AppError.PermissionError.StoragePermissionDenied ->
+                        showPermissionDialog(_uiState.value.gameInfo.gamePath)
+
+                    is AppError.PermissionError.UriPermissionNotGranted ->
+                        showPermissionDialog(_uiState.value.gameInfo.gamePath)
+
+                    else -> snackbarManager.showMessage(R.string.toast_unknow_err, error)
+                }
+            }
         }
     }
 
+    private fun showPermissionDialog(
+        gamePath: String,
+        permissionType: PermissionType = PermissionType.URI_SAF
+    ) {
+        _permissionState.update {
+            PermissionRequestState(
+                showDialog = true,
+                requestPath = permissionService.getRequestPermissionPath(gamePath),
+                permissionType = permissionType
+            )
+        }
+    }
+
+    /** 权限授予回调 */
+    fun onPermissionGranted() {
+        _permissionState.update { PermissionRequestState() }
+        snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+        // TODO: 重试之前的操作
+    }
+
+    /** 权限拒绝回调 */
+    fun onPermissionDenied() {
+        _permissionState.update { PermissionRequestState() }
+        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+    }
+
+    /** 请求 Shizuku 权限 */
+    fun requestShizukuPermission() {
+        val result = permissionService.requestShizukuPermission()
+        result
+            .onSuccess {
+                // Shizuku 权限请求已发起，等待结果
+            }
+            .onError {
+                snackbarManager.showMessageAsync(R.string.toast_shizuku_not_available)
+                _permissionState.update { PermissionRequestState() }
+            }
+    }
+
+    /** Shizuku 是否可用 */
+    fun isShizukuAvailable(): Boolean = permissionService.isShizukuAvailable()
+
+    fun setScanQQDirectory(scan: Boolean) {
+        val path = PathConstants.SCAN_PATH_QQ
+        if (permissionService.getFileAccessType(path) != FileAccessType.NONE) {
+            viewModelScope.launch { userPreferencesRepository.saveScanQQDirectory(scan) }
+        } else {
+            showPermissionDialog(path)
+        }
+    }
 
     fun setSelectedDirectory(selectedDirectory: String) {
         viewModelScope.launch {
-            if (!saveSelectModDirectoryUserCase(selectedDirectory)) {
-                ToastUtils.longCall(R.string.toast_this_dir_has_no_prim_android)
-            }
-        }
-    }
+            userPreferencesRepository
+                .prepareAndSetModDirectory(selectedDirectory)
+                .onSuccess {}
+                .onError {
+                    when (it) {
+                        is AppError.FileError.PermissionDenied ->
+                            snackbarManager.showMessage(
+                                R.string.toast_this_dir_has_no_prim_android
+                            )
 
-    private fun setScanDownload(scanDownload: Boolean) {
-        viewModelScope.launch {
-            saveUserPreferenceUseCase(UserPreferencesKeys.SCAN_DOWNLOAD, scanDownload)
-        }
-    }
-
-    fun setOpenPermissionRequestDialog(b: Boolean) {
-        viewModelScope.launch {
-            saveUserPreferenceUseCase(UserPreferencesKeys.OPEN_PERMISSION_REQUEST_DIALOG, b)
-        }
-    }
-
-
-    // 设置扫描文件夹中的Mods
-    fun setScanDirectoryMods(scanDirectoryMods: Boolean) {/*  if (gameInfo.isGameFileRepeat){
-              ToastUtils.longCall(R.string.toast_game_config_not_suppose)
-              return
-          }*/
-        viewModelScope.launch {
-            saveUserPreferenceUseCase(UserPreferencesKeys.SCAN_DIRECTORY_MODS, scanDirectoryMods)
-        }
-    }
-
-    // 设置请求权路径
-    fun setRequestPermissionPath(path: String) {
-        Log.d("ConsoleViewModel", "setRequestPermissionPath: $path")
-        _requestPermissionPath = path
-    }
-
-
-    // 更新游戏信息
-    private suspend fun updateGameInfo(userPreferencesState: UserPreferencesState) {
-        val gameInfo = updateGameInfoUserCase(
-            userPreferencesState.selectedGameIndex,
-            appPathsManager.getRootPath() + userPreferencesState.selectedDirectory
-        )
-        setGameInfo(gameInfo)
-        //selectGameUserCase(gameInfo)
-        // Log.d("主界面更新游戏信息", "更新updateGameInfo: $gameInfo")
-    }
-
-
-    // 开启扫描QQ目录
-    fun openScanQQDirectoryDialog(b: Boolean) {
-        setRequestPermissionPath(permissionTools.getRequestPermissionPath(ScanModPath.MOD_PATH_QQ))
-        if (permissionTools.checkPermission(ScanModPath.MOD_PATH_QQ) != PathType.NULL) {
-            setScanQQDirectory(b)
-        } else {
-            setOpenPermissionRequestDialog(true)
-        }
-    }
-
-    // 开启反和谐
-    fun openAntiHarmony(flag: Boolean) {
-        val gameInfo = gameInfoManager.getGameInfo()
-        viewModelScope.launch {
-            val result = switchAntiHarmonyUserCase(flag)
-            when (result) {
-                ResultCode.NOT_SUPPORT -> {
-                    ToastUtils.longCall(R.string.toast_game_not_suppose_anti)
+                        else -> snackbarManager.showMessage(R.string.toast_unknow_err, it)
+                    }
                 }
+        }
+    }
 
-                ResultCode.NO_PERMISSION -> {
-                    setRequestPermissionPath(permissionTools.getRequestPermissionPath(gameInfo.gamePath))
-                    setOpenPermissionRequestDialog(true)
-                }
+    fun switchScanDirectoryMods(scan: Boolean) {
+        if (!scan) {
+            if (uiState.value.showScanDirectoryModsDialog) {
+                _uiState.update { it.copy(showScanDirectoryModsDialog = false) }
+                viewModelScope.launch { userPreferencesRepository.saveScanDirectoryMods(scan) }
 
-                ResultCode.NO_MY_APP_PERMISSION -> {
-                    setRequestPermissionPath(appPathsManager.getMyAppPath())
-                    setOpenPermissionRequestDialog(true)
-                }
-
-                ResultCode.SUCCESS -> {
-
-                }
+            } else {
+                _uiState.update { it.copy(showScanDirectoryModsDialog = true) }
             }
-        }
-    }
-
-    // 开启扫描下载目录
-    fun openScanDownloadDirectoryDialog(b: Boolean) {
-        setScanDownload(b)
-    }
-
-
-    // 设置showScanDirectoryModsDialog
-    fun setShowScanDirectoryModsDialog(b: Boolean) {
-        _uiState.update {
-            it.copy(showScanDirectoryModsDialog = b)
-        }
-    }
-
-
-    fun openUrl(context: Context, url: String) {
-        val urlIntent = Intent(
-            Intent.ACTION_VIEW, url.toUri()
-        )
-        context.startActivity(urlIntent)
-    }
-
-
-    fun openScanDirectoryMods(b: Boolean) {
-        if (b) {
-            _uiState.update {
-                it.copy(showScanDirectoryModsDialog = true)
-            }
-        } else {
-            setScanDirectoryMods(false)
-        }
-    }
-
-    // 检查是否支持安装mod
-    private fun checkInstallMod() {
-        val gameInfo = gameInfoManager.getGameInfo()
-        val checkPermission = permissionTools.checkPermission(gameInfo.gamePath)
-        if (checkPermission != PathType.NULL && gameInfo.gamePath.isNotEmpty()) {
-            Log.d("ConsoleViewModel", "checkInstallMod: true")
-            _uiState.update {
-                it.copy(canInstallMod = true)
-            }
-        } else {
-            _uiState.update {
-                it.copy(canInstallMod = false)
-            }
-        }
-    }
-
-    // 更新mod数量
-    private fun updateModCount() {
-        updateModCountJob?.cancel()
-        updateModCountJob = viewModelScope.launch {
-            getGameModsCountUserCase().collectLatest { count ->
-                _uiState.update {
-                    it.copy(modCount = count)
-                }
-            }
-        }
-    }
-
-    // 更新已开启mod数量
-    private fun updateEnableModCount() {
-        updateEnableModCountJob?.cancel()
-        updateEnableModCountJob = viewModelScope.launch {
-            getGameEnableModsCountUserCase().collectLatest { count ->
-                _uiState.update {
-                    it.copy(enableModCount = count)
-                }
-            }
+        } else{
+            viewModelScope.launch { userPreferencesRepository.saveScanDirectoryMods(scan) }
         }
 
     }
 
-
-    // 设置游戏信息
-    private fun setGameInfo(gameInfo: GameInfoBean) {
-        _uiState.update {
-            it.copy(gameInfo = gameInfo)
-        }
+    fun setScanDownload(scan: Boolean) {
+        viewModelScope.launch { userPreferencesRepository.saveScanDirectoryMods(scan) }
     }
-
-    // 设置显示升级弹窗
-    fun setShowUpgradeDialog(b: Boolean) {
-        _uiState.update {
-            it.copy(showUpgradeDialog = b)
-        }
-    }
-
-    //检测软件更新
-//    private fun checkUpdate() {
-//        viewModelScope.launch {
-//            kotlin.runCatching {
-//                ModManagerApi.retrofitService.getUpdate()
-//            }.onFailure {
-//                Log.e("ConsoleViewModel", "checkUpdate: $it")
-//            }.onSuccess {
-//                if (it.code > ModTools.getVersionCode()) {
-//                    Log.d("ConsoleViewModel", "checkUpdate: $it")
-//                    _downloadUrl = it.url
-//                    _updateContent = it.des
-//                    setShowUpgradeDialog(true)
-//                }
-//            }
-//        }
-//    }
-
 
     fun startGame() {
-        appInfoTools.startGame()
+        appInfoService.startGame(userPreferencesRepository.selectedGameValue)
     }
 
+    fun openUrl(context: Context, url: String) {
+        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+    }
 
-    fun setShowDelUnzipDialog(b: Boolean) {
+    // Dialog state setters
+    fun setShowInfoDialog(show: Boolean) = _uiState.update { it.copy(showInfoDialog = show) }
+    fun setShowUpgradeDialog(show: Boolean) = _uiState.update { it.copy(showUpgradeDialog = show) }
+    fun setShowScanDirectoryModsDialog(show: Boolean) {
+        Log.i("setShowScanDirectoryModsDialog", "扫描目录对话框显示: $show")
         _uiState.update {
-            it.copy(showDeleteUnzipDialog = b)
+            it.copy(showScanDirectoryModsDialog = show)
         }
     }
 
-    fun switchDelUnzip(b: Boolean) {
-        if (b && !_uiState.value.showDeleteUnzipDialog) {
-            _uiState.update {
-                it.copy(showDeleteUnzipDialog = true)
-            }
-        } else {
-            viewModelScope.launch {
-                saveUserPreferenceUseCase(UserPreferencesKeys.DELETE_UNZIP_DIRECTORY, b)
-            }
-            _uiState.update {
-                it.copy(showDeleteUnzipDialog = false)
-            }
-        }
+    fun setOpenPermissionRequestDialog(show: Boolean) =
+        _uiState.update { it.copy(openPermissionRequestDialog = show) }
+
+    fun switchDelUnzip(bool: Boolean) {
+        viewModelScope.launch { userPreferencesRepository.saveDeleteUnzipDirectory(bool) }
     }
 
-    fun setShowCategoryView(b: Boolean) {
-        // 展示分类视图
-        viewModelScope.launch {
-            saveUserPreferenceUseCase(UserPreferencesKeys.SHOW_CATEGORY_VIEW, b)
-        }
-
+    fun setShowDelUnzipDialog(bool: Boolean) {
+        _uiState.update { it.copy(showDeleteUnzipDialog = bool) }
     }
 
     fun getGameIcon(): ImageBitmap {
-
-        return appInfoTools.getAppIcon(gameInfoManager.getGameInfo().packageName)
-
-
+        return appInfoService.getAppIcon(uiState.value.gameInfo.packageName)
     }
 
-    fun getPermissionTools(): PermissionTools {
-        return permissionTools
+    fun checkFileAccessType(): FileAccessType {
+        return permissionService.getFileAccessType(_uiState.value.gameInfo.gamePath)
     }
 
-    fun getAppPathsManager(): AppPathsManager {
-        return appPathsManager
+    fun setShowCategoryView(bool: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.saveShowCategoryView(bool)
+        }
     }
 
-    fun getFileToolsManager(): FileToolsManager {
-        return fileToolsManager
+    fun switchScanQQDirectory(it: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.saveScanQQDirectory(it)
+        }
     }
+
+    fun switchScanDownloadDirectory(it: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.saveScanDownload(it)
+        }
+    }
+
+    fun getGameVersion(gameInfo: GameInfoBean): String {
+        return appInfoService.getVersionName(gameInfo.packageName).getOrDefault("")
+    }
+
 }
-
-
-

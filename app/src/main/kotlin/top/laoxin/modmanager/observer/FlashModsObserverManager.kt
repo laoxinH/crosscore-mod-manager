@@ -3,15 +3,17 @@ package top.laoxin.modmanager.observer
 import android.os.Build
 import android.os.FileObserver
 import android.util.Log
-import top.laoxin.modmanager.tools.manager.AppPathsManager
+import top.laoxin.modmanager.constant.PathConstants
+import top.laoxin.modmanager.ui.viewmodel.ModScanViewModel
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class FlashModsObserverManager @Inject constructor(
-    private val appPathsManager: AppPathsManager
+
 ) {
 
+    lateinit var observer: ModScanViewModel
     private var selectedDictionaryFileObserver: FileObserver? = null
     private var modDictionaryFileObserver: FileObserver? = null
 
@@ -24,9 +26,9 @@ class FlashModsObserverManager @Inject constructor(
 
         selectedDictionaryFileObserver =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                FlashModsObserver(appPathsManager.getRootPath() + selectedDirectory)
+                FlashModsObserver(PathConstants.ROOT_PATH + selectedDirectory)
             } else {
-                FlashModsObserverLow(appPathsManager.getRootPath() + selectedDirectory)
+                FlashModsObserverLow(PathConstants.ROOT_PATH + selectedDirectory)
             }
         selectedDictionaryFileObserver?.startWatching()
     }
@@ -36,9 +38,9 @@ class FlashModsObserverManager @Inject constructor(
 
         modDictionaryFileObserver =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                FlashModsObserver(appPathsManager.getRootPath() + modDirectory)
+                FlashModsObserver(PathConstants.ROOT_PATH + modDirectory)
             } else {
-                FlashModsObserverLow(appPathsManager.getRootPath() + modDirectory)
+                FlashModsObserverLow(PathConstants.ROOT_PATH + modDirectory)
             }
         modDictionaryFileObserver?.startWatching()
     }

@@ -1,21 +1,29 @@
 package top.laoxin.modmanager.di
 
-// app/src/main/kotlin/top/laoxin/modmanager/di/RepositoryModule.kt
-
-
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import top.laoxin.modmanager.data.repository.antiharmony.AntiHarmonyRepository
-import top.laoxin.modmanager.data.repository.antiharmony.OfflineAntiHarmonyRepository
-import top.laoxin.modmanager.data.repository.backup.BackupRepository
-import top.laoxin.modmanager.data.repository.backup.OfflineBackupRepository
-import top.laoxin.modmanager.data.repository.mod.ModRepository
-import top.laoxin.modmanager.data.repository.mod.OfflineModsRepository
-import top.laoxin.modmanager.data.repository.scanfile.OfflineScanFileRepository
-import top.laoxin.modmanager.data.repository.scanfile.ScanFileRepository
+import top.laoxin.modmanager.data.repository.AntiHarmonyRepositoryImpl
+import top.laoxin.modmanager.data.repository.AppDataRepositoryImpl
 import javax.inject.Singleton
+import top.laoxin.modmanager.data.repository.GameInfoRepositoryImpl
+import top.laoxin.modmanager.data.repository.InformationRepositoryImpl
+import top.laoxin.modmanager.data.repository.ReplacedFileRepositoryImpl
+import top.laoxin.modmanager.data.repository.UserPreferencesRepositoryImpl
+import top.laoxin.modmanager.data.repository.VersionRepositoryImpl
+import top.laoxin.modmanager.data.repository.backup.BackupRepositoryImpl
+import top.laoxin.modmanager.data.repository.mod.ModsRepositoryImpl
+import top.laoxin.modmanager.data.repository.scanfile.ScanFileRepositoryImpl
+import top.laoxin.modmanager.domain.repository.AntiHarmonyRepository
+import top.laoxin.modmanager.domain.repository.AppDataRepository
+import top.laoxin.modmanager.domain.repository.BackupRepository
+import top.laoxin.modmanager.domain.repository.GameInfoRepository
+import top.laoxin.modmanager.domain.repository.InformationRepository
+import top.laoxin.modmanager.domain.repository.ModRepository
+import top.laoxin.modmanager.domain.repository.ScanFileRepository
+import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
+import top.laoxin.modmanager.domain.repository.VersionRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -23,25 +31,70 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindModRepository(
-        offlineModsRepository: OfflineModsRepository
-    ): ModRepository
+    abstract fun bindModRepository(modsRepositoryImpl: ModsRepositoryImpl): ModRepository
 
     @Binds
     @Singleton
-    abstract fun bindBackupRepository(
-        offlineBackupRepository: OfflineBackupRepository
-    ): BackupRepository
+    abstract fun bindBackupRepository(backupRepositoryImpl: BackupRepositoryImpl): BackupRepository
 
     @Binds
     @Singleton
     abstract fun bindAntiHarmonyRepository(
-        offlineAntiHarmonyRepository: OfflineAntiHarmonyRepository
+            antiHarmonyRepositoryImpl: AntiHarmonyRepositoryImpl
     ): AntiHarmonyRepository
 
     @Binds
     @Singleton
     abstract fun bindScanFileRepository(
-        offlineScanFileRepository: OfflineScanFileRepository
+            scanFileRepositoryImpl: ScanFileRepositoryImpl
     ): ScanFileRepository
+
+    /*   @Binds
+    @Singleton
+    abstract fun bindModScanRepository(
+            modScanRepositoryImpl: ModScanRepositoryImpl
+    ): ModScanRepository*/
+
+    //    @Binds
+    //    @Singleton
+    //    abstract fun bindModParseRepository(
+    //            modParseRepositoryImpl: ModParseRepositoryImpl
+    //    ): ModParseRepository
+
+    // gameInfoRepository
+    @Binds
+    @Singleton
+    abstract fun bindGameInfoRepository(
+            gameInfoRepositoryImpl: GameInfoRepositoryImpl
+    ): GameInfoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserPreferencesRepository(
+            userPreferencesRepositoryImpl: UserPreferencesRepositoryImpl
+    ): UserPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindVersionRepository(
+            versionRepositoryImpl: VersionRepositoryImpl
+    ): VersionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindInformationRepository(
+            infoRepositoryImpl: InformationRepositoryImpl
+    ): InformationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReplacedFileRepository(
+            replacedFileRepositoryImpl: ReplacedFileRepositoryImpl
+    ): top.laoxin.modmanager.domain.repository.ReplacedFileRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAppDataRepository(
+            appDataRepositoryImpl: AppDataRepositoryImpl
+    ): AppDataRepository
 }

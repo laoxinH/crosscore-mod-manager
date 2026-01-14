@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.theme.ExpressiveButton
+import top.laoxin.modmanager.ui.view.common.openUrl
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +40,7 @@ fun SettingTopBar(
 ) {
     val context = LocalContext.current
     val uiState = viewModel.uiState.collectAsState().value
-    val showNavigationIcon = uiState.showAbout
+    val showNavigationIcon = uiState.isAboutPage
 
     TopAppBar(
         modifier = modifier,
@@ -87,7 +88,7 @@ fun SettingTopBar(
             if (!showNavigationIcon) {
                 IconButton(
                     onClick = {
-                        viewModel.setAboutPage(!viewModel.uiState.value.showAbout)
+                        viewModel.setAboutPage(!viewModel.uiState.value.isAboutPage)
                     },
                 ) {
                     Icon(
@@ -99,7 +100,7 @@ fun SettingTopBar(
             }
             IconButton(
                 onClick = {
-                    viewModel.openUrl(context, context.getString(R.string.github_url))
+                    context.openUrl( context.getString(R.string.github_url))
                 },
             ) {
                 Icon(
@@ -110,7 +111,7 @@ fun SettingTopBar(
             }
             IconButton(
                 onClick = {
-                    viewModel.checkUpdate()
+                    viewModel.checkUpdate(false)
                 },
             ) {
                 Icon(

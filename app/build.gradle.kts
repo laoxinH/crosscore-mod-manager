@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.aboutLibrariesAndroid)
+    id("kotlin-parcelize")
 }
 
 val supportedAbis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
@@ -74,8 +75,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_24
-        targetCompatibility = JavaVersion.VERSION_24
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     packaging {
@@ -104,7 +105,7 @@ android {
 }
 
 kotlin {
-    jvmToolchain(24)
+    jvmToolchain(21)
     compilerOptions {
         freeCompilerArgs = listOf(
             "-progressive",
@@ -138,6 +139,7 @@ androidComponents {
 }
 
 dependencies {
+    implementation(libs.androidx.security.state.provider)
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.rules)
@@ -210,6 +212,7 @@ dependencies {
 
     // Dependency Injection
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     // Compression & Archives

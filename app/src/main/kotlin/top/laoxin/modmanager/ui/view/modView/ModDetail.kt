@@ -60,11 +60,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.data.bean.ModBean
-import top.laoxin.modmanager.tools.LogTools.logRecord
+import top.laoxin.modmanager.domain.bean.ModBean
 import top.laoxin.modmanager.ui.theme.ExpressiveAssistChip
-import top.laoxin.modmanager.ui.view.commen.DialogCommon
-import top.laoxin.modmanager.ui.viewmodel.ModViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModDetailViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModOperationViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModScanViewModel
 import java.io.File
 import java.util.Date
 import java.util.Locale
@@ -74,17 +74,16 @@ import java.util.Locale
 fun ModDetailPartialBottomSheet(
     showDialog: Boolean,
     mod: ModBean,
-    viewModel: ModViewModel,
+    modDetailViewModel: ModDetailViewModel,
+    modScanViewModel: ModScanViewModel,
+    modOperationViewModel: ModOperationViewModel,
     onDismiss: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    DialogCommon(
-        title = stringResource(id = R.string.dialog_del_mod_title),
-        content = stringResource(id = R.string.dialog_del_mod_content),
-        onConfirm = { viewModel.deleteMod() },
-        onCancel = { viewModel.setShowDelModDialog(false) },
-        showDialog = uiState.showDelModDialog
-    )
+    // 收集操作状态
+    val modOperationUiState by modOperationViewModel.uiState.collectAsState()
+    //val modSwitchEnable = modOperationUiState.modSwitchEnable
+    val showDelModDialog = modOperationUiState.showDelModDialog
+
 
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
@@ -114,14 +113,17 @@ fun ModDetailPartialBottomSheet(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 // 预览图
-                if ((!mod.images.isNullOrEmpty() && !mod.isEncrypted) || (mod.password != null && !mod.images.isNullOrEmpty())) {
+                if ((!mod.images.isNullOrEmpty() && !mod.isEncrypted) || (!mod.images.isNullOrEmpty())) {
                     showButton = false
                     val context = LocalContext.current
                     LabelAndIconButtonGroup(
                         label = R.string.mod_page_mod_detail_dialog_detali_perview,
+                        mod = mod,
                         icon = Icons.Filled.Image,
                         showButton = true,
-                        viewModel = viewModel
+
+                        modDetailViewModel = modDetailViewModel,
+                        modOperationViewModel = modOperationViewModel
                     )
 
                     // 使用优化的图片加载
@@ -143,12 +145,12 @@ fun ModDetailPartialBottomSheet(
                                 }
                             } else {
                                 Log.e("ModDetail", "图片文件不存在: $path")
-                                logRecord("图片文件不存在: $path")
+                             //   logRecord("图片文件不存在: $path")
                                 
-                                viewModel.flashModImage(mod)
+                                modDetailViewModel.refreshModDetail(mod)
                                 
                                 Log.e("ModDetail", "图片文件已重新解压: $path")
-                                logRecord("图片文件已重新解压: $path")
+                              //  logRecord("图片文件已重新解压: $path")
                                 
                                 loadImageBitmapWithCache(context, normalizedPath, 1024, 1024)?.let {
                                     imageBitmaps.add(it)
@@ -169,8 +171,10 @@ fun ModDetailPartialBottomSheet(
                 LabelAndIconButtonGroup(
                     label = R.string.mod_page_mod_detail_dialog_detali_title,
                     icon = Icons.Filled.Settings,
+                    mod = mod,
                     showButton = showButton,
-                    viewModel = viewModel
+                    modDetailViewModel = modDetailViewModel,
+                    modOperationViewModel = modOperationViewModel,
                 )
                 // 文本标签
                 Card {
@@ -245,7 +249,9 @@ fun ModDetailPartialBottomSheet(
                     label = R.string.mod_page_mod_detail_dialog_detali_readme,
                     icon = Icons.Filled.AttachFile,
                     showButton = false,
-                    viewModel = viewModel
+                    mod = mod,
+                    modDetailViewModel  = modDetailViewModel,
+                    modOperationViewModel = modOperationViewModel,
                 )
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -324,8 +330,12 @@ fun LabelAndIconButtonGroup(
     @StringRes label: Int,
     icon: ImageVector,
     showButton: Boolean,
-    viewModel: ModViewModel
+    modDetailViewModel: ModDetailViewModel,
+    modOperationViewModel: ModOperationViewModel,
+    mod: ModBean
 ) {
+    val modDetailUiState by modDetailViewModel.uiState.collectAsState()
+    val modDetail = modDetailUiState.mod
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -349,7 +359,7 @@ fun LabelAndIconButtonGroup(
                 modifier = Modifier
             ) {
                 IconButton(onClick = {
-                    viewModel.refreshModDetail()
+                    modDetailViewModel.refreshModDetail(mod,false)
                 }) {
                     Icon(
                         Icons.Filled.Refresh,
@@ -358,7 +368,8 @@ fun LabelAndIconButtonGroup(
                     )
                 }
                 IconButton(onClick = {
-                    viewModel.deleteMod()
+                    modDetailViewModel.setShowModDetail(false)
+                    modOperationViewModel.checkAndDeleteMods(listOf(mod))
                 }) {
                     Icon(
                         Icons.Filled.Delete,

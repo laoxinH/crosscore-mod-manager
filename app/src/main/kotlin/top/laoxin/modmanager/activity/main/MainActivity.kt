@@ -15,20 +15,21 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import dagger.hilt.android.AndroidEntryPoint
-import rikka.shizuku.Shizuku
+import javax.inject.Inject
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
-import top.laoxin.modmanager.tools.LogTools
-import top.laoxin.modmanager.tools.PermissionTools
+import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 import top.laoxin.modmanager.ui.view.ModManagerApp
 
 @AndroidEntryPoint
 class MainActivity() : ComponentActivity() {
 
+    @Inject lateinit var permissionService: PermissionService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // SplashScreen
         installSplashScreen()
-        
+
         super.onCreate(savedInstanceState)
 
         // 检查用户协议
@@ -44,9 +45,7 @@ class MainActivity() : ComponentActivity() {
         setContent {
             ModManagerTheme {
                 ConfigureSystemBars()
-                Surface(Modifier.fillMaxSize()) {
-                    ModManagerApp()
-                }
+                Surface(Modifier.fillMaxSize()) { ModManagerApp() }
             }
         }
     }
@@ -54,9 +53,9 @@ class MainActivity() : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cleanupShizuku()
-        
+
         if (isFinishing) {
-            LogTools.flushAll()
+           // LogTools.flushAll()
         }
     }
 
@@ -66,25 +65,15 @@ class MainActivity() : ComponentActivity() {
     }
 
     private fun setupShizuku() {
-        try {
-            if (PermissionTools.isShizukuAvailable) {
-                Shizuku.addRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
-            }
-        } catch (_: Exception) {
-        }
+        permissionService.registerShizukuListener()
     }
 
     private fun cleanupShizuku() {
-        try {
-            if (PermissionTools.isShizukuAvailable) {
-                Shizuku.removeRequestPermissionResultListener(PermissionTools.REQUEST_PERMISSION_RESULT_LISTENER)
-            }
-        } catch (_: Exception) {
-        }
+        permissionService.unregisterShizukuListener()
     }
 
     private fun isUserAgreementConfirmed() =
-        getSharedPreferences("AppLaunch", MODE_PRIVATE).getBoolean("isConfirm", false)
+            getSharedPreferences("AppLaunch", MODE_PRIVATE).getBoolean("isConfirm", false)
 
     // 设置状态栏和导航栏
     @Composable

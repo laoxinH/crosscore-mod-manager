@@ -112,25 +112,25 @@
     <string name="switch_game_service_tiltle">选择游戏</string>
     <string name="setting_page_more_qq">实验室交流群</string>
     <string name="qq_url" translatable="false"><![CDATA[http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=lynCj4WRXPNwATYiZKfYkySm0utpUAAO&authKey=qFoE9Wpp9h5%2FCqMSXF7yQAG%2BG6WSxjGkjU7mwez%2BU%2FO7MpmzSbpivyx1OjCHFldQ&noverify=0&group_code=939934555]]></string>
-    <string name="setting_page_more_qq_descript">BUG反馈(游戏交流: 939934555)</string>
+    <string name="setting_page_more_qq_descript">游戏魔改MOD交流</string>
     <string name="tips_copy_mod_failed">复制Mod文件失败, 尝试流写入</string>
     <string name="choose_method_title">请选择授权方式</string>
     <string name="select_permission_dialog_descript">由于安卓系统限制, 需要授予读写权限才能正常使用</string>
     <string name="select_permission_dialog_by_file">通过文件管理器授权</string>
-    <string name="select_permission_dialog_by_file_descript">通过文件管理器授权读写权限</string>
+    <string name="select_permission_dialog_by_file_descript">通过文件管理器授权读写权限(在最新的安卓补丁中已无法授权, 若授权失败请尝试使用shizuku授权)</string>
     <string name="select_permission_dialog_by_shizuku">通过shizuku授权</string>
     <string name="select_permission_dialog_by_shizuku_descript">通过shuzuku获取文件读写权限</string>
     <string name="dialog_storage_message_a6">实验室需要文件管理权限才能继续使用</string>
     <string name="toast_setect_game_success">已选择: %1$s %2$s</string>
     <string name="toast_set_game_info_failed">游戏未安装: %1$s %2$s</string>
     <string name="toast_please_select_game">请到设置中选择游戏</string>
-    <string name="console_configuration_disable_scan_dictionary">不扫描文件夹MOD</string>
+    <string name="console_configuration_disable_scan_dictionary">扫描文件夹MOD</string>
     <string name="console_scan_directory_mods">注意</string>
-    <string name="console_scan_directory_mods_content">此功能只会扫描配置的MOD目录中游戏包名(比如:com.megagame.crosscore)文件夹包含的MOD(QQ和系统下载均不会扫描)</string>
+    <string name="console_scan_directory_mods_content">此功能关闭后将不在扫描MOD目录中以文件夹形式存储的MOD</string>
     <string name="toast_this_dir_has_no_prim">此文件夹权限不足</string>
     <string name="toast_has_no_prim">未授权</string>
-    <string name="setting_page_app_flash_game_config">读取游戏配置文件</string>
-    <string name="setting_page_app_flash_game_config_descript">配置文件放到配置的MOD目录中的GameConfig中</string>
+    <string name="setting_page_app_flash_game_config">读取自定义游戏配置文件</string>
+    <string name="setting_page_app_flash_game_config_descript">配置文件放到首页配置的MOD目录中的GameConfig文件夹中</string>
     <string name="toast_game_not_suppose_anti">此游戏无反和谐配置</string>
     <string name="mod_page_mod_detail_dialog_detali_modType">MOD类型: %1$s</string>
     <string name="toast_load_game_config_err">读取游戏配置失败: %1$s</string>
@@ -161,8 +161,8 @@
     <string name="setting_page_app_swtch_permission_shizuku">申请shizuku授权</string>
     <string name="setting_page_app_swtch_permission_shizuku_desc">申请shizuku授权(某些游戏仅支持shizuku授权)</string>
     <string name="console_game_tips_title">特别注意!</string>
-    <string name="setting_page_more_discord">Discord服务器</string>
-    <string name="setting_page_more_discord_descript">这是一个各种游戏MOD分享交流的Discord服务器</string>
+    <string name="setting_page_more_community">MOD 社区</string>
+    <string name="setting_page_more_community_descript">这是一个各种游戏MOD分享交流的社区</string>
     <string name="disscord_url" translatable="false">https://discord.gg/4UJsfDSxZ7</string>
     <string name="mod_temp_bean_name_dictionary_desc">文件夹</string>
     <string name="mod_bean_no_readme">无readme文件</string>
@@ -219,4 +219,179 @@
     <string name="log_path_not_writable">日志目录不可写</string>
     <string name="log_create_dir_failed">无法创建日志目录</string>
     <string name="log_logcat_running">logcat已在运行</string>
+    <string name="toast_unknow_err">未知错误: %1$s</string>
+    <string name="log_path_is_root">存储根路径不能作为日志目录</string>
+
+    <!-- Scan Progress Overlay -->
+    <string name="scan_progress_title">扫描 MOD</string>
+    <string name="scan_progress_found_mods">发现 MOD: %d</string>
+    <string name="scan_progress_cancel">取消扫描</string>
+    <string name="scan_progress_processing">处理中…</string>
+    <string name="scan_result_title">扫描完成</string>
+    <string name="scan_result_total">发现 MOD</string>
+    <string name="scan_result_added">新增</string>
+    <string name="scan_result_updated">更新</string>
+    <string name="scan_result_deleted">删除</string>
+    <string name="scan_result_transferred">已转移</string>
+    <string name="scan_result_skipped">已跳过</string>
+    <string name="scan_error_title">扫描失败</string>
+    <string name="scan_step_permission">检查权限</string>
+    <string name="scan_step_transfer">转移外部MOD</string>
+    <string name="scan_step_scanning">扫描MOD文件</string>
+    <string name="scan_step_syncing">同步数据库</string>
+    <string name="scan_step_complete">扫描完成</string>
+    <!-- ScanStep enum i18n strings -->
+    <string name="scan_step_checking_encryption">检查加密状态…</string>
+    <string name="scan_step_listing_files">读取文件列表…</string>
+    <string name="scan_step_analyzing_files">分析文件 %1$d/%2$d</string>
+    <string name="scan_step_identifying_mods">识别 MOD…</string>
+    <string name="scan_step_checking_folder">检查文件夹…</string>
+    <string name="scan_step_transferring">转移外部 MOD…</string>
+    <string name="scan_step_scanning_directory">扫描 MOD 目录…</string>
+    <string name="scan_step_syncing_database">同步数据库…</string>
+
+    <!-- Enable Progress Overlay -->
+    <string name="enable_progress_title">MOD 处理中</string>
+    <string name="enable_progress_processing">处理中…</string>
+    <string name="enable_progress_count">进度: %1$d/%2$d</string>
+    <string name="enable_result_title">处理完成</string>
+    <string name="enable_result_success">成功</string>
+    <string name="enable_result_need_password">需要密码</string>
+    <string name="enable_result_file_missing">文件缺失</string>
+    <string name="enable_result_backup_failed">备份失败</string>
+    <string name="enable_result_enable_failed">开启失败</string>
+    <string name="enable_result_restore_failed">还原失败</string>
+    <string name="enable_error_title">处理出错</string>
+    <string name="enable_step_validating">验证 MOD…</string>
+    <string name="enable_step_backing_up">备份游戏文件…</string>
+    <string name="enable_step_enabling">开启 MOD %1$d/%2$d</string>
+    <string name="enable_step_disabling">关闭 MOD %1$d/%2$d</string>
+    <string name="enable_step_special_process">特殊处理…</string>
+    <string name="enable_step_updating_db">更新数据库…</string>
+    <string name="enable_step_complete">处理完成</string>
+    <string name="enable_result_mutual_conflict">列表内冲突</string>
+    <string name="enable_result_enabled_conflict">与已开启冲突</string>
+    <string name="toast_swtch_cancel_mods_result">已取消, 成功: %1$s 失败: %2$s</string>
+    <string name="enable_progress_canceling">取消中...</string>
+    <string name="enable_progress_cancel">取消任务</string>
+    <string name="enable_step_canceling">正在取消...</string>
+
+    <!-- 解密相关 -->
+    <string name="decrypt_dialog_title">输入密码</string>
+    <string name="decrypt_dialog_message">此 MOD 已加密，请输入密码以解锁：</string>
+    <string name="decrypt_dialog_password_hint">密码</string>
+    <string name="decrypt_dialog_confirm">确认</string>
+    <string name="decrypt_dialog_cancel">取消</string>
+    <string name="decrypt_progress_title">解密中</string>
+    <string name="decrypt_step_validating">验证密码...</string>
+    <string name="decrypt_step_extracting_icon">提取图标...</string>
+    <string name="decrypt_step_extracting_images">提取预览图...</string>
+    <string name="decrypt_step_reading_readme">读取说明...</string>
+    <string name="decrypt_step_updating_db">更新数据...</string>
+    <string name="toast_decrypt_success">解密成功</string>
+    <string name="toast_decrypt_failed">解密失败：%1$s</string>
+    <string name="decrypt_result_modCount">成功解密 %1$d 个 MOD</string>
+
+    <!-- 游戏错误相关 -->
+    <string name="error_game_not_selected">请先在设置中选择游戏</string>
+    <string name="error_game_not_installed">%1$s 未安装</string>
+    <string name="error_permission_denied">权限不足</string>
+    <string name="error_action_go_settings">去设置</string>
+    <string name="error_action_grant_permission">去授权</string>
+
+    <!-- 刷新MOD详情相关 -->
+    <string name="refresh_detail_success">MOD详情刷新成功</string>
+    <string name="refresh_detail_failed">MOD详情刷新失败</string>
+
+    <!-- 扫描结果 - 已删除但启用的MOD -->
+    <string name="scan_result_deleted_enabled_warning">以下MOD的物理文件已被删除但仍处于启用状态</string>
+    <string name="scan_result_deleted_enabled_hint">如不关闭，这些MOD将保持启用状态且无法在列表中显示</string>
+    <string name="scan_result_deleted_enabled_count">已删除但启用</string>
+    <string name="scan_result_disable_mod">关闭</string>
+    <string name="scan_result_disable_all">关闭所有</string>
+    <string name="scan_result_keep_enabled">保留启用</string>
+    <string name="scan_result_show_stats">查看统计详情</string>
+    <string name="scan_result_hide_stats">隐藏统计详情</string>
+    <string name="toast_disable_filed">关闭失败: %1$s</string>
+
+    <!-- 开启结果 - 冲突详情 -->
+    <string name="enable_result_show_conflict_details">查看冲突详情</string>
+    <string name="enable_result_hide_conflict_details">隐藏冲突详情</string>
+    <string name="enable_result_mutual_conflict_title">内部冲突的MOD</string>
+    <string name="enable_result_mutual_conflict_hint">以下MOD之间存在冲突，无法同时开启</string>
+    <string name="enable_result_enabled_conflict_title">与已开启MOD冲突</string>
+    <string name="enable_result_enabled_conflict_hint">以下MOD与已开启的MOD存在冲突</string>
+    <string name="enable_result_remove_selection">移除选中</string>
+
+    <!-- 删除 MOD 相关 -->
+    <string name="delete_step_authenticating">正在验证权限…</string>
+    <string name="delete_step_collecting">正在收集文件…</string>
+    <string name="delete_step_filtering">正在筛选…</string>
+    <string name="delete_step_deleting">正在删除…</string>
+    <string name="delete_step_completed">删除完成</string>
+    <string name="delete_progress_title">删除 MOD</string>
+    <string name="delete_progress_current">%1$d / %2$d</string>
+    <string name="delete_result_success">成功删除 %d 个 MOD</string>
+    <string name="delete_result_deleted_mods">已删除 %d 个 MOD</string>
+    <string name="delete_result_deleted_mods_hint">以下 MOD 已被完全删除</string>
+    <string name="delete_result_deleted_enabled">%d 个已启用的 MOD 已删除</string>
+    <string name="delete_result_deleted_enabled_hint">以下已启用的 MOD 物理文件已删除，请关闭后刷新列表以清理</string>
+    <string name="delete_result_keep_enabled">保留开启</string>
+    <string name="delete_result_disable_all">关闭所有</string>
+    <string name="delete_result_skipped_enabled">已跳过 %d 个已启用的 MOD</string>
+    <string name="delete_result_skipped_integrated">已跳过 %d 个整合包 MOD</string>
+    <string name="delete_result_failed">%d 个 MOD 删除失败</string>
+    <string name="delete_result_show_skipped">查看跳过的 MOD</string>
+    <string name="delete_result_hide_skipped">隐藏跳过的 MOD</string>
+    <string name="delete_result_show_failed">查看失败的 MOD</string>
+    <string name="delete_result_hide_failed">隐藏失败的 MOD</string>
+    <string name="delete_result_skipped_enabled_title">跳过已启用的 MOD</string>
+    <string name="delete_result_skipped_enabled_hint">以下 MOD 处于启用状态，需要先关闭才能删除</string>
+    <string name="delete_result_skipped_integrated_title">跳过整合包 MOD</string>
+    <string name="delete_result_skipped_integrated_hint">以下 MOD 属于整合包，未选择删除整合包时跳过</string>
+    <string name="delete_result_failed_title">删除失败的 MOD</string>
+    <string name="delete_result_failed_hint">以下 MOD 删除时发生错误</string>
+    <string name="delete_error_permission_denied">权限不足，无法删除文件</string>
+    <string name="delete_error_file_not_found">文件不存在</string>
+    <string name="delete_error_delete_failed">删除文件失败</string>
+    <string name="delete_confirm_title">确认删除</string>
+    <string name="delete_confirm_message">确定要删除选中的 %d 个 MOD 吗？此操作不可撤销。</string>
+    <string name="delete_option_include_integrated">同时删除整合包</string>
+    <string name="delete_option_include_integrated_hint">勾选后将删除整合包中的所有 MOD</string>
+    <string name="delete_button_cancel">取消</string>
+    <string name="delete_button_confirm">确认删除</string>
+    <string name="delete_button_dismiss">完成</string>
+
+    <!-- 删除确认对话框 - 整合包警告 -->
+    <string name="delete_check_title">删除确认</string>
+    <string name="delete_check_integrated_warning">检测到整合包</string>
+    <string name="delete_check_integrated_count">发现 %d 个整合包</string>
+    <string name="delete_check_other_mods_warning">删除整合包将同时删除以下 %d 个未选中的 MOD：</string>
+    <string name="delete_check_enabled_warning">共存在 %d 个 MOD 处于启用状态：</string>
+    <string name="delete_check_enabled_hint">建议在上方结果中关闭这些 MOD 或点击全部关闭按钮</string>
+    <string name="delete_check_package_name">整合包: %s</string>
+    <string name="delete_check_package_mods_count">包含 %d 个 MOD</string>
+    <string name="delete_check_selected_mods">选中的 MOD (%d)</string>
+    <string name="delete_check_other_mods">其他 MOD (%d)</string>
+    <string name="delete_check_enabled_mods">已启用 (%d)</string>
+    <string name="delete_button_skip_integrated">跳过整合包</string>
+    <string name="delete_button_delete_all">删除所有</string>
+    <string name="delete_button_disable_mod">关闭</string>
+    <string name="delete_button_disable_all">全部关闭</string>
+    <string name="delete_check_deletion_Pending">以下非整合包 MOD 将在确认后被删除 (%d)</string>
+
+    <!-- 游戏配置下载 -->
+    <string name="game_config_fetch_failed">获取配置列表失败</string>
+    <string name="game_config_added">已添加: %s</string>
+    <string name="game_config_download_failed">下载失败</string>
+
+    <!-- 自定义游戏配置导入 -->
+    <string name="game_config_import_success">成功导入 %d 个配置</string>
+    <string name="game_config_import_partial">导入完成: 成功 %1$d 个, 失败 %2$d 个</string>
+    <string name="game_config_import_no_files">未找到配置文件</string>
+    <string name="game_config_import_failed">导入失败</string>
+    <string name="game_config_import_dir_not_found">配置目录不存在</string>
+
+    <!-- 感谢名单 -->
+    <string name="thanks_list_fetch_failed">获取感谢名单失败</string>
 </resources>

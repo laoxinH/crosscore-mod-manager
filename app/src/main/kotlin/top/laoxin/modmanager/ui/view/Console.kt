@@ -3,7 +3,6 @@ package top.laoxin.modmanager.ui.view
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -42,53 +41,90 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
+import top.laoxin.modmanager.constant.FileAccessType
 import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.constant.PathConstants
+import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.ui.state.ConsoleUiState
 import top.laoxin.modmanager.ui.theme.ExpressiveSwitch
 import top.laoxin.modmanager.ui.theme.ExpressiveTextButton
-import top.laoxin.modmanager.ui.view.commen.DialogCommon
-import top.laoxin.modmanager.ui.view.commen.DialogCommonForUpdate
-import top.laoxin.modmanager.ui.view.commen.RequestNotificationPermission
-import top.laoxin.modmanager.ui.view.commen.RequestStoragePermission
-import top.laoxin.modmanager.ui.view.commen.RequestUriPermission
+import top.laoxin.modmanager.ui.view.common.DialogCommon
+import top.laoxin.modmanager.ui.view.common.DialogCommonForUpdate
+import top.laoxin.modmanager.ui.view.common.DialogType
+import top.laoxin.modmanager.ui.view.common.PermissionHandler
+import top.laoxin.modmanager.ui.view.common.openUrl
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 
 @SuppressLint("NewApi")
 @Composable
 fun ConsoleContent(viewModel: ConsoleViewModel) {
     val context = LocalContext.current
-    viewModel.getAppPathsManager()
-    val permissionTools = viewModel.getPermissionTools()
-    val fileToolsManager = viewModel.getFileToolsManager()
+//    viewModel.getAppPathsManager()
+//    val permissionTools = viewModel.getPermissionTools()
+//    val fileToolsManager = viewModel.getFileToolsManager()
 
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
-    DialogCommon(
-        title = stringResource(id = R.string.console_scan_directory_mods),
-        content = stringResource(id = R.string.console_scan_directory_mods_content),
-        onConfirm = {
-            viewModel.setShowScanDirectoryModsDialog(false)
-            viewModel.setScanDirectoryMods(true)
-        },
-        onCancel = {
-            viewModel.setShowScanDirectoryModsDialog(false)
-        },
-        showDialog = uiState.showScanDirectoryModsDialog
+
+        DialogCommon(
+            title = stringResource(id = R.string.console_scan_directory_mods),
+            type = DialogType.WARNING,
+            content = stringResource(id = R.string.console_scan_directory_mods_content),
+            onConfirm = {
+               // viewModel.setShowScanDirectoryModsDialog(false)
+                viewModel.switchScanDirectoryMods(false)
+            },
+            onCancel = {
+                viewModel.setShowScanDirectoryModsDialog(false)
+            },
+            showDialog = uiState.showScanDirectoryModsDialog
+        )
+
+
+
+    // 升级提示框
+    uiState.updateInfo?.let {
+        DialogCommonForUpdate(
+            title = stringResource(id = R.string.console_upgrade_title),
+            content = it.changelog,
+            onConfirm = {
+                context.openUrl(it.downloadUrl)
+            },
+            onDismiss = {
+                context.openUrl(it.downloadUrl)
+            },
+            showDialog = uiState.showUpgradeDialog
+        )
+    }
+
+    // 权限处理器 - 一行代码集成
+    PermissionHandler(
+        permissionStateFlow = viewModel.permissionState,
+        onPermissionGranted = viewModel::onPermissionGranted ,
+        onPermissionDenied = viewModel::onPermissionDenied,
+        onRequestShizuku = viewModel::requestShizukuPermission,
+        isShizukuAvailable = viewModel.isShizukuAvailable()
     )
 
-    DialogCommon(
-        title = stringResource(id = R.string.console_scan_directory_mods),
-        content = stringResource(id = R.string.console_del_unzip_dictionary_content),
-        onConfirm = {
-            viewModel.switchDelUnzip(true)
+    // 请求通知权限
+    //RequestNotificationPermission()
+    // 升级提示
 
-        },
-        onCancel = {
-            viewModel.setShowDelUnzipDialog(false)
-        },
-        showDialog = uiState.showDeleteUnzipDialog
-    )
+
+    // 信息提示
+    uiState.infoBean?.let {
+        DialogCommon(
+            title = stringResource(id = R.string.console_info_title),
+            content = it.msg,
+            onConfirm = {
+                viewModel.setShowInfoDialog(false)
+            },
+            onCancel = {
+                viewModel.setShowInfoDialog(false)
+            },
+            showDialog = uiState.showInfoDialog
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -99,47 +135,10 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
     ) {
 
         // 权限提示框
-        RequestStoragePermission()
-        // 请求通知权限
-        RequestNotificationPermission()
-        // 升级提示
-        viewModel.updateContent?.let {
-            DialogCommonForUpdate(
-                title = stringResource(id = R.string.console_upgrade_title),
-                content = it,
-                onConfirm = {
-                    viewModel.downloadUrl?.let { url -> viewModel.openUrl(context, url) }
-                },
-                onDismiss = {
-                    viewModel.universalUrl?.let { url -> viewModel.openUrl(context, url) }
-                },
-                showDialog = uiState.showUpgradeDialog
-            )
-        }
+       // RequestStoragePermission()
 
-        // 信息提示
-        DialogCommon(
-            title = stringResource(id = R.string.console_info_title),
-            content = uiState.infoBean.msg,
-            onConfirm = {
-                viewModel.setShowInfoDialog(false)
-            },
-            onCancel = {
-                viewModel.setShowInfoDialog(false)
-            },
-            showDialog = uiState.showInfoDialog
-        )
-        Log.d("ConsoleContent", "信息提示: ${uiState.infoBean}  ${uiState.showInfoDialog}")
+        //Log.d("ConsoleContent", "信息提示: ${uiState.infoBean}  ${uiState.showInfoDialog}")
 
-
-        if (viewModel.requestPermissionPath.isNotEmpty()) {
-            RequestUriPermission(
-                path = viewModel.requestPermissionPath, uiState.openPermissionRequestDialog,
-                onDismissRequest = { viewModel.setOpenPermissionRequestDialog(false) },
-                permissionTools = permissionTools,
-                fileTools = fileToolsManager.getFileTools()
-            )
-        }
         Spacer(modifier = Modifier.height(8.dp))
         // 权限信息
         // PermissionInformationCard()
@@ -166,6 +165,7 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
 fun GameInformationCard(
     viewModel: ConsoleViewModel, gameInfo: GameInfoBean, modifier: Modifier = Modifier
 ) {
+   // Log.i("GameInformationCard", "游戏信息选项卡: ${gameInfo.version}")
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.large
@@ -209,7 +209,7 @@ fun GameInformationCard(
                     )
                     Text(
                         text = stringResource(
-                            id = R.string.console_game_version, gameInfo.version
+                            id = R.string.console_game_version, viewModel.getGameVersion(gameInfo)
                         ), style = typography.labelLarge
                     )
                     Text(
@@ -270,18 +270,16 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
 
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(14.dp))
-                val permissionTools = viewModel.getPermissionTools()
-                val appPathsManager = viewModel.getAppPathsManager()
+                val fileAccessType : FileAccessType = viewModel.checkFileAccessType()
                 Text(
-                    if (permissionTools.isShizukuAvailable && permissionTools.hasShizukuPermission()) {
-                        // 优先检查shizuku
-                        stringResource(id = R.string.permission, "SHIZUKU")
-                    } else {
-                        when (if (uiState.gameInfo.packageName.isNotEmpty()) {
-                            permissionTools.checkPermission(
-                                appPathsManager.getRootPath() + "/Android/data/" + uiState.gameInfo.packageName
-                            )
-                        } else {
+
+                        when (fileAccessType) {
+                            FileAccessType.STANDARD_FILE-> stringResource(id = R.string.permission, "FILE")
+                            FileAccessType.DOCUMENT_FILE -> stringResource(id = R.string.permission, "DOCUMENT")
+                           // FileAccessType.PACKAGE_NAME -> stringResource(id = R.string.permission, "PACKAGE_NAME")
+                            FileAccessType.SHIZUKU -> stringResource(id = R.string.permission, "SHIZUKU")
+                            FileAccessType.NONE-> stringResource(id = R.string.permission, "NONE")
+                        } /*else {
                             permissionTools.checkPermission(
                                 appPathsManager.getRootPath() + "/Android/data/" + (App.get().packageName
                                     ?: "")
@@ -295,8 +293,8 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
                                 id = R.string.permission,
                                 stringResource(R.string.console_status_no_permission)
                             )
-                        }
-                    }, style = typography.labelLarge
+                        }*/
+                    , style = typography.labelLarge
                 )
                 Text(
                     stringResource(
@@ -315,7 +313,7 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
 @Composable
 fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
     //val uiState by viewModel.uiState.collectAsState()
-    val appPathsManager = viewModel.getAppPathsManager()
+
     val openDirectoryLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
             // 这里的uri就是用户选择的目录
@@ -323,11 +321,11 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
             if (uri != null) {
                 // 使用uri
                 val path =
-                    uri.path?.split(":")?.last()?.replace("${appPathsManager.getRootPath()}/", "")
+                    uri.path?.split(":")?.last()?.replace("${PathConstants.ROOT_PATH}/", "")
 
                 viewModel.setSelectedDirectory(
                     path
-                        ?: (appPathsManager.getRootPath() + "/" + appPathsManager.getDownloadModPath())
+                        ?: (PathConstants.ROOT_PATH + "/" + PathConstants.DOWNLOAD_MOD_PATH)
                 )
                 // TODO: 使用path
             }
@@ -364,7 +362,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 }
             }
 
-            Row(
+/*            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
@@ -376,7 +374,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 ExpressiveSwitch(checked = !uiState.showCategoryView, onCheckedChange = {
                     viewModel.setShowCategoryView(!it)
                 })
-            }
+            }*/
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -387,8 +385,8 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     text = stringResource(id = R.string.console_configuration_disable_scan_dictionary),
                     style = typography.titleMedium
                 )
-                ExpressiveSwitch(checked = !uiState.scanDirectoryMods, onCheckedChange = {
-                    viewModel.openScanDirectoryMods(!it)
+                ExpressiveSwitch(checked = uiState.scanDirectoryMods, onCheckedChange = {
+                    viewModel.switchScanDirectoryMods(it)
                 })
             }
 
@@ -403,7 +401,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 )
                 ExpressiveSwitch(checked = uiState.scanQQDirectory, onCheckedChange = {
 
-                    viewModel.openScanQQDirectoryDialog(it)
+                    viewModel.switchScanQQDirectory(it)
                 })
             }
 
@@ -417,11 +415,11 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                     style = typography.titleMedium
                 )
                 ExpressiveSwitch(checked = uiState.scanDownload, onCheckedChange = {
-                    viewModel.openScanDownloadDirectoryDialog(it)
+                    viewModel.switchScanDownloadDirectory(it)
                 })
             }
 
-            Row(
+/*            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
@@ -433,7 +431,7 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
                 ExpressiveSwitch(checked = uiState.delUnzipDictionary, onCheckedChange = {
                     viewModel.switchDelUnzip(it)
                 })
-            }
+            }*/
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,

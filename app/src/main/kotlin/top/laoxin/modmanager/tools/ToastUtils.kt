@@ -17,7 +17,7 @@ object ToastUtils {
         handler.post {
             cancelToast()
             sToast = Toast.makeText(App.get(), text, Toast.LENGTH_SHORT)
-            sToast!!.show()
+            sToast?.show()
         }
 
     }
@@ -30,14 +30,12 @@ object ToastUtils {
         handler.post {
             cancelToast()
             sToast = Toast.makeText(App.get(), text, Toast.LENGTH_LONG)
-            sToast!!.show()
+            sToast?.show()
         }
     }
 
     private fun cancelToast() {
-        if (sToast != null) {
-            sToast!!.cancel()
-        }
+        sToast?.cancel()
     }
 }
 

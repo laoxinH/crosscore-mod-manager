@@ -1,37 +1,45 @@
 package top.laoxin.modmanager.ui.state
 
-import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.data.bean.GameInfoBean
-import top.laoxin.modmanager.data.bean.InfoBean
-import top.laoxin.modmanager.data.bean.ThanksBean
+import top.laoxin.modmanager.constant.GameInfoConstant
+import top.laoxin.modmanager.domain.bean.DownloadGameConfigBean
+import top.laoxin.modmanager.domain.bean.GameInfoBean
+import top.laoxin.modmanager.domain.bean.InfoBean
+import top.laoxin.modmanager.domain.bean.ThanksBean
+import top.laoxin.modmanager.domain.repository.UpdateInfo
 
+/** 设置页面的 UI 状态 */
 data class SettingUiState(
-    // 删除备份对话框
-    val deleteBackupDialog: Boolean = false,
-    // 删除缓存对话框
-    val deleteCacheDialog: Boolean = false,
-    val showAcknowledgments: Boolean = false,
-    val showSwitchGame: Boolean = false,
-    val gameInfoList: List<GameInfoBean> = emptyList(),
-    // 更新弹窗
-    val showUpdateDialog: Boolean = false,
-    // 当前的versionName
-    val versionName: String = "",
-    // 显示下载游戏配置弹窗
-    val showDownloadGameConfigDialog: Boolean = false,
-    // 下载游戏配置列表
-    val downloadGameConfigList: List<DownloadGameConfigBean> = emptyList(),
-    // 感谢名单
-    val thinksList: List<ThanksBean> = emptyList(),
-    // 游戏提示弹窗
-    val showGameTipsDialog: Boolean = false,
+        // Dialogs
+        val showDeleteBackupDialog: Boolean = false,
+        val showDeleteCacheDialog: Boolean = false,
+        val showAcknowledgmentsDialog: Boolean = false,
+        val showSwitchGameDialog: Boolean = false,
+        val showGameTipsDialog: Boolean = false,
+        val showUpdateDialog: Boolean = false,
+        val showDownloadGameConfigDialog: Boolean = false,
+        val showNotificationDialog: Boolean = false,
+        val openPermissionRequestDialog: Boolean = false,
+        val showAboutDialog: Boolean = false,
 
-    //权限提示窗
-    val openPermissionRequestDialog: Boolean = false,
-    // 显示通知弹窗
-    val showNotificationDialog: Boolean = false,
-    // 通知
-    val infoBean: InfoBean = InfoBean(0.0, ""),
-    // 显示关于页面
-    val showAbout: Boolean = false,
+        // Data
+        val thanksList: List<ThanksBean> = emptyList(),
+        val gameInfoList: List<GameInfoBean> = emptyList(),
+        val currentGame: GameInfoBean = GameInfoConstant.NO_GAME,
+        val targetGame: GameInfoBean? = null, // Game selected in dialog
+        val downloadGameConfigList: List<DownloadGameConfigBean> = emptyList(),
+        val infoBean: InfoBean? = null,
+        val updateInfo: UpdateInfo? = null,
+        val versionName: String = "",
+
+        // Permission
+        val requestPermissionPath: String = "",
+
+        // Loading State
+        val isLoading: Boolean = true,
+
+        // 下载状态
+        val isDownloading: Boolean = false,
+
+        // 是否在关于页面
+        val isAboutPage: Boolean = false,
 )

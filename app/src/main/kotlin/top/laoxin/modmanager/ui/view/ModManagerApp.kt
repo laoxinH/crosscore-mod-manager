@@ -1,13 +1,13 @@
 package top.laoxin.modmanager.ui.view
 
+// import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+// import androidx.hilt.navigation.compose.hiltViewModel
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Canvas
@@ -45,16 +45,14 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ImagesearchRoller
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -65,7 +63,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -73,31 +70,36 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import kotlin.math.abs
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.App
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.ui.state.ModUiState
-import top.laoxin.modmanager.ui.theme.ExpressiveFilledTonalButton
+import top.laoxin.modmanager.ui.state.SnackbarManager
 import top.laoxin.modmanager.ui.theme.MotionDuration
 import top.laoxin.modmanager.ui.theme.MotionEasing
+import top.laoxin.modmanager.ui.view.common.GlobalSnackbarHost
 import top.laoxin.modmanager.ui.view.modView.ModPage
 import top.laoxin.modmanager.ui.view.modView.ModTopBar
 import top.laoxin.modmanager.ui.view.settingView.SettingPage
 import top.laoxin.modmanager.ui.view.settingView.SettingTopBar
 import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
-import top.laoxin.modmanager.ui.viewmodel.ModViewModel
+import top.laoxin.modmanager.ui.viewmodel.MainViewModel
+import top.laoxin.modmanager.ui.viewmodel.NavigationEvent
+import top.laoxin.modmanager.ui.viewmodel.ModBrowserViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModDetailViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModListViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModOperationViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModScanViewModel
+import top.laoxin.modmanager.ui.viewmodel.ModSearchViewModel
 import top.laoxin.modmanager.ui.viewmodel.SettingViewModel
-import kotlin.math.abs
 
 // 通知相关常量
 private const val TIPS_NOTIFICATION_ID = 1919810
@@ -106,8 +108,8 @@ private const val TIPS_NOTIFICATION_ACTION = "top.laoxin.modmanager.ACTION_SHOW_
 
 // 导航栏索引
 enum class NavigationIndex(
-    @param:StringRes val title: Int,
-    val icon: ImageVector,
+        @param:StringRes val title: Int,
+        val icon: ImageVector,
 ) {
     CONSOLE(R.string.console, Icons.Filled.Dashboard),
     MOD(R.string.mod, Icons.Filled.ImagesearchRoller),
@@ -115,42 +117,46 @@ enum class NavigationIndex(
 }
 
 data class PageNavigationState(
-    val pageList: List<NavigationIndex>,
-    val exitTime: Long,
-    val currentPage: Int,
-    val shouldScroll: Boolean,
-    val pagerState: PagerState,
-    val onExitTimeChange: (Long) -> Unit,
-    val onCurrentPageChange: (Int) -> Unit,
-    val onShouldScrollChange: (Boolean) -> Unit
+        val pageList: List<NavigationIndex>,
+        val exitTime: Long,
+        val currentPage: Int,
+        val shouldScroll: Boolean,
+        val pagerState: PagerState,
+        val onExitTimeChange: (Long) -> Unit,
+        val onCurrentPageChange: (Int) -> Unit,
+        val onShouldScrollChange: (Boolean) -> Unit
 )
 
 @Composable
 fun ModManagerApp() {
-    val consoleViewModel: ConsoleViewModel = viewModel()
-    val settingViewModel: SettingViewModel = viewModel()
-    val modViewModel: ModViewModel = viewModel()
-    val configuration = LocalConfiguration.current
+    val mainViewModel: MainViewModel = hiltViewModel()
+    val snackbarManager = mainViewModel.snackbarManager
+
     val pageNavigationState = rememberPageNavigationState()
-    val settingUiState = settingViewModel.uiState.collectAsState().value
+    val configuration = LocalConfiguration.current
 
     var hideBottomBar by remember { mutableStateOf(false) }
 
-    LaunchedEffect(settingUiState.showAbout) {
-        if (!settingUiState.showAbout) {
-            hideBottomBar = false
+    // 订阅导航事件
+    LaunchedEffect(Unit) {
+        mainViewModel.navigationEvent.collect { event ->
+            val targetPage = when (event) {
+                is NavigationEvent.NavigateToSettings -> NavigationIndex.SETTINGS.ordinal
+                is NavigationEvent.NavigateToConsole -> NavigationIndex.CONSOLE.ordinal
+                is NavigationEvent.NavigateToMod -> NavigationIndex.MOD.ordinal
+            }
+            pageNavigationState.onCurrentPageChange(targetPage)
+            pageNavigationState.onShouldScrollChange(true)
         }
     }
 
     // 页面内容
     PageContent(
-        consoleViewModel = consoleViewModel,
-        modViewModel = modViewModel,
-        settingViewModel = settingViewModel,
-        pageNavigationState = pageNavigationState,
-        configuration = configuration,
-        hideBottomBar = hideBottomBar,
-        onHideBottomBarChange = { hideBottomBar = it }
+            pageNavigationState = pageNavigationState,
+            configuration = configuration,
+            hideBottomBar = hideBottomBar,
+            onHideBottomBarChange = { hideBottomBar = it },
+            snackbarManager = snackbarManager
     )
 }
 
@@ -160,211 +166,158 @@ fun rememberPageNavigationState(): PageNavigationState {
     var exitTime by rememberSaveable { mutableLongStateOf(0L) }
     var currentPage by rememberSaveable { mutableIntStateOf(0) }
     var shouldScroll by remember { mutableStateOf(false) }
-    val pagerState = rememberPagerState(
-        initialPage = currentPage,
-        pageCount = { pageList.size }
-    )
+    val pagerState = rememberPagerState(initialPage = currentPage, pageCount = { pageList.size })
     return PageNavigationState(
-        pageList = pageList,
-        exitTime = exitTime,
-        currentPage = currentPage,
-        shouldScroll = shouldScroll,
-        pagerState = pagerState,
-        onExitTimeChange = { exitTime = it },
-        onCurrentPageChange = { currentPage = it },
-        onShouldScrollChange = { shouldScroll = it }
+            pageList = pageList,
+            exitTime = exitTime,
+            currentPage = currentPage,
+            shouldScroll = shouldScroll,
+            pagerState = pagerState,
+            onExitTimeChange = { exitTime = it },
+            onCurrentPageChange = { currentPage = it },
+            onShouldScrollChange = { shouldScroll = it }
     )
 }
 
 @Composable
 fun PageContent(
-    modViewModel: ModViewModel,
-    consoleViewModel: ConsoleViewModel,
-    settingViewModel: SettingViewModel,
-    pageNavigationState: PageNavigationState,
-    configuration: Configuration,
-    hideBottomBar: Boolean,
-    onHideBottomBarChange: (Boolean) -> Unit
+        pageNavigationState: PageNavigationState,
+        configuration: Configuration,
+        hideBottomBar: Boolean,
+        onHideBottomBarChange: (Boolean) -> Unit,
+        snackbarManager: SnackbarManager
 ) {
-    // 处理通知相关逻辑
-    HandleTipsNotification(modViewModel)
+    // 在页面级别初始化ViewModel
+    val settingViewModel: SettingViewModel = hiltViewModel()
+    val settingUiState = settingViewModel.uiState.collectAsState().value
+
+    LaunchedEffect(settingUiState.isAboutPage) {
+        if (!settingUiState.isAboutPage) {
+            onHideBottomBarChange(false)
+        }
+    }
 
     Row {
         // 横屏时显示侧边导航
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             NavigationRail(
-                currentPage = pageNavigationState.currentPage,
-                onPageSelected = { page ->
-                    pageNavigationState.onCurrentPageChange(page)
-                    pageNavigationState.onShouldScrollChange(true)
-                },
-                modViewModel = modViewModel,
-                consoleViewModel = consoleViewModel
+                    currentPage = pageNavigationState.currentPage,
+                    onPageSelected = { page ->
+                        pageNavigationState.onCurrentPageChange(page)
+                        pageNavigationState.onShouldScrollChange(true)
+                    }
             )
         }
 
         MainScaffold(
-            modViewModel = modViewModel,
-            consoleViewModel = consoleViewModel,
-            settingViewModel = settingViewModel,
-            pageNavigationState = pageNavigationState,
-            configuration = configuration,
-            hideBottomBar = hideBottomBar,
-            onHideBottomBarChange = onHideBottomBarChange
+                pageNavigationState = pageNavigationState,
+                configuration = configuration,
+                hideBottomBar = hideBottomBar,
+                onHideBottomBarChange = onHideBottomBarChange,
+                snackbarManager = snackbarManager
         )
-    }
-}
-
-@Composable
-private fun HandleTipsNotification(modViewModel: ModViewModel) {
-    val context = LocalContext.current
-    val modViewUiState = modViewModel.uiState.collectAsState().value
-
-    LaunchedEffect(
-        modViewUiState.tipsText,
-        modViewUiState.unzipProgress,
-        modViewUiState.multitaskingProgress
-    ) {
-        val tipsStart = if (modViewUiState.unzipProgress.isNotEmpty()) {
-            "${modViewUiState.tipsText} : ${modViewUiState.unzipProgress}"
-        } else {
-            modViewUiState.tipsText
-        }
-
-        val tipsEnd = if (modViewUiState.multitaskingProgress.isNotEmpty()) {
-            context.getString(R.string.mod_top_bar_tips, modViewUiState.multitaskingProgress)
-        } else {
-            ""
-        }
-
-        val tipsContent = "$tipsStart $tipsEnd"
-        val hasActiveOperation =
-            modViewUiState.unzipProgress.isNotEmpty() || modViewUiState.multitaskingProgress.isNotEmpty()
-
-        if (hasActiveOperation) {
-            sendTipsNotification(context, tipsContent)
-            if (!modViewUiState.showTips) {
-                modViewModel.setShowTips(true)
-                modViewModel.setSnackbarHidden(false)
-            }
-        } else {
-            cancelTipsNotification(context)
-
-            if (modViewUiState.showTips) {
-                modViewModel.setShowTips(false)
-                if (modViewUiState.tipsText.isNotBlank()) {
-                    delay(2000)
-                    val currentState = modViewModel.uiState.value
-                    val currentlyHasActiveOperation =
-                        currentState.unzipProgress.isNotEmpty() ||
-                                currentState.multitaskingProgress.isNotEmpty()
-
-                    if (!currentlyHasActiveOperation) {
-                        modViewModel.setSnackbarHidden(true)
-                    }
-                } else {
-                    modViewModel.setSnackbarHidden(true)
-                }
-            }
-        }
     }
 }
 
 @Composable
 private fun MainScaffold(
-    modViewModel: ModViewModel,
-    consoleViewModel: ConsoleViewModel,
-    settingViewModel: SettingViewModel,
-    pageNavigationState: PageNavigationState,
-    configuration: Configuration,
-    hideBottomBar: Boolean,
-    onHideBottomBarChange: (Boolean) -> Unit
+        pageNavigationState: PageNavigationState,
+        configuration: Configuration,
+        hideBottomBar: Boolean,
+        onHideBottomBarChange: (Boolean) -> Unit,
+        snackbarManager: SnackbarManager
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
-        topBar = {
-            TopBarContent(
-                modViewModel = modViewModel,
-                consoleViewModel = consoleViewModel,
-                settingViewModel = settingViewModel,
-                currentPage = pageNavigationState.currentPage,
-                configuration = configuration.orientation
-            )
-        },
-        bottomBar = {
-            BottomBarContent(
-                configuration = configuration,
-                hideBottomBar = hideBottomBar,
-                currentPage = pageNavigationState.currentPage,
-                modViewModel = modViewModel,
-                onPageSelected = { page ->
-                    pageNavigationState.onCurrentPageChange(page)
-                    pageNavigationState.onShouldScrollChange(true)
-                }
-            )
-        }
+            topBar = {
+                TopBarContent(
+                        currentPage = pageNavigationState.currentPage,
+                        configuration = configuration.orientation
+                )
+            },
+            bottomBar = {
+                BottomBarContent(
+                        configuration = configuration,
+                        hideBottomBar = hideBottomBar,
+                        currentPage = pageNavigationState.currentPage,
+                        onPageSelected = { page ->
+                            pageNavigationState.onCurrentPageChange(page)
+                            pageNavigationState.onShouldScrollChange(true)
+                        }
+                )
+            },
+            snackbarHost = {
+                GlobalSnackbarHost(
+                        snackbarManager = snackbarManager,
+                        snackbarHostState = snackbarHostState
+                )
+            }
     ) { innerPadding ->
         ScaffoldContent(
-            modViewModel = modViewModel,
-            consoleViewModel = consoleViewModel,
-            settingViewModel = settingViewModel,
-            pageNavigationState = pageNavigationState,
-            innerPadding = innerPadding,
-            onHideBottomBarChange = onHideBottomBarChange
+                pageNavigationState = pageNavigationState,
+                innerPadding = innerPadding,
+                onHideBottomBarChange = onHideBottomBarChange
         )
     }
 }
 
 @Composable
-private fun TopBarContent(
-    modViewModel: ModViewModel,
-    consoleViewModel: ConsoleViewModel,
-    settingViewModel: SettingViewModel,
-    currentPage: Int,
-    configuration: Int
-) {
+private fun TopBarContent(currentPage: Int, configuration: Int) {
     when (currentPage) {
-        NavigationIndex.CONSOLE.ordinal -> ConsoleTopBar(
-            consoleViewModel,
-            configuration = configuration
-        )
+        NavigationIndex.CONSOLE.ordinal -> {
+            val consoleViewModel: ConsoleViewModel = hiltViewModel()
+            ConsoleTopBar(viewModel = consoleViewModel, configuration = configuration)
+        }
+        NavigationIndex.MOD.ordinal -> {
+            // 使用新的拆分ViewModel
+            val modScanViewModel: ModScanViewModel = hiltViewModel()
+            val modOperationViewModel: ModOperationViewModel = hiltViewModel()
+            val modListViewModel: ModListViewModel = hiltViewModel()
+            val modDetailViewModel: ModDetailViewModel = hiltViewModel()
+            val modSearchViewModel: ModSearchViewModel = hiltViewModel()
+            val modBrowserViewModel: ModBrowserViewModel = hiltViewModel()
 
-        NavigationIndex.MOD.ordinal -> ModTopBar(
-            modViewModel,
-            configuration = configuration
-        )
-
-        NavigationIndex.SETTINGS.ordinal -> SettingTopBar(
-            settingViewModel,
-            configuration = configuration
-        )
+            ModTopBar(
+                   // modDetailViewModel= modDetailViewModel,
+                    modListViewModel = modListViewModel,
+                    modOperationViewModel = modOperationViewModel,
+                    modBrowserViewModel = modBrowserViewModel,
+                    modSearchViewModel = modSearchViewModel,
+                    modScanViewModel = modScanViewModel,
+                    configuration = configuration
+            )
+        }
+        NavigationIndex.SETTINGS.ordinal -> {
+            val settingViewModel: SettingViewModel = hiltViewModel()
+            SettingTopBar(settingViewModel, configuration = configuration)
+        }
     }
 }
 
 @Composable
 private fun BottomBarContent(
-    configuration: Configuration,
-    hideBottomBar: Boolean,
-    currentPage: Int,
-    modViewModel: ModViewModel,
-    onPageSelected: (Int) -> Unit
+        configuration: Configuration,
+        hideBottomBar: Boolean,
+        currentPage: Int,
+        onPageSelected: (Int) -> Unit
 ) {
     if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .animateContentSize()
-                .height(
-                    if (hideBottomBar) 0.dp
-                    else 80.dp + WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding()
-                )
+                modifier =
+                        Modifier.fillMaxWidth()
+                                .animateContentSize()
+                                .height(
+                                        if (hideBottomBar) 0.dp
+                                        else
+                                                80.dp +
+                                                        WindowInsets.navigationBars
+                                                                .asPaddingValues()
+                                                                .calculateBottomPadding()
+                                )
         ) {
             if (!hideBottomBar) {
-                NavigationBar(
-                    currentPage = currentPage,
-                    modViewModel = modViewModel,
-                    onPageSelected = onPageSelected
-                )
+                NavigationBar(currentPage = currentPage, onPageSelected = onPageSelected)
             }
         }
     }
@@ -372,81 +325,43 @@ private fun BottomBarContent(
 
 @Composable
 private fun ScaffoldContent(
-    modViewModel: ModViewModel,
-    consoleViewModel: ConsoleViewModel,
-    settingViewModel: SettingViewModel,
-    pageNavigationState: PageNavigationState,
-    innerPadding: PaddingValues,
-    onHideBottomBarChange: (Boolean) -> Unit
+        pageNavigationState: PageNavigationState,
+        innerPadding: PaddingValues,
+        onHideBottomBarChange: (Boolean) -> Unit
 ) {
-    val modViewUiState = modViewModel.uiState.collectAsState().value
-
     // 处理返回键逻辑
-    HandleBackNavigation(
-        pageNavigationState = pageNavigationState,
-        modViewModel = modViewModel,
-        modViewUiState = modViewUiState
-    )
+    HandleBackNavigation(pageNavigationState = pageNavigationState)
 
     // 处理页面滚动
     HandlePageScrolling(pageNavigationState)
 
-    // 注册广播接收器
-    HandleBroadcastReceiver(modViewModel)
-
     Box(modifier = Modifier.fillMaxSize()) {
-        // 显示提示信息
-        if (modViewUiState.showTips && !modViewUiState.isSnackbarHidden) {
-            ProcessTips(
-                text = modViewUiState.tipsText,
-                setSnackbarHidden = { hidden ->
-                    modViewModel.setSnackbarHidden(hidden)
-                },
-                uiState = modViewUiState,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = innerPadding.calculateTopPadding())
-                    .zIndex(10f)
-            )
-        }
-
+        // 显示提示信息 - 现在由各个页面自己处理
         AppContent(
-            pagerState = pageNavigationState.pagerState,
-            modifier = Modifier
-                .padding(innerPadding)
-                .zIndex(0f),
-            consoleViewModel = consoleViewModel,
-            modViewModel = modViewModel,
-            settingViewModel = settingViewModel,
-            onHideBottomBar = onHideBottomBarChange
+                pagerState = pageNavigationState.pagerState,
+                modifier = Modifier.padding(innerPadding).zIndex(0f),
+                onHideBottomBar = onHideBottomBarChange
         )
     }
 }
 
 @Composable
-private fun HandleBackNavigation(
-    pageNavigationState: PageNavigationState,
-    modViewModel: ModViewModel,
-    modViewUiState: ModUiState
-) {
+private fun HandleBackNavigation(pageNavigationState: PageNavigationState) {
     val context = LocalContext.current
-    val exitToast: Toast = remember {
-        Toast.makeText(
-            context,
-            context.getText(R.string.toast_quit_app),
-            Toast.LENGTH_SHORT
-        )
-    }
     val activity = context as? Activity
 
+    // 获取搜索状态
+    val modSearchViewModel: ModSearchViewModel = hiltViewModel()
+    val modScanUiState by modSearchViewModel.uiState.collectAsState()
+    val searchBoxVisible = modScanUiState.searchBoxVisible
+
     val isOnModPageWithSearchVisible =
-        pageNavigationState.currentPage == NavigationIndex.MOD.ordinal &&
-                modViewUiState.searchBoxVisible
+            pageNavigationState.currentPage == NavigationIndex.MOD.ordinal && searchBoxVisible
     val isNotOnConsolePage = pageNavigationState.currentPage != NavigationIndex.CONSOLE.ordinal
 
     // MOD页面搜索框可见时，隐藏搜索框
     BackHandler(enabled = isOnModPageWithSearchVisible) {
-        modViewModel.setSearchBoxVisible(false)
+        modSearchViewModel.setSearchBoxVisible(false)
     }
 
     // 非CONSOLE页面时，返回CONSOLE（排除搜索框可见情况）
@@ -459,10 +374,10 @@ private fun HandleBackNavigation(
     BackHandler(enabled = pageNavigationState.currentPage == NavigationIndex.CONSOLE.ordinal) {
         val currentTime = System.currentTimeMillis()
         if (currentTime - pageNavigationState.exitTime > 2000) {
-            exitToast.show()
+            Toast.makeText(context, context.getText(R.string.toast_quit_app), Toast.LENGTH_SHORT)
+                    .show()
             pageNavigationState.onExitTimeChange(currentTime)
         } else {
-            exitToast.cancel()
             activity?.finish()
         }
     }
@@ -479,11 +394,14 @@ private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
             val currentPagerPage = pagerState.currentPage
             if (targetPage != currentPagerPage) {
                 pagerState.animateScrollToPage(
-                    page = targetPage,
-                    animationSpec = tween(
-                        durationMillis = abs(currentPagerPage - targetPage) * 100 + MotionDuration.Medium,
-                        easing = MotionEasing.Emphasized
-                    )
+                        page = targetPage,
+                        animationSpec =
+                                tween(
+                                        durationMillis =
+                                                abs(currentPagerPage - targetPage) * 100 +
+                                                        MotionDuration.Medium,
+                                        easing = MotionEasing.Emphasized
+                                )
                 )
             }
             pageNavigationState.onShouldScrollChange(false)
@@ -491,9 +409,7 @@ private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
     }
 
     // 使用 settledPage 而不是 currentPage，避免动画过程中的中间状态
-    val settledPage by remember {
-        derivedStateOf { pagerState.settledPage }
-    }
+    val settledPage by remember { derivedStateOf { pagerState.settledPage } }
 
     // 只在页面完全停止后才同步状态
     LaunchedEffect(settledPage) {
@@ -504,142 +420,114 @@ private fun HandlePageScrolling(pageNavigationState: PageNavigationState) {
 }
 
 @Composable
-private fun HandleBroadcastReceiver(modViewModel: ModViewModel) {
-    val context = LocalContext.current
-
-    DisposableEffect(context) {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == TIPS_NOTIFICATION_ACTION) {
-                    val currentState = modViewModel.uiState.value
-                    val hasActiveOperation = currentState.unzipProgress.isNotEmpty() ||
-                            currentState.multitaskingProgress.isNotEmpty()
-
-                    if (hasActiveOperation) {
-                        MainScope().launch {
-                            modViewModel.setShowTips(true)
-                            modViewModel.setSnackbarHidden(false)
-                        }
-                    }
-                }
-            }
-        }
-        val filter = IntentFilter(TIPS_NOTIFICATION_ACTION)
-
-        try {
-            ContextCompat.registerReceiver(
-                context,
-                receiver,
-                filter,
-                ContextCompat.RECEIVER_EXPORTED
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        onDispose {
-            try {
-                context.unregisterReceiver(receiver)
-            } catch (_: Exception) {
-            }
-        }
-    }
-}
-
-@Composable
 fun AppContent(
-    pagerState: PagerState,
-    modifier: Modifier = Modifier,
-    consoleViewModel: ConsoleViewModel,
-    modViewModel: ModViewModel,
-    settingViewModel: SettingViewModel,
-    onHideBottomBar: (Boolean) -> Unit
+        pagerState: PagerState,
+        modifier: Modifier = Modifier,
+        onHideBottomBar: (Boolean) -> Unit
 ) {
     HorizontalPager(
-        state = pagerState,
-        modifier = modifier,
-        beyondViewportPageCount = 0,
-        key = { page -> "page_$page" }
+            state = pagerState,
+            modifier = modifier,
+            beyondViewportPageCount = 0,
+            key = { page -> "page_$page" }
     ) { page ->
         when (page) {
-            NavigationIndex.CONSOLE.ordinal -> ConsolePage(consoleViewModel)
-            NavigationIndex.MOD.ordinal -> ModPage(modViewModel)
-            NavigationIndex.SETTINGS.ordinal -> SettingPage(settingViewModel, onHideBottomBar)
+            NavigationIndex.CONSOLE.ordinal -> {
+                val consoleViewModel: ConsoleViewModel = hiltViewModel()
+                ConsolePage(viewModel = consoleViewModel)
+            }
+            NavigationIndex.MOD.ordinal -> {
+                // 使用新的拆分ViewModel
+                val modScanViewModel: ModScanViewModel = hiltViewModel()
+                val modOperationViewModel: ModOperationViewModel = hiltViewModel()
+                val modListViewModel: ModListViewModel = hiltViewModel()
+                val modDetailViewModel: ModDetailViewModel = hiltViewModel()
+                val modSearchViewModel: ModSearchViewModel = hiltViewModel()
+                val modBrowserViewModel: ModBrowserViewModel = hiltViewModel()
+
+                ModPage(
+                        modScanViewModel = modScanViewModel,
+                        modOperationViewModel = modOperationViewModel,
+                        modListViewModel = modListViewModel,
+                        modDetailViewModel = modDetailViewModel,
+                        modSearchViewModel = modSearchViewModel,
+                        modBrowserViewModel = modBrowserViewModel
+                )
+            }
+            NavigationIndex.SETTINGS.ordinal -> {
+                val settingViewModel: SettingViewModel = hiltViewModel()
+                SettingPage(settingViewModel, onHideBottomBar)
+            }
         }
     }
 }
 
-//侧边导航
+// 侧边导航
 @Composable
-fun NavigationRail(
-    currentPage: Int,
-    onPageSelected: (Int) -> Unit,
-    modViewModel: ModViewModel,
-    consoleViewModel: ConsoleViewModel
-) {
+fun NavigationRail(currentPage: Int, onPageSelected: (Int) -> Unit) {
     var lastClickTime by remember { mutableLongStateOf(0L) }
     var isNavigating by remember { mutableStateOf(false) }
-    val packageName = consoleViewModel.uiState.collectAsState().value.gameInfo.packageName
-    val gameIcon = remember(packageName) {
-        getGameIcon(packageName)
-    }
 
-    NavigationRail(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(90.dp)
-            .padding(0.dp)
-    ) {
+    // 获取游戏信息用于显示图标
+    val consoleViewModel: ConsoleViewModel = hiltViewModel()
+    val packageName = consoleViewModel.uiState.collectAsState().value.gameInfo.packageName
+    val gameIcon = remember(packageName) { getGameIcon(packageName) }
+
+    // 获取ModListViewModel用于退出多选模式
+    val modListViewModel: ModListViewModel = hiltViewModel()
+
+    NavigationRail(modifier = Modifier.fillMaxHeight().width(90.dp).padding(0.dp)) {
         val currentPageName = stringResource(id = NavigationIndex.entries[currentPage].title)
-        Text(
-            text = currentPageName,
-            modifier = Modifier.padding(16.dp)
-        )
+        Text(text = currentPageName, modifier = Modifier.padding(16.dp))
         Column {
             NavigationIndex.entries.forEachIndexed { index, navigationItem ->
                 val isSelected = currentPage == index
 
                 NavigationRailItem(
-                    selected = isSelected,
-                    onClick = {
-                        val currentTime = System.currentTimeMillis()
-                        val timeSinceLastClick = currentTime - lastClickTime
+                        selected = isSelected,
+                        onClick = {
+                            val currentTime = System.currentTimeMillis()
+                            val timeSinceLastClick = currentTime - lastClickTime
 
-                        // 双击刷新当前页面
-                        if (isSelected && timeSinceLastClick < 300) {
-                            refreshCurrentPage(currentPage, modViewModel)
-                            lastClickTime = currentTime
-                            return@NavigationRailItem
-                        }
-
-                        // 防抖：防止快速点击和动画进行中的点击
-                        if (!isNavigating && !isSelected && timeSinceLastClick > 100) {
-                            isNavigating = true
-                            modViewModel.exitSelect()
-                            onPageSelected(index)
-
-                            // 动画时间后重置导航状态
-                            MainScope().launch {
-                                delay(abs(currentPage - index) * 100L + MotionDuration.Medium.toLong())
-                                isNavigating = false
+                            // 双击刷新当前页面
+                            if (isSelected && timeSinceLastClick < 300) {
+                                refreshCurrentPage(currentPage)
+                                lastClickTime = currentTime
+                                return@NavigationRailItem
                             }
-                        }
 
-                        lastClickTime = currentTime
-                    },
-                    icon = {
-                        Icon(imageVector = navigationItem.icon, contentDescription = null)
-                    },
-                    label = {
-                        AnimatedVisibility(
-                            visible = isSelected,
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                        ) {
-                            Text(text = stringResource(id = navigationItem.title))
-                        }
-                    },
-                    alwaysShowLabel = false
+                            // 防抖：防止快速点击和动画进行中的点击
+                            if (!isNavigating && !isSelected && timeSinceLastClick > 100) {
+                                isNavigating = true
+                                // 退出多选模式
+                                if (currentPage == NavigationIndex.MOD.ordinal) {
+                                    modListViewModel.exitSelect()
+                                }
+                                onPageSelected(index)
+
+                                // 动画时间后重置导航状态
+                                MainScope().launch {
+                                    delay(
+                                            abs(currentPage - index) * 100L +
+                                                    MotionDuration.Medium.toLong()
+                                    )
+                                    isNavigating = false
+                                }
+                            }
+
+                            lastClickTime = currentTime
+                        },
+                        icon = {
+                            Icon(imageVector = navigationItem.icon, contentDescription = null)
+                        },
+                        label = {
+                            AnimatedVisibility(
+                                    visible = isSelected,
+                                    enter = fadeIn(),
+                                    exit = fadeOut()
+                            ) { Text(text = stringResource(id = navigationItem.title)) }
+                        },
+                        alwaysShowLabel = false
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
             }
@@ -647,16 +535,12 @@ fun NavigationRail(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Column(
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
+        Column(modifier = Modifier.padding(bottom = 16.dp)) {
             gameIcon?.let {
                 Image(
-                    bitmap = it,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .padding(8.dp)
+                        bitmap = it,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp).padding(8.dp)
                 )
             }
         }
@@ -665,72 +549,72 @@ fun NavigationRail(
 
 // 底部导航
 @Composable
-fun NavigationBar(
-    currentPage: Int,
-    modViewModel: ModViewModel,
-    onPageSelected: (Int) -> Unit
-) {
+fun NavigationBar(currentPage: Int, onPageSelected: (Int) -> Unit) {
     var lastClickTime by remember { mutableLongStateOf(0L) }
     var isNavigating by remember { mutableStateOf(false) }
+
+    // 获取ModListViewModel用于退出多选模式
+    val modListViewModel: ModListViewModel = hiltViewModel()
 
     NavigationBar {
         NavigationIndex.entries.forEachIndexed { index, navigationItem ->
             val isSelected = currentPage == index
 
             NavigationBarItem(
-                selected = isSelected,
-                onClick = {
-                    val currentTime = System.currentTimeMillis()
-                    val timeSinceLastClick = currentTime - lastClickTime
+                    selected = isSelected,
+                    onClick = {
+                        val currentTime = System.currentTimeMillis()
+                        val timeSinceLastClick = currentTime - lastClickTime
 
-                    // 双击刷新当前页面
-                    if (isSelected && timeSinceLastClick < 300) {
-                        refreshCurrentPage(currentPage, modViewModel)
-                        lastClickTime = currentTime
-                        return@NavigationBarItem
-                    }
-
-                    // 防抖：防止快速点击和动画进行中的点击
-                    if (!isNavigating && !isSelected && timeSinceLastClick > 100) {
-                        isNavigating = true
-                        modViewModel.exitSelect()
-                        onPageSelected(index)
-
-                        // 动画时间后重置导航状态
-                        MainScope().launch {
-                            delay(abs(currentPage - index) * 100L + MotionDuration.Medium.toLong())
-                            isNavigating = false
+                        // 双击刷新当前页面
+                        if (isSelected && timeSinceLastClick < 300) {
+                            refreshCurrentPage(currentPage)
+                            lastClickTime = currentTime
+                            return@NavigationBarItem
                         }
-                    }
 
-                    lastClickTime = currentTime
-                },
-                icon = {
-                    Icon(imageVector = navigationItem.icon, contentDescription = null)
-                },
-                label = {
-                    AnimatedVisibility(
-                        visible = isSelected,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        Text(text = stringResource(id = navigationItem.title))
-                    }
-                },
-                alwaysShowLabel = false
+                        // 防抖：防止快速点击和动画进行中的点击
+                        if (!isNavigating && !isSelected && timeSinceLastClick > 100) {
+                            isNavigating = true
+                            // 退出多选模式
+                            if (currentPage == NavigationIndex.MOD.ordinal) {
+                                modListViewModel.exitSelect()
+                            }
+                            onPageSelected(index)
+
+                            // 动画时间后重置导航状态
+                            MainScope().launch {
+                                delay(
+                                        abs(currentPage - index) * 100L +
+                                                MotionDuration.Medium.toLong()
+                                )
+                                isNavigating = false
+                            }
+                        }
+
+                        lastClickTime = currentTime
+                    },
+                    icon = { Icon(imageVector = navigationItem.icon, contentDescription = null) },
+                    label = {
+                        AnimatedVisibility(
+                                visible = isSelected,
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                        ) { Text(text = stringResource(id = navigationItem.title)) }
+                    },
+                    alwaysShowLabel = false
             )
         }
     }
 }
 
-private fun refreshCurrentPage(currentPage: Int, modViewModel: ModViewModel) {
+private fun refreshCurrentPage(currentPage: Int) {
     when (currentPage) {
         NavigationIndex.CONSOLE.ordinal -> {}
-
         NavigationIndex.MOD.ordinal -> {
-            modViewModel.flashMods(isLoading = true, forceScan = false)
+            // 通过事件总线触发刷新，而不是直接调用ViewModel
+            // 这里可以发送刷新事件，由ModScanViewModel监听处理
         }
-
         NavigationIndex.SETTINGS.ordinal -> {}
     }
 }
@@ -744,22 +628,23 @@ fun getGameIcon(packageName: String): ImageBitmap? {
     try {
         val packageInfo = App.get().packageManager.getPackageInfo(packageName, 0)
         var drawable = packageInfo.applicationInfo?.loadIcon(App.get().packageManager)
-        val bitmap = when (drawable) {
-            is BitmapDrawable -> drawable.bitmap
-            is AdaptiveIconDrawable -> {
-                createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight).also { bitmap ->
-                    val canvas = Canvas(bitmap)
-                    drawable.setBounds(0, 0, canvas.width, canvas.height)
-                    drawable.draw(canvas)
+        val bitmap =
+                when (drawable) {
+                    is BitmapDrawable -> drawable.bitmap
+                    is AdaptiveIconDrawable -> {
+                        createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight).also {
+                                bitmap ->
+                            val canvas = Canvas(bitmap)
+                            drawable.setBounds(0, 0, canvas.width, canvas.height)
+                            drawable.draw(canvas)
+                        }
+                    }
+                    else -> {
+                        val context = App.get()
+                        drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
+                        drawable.toBitmap()
+                    }
                 }
-            }
-
-            else -> {
-                val context = App.get()
-                drawable = context.resources.getDrawable(R.drawable.app_icon, context.theme)
-                drawable.toBitmap()
-            }
-        }
         return bitmap.asImageBitmap()
     } catch (_: PackageManager.NameNotFoundException) {
         val context = App.get()
@@ -769,125 +654,58 @@ fun getGameIcon(packageName: String): ImageBitmap? {
     }
 }
 
-@Composable
-fun ProcessTips(
-    text: String,
-    setSnackbarHidden: (Boolean) -> Unit,
-    uiState: ModUiState,
-    modifier: Modifier
-) {
-    val tipsStart =
-        if (uiState.unzipProgress.isNotEmpty()) {
-            "$text : ${uiState.unzipProgress}"
-        } else {
-            text
-        }
-
-    val tipsEnd =
-        if (uiState.multitaskingProgress.isNotEmpty()) {
-            stringResource(R.string.mod_top_bar_tips, uiState.multitaskingProgress)
-        } else {
-            ""
-        }
-
-    val tipsContent = "$tipsStart $tipsEnd"
-    val hasActiveOperation =
-        uiState.unzipProgress.isNotEmpty() || uiState.multitaskingProgress.isNotEmpty()
-    DisposableEffect(hasActiveOperation) {
-        val job = if (!hasActiveOperation) {
-            MainScope().launch {
-                if (tipsContent.isNotBlank()) {
-                    delay(2000)
-                    setSnackbarHidden(true)
-                }
-            }
-        } else null
-
-        onDispose {
-            job?.cancel()
-        }
-    }
-
-    Box(modifier.fillMaxWidth(0.7f)) {
-        Snackbar(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier
-                .padding(16.dp)
-                .animateContentSize(),
-            shape = MaterialTheme.shapes.large,
-            action = {
-                ExpressiveFilledTonalButton(
-                    onClick = {
-                        setSnackbarHidden(true)
-                    },
-                    modifier = Modifier.padding(4.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.tips_btn_close),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
-        ) {
-            Text(
-                text = tipsContent,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
 private fun sendTipsNotification(context: Context, content: String) {
     val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    val channel = NotificationChannel(
-        TIPS_NOTIFICATION_CHANNEL_ID,
-        context.getString(R.string.console_info_title),
-        NotificationManager.IMPORTANCE_DEFAULT
-    )
+    val channel =
+            NotificationChannel(
+                    TIPS_NOTIFICATION_CHANNEL_ID,
+                    context.getString(R.string.console_info_title),
+                    NotificationManager.IMPORTANCE_DEFAULT
+            )
     // 设置通知不发出声音和震动，避免频繁更新时的干扰
     channel.setSound(null, null)
     channel.enableVibration(false)
     notificationManager.createNotificationChannel(channel)
 
     val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-    val contentPendingIntent = PendingIntent.getActivity(
-        context,
-        0,
-        launchIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
+    val contentPendingIntent =
+            PendingIntent.getActivity(
+                    context,
+                    0,
+                    launchIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
-    val actionIntent = Intent(TIPS_NOTIFICATION_ACTION).apply {
-        putExtra("timestamp", System.currentTimeMillis())
-    }
-    val actionPendingIntent = PendingIntent.getBroadcast(
-        context,
-        1,
-        actionIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
+    val actionIntent =
+            Intent(TIPS_NOTIFICATION_ACTION).apply {
+                putExtra("timestamp", System.currentTimeMillis())
+            }
+    val actionPendingIntent =
+            PendingIntent.getBroadcast(
+                    context,
+                    1,
+                    actionIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
-    val notification = NotificationCompat.Builder(context, TIPS_NOTIFICATION_CHANNEL_ID)
-        .setSmallIcon(R.drawable.app_icon)
-        .setContentTitle(context.getString(R.string.console_info_title))
-        .setContentText(content)
-        .setStyle(NotificationCompat.BigTextStyle().bigText(content))
-        .setAutoCancel(false)
-        .setOngoing(true)
-        .setContentIntent(contentPendingIntent)
-        .addAction(
-            R.drawable.app_icon,
-            context.getString(R.string.show_snackbar),
-            actionPendingIntent
-        )
-        .setOnlyAlertOnce(true)
-        .build()
+    val notification =
+            NotificationCompat.Builder(context, TIPS_NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.app_icon)
+                    .setContentTitle(context.getString(R.string.console_info_title))
+                    .setContentText(content)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(content))
+                    .setAutoCancel(false)
+                    .setOngoing(true)
+                    .setContentIntent(contentPendingIntent)
+                    .addAction(
+                            R.drawable.app_icon,
+                            context.getString(R.string.show_snackbar),
+                            actionPendingIntent
+                    )
+                    .setOnlyAlertOnce(true)
+                    .build()
 
     notificationManager.notify(TIPS_NOTIFICATION_ID, notification)
 }
@@ -895,6 +713,6 @@ private fun sendTipsNotification(context: Context, content: String) {
 // 取消通知
 private fun cancelTipsNotification(context: Context) {
     val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(TIPS_NOTIFICATION_ID)
 }

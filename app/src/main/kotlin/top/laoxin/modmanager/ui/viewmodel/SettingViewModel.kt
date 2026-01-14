@@ -1,384 +1,384 @@
 package top.laoxin.modmanager.ui.viewmodel
 
-import android.content.Context
-import android.content.Intent
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import top.laoxin.modmanager.App
 import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
-import top.laoxin.modmanager.constant.GameInfoConstant
-import top.laoxin.modmanager.constant.PathType
-import top.laoxin.modmanager.constant.ResultCode
-import top.laoxin.modmanager.data.bean.DownloadGameConfigBean
-import top.laoxin.modmanager.data.bean.GameInfoBean
-import top.laoxin.modmanager.data.network.ModManagerApi
+import top.laoxin.modmanager.constant.FileAccessType
+import top.laoxin.modmanager.constant.PathConstants
+import top.laoxin.modmanager.domain.bean.DownloadGameConfigBean
+import top.laoxin.modmanager.domain.bean.GameInfoBean
+import top.laoxin.modmanager.domain.bean.InfoBean
+import top.laoxin.modmanager.domain.bean.ThanksBean
+import top.laoxin.modmanager.data.repository.UserPreferencesRepositoryImpl
+import top.laoxin.modmanager.data.service.AppInfoService
+import top.laoxin.modmanager.domain.model.Result
+import top.laoxin.modmanager.domain.repository.AppDataRepository
+import top.laoxin.modmanager.domain.repository.GameInfoRepository
+import top.laoxin.modmanager.domain.repository.UpdateInfo
+import top.laoxin.modmanager.domain.service.FileService
+import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.domain.usercase.app.CheckUpdateUserCase
-import top.laoxin.modmanager.domain.usercase.setting.DeleteBackupUserCase
-import top.laoxin.modmanager.domain.usercase.setting.DeleteCacheUserCase
-import top.laoxin.modmanager.domain.usercase.setting.DeleteTempUserCase
-import top.laoxin.modmanager.domain.usercase.setting.DownloadGameConfigUserCase
-import top.laoxin.modmanager.domain.usercase.setting.FlashGameConfigUserCase
-import top.laoxin.modmanager.domain.usercase.setting.SelectGameUserCase
-import top.laoxin.modmanager.tools.AppInfoTools
-import top.laoxin.modmanager.tools.PermissionTools
-import top.laoxin.modmanager.tools.ToastUtils
-import top.laoxin.modmanager.tools.filetools.FileToolsManager
-import top.laoxin.modmanager.tools.manager.GameInfoManager
+import top.laoxin.modmanager.domain.usercase.app.GetCurrentInformationUserCase
+import top.laoxin.modmanager.ui.state.PermissionRequestState
+import top.laoxin.modmanager.ui.state.PermissionType
 import top.laoxin.modmanager.ui.state.SettingUiState
-import javax.inject.Inject
+import top.laoxin.modmanager.ui.state.SnackbarManager
 
 @HiltViewModel
-class SettingViewModel @Inject constructor(
-    private val deleteBackupUserCase: DeleteBackupUserCase,
-    private val deleteCacheUserCase: DeleteCacheUserCase,
-    private val deleteTempUserCase: DeleteTempUserCase,
-    private val selectGameUserCase: SelectGameUserCase,
-    private val flashGameConfigUserCase: FlashGameConfigUserCase,
-    private val permissionTools: PermissionTools,
-    private val gameInfoManager: GameInfoManager,
-    private val appInfoManager: AppInfoTools,
-    private val downloadGameConfigUserCase: DownloadGameConfigUserCase,
+class SettingViewModel
+@Inject
+constructor(
+    private val gameInfoRepository: GameInfoRepository,
+    private val appDataRepository: AppDataRepository,
+    private val userPreferencesRepository: UserPreferencesRepositoryImpl,
     private val checkUpdateUserCase: CheckUpdateUserCase,
-    private val fileToolsManager: FileToolsManager
+    private val getCurrentInformationUserCase: GetCurrentInformationUserCase,
+    private val appInfoService: AppInfoService,
+    private val permissionService: PermissionService,
+    private val snackbarManager: SnackbarManager,
+    private val fileService: FileService
 ) : ViewModel() {
+
     companion object {
-        var gameInfoJob: Job? = null
+        private const val TAG = "SettingViewModel"
     }
 
-    private var _requestPermissionPath by mutableStateOf("")
-    val requestPermissionPath get() = _requestPermissionPath
-    private val _uiState = MutableStateFlow(SettingUiState())
-    val uiState = _uiState.asStateFlow()
-    private var _gameInfo = mutableStateOf(GameInfoConstant.gameInfoList[0])
-    val gameInfo get() = _gameInfo.value
+    private val _internalState = MutableStateFlow(InternalState())
 
-    // 下载地址
-    private var _downloadUrl: String? by mutableStateOf("")
-    val downloadUrl: String?
-        get() = _downloadUrl
-
-    private var _universalUrl: String? by mutableStateOf("")
-    val universalUrl: String?
-        get() = _universalUrl
-
-    // 更新内容
-    private var _updateContent: String? by mutableStateOf("")
-    val updateContent: String?
-        get() = _updateContent
+    // 权限请求状态
+    private val _permissionState = MutableStateFlow(PermissionRequestState())
+    val permissionState: StateFlow<PermissionRequestState> = _permissionState.asStateFlow()
+    val uiState: StateFlow<SettingUiState> =
+        combine(
+            _internalState,
+            gameInfoRepository.getGameInfoList(),
+            userPreferencesRepository.selectedGame
+        ) { internal, gameList, currentGame ->
+            SettingUiState(
+                showDeleteBackupDialog = internal.showDeleteBackupDialog,
+                showDeleteCacheDialog = internal.showDeleteCacheDialog,
+                showAcknowledgmentsDialog = internal.showAcknowledgmentsDialog,
+                showSwitchGameDialog = internal.showSwitchGameDialog,
+                showGameTipsDialog = internal.showGameTipsDialog,
+                showUpdateDialog = internal.showUpdateDialog,
+                showDownloadGameConfigDialog =
+                    internal.showDownloadGameConfigDialog,
+                showNotificationDialog = internal.showNotificationDialog,
+                openPermissionRequestDialog = internal.openPermissionRequestDialog,
+                showAboutDialog = internal.showAboutDialog,
+                thanksList = internal.thanksList,
+                gameInfoList = gameList,
+                currentGame = currentGame,
+                targetGame = internal.targetGame,
+                downloadGameConfigList = internal.downloadGameConfigList,
+                infoBean = internal.infoBean,
+                updateInfo = internal.updateInfo,
+                versionName =
+                    appInfoService
+                        .getVersionName(appInfoService.getPackageName())
+                        .getOrNull()
+                        ?: "",
+                requestPermissionPath = internal.requestPermissionPath,
+                isLoading = false,
+                isDownloading = internal.isDownloading,
+                isAboutPage = internal.isAboutPage
+            )
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = SettingUiState(isLoading = true)
+            )
 
     init {
-
-        loadGameInfo()
-        getVersionName()
+        checkUpdate()
+        getNewInfo()
     }
 
-    // 删除所有备份
-    fun deleteAllBackups() {
-        gameInfoJob?.cancel()
-        setDeleteBackupDialog(false)
-        gameInfoJob = viewModelScope.launch {
-            val (code, name) = deleteBackupUserCase()
-            when (code) {
-                ResultCode.NO_SELECTED_GAME -> {
-                    ToastUtils.longCall(R.string.toast_please_select_game)
-                }
+    fun onSwitchGame(game: GameInfoBean) {
+        val currentGame = uiState.value.currentGame
+        if (game.packageName != currentGame.packageName) {
+            viewModelScope.launch {
 
-                ResultCode.HAVE_ENABLE_MODS -> {
-                    ToastUtils.longCall(R.string.toast_del_buckup_when_mod_enable)
-                }
-
-                ResultCode.SUCCESS -> {
-                    ToastUtils.longCall(
-                        App.get().getString(
-                            R.string.toast_del_buckup_success,
-                            name
+                val gameInfo =
+                    gameInfoRepository.enrichGameInfo(
+                        game,
+                        PathConstants.getFullModPath(
+                            userPreferencesRepository.selectedDirectory.first()
                         )
                     )
+                userPreferencesRepository.saveSelectedGame(gameInfo)
+                snackbarManager.showMessage(R.string.toast_setect_game_success,game.gameName,game.serviceName)
+                _internalState.update {
+                    it.copy(targetGame = null, showGameTipsDialog = false)
                 }
 
-                ResultCode.FAIL -> {
-                    ToastUtils.longCall(
-                        App.get().getString(
-                            R.string.toast_del_buckup_failed,
-                            name
-                        )
-                    )
+
+            }
+        }
+    }
+
+
+
+
+    fun clearCache() {
+        viewModelScope.launch {
+            val result = fileService.deleteFile(PathConstants.MODS_TEMP_PATH)
+            when (result) {
+                is Result.Success -> {
+                    snackbarManager.showMessage("清理成功")
+                }
+
+                is Result.Error -> {
+                    snackbarManager.showMessage("清理失败")
                 }
             }
-            gameInfoJob?.cancel()
         }
-
+        setShowDeleteCacheDialog(false)
     }
 
-    // 设置删除备份对话框
-    fun setDeleteBackupDialog(open: Boolean) {
-        _uiState.value = _uiState.value.copy(deleteBackupDialog = open)
-    }
-
-    // 设置删除备份对话框
-    fun setDeleteCacheDialog(open: Boolean) {
-        _uiState.value = _uiState.value.copy(deleteCacheDialog = open)
-    }
-
-    fun deleteCache() {
-        setDeleteCacheDialog(false)
+    fun getThanks() {
         viewModelScope.launch {
-            val delCache = deleteCacheUserCase()
-            if (delCache) {
-                ToastUtils.longCall(R.string.toast_del_cache_success)
-            } else {
-                ToastUtils.longCall(R.string.toast_del_cache_filed)
-            }
-        }
-    }
-
-    fun openUrl(context: Context, url: String) {
-        if (url.isEmpty()) {
-            return
-        }
-        val urlIntent = Intent(
-            Intent.ACTION_VIEW,
-            url.toUri()
-        )
-        context.startActivity(urlIntent)
-    }
-
-    fun deleteTemp() {
-        viewModelScope.launch {
-            val delTemp: Boolean = deleteTempUserCase()
-            if (delTemp) {
-                ToastUtils.longCall(R.string.toast_del_temp_success)
-            } else {
-                ToastUtils.longCall(R.string.toast_del_temp_filed)
-            }
-        }
-    }
-
-    fun showAcknowledgments(b: Boolean) {
-        if (b) {
-            viewModelScope.launch(Dispatchers.IO) {
-                kotlin.runCatching {
-                    ModManagerApi.retrofitService.getThanksList()
-                }.onFailure {
-                    Log.e("SettingViewModel", "showAcknowledgments: $it")
-                    ToastUtils.longCall("获取感谢名单失败")
-                }.onSuccess {
-                    withContext(Dispatchers.Main) {
-                        _uiState.value = _uiState.value.copy(thinksList = it)
-                        _uiState.value = _uiState.value.copy(showAcknowledgments = b)
+            when (val result = appDataRepository.getThanksList()) {
+                is Result.Success -> {
+                    _internalState.update { 
+                        it.copy(thanksList = result.data, showAcknowledgmentsDialog = true) 
                     }
                 }
-            }
-        } else {
-            _uiState.value = _uiState.value.copy(showAcknowledgments = false)
-        }
-    }
-
-    fun showSwitchGame(b: Boolean) {
-        _uiState.value = _uiState.value.copy(showSwitchGame = b)
-    }
-
-
-    // 通过名称软件包名获取软件包信息
-    private fun loadGameInfo() {
-        _uiState.value = _uiState.value.copy(gameInfoList = gameInfoManager.getGameInfoList())
-    }
-
-    //设置游戏信息
-    fun setGameInfo(gameInfo: GameInfoBean, isTips: Boolean = false) {
-        _gameInfo.value = gameInfo
-        if (gameInfo.tips.isNotEmpty() && !isTips) {
-            _uiState.update {
-                it.copy(showGameTipsDialog = true)
-            }
-        } else {
-            if (permissionTools.checkPermission(gameInfo.gamePath) == PathType.NULL) {
-                _requestPermissionPath =
-                    permissionTools.getRequestPermissionPath(gameInfo.gamePath)
-                _uiState.update {
-                    it.copy(openPermissionRequestDialog = true)
+                is Result.Error -> {
+                    Log.e(TAG, "获取感谢名单失败: ${result.error}")
+                    snackbarManager.showMessageAsync(R.string.thanks_list_fetch_failed)
                 }
-                return
             }
-            confirmGameInfo(gameInfo)
         }
-
-
     }
 
-    private fun confirmGameInfo(gameInfo: GameInfoBean) {
-
+    fun checkUpdate(autoCheck: Boolean = true) {
         viewModelScope.launch {
-            if (selectGameUserCase(gameInfo)) {
-                ToastUtils.longCall(
-                    App.get().getString(
-                        R.string.toast_setect_game_success,
-                        gameInfo.gameName,
-                        gameInfo.serviceName
+            checkUpdateUserCase(BuildConfig.VERSION_NAME, autoCheck).let { updateInfo ->
+                _internalState.update { it.copy(updateInfo = updateInfo, showUpdateDialog = true) }
+            }
+        }
+    }
+
+    fun getNewInfo(autoCheck: Boolean = true) {
+        viewModelScope.launch {
+            val info = getCurrentInformationUserCase(autoCheck)
+            _internalState.update {
+                it.copy(infoBean = info, showNotificationDialog = info != null)
+            }
+        }
+    }
+
+    fun getDownloadGameConfig() {
+        viewModelScope.launch {
+            when (val result = gameInfoRepository.getRemoteGameConfigs()) {
+                is Result.Success -> {
+                    _internalState.update {
+                        it.copy(
+                            downloadGameConfigList = result.data,
+                            showDownloadGameConfigDialog = true
+                        )
+                    }
+                }
+
+                is Result.Error -> {
+                    snackbarManager.showMessageAsync(R.string.game_config_fetch_failed)
+                }
+            }
+        }
+    }
+
+    fun installGameConfig(config: DownloadGameConfigBean) {
+        viewModelScope.launch {
+            _internalState.update { it.copy(isDownloading = true) }
+            when (val result = gameInfoRepository.downloadRemoteGameConfig(config)) {
+                is Result.Success -> {
+                    snackbarManager.showMessageAsync(
+                        R.string.game_config_added,
+                        result.data.gameName
                     )
-                )
-                showSwitchGame(false)
+                    _internalState.update {
+                        it.copy(isDownloading = false, showDownloadGameConfigDialog = false)
+                    }
+                }
+
+                is Result.Error -> {
+                    snackbarManager.showMessageAsync(R.string.game_config_download_failed)
+                    _internalState.update { it.copy(isDownloading = false) }
+                }
+            }
+        }
+    }
+
+    /** 获取应用图标 */
+    fun getAppIcon(packageName: String) = appInfoService.getAppIcon(packageName)
+
+    // Dialog state setters
+    fun setShowDeleteBackupDialog(show: Boolean) =
+        _internalState.update { it.copy(showDeleteBackupDialog = show) }
+
+    fun setShowDeleteCacheDialog(show: Boolean) =
+        _internalState.update { it.copy(showDeleteCacheDialog = show) }
+
+    fun setShowAcknowledgmentsDialog(show: Boolean) =
+        _internalState.update { it.copy(showAcknowledgmentsDialog = show) }
+
+    fun setShowSwitchGameDialog(show: Boolean) =
+        _internalState.update { it.copy(showSwitchGameDialog = show) }
+
+    fun setShowGameTipsDialog(show: Boolean) =
+        _internalState.update { it.copy(showGameTipsDialog = show) }
+
+    fun setShowUpdateDialog(show: Boolean) =
+        _internalState.update { it.copy(showUpdateDialog = show) }
+
+    fun setShowDownloadGameConfigDialog(show: Boolean) =
+        _internalState.update { it.copy(showDownloadGameConfigDialog = show) }
+
+    fun setShowNotificationDialog(show: Boolean) =
+        _internalState.update { it.copy(showNotificationDialog = show) }
+
+
+
+    fun setAboutPage(bool: Boolean) = _internalState.update { it.copy(isAboutPage = bool) }
+    fun setGameInfo(targetGame: GameInfoBean) {
+        if (targetGame.packageName == userPreferencesRepository.selectedGameValue.packageName) return
+        Log.d(TAG, "setGameInfo: $targetGame")
+        if (permissionService.getFileAccessType(targetGame.gamePath) != FileAccessType.NONE) {
+            //appInfoService.isAppInstalled(targetGame.packageName)
+            if (appInfoService.isAppInstalled(targetGame.packageName).isSuccess) {
+                if (targetGame.tips.isNotEmpty()) {
+                    _internalState.update {
+                        it.copy(
+                            targetGame = targetGame,
+                            showGameTipsDialog = true
+                        )
+                    }
+                } else {
+                    onSwitchGame(targetGame)
+                }
+
             } else {
-                ToastUtils.longCall(
-                    App.get().getString(
-                        R.string.toast_set_game_info_failed,
-                        gameInfo.gameName,
-                        gameInfo.serviceName
-                    )
+                //Log.d(TAG, "setGameInfo: app not installed")
+                snackbarManager.showMessageAsync(
+                    R.string.toast_set_game_info_failed,
+                    targetGame.gameName, targetGame.serviceName
                 )
             }
-
+            //onSwitchGame(targetGame)
+        } else {
+            showPermissionDialog(targetGame.gamePath)
         }
     }
 
-    fun flashGameConfig() {
-        gameInfoJob?.cancel()
-        gameInfoJob = viewModelScope.launch {
-            flashGameConfigUserCase()
 
-        }
-    }
 
-    fun checkUpdate() {
+    fun reloadGameConfig() {
         viewModelScope.launch {
-            val update = checkUpdateUserCase(BuildConfig.VERSION_NAME)
-            if (update.third) {
-                _downloadUrl = update.first[0]
-                _universalUrl = update.first[1]
-                _updateContent = update.second[0]
-                setShowUpgradeDialog(true)
-            } else {
-                ToastUtils.longCall(R.string.toast_no_update)
-            }
-        }
-    }
-
-    // 设置更新弹窗
-    fun setShowUpgradeDialog(b: Boolean) {
-        _uiState.update {
-            it.copy(showUpdateDialog = b)
-        }
-    }
-
-
-    // 获取版本号
-    fun getVersionName() {
-        viewModelScope.launch {
-            val version = appInfoManager.getVersionName(appInfoManager.getPackageName())
-            _uiState.update {
-                it.copy(versionName = version)
-            }
-        }
-    }
-
-    fun setShowDownloadGameConfig(b: Boolean) {
-        if (b) {
-            viewModelScope.launch(Dispatchers.IO) {
-                kotlin.runCatching {
-                    val gameConfigs = ModManagerApi.retrofitService.getGameConfigs()
-                    Log.d("SettingViewModel", "getGameConfigs: $gameConfigs")
-                    withContext(Dispatchers.Main) {
-                        _uiState.update {
-                            it.copy(
-                                downloadGameConfigList = gameConfigs,
-                                showDownloadGameConfigDialog = b
+            val modPath = userPreferencesRepository.selectedDirectory.first()
+            val customConfigPath = PathConstants.getFullModPath(modPath) + PathConstants.GAME_CONFIG_PATH
+            
+            when (val result = gameInfoRepository.importCustomGameConfigs(customConfigPath)) {
+                is Result.Success -> {
+                    val data = result.data
+                    when {
+                        data.successCount == 0 && data.failedCount == 0 -> {
+                            snackbarManager.showMessageAsync(R.string.game_config_import_no_files)
+                        }
+                        data.failedCount == 0 -> {
+                            snackbarManager.showMessageAsync(R.string.game_config_import_success, data.successCount)
+                        }
+                        else -> {
+                            snackbarManager.showMessageAsync(
+                                R.string.game_config_import_partial,
+                                data.successCount,
+                                data.failedCount
                             )
                         }
                     }
-
-                }.onFailure {
-                    withContext(Dispatchers.Main) {
-                        ToastUtils.longCall(R.string.toast_get_game_config_failed)
-                    }
+                }
+                is Result.Error -> {
+                    snackbarManager.showMessageAsync(R.string.game_config_import_failed)
                 }
             }
-        } else {
-            _uiState.update {
-                it.copy(showDownloadGameConfigDialog = false)
-            }
         }
     }
 
-    fun setShowGameTipsDialog(b: Boolean) {
-        _uiState.update {
-            it.copy(showGameTipsDialog = b)
+    private fun showPermissionDialog(
+        gamePath: String,
+        permissionType: PermissionType = PermissionType.URI_SAF
+    ) {
+        _permissionState.update {
+            PermissionRequestState(
+                showDialog = true,
+                requestPath = permissionService.getRequestPermissionPath(gamePath),
+                permissionType = permissionType
+            )
         }
     }
 
-    fun downloadGameConfig(downloadGameConfigBean: DownloadGameConfigBean) {
-        viewModelScope.launch {
-            downloadGameConfigUserCase(downloadGameConfigBean)
-            ToastUtils.longCall(R.string.toast_download_game_config_success)
-        }
+    /** 权限授予回调 */
+    fun onPermissionGranted() {
+        _permissionState.update { PermissionRequestState() }
+        snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+        // TODO: 重试之前的操作
     }
 
+    /** 权限拒绝回调 */
+    fun onPermissionDenied() {
+        _permissionState.update { PermissionRequestState() }
+        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+    }
+
+    /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
-        if (permissionTools.isShizukuAvailable) {
-            if (permissionTools.hasShizukuPermission()) {
-                permissionTools.checkShizukuPermission()
-            } else {
-                permissionTools.requestShizukuPermission()
+        val result = permissionService.requestShizukuPermission()
+        result
+            .onSuccess {
+                // Shizuku 权限请求已发起，等待结果
             }
-        } else {
-            ToastUtils.longCall(R.string.toast_shizuku_not_available)
-        }
-    }
-
-    fun setOpenPermissionRequestDialog(b: Boolean) {
-        _uiState.update {
-            it.copy(openPermissionRequestDialog = b)
-        }
-    }
-
-    fun checkInformation() {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                ModManagerApi.retrofitService.getInfo()
-            }.onFailure {
-                Log.e("SettingViewModel", "checkInformation: $it")
-            }.onSuccess { info ->
-                _uiState.update {
-                    it.copy(infoBean = info)
-                }
-                setShowInfoDialog(true)
+            .onError {
+                snackbarManager.showMessageAsync(R.string.toast_shizuku_not_available)
+                _permissionState.update { PermissionRequestState() }
             }
-        }
-
     }
 
-    // 显示信息弹窗
-    fun setShowInfoDialog(b: Boolean) {
-        _uiState.update {
-            it.copy(showNotificationDialog = b)
-        }
-    }
+    /** Shizuku 是否可用 */
+    fun isShizukuAvailable(): Boolean = permissionService.isShizukuAvailable()
 
-    fun getPermissionTools(): PermissionTools {
-        return permissionTools
-    }
-
-    fun getFileToolsManager(): FileToolsManager {
-        return fileToolsManager
-    }
-
-    fun setAboutPage(b: Boolean) {
-        _uiState.update {
-            it.copy(showAbout = b)
-        }
-    }
-
+    // Internal state data class
+    private data class InternalState(
+        val showDeleteBackupDialog: Boolean = false,
+        val showDeleteCacheDialog: Boolean = false,
+        val showAcknowledgmentsDialog: Boolean = false,
+        val showSwitchGameDialog: Boolean = false,
+        val showGameTipsDialog: Boolean = false,
+        val showUpdateDialog: Boolean = false,
+        val showDownloadGameConfigDialog: Boolean = false,
+        val showNotificationDialog: Boolean = false,
+        val openPermissionRequestDialog: Boolean = false,
+        val showAboutDialog: Boolean = false,
+        val thanksList: List<ThanksBean> = emptyList(),
+        val targetGame: GameInfoBean? = null,
+        val downloadGameConfigList: List<DownloadGameConfigBean> = emptyList(),
+        val infoBean: InfoBean? = null,
+        val updateInfo: UpdateInfo? = null,
+        val requestPermissionPath: String = "",
+        val isAboutPage: Boolean = false,
+        val isDownloading: Boolean = false,
+    )
 }

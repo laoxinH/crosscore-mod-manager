@@ -16,19 +16,19 @@ buildscript {
         classpath(libs.okhttp3.okhttp)
 
     }
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-        maven { url = uri("https://jitpack.io") }
-    }
+//    repositories {
+//        google()
+//        mavenCentral()
+//        gradlePluginPortal()
+//        maven { url = uri("https://jitpack.io") }
+//    }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-        maven { url = uri("https://jitpack.io") }
-    }
-}
+//allprojects {
+//    repositories {
+//        google()
+//        mavenCentral()
+//        gradlePluginPortal()
+//        maven { url = uri("https://jitpack.io") }
+//    }
+//}

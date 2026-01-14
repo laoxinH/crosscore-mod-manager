@@ -11,7 +11,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import dagger.hilt.android.HiltAndroidApp
 import top.laoxin.modmanager.constant.OSVersion
-import top.laoxin.modmanager.tools.LogTools
 import java.io.File
 
 
@@ -46,14 +45,14 @@ class App : Application() {
     private fun setupLifecycleObserver() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onStop(owner: LifecycleOwner) {
-                LogTools.flushAll()
+               // LogTools.flushAll()
             }
         })
 
         try {
             Runtime.getRuntime().addShutdownHook(Thread {
                 try {
-                    LogTools.shutdown()
+                    //LogTools.shutdown()
                 } catch (_: Exception) {
                 }
             })
@@ -127,7 +126,7 @@ class App : Application() {
         val stackTrace = throwable.stackTraceToString()
 
         Log.e("GlobalException", "$deviceInfo\n$exceptionInfo", throwable)
-        LogTools.logRecord("=== Crash Report ===\n$deviceInfo\n$exceptionInfo\n\nStack Trace:\n$stackTrace")
+        //LogTools.logRecord("=== Crash Report ===\n$deviceInfo\n$exceptionInfo\n\nStack Trace:\n$stackTrace")
     }
 
 }

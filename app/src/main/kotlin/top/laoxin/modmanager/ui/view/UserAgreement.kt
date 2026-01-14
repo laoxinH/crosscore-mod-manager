@@ -36,6 +36,7 @@ import androidx.core.content.edit
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.activity.main.MainActivity
 
@@ -76,14 +77,23 @@ private fun HandleScrollEvents(state: UserAgreementState) {
 // 处理倒计时
 @Composable
 private fun HandleCountdown(state: UserAgreementState) {
+    // 开发环境跳过等待
+    val requiredTime = if (BuildConfig.DEBUG) 0 else 20
+    
     LaunchedEffect(Unit) {
-        coroutineScope {
-            while (state.timeSpent < 20) {
-                delay(1000L)
-                state.timeSpent++
-            }
-            if (state.timeSpent >= 20) {
-                state.isConfirmed = true
+        if (requiredTime == 0) {
+            // Debug 模式直接确认
+            state.timeSpent = 20
+            state.isConfirmed = true
+        } else {
+            coroutineScope {
+                while (state.timeSpent < requiredTime) {
+                    delay(1000L)
+                    state.timeSpent++
+                }
+                if (state.timeSpent >= requiredTime) {
+                    state.isConfirmed = true
+                }
             }
         }
     }

@@ -71,15 +71,17 @@ suspend fun loadImageBitmapWithCache(
 }
 
 // Compose 友好的图片加载器
+// key 参数用于强制刷新，例如传入 mod.updateAt 在刷新后重新加载图片
 @Composable
 fun rememberImageBitmap(
     path: String?,
     reqWidth: Int = 256,
-    reqHeight: Int = 256
+    reqHeight: Int = 256,
+    key: Any? = null
 ): State<ImageBitmap?> {
     val context = LocalContext.current
 
-    return produceState(initialValue = null, path, reqWidth, reqHeight) {
+    return produceState(initialValue = null, path, reqWidth, reqHeight, key) {
         if (path.isNullOrEmpty()) {
             value = null
             return@produceState
@@ -91,8 +93,8 @@ fun rememberImageBitmap(
             return@produceState
         }
 
-        // 先检查缓存
-        val cacheKey = "$path-$reqWidth-$reqHeight"
+        // 缓存 key 包含刷新 key，确保刷新后使用新缓存
+        val cacheKey = "$path-$reqWidth-$reqHeight-${key ?: ""}"
         val cached = ImageCacheManager.get(cacheKey)
         if (cached != null) {
             Log.d("ImageCache", "从缓存加载图片: $path")
@@ -102,10 +104,13 @@ fun rememberImageBitmap(
 
         // 异步加载
         Log.d("ImageCache", "开始加载图片: $path")
-        value = loadImageBitmapWithCache(context, path, reqWidth, reqHeight)
-        if (value != null) {
+        val bitmap = loadImageBitmapWithCache(context, path, reqWidth, reqHeight)
+        if (bitmap != null) {
+            // 使用新的 cacheKey 存储
+            ImageCacheManager.put(cacheKey, bitmap)
             Log.d("ImageCache", "图片加载成功: $path")
         }
+        value = bitmap
     }
 }
 

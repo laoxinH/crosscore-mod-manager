@@ -1,7 +1,7 @@
 package top.laoxin.modmanager.constant
 
 import android.os.Environment
-import top.laoxin.modmanager.data.bean.GameInfoBean
+import top.laoxin.modmanager.domain.bean.GameInfoBean
 
 
 object GameInfoConstant {
