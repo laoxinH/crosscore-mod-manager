@@ -16,8 +16,7 @@ interface BackupDao {
     suspend fun insert(backupBean: BackupBean)
 
     // 获取所有数据
-    @Query("SELECT * from backups")
-    fun getAll(): List<BackupBean>
+    @Query("SELECT * from backups") fun getAll(): List<BackupBean>
 
     @Query("SELECT * from backups WHERE modId = :modId")
     fun getByModId(modId: Int): Flow<List<BackupBean>>
@@ -25,8 +24,7 @@ interface BackupDao {
     @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
     suspend fun insertAll(backups: List<BackupBean>)
 
-    @Query("DELETE FROM backups")
-    fun deleteAll()
+    @Query("DELETE FROM backups") fun deleteAll()
 
     // 通过gamePackageName删除
     @Query("DELETE FROM backups WHERE gamePackageName = :gamePackageName")
@@ -34,18 +32,14 @@ interface BackupDao {
 
     // 通过modId和gamePackageName查询backups
     @Query("SELECT * from backups WHERE modId = :modId AND gamePackageName = :gamePackageName")
-    fun getByModIdAndGamePackageName(
-        modId: Int,
-        gamePackageName: String
-    ): Flow<List<BackupBean>>
+    fun getByModIdAndGamePackageName(modId: Int, gamePackageName: String): Flow<List<BackupBean>>
 
     // 通过modId查询backups（suspend，同步获取）
     @Query("SELECT * from backups WHERE modId = :modId")
     suspend fun getByModIdSync(modId: Int): List<BackupBean>
 
     // 通过modId删除backups
-    @Query("DELETE FROM backups WHERE modId = :modId")
-    suspend fun deleteByModId(modId: Int)
+    @Query("DELETE FROM backups WHERE modId = :modId") suspend fun deleteByModId(modId: Int)
 
     // ==================== MD5 校验相关 ====================
 
@@ -58,10 +52,15 @@ interface BackupDao {
     suspend fun getByModIdAndGameFilePath(modId: Int, gameFilePath: String): BackupBean?
 
     // 更新备份记录
-    @Update
-    suspend fun update(backup: BackupBean)
+    @Update suspend fun update(backup: BackupBean)
 
     // 通过 gameFilePath 更新所有 originalMd5（游戏更新后批量更新）
-    @Query("UPDATE backups SET originalMd5 = :md5, backupTime = :backupTime WHERE gameFilePath = :gameFilePath")
+    @Query(
+            "UPDATE backups SET originalMd5 = :md5, backupTime = :backupTime WHERE gameFilePath = :gameFilePath"
+    )
     suspend fun updateOriginalMd5ByGameFilePath(gameFilePath: String, md5: String, backupTime: Long)
+
+    // 计算 backupPath 被引用的次数（用于判断是否可以安全删除物理备份文件）
+    @Query("SELECT COUNT(*) FROM backups WHERE backupPath = :backupPath")
+    suspend fun countByBackupPath(backupPath: String): Int
 }

@@ -1,7 +1,10 @@
 package top.laoxin.modmanager.ui.view.modView
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -31,6 +34,7 @@ import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -46,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,6 +65,10 @@ import top.laoxin.modmanager.ui.state.ScanProgressState
 import top.laoxin.modmanager.ui.state.ScanResultState
 import top.laoxin.modmanager.ui.theme.ExpressiveOutlinedButton
 import top.laoxin.modmanager.ui.theme.ExpressiveTextButton
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.outlined.Refresh
+import kotlin.unaryMinus
 
 
 /** 扫描进度覆盖层 显示扫描过程中的实时进度和最终结果 */
@@ -157,14 +166,66 @@ private fun ProgressContent(state: ScanProgressState, onCancel: () -> Unit) {
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
         ) {
-                // 标题
-                Text(
-                        text = "🔍 " + stringResource(R.string.scan_progress_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                val infiniteTransition = rememberInfiniteTransition(label = "searchAnimation")
+                val rotation by infiniteTransition.animateFloat(
+                    initialValue = 0f,
+                    targetValue = 360f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1500, easing = LinearEasing)
+                    ),
+                    label = "orbitAnimation"
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Box(
+                    modifier = Modifier.size(35.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // 圆形轨道（可选的视觉参考）
+                   /* Box(
+                        modifier = Modifier
+                            .size(35.dp)
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(50))
+                    )*/
+
+                    // 搜索图标沿圆形轨道移动，自身不旋转
+                    Box(
+                        modifier = Modifier
+                            .size(35.dp)
+                            .rotate(rotation),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .rotate(-rotation)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.scan_progress_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+
+
+
+
+
+            Spacer(modifier = Modifier.height(24.dp))
 
                 // 当前扫描的源文件（压缩包/文件夹名）
                 if (state.sourceName.isNotEmpty()) {
@@ -182,12 +243,21 @@ private fun ProgressContent(state: ScanProgressState, onCancel: () -> Unit) {
                 // 进度条：subProgress < 0 时显示滚动动画，否则显示正常进度
                 /*if (state.subProgress < 0) {*/
                 // 不确定进度（滚动动画）
-                LinearProgressIndicator(
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp)),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+                /*LinearProgressIndicator(
                         modifier =
                                 Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                )*/
                 /*        } else {
                     // 确定进度
                     LinearProgressIndicator(
@@ -202,14 +272,14 @@ private fun ProgressContent(state: ScanProgressState, onCancel: () -> Unit) {
                 }*/
 
                 // 百分比（只在有确定进度时显示）
-                if (state.subProgress >= 0) {
+               /* if (state.subProgress >= 0) {
                         Text(
                                 text = "${(animatedProgress * 100).toInt()}%",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 8.dp)
                         )
-                } else {
+                } else {*/
                         // 显示处理中提示
                         Text(
                                 text = stringResource(R.string.scan_progress_processing),
@@ -217,8 +287,8 @@ private fun ProgressContent(state: ScanProgressState, onCancel: () -> Unit) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 8.dp)
                         )
-                }
-
+                /*}
+*/
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // 子进度区域：显示当前步骤详情
@@ -243,27 +313,41 @@ private fun ProgressContent(state: ScanProgressState, onCancel: () -> Unit) {
                         )
 
                         // 当前文件名
-                        if (state.currentFile.isNotEmpty()) {
-
-                                Text(
-                                        text = "📄 ${state.currentFile}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.padding(top = 4.dp)
-                                )
+                    if (state.currentFile.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 40.dp)
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Folder,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = state.currentFile,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
+                    }
 
-                        // 子进度百分比
-                        if (state.subProgress >= 0) {
+
+                    // 子进度百分比
+                        /*if (state.subProgress >= 0) {
                                 Text(
                                         text = "${(state.subProgress * 100).toInt()}%",
                                         style = MaterialTheme.typography.titleSmall,
                                         color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.padding(top = 4.dp)
                                 )
-                        }
+                        }*/
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

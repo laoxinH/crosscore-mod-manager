@@ -2,6 +2,7 @@ package top.laoxin.modmanager.domain.usercase.mod
 
 import android.util.Log
 import javax.inject.Inject
+import kotlin.text.substringAfterLast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -15,6 +16,7 @@ import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.BackupRepository
 import top.laoxin.modmanager.domain.repository.ModRepository
 import top.laoxin.modmanager.domain.repository.ReplacedFileRepository
+import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
 import top.laoxin.modmanager.domain.service.BackupEvent
 import top.laoxin.modmanager.domain.service.BackupService
 import top.laoxin.modmanager.domain.service.EnableFileEvent
@@ -24,9 +26,8 @@ import top.laoxin.modmanager.domain.service.ModEnableService
 import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.domain.service.SpecialGameService
 import top.laoxin.modmanager.domain.service.ValidationResult
-import kotlin.text.substringAfterLast
 
-//import java.io.File
+// import java.io.File
 
 /** 批量开启/关闭 MOD 用例 负责权限检查、验证、备份、调用 Service、特殊处理、DB更新、结果聚合 */
 class EnableModsUseCase
@@ -39,12 +40,12 @@ constructor(
     private val backupRepository: BackupRepository,
     private val permissionService: PermissionService,
     private val replacedFileRepository: ReplacedFileRepository,
-    private val fileService: FileService
+    private val fileService: FileService,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) {
     companion object {
         private const val TAG = "EnableModsUseCase"
     }
-
 
     // 取消任务标识
     private var isCanceled = false
@@ -56,7 +57,8 @@ constructor(
      * @return Flow<EnableState> 开启状态流
      */
     fun execute(modsToEnable: List<ModBean>, gameInfo: GameInfoBean): Flow<EnableState> = flow {
-        val mods = modsToEnable.mapNotNull { modRepository.getModById( it.id) }.filter { !it.isEnable }
+        val mods =
+            modsToEnable.mapNotNull { modRepository.getModById(it.id) }.filter { !it.isEnable }
         if (mods.isEmpty()) return@flow
         // 初始化结果统计
         val needPasswordMods = mutableListOf<ModBean>()
@@ -83,15 +85,22 @@ constructor(
         }
 
         // 0.1 游戏安装检查
-        fileService.listFiles(gameInfo.gamePath).onSuccess {
-            if (it.isEmpty()) {
-                emit(EnableState.Error(AppError.GameError.GameNotInstalled(gameInfo.gameName)))
+        fileService
+            .listFiles(gameInfo.gamePath)
+            .onSuccess {
+                if (it.isEmpty()) {
+                    emit(
+                        EnableState.Error(
+                            AppError.GameError.GameNotInstalled(gameInfo.gameName)
+                        )
+                    )
+                    return@flow
+                }
+            }
+            .onError {
+                emit(EnableState.Error(it))
                 return@flow
             }
-        }.onError {
-            emit(EnableState.Error(it))
-            return@flow
-        }
 
         // 1. 权限检查
         emit(
@@ -110,39 +119,52 @@ constructor(
             return@flow
         }
 
-        // 2. 冲突检测
-        emit(
-            EnableState.Progress(
-                step = EnableStep.VALIDATING,
-                modName = "",
-                current = 0,
-                total = total,
-                message = "检测冲突..."
+        // 2. 冲突检测（可配置）
+        val conflictDetectionEnabled = userPreferencesRepository.conflictDetectionEnabled.first()
+
+        val modsToProcess: List<ModBean>
+        val mutualConflictMods: List<ModBean>
+        val enabledConflictMods: List<ModBean>
+
+        if (conflictDetectionEnabled) {
+            emit(
+                EnableState.Progress(
+                    step = EnableStep.VALIDATING,
+                    modName = "",
+                    current = 0,
+                    total = total,
+                    message = "检测冲突..."
+                )
             )
-        )
 
-        // 2.1 检测待开启 MOD 之间的内部冲突
-        val (mutualConflictMods, noInternalConflictMods) = detectMutualConflicts(mods)
-        Log.d(
-            TAG,
-            "内部冲突 MOD: ${mutualConflictMods.size}, 无冲突: ${noInternalConflictMods.size}"
-        )
+            // 2.1 检测待开启 MOD 之间的内部冲突
+            val (mutual, noInternalConflict) = detectMutualConflicts(mods)
+            mutualConflictMods = mutual
+            Log.d(
+                TAG,
+                "内部冲突 MOD: ${mutualConflictMods.size}, 无冲突: ${noInternalConflict.size}"
+            )
 
-        // 2.2 获取已开启的 MOD 列表
-        val enabledMods = modRepository.getEnableMods(gameInfo.packageName).first()
+            // 2.2 获取已开启的 MOD 列表
+            val enabledMods = modRepository.getEnableMods(gameInfo.packageName).first()
 
-        // 2.3 检测与已开启 MOD 的冲突
-        val (enabledConflictMods, modsToProcess) = detectEnabledConflicts(
-            noInternalConflictMods,
-            enabledMods
-        )
-        Log.d(TAG, "与已开启冲突: ${enabledConflictMods.size}, 待处理: ${modsToProcess.size}")
+            // 2.3 检测与已开启 MOD 的冲突
+            val (enabled, toProcess) = detectEnabledConflicts(noInternalConflict, enabledMods)
+            enabledConflictMods = enabled
+            modsToProcess = toProcess
+            Log.d(TAG, "与已开启冲突: ${enabledConflictMods.size}, 待处理: ${modsToProcess.size}")
+        } else {
+            // 跳过冲突检测，所有 MOD 直接进入处理
+            Log.d(TAG, "冲突检测已禁用，跳过冲突检测")
+            mutualConflictMods = emptyList()
+            enabledConflictMods = emptyList()
+            modsToProcess = mods
+        }
 
         val processTotal = modsToProcess.size
 
         // 3. 遍历无冲突的 MOD 列表
         loop@ for ((index, mod) in modsToProcess.withIndex()) {
-
 
             val currentIndex = index + 1
 
@@ -191,7 +213,15 @@ constructor(
             var backupError: AppError? = null
             var backups: List<BackupBean> = emptyList()
 
-            backupService.backupGameFiles(mod, gameInfo).collect { event ->
+            // 查询已替换文件记录，用于智能备份检测
+            val replacedFilesMap =
+                mod.gameFilesPath
+                    .mapNotNull { path ->
+                        replacedFileRepository.getByGameFilePath(path)?.let { path to it }
+                    }
+                    .toMap()
+
+            backupService.backupGameFiles(mod, gameInfo, replacedFilesMap).collect { event ->
                 when (event) {
                     is BackupEvent.FileProgress -> {
                         emit(
@@ -208,7 +238,7 @@ constructor(
 
                     is BackupEvent.Success -> {
                         // 插入备份数据库
-                        //event.backups.forEach { backup -> backupRepository.insert(backup) }
+                        // event.backups.forEach { backup -> backupRepository.insert(backup) }
                         backups = event.backups
                         backupSuccess = true
                     }
@@ -302,12 +332,14 @@ constructor(
                 )
             )
 
-            // 保存替换文件记录
+            // 保存替换文件记录（智能更新：存在则更新ID，不存在则新增）
             if (fileMd5Map.isNotEmpty()) {
                 val currentTime = System.currentTimeMillis()
                 val replacedFiles =
                     fileMd5Map.map { (gameFilePath, md5) ->
+                        val existingRecord = replacedFilesMap[gameFilePath]
                         ReplacedFileBean(
+                            id = existingRecord?.id ?: 0, // 存在则使用原ID进行更新，否则新增
                             modId = mod.id,
                             filename = gameFilePath.substringAfterLast("/"),
                             gameFilePath = gameFilePath,
@@ -324,15 +356,18 @@ constructor(
 
             modRepository.updateMod(mod.copy(isEnable = true))
             enabledSucceededMods.add(mod.copy(isEnable = true))
-            //判断是否取消
+            // 判断是否取消
             if (isCanceled) {
                 emit(
                     EnableState.Cancel(
                         EnableResult(
                             enabledCount = enabledSucceededMods.size,
                             enabledSucceededMods = enabledSucceededMods,
-                            skippedCount = needPasswordMods.size + fileMissingMods.size +
-                                    mutualConflictMods.size + enabledConflictMods.size,
+                            skippedCount =
+                                needPasswordMods.size +
+                                        fileMissingMods.size +
+                                        mutualConflictMods.size +
+                                        enabledConflictMods.size,
                             needPasswordMods = needPasswordMods,
                             fileMissingMods = fileMissingMods,
                             backupFailedMods = backupFailedMods,
@@ -353,8 +388,11 @@ constructor(
                 EnableResult(
                     enabledCount = enabledSucceededMods.size,
                     enabledSucceededMods = enabledSucceededMods,
-                    skippedCount = needPasswordMods.size + fileMissingMods.size +
-                            mutualConflictMods.size + enabledConflictMods.size,
+                    skippedCount =
+                        needPasswordMods.size +
+                                fileMissingMods.size +
+                                mutualConflictMods.size +
+                                enabledConflictMods.size,
                     needPasswordMods = needPasswordMods,
                     fileMissingMods = fileMissingMods,
                     backupFailedMods = backupFailedMods,
@@ -373,11 +411,12 @@ constructor(
      * @return Flow<EnableState> 关闭状态流
      */
     fun disable(modsToDisable: List<ModBean>, gameInfo: GameInfoBean): Flow<EnableState> = flow {
-        val mods = modsToDisable.mapNotNull { modRepository.getModById( it.id) }.filter { it.isEnable }
+        val mods =
+            modsToDisable.mapNotNull { modRepository.getModById(it.id) }.filter { it.isEnable }
         if (mods.isEmpty()) return@flow
         val restoreFailedMods = mutableListOf<ModBean>()
         val disabledSucceededMods = mutableListOf<ModBean>()
-        //var disabledCount = 0
+        // var disabledCount = 0
         val total = mods.size
 
         // 1. 权限检查
@@ -405,8 +444,17 @@ constructor(
             var restoreSuccess = false
             var restoreError: AppError? = null
             val backups = backupRepository.getByModIdSync(mod.id)
-            val replacedFiles = replacedFileRepository.getByModId(mod.id)
-            backupService.restoreBackups(backups, replacedFiles, mod, gameInfo).collect { event ->
+
+            // 构建 gameFilePath -> ReplacedFileBean 映射用于智能还原
+            val replacedFilesMap =
+                mod.gameFilesPath
+                    .mapNotNull { path ->
+                        replacedFileRepository.getByGameFilePath(path)?.let { path to it }
+                    }
+                    .toMap()
+
+            backupService.restoreBackups(backups, replacedFilesMap, mod, gameInfo).collect { event
+                ->
                 when (event) {
                     is BackupEvent.FileProgress -> {
                         emit(
@@ -456,8 +504,6 @@ constructor(
                     restoreFailedMods.add(mod)
                     continue@loop
                 }
-
-
             }
 
             // 2.2 更新数据库状态
@@ -472,16 +518,17 @@ constructor(
             )
 
             // 删除替换文件记录
-            replacedFileRepository.deleteByModId(mod.id)
+            // replacedFileRepository.deleteByModId(mod.id)
 
-            // 检查物理文件是否存在
-            val isExist = when (val existResult =  fileService.isFileExist(mod.path)) {
-                is Result.Success -> existResult.data
-                is Result.Error -> {
-                    Log.e(TAG, "Check file exist failed: ${existResult.error}")
-                    false
+            // 检查mod物理文件是否存在
+            val isExist =
+                when (val existResult = fileService.isFileExist(mod.path)) {
+                    is Result.Success -> existResult.data
+                    is Result.Error -> {
+                        Log.e(TAG, "Check file exist failed: ${existResult.error}")
+                        false
+                    }
                 }
-            }
             if (isExist) {
                 // 物理文件存在，只更新状态为关闭
                 modRepository.updateMod(mod.copy(isEnable = false))
@@ -495,6 +542,20 @@ constructor(
 
             // 删除备份数据
             backupRepository.deleteByModId(mod.id)
+            // 删除备份物理文件（仅当没有其他 MOD 引用时）
+            for (backup in backups) {
+                val refCount = backupRepository.countByBackupPath(backup.backupPath)
+                if (refCount == 0) {
+                    // 没有其他 MOD 引用此备份文件，安全删除
+                    fileService.deleteFile(backup.backupPath)
+                    Log.d(TAG, "删除备份物理文件: ${backup.backupPath}")
+                } else {
+                    Log.d(
+                        TAG,
+                        "备份文件仍被 $refCount 个其他 MOD 引用，跳过删除: ${backup.backupPath}"
+                    )
+                }
+            }
 
             // 检查是否取消任务
             if (isCanceled) {
@@ -526,13 +587,11 @@ constructor(
         )
     }
 
-    /**
-     * 执行取消任务
-     */
-
+    /** 执行取消任务 */
     fun cancel() {
         isCanceled = true
     }
+
     /**
      * 检测待开启 MOD 之间的内部冲突
      * @return Pair<冲突的MOD列表, 无冲突的MOD列表>
@@ -618,7 +677,7 @@ sealed class EnableState {
     /** 错误 */
     data class Error(val error: AppError) : EnableState()
 
-    /** 取消*/
+    /** 取消 */
     data class Cancel(val result: EnableResult) : EnableState()
 }
 

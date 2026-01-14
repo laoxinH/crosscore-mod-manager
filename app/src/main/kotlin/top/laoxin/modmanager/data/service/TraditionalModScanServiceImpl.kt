@@ -406,26 +406,36 @@ constructor(private val archiveService: ArchiveService, private val fileService:
                 val cleanGameDir = gameDirSource.trimEnd('/')
 
                 val gameDirName = fileService.getFileName(cleanGameDir)
-               // Log.d(TAG, "当前gameDirSource: $gameDirSource")
-               // Log.d(TAG, "当前gameDir: $gameDir")
-              //  Log.d(TAG, "当前cleanGameDir: $cleanGameDir")
+                Log.i(TAG, "当前gameDirSource: $gameDirSource")
+                Log.i(TAG, "当前gameDirName: $gameDirName")
+                Log.i(TAG, "当前cleanGameDir: $cleanGameDir")
 
                 // 检查路径是否包含游戏目录
-                val gameDirIndex = filePath.indexOf(gameDirName, ignoreCase = true)
-                if (gameDirIndex != -1) {
+
+              //  Log.d(TAG, "$filePath 文件是否包含游戏目录: ${gameDirIndex != -1}")
+                if (File(filePath).parentFile?.name == gameDirName) {
+                    val gameDirIndex = filePath.indexOf(gameDirName, ignoreCase = true)
                     // 提取相对于游戏目录的文件路径
                     // 例如: "皮肤/人物1/Custom/abc.dat" -> "abc.dat"
                     val relativeToGameDir =
                         filePath.substring(gameDirIndex + gameDirName.length).trimStart('/')
                     val fileName = relativeToGameDir.substringAfterLast("/")
+                    Log.d(TAG, "当前relativeToGameDir: $relativeToGameDir")
+                    Log.d(TAG, "当前fileName: $fileName")
 
 
                     // 验证：检查游戏目录中是否存在此文件
                     val gameFiles = gameFilesByDir[cleanGameDir] ?: emptySet()
+                    Log.d(TAG, "当前gameFiles大小: ${gameFiles.size}")
+                    gameFilesByDir.forEach {
+                        Log.d(TAG, "当前gameFiles: ${it.key} 包含文件数量：￥${it.value.size}")
+
+                    }
+
                     val fileExistsInGame =
                         gameFiles.isNotEmpty() && // 如果无法获取游戏文件列表，不允许通过
                                 gameFiles.any { it.equals(fileName, ignoreCase = true) }
-
+                    Log.d(TAG, "是否存在于游戏目录: $fileExistsInGame")
                     if (fileExistsInGame) {
                         // modKey = 游戏目录之前的完整路径 + 游戏目录
                         // 示例 1: "皮肤/人物1/Custom/abc.dat" -> "皮肤/人物1/Custom"
@@ -442,7 +452,7 @@ constructor(private val archiveService: ArchiveService, private val fileService:
                 }
             }
         }
-      //  Log.d(TAG, "最终mod分组 Mod groups: $modGroups")
+        Log.d(TAG, "最终mod分组 Mod groups: $modGroups")
         var modIndex = 0
         // 转换为 ModBean 列表
         val mods =

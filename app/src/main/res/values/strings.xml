@@ -29,6 +29,7 @@
     <string name="console_configuration_anti_harmony">反和谐</string>
     <string name="console_configuration_scanQQ">扫描QQ下载目录(可能无效)</string>
     <string name="console_configuration_scan_download">扫描系统DOWNLOAD目录</string>
+    <string name="console_configuration_conflict_detection">MOD冲突检测</string>
     <string name="console_configuration_select_mod_directory">选择MOD目录</string>
     <string name="toast_copy_failed">Mod 文件复制失败</string>
     <string name="toast_restore_failed">游戏文件还原失败</string>
@@ -226,7 +227,7 @@
     <string name="scan_progress_title">扫描 MOD</string>
     <string name="scan_progress_found_mods">发现 MOD: %d</string>
     <string name="scan_progress_cancel">取消扫描</string>
-    <string name="scan_progress_processing">处理中…</string>
+    <string name="scan_progress_processing">扫描中…</string>
     <string name="scan_result_title">扫描完成</string>
     <string name="scan_result_total">发现 MOD</string>
     <string name="scan_result_added">新增</string>

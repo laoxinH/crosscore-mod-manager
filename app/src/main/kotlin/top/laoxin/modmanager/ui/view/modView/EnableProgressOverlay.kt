@@ -163,37 +163,37 @@ private fun ProgressContent(state: EnableProgressState, onCancel: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 进度条
-        if (state.subProgress < 0) {
+        /*if (state.subProgress < 0) {
             LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
-        } else {
+        } else {*/
             LinearProgressIndicator(
                     progress = { animatedProgress },
                     modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
-        }
+       // }
 
         // 百分比
-        if (state.subProgress >= 0) {
+        /*if (state.subProgress >= 0) {*/
             Text(
                     text = "${(animatedProgress * 100).toInt()}%",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
             )
-        } else {
+   /*     } else {
             Text(
                     text = stringResource(R.string.enable_progress_processing),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
             )
-        }
+        }*/
 
         Spacer(modifier = Modifier.height(16.dp))
 

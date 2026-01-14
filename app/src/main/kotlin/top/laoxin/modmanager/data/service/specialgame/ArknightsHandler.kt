@@ -95,14 +95,17 @@ constructor(
                 // 修改校验信息
                 val flag = mutableListOf<Boolean>()
                 mod.gameFilesPath.forEachIndexed { index, gameFile ->
+                    Log.d(TAG, "handleModEnable: $gameFile")
                     val md5Result = fileService.calculateFileMd5(gameFile)
                     if (md5Result is Result.Error)  return@withContext Result.Error(md5Result.error)
                     val md5 = (md5Result as Result.Success).data
                     val fileSizeResult = fileService.getFileLength(gameFile)
                     if (fileSizeResult is Result.Error)  return@withContext Result.Error(fileSizeResult.error)
                     val fileSize = (fileSizeResult as Result.Success).data
-                    Log.d(TAG, "checkFileName: $gameFile, md5: $md5, fileSize: $fileSize")
-                    flag.add(modifyCheckFile(gameFile, md5, fileSize))
+                    val checkName = File(File(gameFile).parentFile?.name,File(gameFile).name).path
+
+                    Log.d(TAG, "checkFileName: $checkName, md5: $md5, fileSize: $fileSize")
+                    flag.add(modifyCheckFile(checkName, md5, fileSize))
                     onProgressUpdate("${index + 1}/${mod.modFiles.size}")
                 }
 
@@ -117,8 +120,7 @@ constructor(
                     Result.Error(AppError.ModError.EnableFailed("部分校验文件修改失败"))
                 }
             } catch (e: Exception) {
-                //Log.e(TAG, "handleModEnable: $e")
-                e.printStackTrace()
+                Log.e(TAG, "handleModEnable: $e")
                 Result.Error(AppError.Unknown(e))
             }
         }
@@ -149,7 +151,10 @@ constructor(
                     val fileSizeResult = fileService.getFileLength(gameFile)
                     if (fileSizeResult is Result.Error)  return@withContext Result.Error(fileSizeResult.error)
                     val fileSize = (fileSizeResult as Result.Success).data
-                    flag.add(modifyCheckFile(gameFile, md5, fileSize))
+                    val checkName = File(File(gameFile).parentFile?.name,File(gameFile).name).path
+                    Log.d(TAG, "checkFileName: $checkName, md5: $md5, fileSize: $fileSize")
+
+                    flag.add(modifyCheckFile(checkName, md5, fileSize))
                     onProgressUpdate("${index + 1}/${backup.size}")
                 }
 
@@ -239,8 +244,8 @@ constructor(
     }
 
     private fun writeCheckFiles() {
-        val checkFile1 = File(PathConstants.MODS_UNZIP_PATH + CHECK_FILE_1)
-        val checkFile2 = File(PathConstants.MODS_UNZIP_PATH + CHECK_FILE_2)
+        val checkFile1 = File(PathConstants.MODS_TEMP_PATH + CHECK_FILE_1)
+        val checkFile2 = File(PathConstants.MODS_TEMP_PATH + CHECK_FILE_2)
 
         gson.toJson(persistentRes, PersistentRes::class.java).let {
             if (checkFile1.exists()) {
@@ -262,6 +267,7 @@ constructor(
         return try {
             persistentRes.abInfos.replaceAll {
                 if (it.name?.contains(fileName) == true) {
+                    Log.d(TAG, "发现persistentRes检测配置: $it")
                     it.copy(md5 = md5, abSize = fileSize)
                 } else {
                     it
@@ -269,6 +275,7 @@ constructor(
             }
             hotUpdate.abInfos.replaceAll {
                 if (it.name?.contains(fileName) == true) {
+                    Log.d(TAG, "发现hotUpdate检测配置: $it")
                     it.copy(md5 = md5, abSize = fileSize)
                 } else {
                     it
@@ -276,7 +283,7 @@ constructor(
             }
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "modifyCheckFile: $e")
             false
         }
     }

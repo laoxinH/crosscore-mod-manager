@@ -59,85 +59,72 @@ import top.laoxin.modmanager.ui.viewmodel.ConsoleViewModel
 @Composable
 fun ConsoleContent(viewModel: ConsoleViewModel) {
     val context = LocalContext.current
-//    viewModel.getAppPathsManager()
-//    val permissionTools = viewModel.getPermissionTools()
-//    val fileToolsManager = viewModel.getFileToolsManager()
+    //    viewModel.getAppPathsManager()
+    //    val permissionTools = viewModel.getPermissionTools()
+    //    val fileToolsManager = viewModel.getFileToolsManager()
 
     val scrollState = rememberScrollState()
     val uiState by viewModel.uiState.collectAsState()
 
-        DialogCommon(
+    DialogCommon(
             title = stringResource(id = R.string.console_scan_directory_mods),
             type = DialogType.WARNING,
             content = stringResource(id = R.string.console_scan_directory_mods_content),
             onConfirm = {
-               // viewModel.setShowScanDirectoryModsDialog(false)
+                // viewModel.setShowScanDirectoryModsDialog(false)
                 viewModel.switchScanDirectoryMods(false)
             },
-            onCancel = {
-                viewModel.setShowScanDirectoryModsDialog(false)
-            },
+            onCancel = { viewModel.setShowScanDirectoryModsDialog(false) },
             showDialog = uiState.showScanDirectoryModsDialog
-        )
-
-
+    )
 
     // 升级提示框
     uiState.updateInfo?.let {
         DialogCommonForUpdate(
-            title = stringResource(id = R.string.console_upgrade_title),
-            content = it.changelog,
-            onConfirm = {
-                context.openUrl(it.downloadUrl)
-            },
-            onDismiss = {
-                context.openUrl(it.downloadUrl)
-            },
-            showDialog = uiState.showUpgradeDialog
+                title = stringResource(id = R.string.console_upgrade_title),
+                content = it.changelog,
+                onConfirm = { context.openUrl(it.downloadUrl) },
+                onDismiss = { context.openUrl(it.downloadUrl) },
+                showDialog = uiState.showUpgradeDialog
         )
     }
 
     // 权限处理器 - 一行代码集成
     PermissionHandler(
-        permissionStateFlow = viewModel.permissionState,
-        onPermissionGranted = viewModel::onPermissionGranted ,
-        onPermissionDenied = viewModel::onPermissionDenied,
-        onRequestShizuku = viewModel::requestShizukuPermission,
-        isShizukuAvailable = viewModel.isShizukuAvailable()
+            permissionStateFlow = viewModel.permissionState,
+            onPermissionGranted = viewModel::onPermissionGranted,
+            onPermissionDenied = viewModel::onPermissionDenied,
+            onRequestShizuku = viewModel::requestShizukuPermission,
+            isShizukuAvailable = viewModel.isShizukuAvailable()
     )
 
     // 请求通知权限
-    //RequestNotificationPermission()
+    // RequestNotificationPermission()
     // 升级提示
-
 
     // 信息提示
     uiState.infoBean?.let {
         DialogCommon(
-            title = stringResource(id = R.string.console_info_title),
-            content = it.msg,
-            onConfirm = {
-                viewModel.setShowInfoDialog(false)
-            },
-            onCancel = {
-                viewModel.setShowInfoDialog(false)
-            },
-            showDialog = uiState.showInfoDialog
+                title = stringResource(id = R.string.console_info_title),
+                content = it.msg,
+                onConfirm = { viewModel.setShowInfoDialog(false) },
+                onCancel = { viewModel.setShowInfoDialog(false) },
+                showDialog = uiState.showInfoDialog
         )
     }
 
     Column(
-        modifier = Modifier
-            .padding(start = 16.dp, end = 16.dp)
-            .padding(0.dp)
-            .fillMaxSize()
-            .verticalScroll(scrollState)
+            modifier =
+                    Modifier.padding(start = 16.dp, end = 16.dp)
+                            .padding(0.dp)
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
     ) {
 
         // 权限提示框
-       // RequestStoragePermission()
+        // RequestStoragePermission()
 
-        //Log.d("ConsoleContent", "信息提示: ${uiState.infoBean}  ${uiState.showInfoDialog}")
+        // Log.d("ConsoleContent", "信息提示: ${uiState.infoBean}  ${uiState.showInfoDialog}")
 
         Spacer(modifier = Modifier.height(8.dp))
         // 权限信息
@@ -146,7 +133,9 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
         // Spacer(modifier = Modifier.height(16.dp))
         // 游戏信息
         GameInformationCard(
-            viewModel, uiState.gameInfo, Modifier.align(Alignment.CenterHorizontally)
+                viewModel,
+                uiState.gameInfo,
+                Modifier.align(Alignment.CenterHorizontally)
         )
 
         // 添加一些间距
@@ -156,33 +145,27 @@ fun ConsoleContent(viewModel: ConsoleViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
         ConfigurationCard(viewModel, uiState)
-
     }
 }
 
 // 游戏信息选项卡
 @Composable
 fun GameInformationCard(
-    viewModel: ConsoleViewModel, gameInfo: GameInfoBean, modifier: Modifier = Modifier
+        viewModel: ConsoleViewModel,
+        gameInfo: GameInfoBean,
+        modifier: Modifier = Modifier
 ) {
-   // Log.i("GameInformationCard", "游戏信息选项卡: ${gameInfo.version}")
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.large
-    ) {
+    // Log.i("GameInformationCard", "游戏信息选项卡: ${gameInfo.version}")
+    Card(modifier = modifier, shape = MaterialTheme.shapes.large) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
         ) {
             // 第一个区域：添加一个圆角图片
             Image(
-                bitmap = viewModel.getGameIcon(),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(MaterialTheme.shapes.extraLarge)
+                    bitmap = viewModel.getGameIcon(),
+                    contentDescription = null,
+                    modifier = Modifier.size(80.dp).clip(MaterialTheme.shapes.extraLarge)
             )
 
             // 添加一些间距
@@ -192,30 +175,43 @@ fun GameInformationCard(
             if (gameInfo == GameInfoConstant.NO_GAME) {
                 Column {
                     Text(
-                        text = App.get().getString(R.string.toast_please_select_game),
-                        style = typography.titleLarge
+                            text = App.get().getString(R.string.toast_please_select_game),
+                            style = typography.titleLarge
                     )
                 }
             } else {
                 Column {
                     Text(
-                        text = stringResource(id = R.string.console_game_name, gameInfo.gameName),
-                        style = typography.labelLarge
+                            text =
+                                    stringResource(
+                                            id = R.string.console_game_name,
+                                            gameInfo.gameName
+                                    ),
+                            style = typography.labelLarge
                     )
                     Text(
-                        text = stringResource(
-                            id = R.string.console_game_packegname, gameInfo.packageName
-                        ), style = typography.labelLarge
+                            text =
+                                    stringResource(
+                                            id = R.string.console_game_packegname,
+                                            gameInfo.packageName
+                                    ),
+                            style = typography.labelLarge
                     )
                     Text(
-                        text = stringResource(
-                            id = R.string.console_game_version, viewModel.getGameVersion(gameInfo)
-                        ), style = typography.labelLarge
+                            text =
+                                    stringResource(
+                                            id = R.string.console_game_version,
+                                            viewModel.getGameVersion(gameInfo)
+                                    ),
+                            style = typography.labelLarge
                     )
                     Text(
-                        text = stringResource(
-                            id = R.string.console_game_service, gameInfo.serviceName
-                        ), style = typography.labelLarge
+                            text =
+                                    stringResource(
+                                            id = R.string.console_game_service,
+                                            gameInfo.serviceName
+                                    ),
+                            style = typography.labelLarge
                     )
                 }
             }
@@ -227,82 +223,89 @@ fun GameInformationCard(
 @Composable
 fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
 
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Card(
-            modifier = Modifier.weight(1f),
-            shape = MaterialTheme.shapes.large
-        ) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Card(modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.large) {
             Column(Modifier.padding(16.dp)) {
                 Text(
-                    text = stringResource(id = R.string.console_setting_info_mod),
-                    style = typography.titleLarge
+                        text = stringResource(id = R.string.console_setting_info_mod),
+                        style = typography.titleLarge
                 )
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = stringResource(
-                        id = R.string.console_setting_info_mod_total, uiState.modCount.toString()
-                    ), style = typography.labelLarge
+                        text =
+                                stringResource(
+                                        id = R.string.console_setting_info_mod_total,
+                                        uiState.modCount.toString()
+                                ),
+                        style = typography.labelLarge
                 )
                 Text(
-                    text = stringResource(
-                        id = R.string.console_setting_info_mod_enable,
-                        uiState.enableModCount.toString()
-                    ), style = typography.labelLarge
+                        text =
+                                stringResource(
+                                        id = R.string.console_setting_info_mod_enable,
+                                        uiState.enableModCount.toString()
+                                ),
+                        style = typography.labelLarge
                 )
             }
-
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Card(
-            modifier = Modifier.weight(1f),
-            shape = MaterialTheme.shapes.large
-        ) {
+        Card(modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.large) {
             Column(Modifier.padding(16.dp)) {
                 Text(
-                    text = stringResource(id = R.string.console_setting_info_configuration),
-                    style = typography.titleLarge
+                        text = stringResource(id = R.string.console_setting_info_configuration),
+                        style = typography.titleLarge
                 )
 
                 // 添加一些间距
                 Spacer(modifier = Modifier.height(14.dp))
-                val fileAccessType : FileAccessType = viewModel.checkFileAccessType()
+                val fileAccessType: FileAccessType = viewModel.checkFileAccessType()
                 Text(
-
                         when (fileAccessType) {
-                            FileAccessType.STANDARD_FILE-> stringResource(id = R.string.permission, "FILE")
-                            FileAccessType.DOCUMENT_FILE -> stringResource(id = R.string.permission, "DOCUMENT")
-                           // FileAccessType.PACKAGE_NAME -> stringResource(id = R.string.permission, "PACKAGE_NAME")
-                            FileAccessType.SHIZUKU -> stringResource(id = R.string.permission, "SHIZUKU")
-                            FileAccessType.NONE-> stringResource(id = R.string.permission, "NONE")
+                            FileAccessType.STANDARD_FILE ->
+                                    stringResource(id = R.string.permission, "FILE")
+                            FileAccessType.DOCUMENT_FILE ->
+                                    stringResource(id = R.string.permission, "DOCUMENT")
+                            // FileAccessType.PACKAGE_NAME -> stringResource(id =
+                            // R.string.permission, "PACKAGE_NAME")
+                            FileAccessType.SHIZUKU ->
+                                    stringResource(id = R.string.permission, "SHIZUKU")
+                            FileAccessType.NONE -> stringResource(id = R.string.permission, "NONE")
                         } /*else {
-                            permissionTools.checkPermission(
-                                appPathsManager.getRootPath() + "/Android/data/" + (App.get().packageName
-                                    ?: "")
-                            )
-                        }) {
-                            0 -> stringResource(id = R.string.permission, "FILE")
-                            1 -> stringResource(id = R.string.permission, "DOCUMENT")
-                            2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
-                            3 -> stringResource(id = R.string.permission, "SHIZUKU")
-                            else -> stringResource(
-                                id = R.string.permission,
-                                stringResource(R.string.console_status_no_permission)
-                            )
-                        }*/
-                    , style = typography.labelLarge
+                              permissionTools.checkPermission(
+                                  appPathsManager.getRootPath() + "/Android/data/" + (App.get().packageName
+                                      ?: "")
+                              )
+                          }) {
+                              0 -> stringResource(id = R.string.permission, "FILE")
+                              1 -> stringResource(id = R.string.permission, "DOCUMENT")
+                              2 -> stringResource(id = R.string.permission, "PACKAGE_NAME")
+                              3 -> stringResource(id = R.string.permission, "SHIZUKU")
+                              else -> stringResource(
+                                  id = R.string.permission,
+                                  stringResource(R.string.console_status_no_permission)
+                              )
+                          }*/,
+                        style = typography.labelLarge
                 )
                 Text(
-                    stringResource(
-                        id = R.string.console_setting_info_configuration_install_loction,
-                        if (uiState.canInstallMod) stringResource(R.string.console_setting_info_configuration_can_install) else stringResource(
-                            R.string.console_setting_info_configuration_not_install
-                        )
-                    ), style = typography.labelLarge
+                        stringResource(
+                                id = R.string.console_setting_info_configuration_install_loction,
+                                if (uiState.canInstallMod)
+                                        stringResource(
+                                                R.string
+                                                        .console_setting_info_configuration_can_install
+                                        )
+                                else
+                                        stringResource(
+                                                R.string
+                                                        .console_setting_info_configuration_not_install
+                                        )
+                        ),
+                        style = typography.labelLarge
                 )
             }
         }
@@ -312,57 +315,59 @@ fun SettingInformationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState)
 // 配置选项卡
 @Composable
 fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
-    //val uiState by viewModel.uiState.collectAsState()
+    // val uiState by viewModel.uiState.collectAsState()
 
     val openDirectoryLauncher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
-            // 这里的uri就是用户选择的目录
-            // 你可以在这里处理用户选择的目录
-            if (uri != null) {
-                // 使用uri
-                val path =
-                    uri.path?.split(":")?.last()?.replace("${PathConstants.ROOT_PATH}/", "")
+            rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.OpenDocumentTree()
+            ) { uri: Uri? ->
+                // 这里的uri就是用户选择的目录
+                // 你可以在这里处理用户选择的目录
+                if (uri != null) {
+                    // 使用uri
+                    val path =
+                            uri.path?.split(":")?.last()?.replace("${PathConstants.ROOT_PATH}/", "")
 
-                viewModel.setSelectedDirectory(
-                    path
-                        ?: (PathConstants.ROOT_PATH + "/" + PathConstants.DOWNLOAD_MOD_PATH)
-                )
-                // TODO: 使用path
+                    viewModel.setSelectedDirectory(
+                            path
+                                    ?: (PathConstants.ROOT_PATH +
+                                            "/" +
+                                            PathConstants.DOWNLOAD_MOD_PATH)
+                    )
+                    // TODO: 使用path
+                }
             }
 
-        }
-
     Card {
-        Column(
-            Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
+        Column(Modifier.padding(16.dp).fillMaxWidth()) {
             Text(
-                text = stringResource(id = R.string.console_configuration_title),
-                style = typography.titleLarge
+                    text = stringResource(id = R.string.console_configuration_title),
+                    style = typography.titleLarge
             )
             // 添加一些间距
             Spacer(modifier = Modifier.height(14.dp))
 
             // 不支持反和谐就隐藏
-            if (uiState.gameInfo.antiHarmonyFile.isNotEmpty() || uiState.gameInfo.antiHarmonyContent.isNotEmpty()) {
+            if (uiState.gameInfo.antiHarmonyFile.isNotEmpty() ||
+                            uiState.gameInfo.antiHarmonyContent.isNotEmpty()
+            ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = stringResource(id = R.string.console_configuration_anti_harmony),
-                        style = typography.titleMedium
+                            text = stringResource(id = R.string.console_configuration_anti_harmony),
+                            style = typography.titleMedium
                     )
                     ExpressiveSwitch(
-                        checked = uiState.antiHarmony,
-                        onCheckedChange = { viewModel.openAntiHarmony(it) })
+                            checked = uiState.antiHarmony,
+                            onCheckedChange = { viewModel.openAntiHarmony(it) }
+                    )
                 }
             }
 
-/*            Row(
+            /*            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
@@ -377,49 +382,72 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
             }*/
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(id = R.string.console_configuration_disable_scan_dictionary),
-                    style = typography.titleMedium
+                        text =
+                                stringResource(
+                                        id = R.string.console_configuration_disable_scan_dictionary
+                                ),
+                        style = typography.titleMedium
                 )
-                ExpressiveSwitch(checked = uiState.scanDirectoryMods, onCheckedChange = {
-                    viewModel.switchScanDirectoryMods(it)
-                })
+                ExpressiveSwitch(
+                        checked = uiState.scanDirectoryMods,
+                        onCheckedChange = { viewModel.switchScanDirectoryMods(it) }
+                )
             }
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(id = R.string.console_configuration_scanQQ),
-                    style = typography.titleMedium
+                        text = stringResource(id = R.string.console_configuration_scanQQ),
+                        style = typography.titleMedium
                 )
-                ExpressiveSwitch(checked = uiState.scanQQDirectory, onCheckedChange = {
-
-                    viewModel.switchScanQQDirectory(it)
-                })
+                ExpressiveSwitch(
+                        checked = uiState.scanQQDirectory,
+                        onCheckedChange = { viewModel.switchScanQQDirectory(it) }
+                )
             }
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(id = R.string.console_configuration_scan_download),
-                    style = typography.titleMedium
+                        text = stringResource(id = R.string.console_configuration_scan_download),
+                        style = typography.titleMedium
                 )
-                ExpressiveSwitch(checked = uiState.scanDownload, onCheckedChange = {
-                    viewModel.switchScanDownloadDirectory(it)
-                })
+                ExpressiveSwitch(
+                        checked = uiState.scanDownload,
+                        onCheckedChange = { viewModel.switchScanDownloadDirectory(it) }
+                )
             }
 
-/*            Row(
+            Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                        text =
+                                stringResource(
+                                        id = R.string.console_configuration_conflict_detection
+                                ),
+                        style = typography.titleMedium
+                )
+                ExpressiveSwitch(
+                        checked = uiState.conflictDetectionEnabled,
+                        onCheckedChange = { viewModel.switchConflictDetection(it) }
+                )
+            }
+
+            /*            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
@@ -434,18 +462,21 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
             }*/
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
             ) {
                 ExpressiveTextButton(
-                    onClick = { openDirectoryLauncher.launch(null) },
-                    contentPadding = PaddingValues(0.dp)
+                        onClick = { openDirectoryLauncher.launch(null) },
+                        contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
-                        text = stringResource(id = R.string.console_configuration_select_mod_directory),
-                        modifier = Modifier.padding(0.dp),
-                        style = typography.titleMedium
+                            text =
+                                    stringResource(
+                                            id = R.string.console_configuration_select_mod_directory
+                                    ),
+                            modifier = Modifier.padding(0.dp),
+                            style = typography.titleMedium
                     )
                 }
                 Text(text = uiState.selectedDirectory) // 显示当前选择的文件夹
@@ -458,45 +489,45 @@ fun ConfigurationCard(viewModel: ConsoleViewModel, uiState: ConsoleUiState) {
 fun ConsolePage(viewModel: ConsoleViewModel) {
 
     ConsoleContent(viewModel = viewModel)
-
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ConsoleTopBar(
-    viewModel: ConsoleViewModel,
-    modifier: Modifier = Modifier,
-    configuration: Int
-) {
+fun ConsoleTopBar(viewModel: ConsoleViewModel, modifier: Modifier = Modifier, configuration: Int) {
     TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = if (configuration == Configuration.ORIENTATION_LANDSCAPE) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-            //titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            //navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        modifier = modifier,
-        title = {
-            if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
-                Text(
-                    stringResource(id = R.string.console), style = typography.titleLarge
+            colors =
+                    TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                                    if (configuration == Configuration.ORIENTATION_LANDSCAPE)
+                                            MaterialTheme.colorScheme.surface
+                                    else MaterialTheme.colorScheme.surfaceContainer,
+                            // titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            // navigationIconContentColor =
+                            // MaterialTheme.colorScheme.onSecondaryContainer,
+                            ),
+            modifier = modifier,
+            title = {
+                if (configuration != Configuration.ORIENTATION_LANDSCAPE) {
+                    Text(stringResource(id = R.string.console), style = typography.titleLarge)
+                }
+            },
+            actions = {
+                Text(text = stringResource(R.string.console_top_bar_start_game))
+                IconButton(
+                        onClick = {
+                            // 在这里处理图标按钮的点击事件
+                            viewModel.startGame()
+                        }
+                ) {
+                    // Text(text = "启动游戏")
+                    Icon(
+                            imageVector = Icons.Default.PlayArrow, // 使用信息图标
+                            contentDescription = "Start", // 为辅助功能提供描述
+                            // tint = MaterialTheme.colorScheme.primaryContainer
+                            )
+                }
 
-                )
+                // 添加更多的菜单项
             }
-        },
-        actions = {
-            Text(text = stringResource(R.string.console_top_bar_start_game))
-            IconButton(onClick = {
-                // 在这里处理图标按钮的点击事件
-                viewModel.startGame()
-            }) {
-                //Text(text = "启动游戏")
-                Icon(
-                    imageVector = Icons.Default.PlayArrow, // 使用信息图标
-                    contentDescription = "Start", // 为辅助功能提供描述
-                    //tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
-
-            // 添加更多的菜单项
-        })
+    )
 }

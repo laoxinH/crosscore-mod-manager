@@ -48,10 +48,14 @@ interface UserPreferencesRepository {
     /** MOD页面导航索引 (NavigationIndex.index) */
     val modsViewIndex: Flow<Int>
     suspend fun saveModsViewIndex(index: Int)
-    
+
     /** MOD列表显示模式 (0=列表视图, 1=大图网格视图) */
     val modListDisplayMode: Flow<Int>
     suspend fun saveModListDisplayMode(mode: Int)
+
+    /** MOD冲突检测开关 (默认开启) */
+    val conflictDetectionEnabled: Flow<Boolean>
+    suspend fun saveConflictDetectionEnabled(enabled: Boolean)
 
     // ==================== 高级操作 ====================
 
