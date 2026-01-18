@@ -1,18 +1,12 @@
 package top.laoxin.modmanager.domain.service
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import top.laoxin.modmanager.constant.FileAccessType
-import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.domain.model.Result
 
 /** 权限服务接口 封装 Shizuku、SAF、标准文件权限的检查和请求逻辑 */
 interface PermissionService {
 
     // ==================== Shizuku 相关 ====================
-
-    /** Shizuku 权限结果 Flow，外部可订阅获取授权结果 */
-    val shizukuPermissionResult: Flow<Boolean>
 
     /** 注册 Shizuku 权限请求监听器 应在 Activity.onCreate 中调用 */
     fun registerShizukuListener(): Result<Unit>
@@ -32,8 +26,11 @@ interface PermissionService {
     /** 是否已获得 Shizuku 权限 */
     fun hasShizukuPermission(): Boolean
 
-    /** 请求 Shizuku 权限 */
-    fun requestShizukuPermission(): Result<Unit>
+    /**
+     * 请求 Shizuku 权限 (挂起函数)
+     * @return Result<Boolean> 权限授予结果 - true: 已授权, false: 被拒绝
+     */
+    suspend fun requestShizukuPermission(): Result<Boolean>
 
     // ==================== URI/SAF 权限 ====================
 
@@ -83,5 +80,5 @@ interface PermissionService {
     fun getRootPath(): String
 
     /** 检查路径权限 */
-    fun checkPathPermissions(gamePath: String) : Result<Unit>
+    fun checkPathPermissions(gamePath: String): Result<Unit>
 }

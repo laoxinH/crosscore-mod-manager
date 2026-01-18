@@ -6,13 +6,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
@@ -20,6 +16,7 @@ import top.laoxin.modmanager.constant.GameInfoConstant
 import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.domain.bean.ModBean
 import top.laoxin.modmanager.domain.model.AppError
+import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
 import top.laoxin.modmanager.domain.service.EnableStep
 import top.laoxin.modmanager.domain.service.PermissionService
@@ -43,19 +40,18 @@ import top.laoxin.modmanager.ui.state.ModOperationUiState
 import top.laoxin.modmanager.ui.state.PermissionRequestState
 import top.laoxin.modmanager.ui.state.PermissionType
 import top.laoxin.modmanager.ui.state.SnackbarManager
-import top.laoxin.modmanager.domain.model.Result
 
 /** Mod操作ViewModel（启用/禁用/删除） */
 @HiltViewModel
 class ModOperationViewModel
 @Inject
 constructor(
-    private val userPreferencesRepository: UserPreferencesRepository,
-    private val snackbarManager: SnackbarManager,
-    private val enableModsUseCase: EnableModsUseCase,
-    private val deleteModsUseCase: DeleteModsUseCase,
-    private val permissionService: PermissionService,
-    private val decryptModsUseCase: DecryptModsUseCase,
+        private val userPreferencesRepository: UserPreferencesRepository,
+        private val snackbarManager: SnackbarManager,
+        private val enableModsUseCase: EnableModsUseCase,
+        private val deleteModsUseCase: DeleteModsUseCase,
+        private val permissionService: PermissionService,
+        private val decryptModsUseCase: DecryptModsUseCase,
 ) : ViewModel(), ProgressUpdateListener {
 
     companion object {
@@ -81,10 +77,10 @@ constructor(
 
             _uiState.update {
                 it.copy(
-                    showPasswordDialog = true,
-                    passwordRequestMod = modBean,
-                    pendingEnableAfterDecrypt = modBean,
-                    passwordError = null
+                        showPasswordDialog = true,
+                        passwordRequestMod = modBean,
+                        pendingEnableAfterDecrypt = modBean,
+                        passwordError = null
                 )
             }
             return
@@ -100,10 +96,10 @@ constructor(
     }
 
     private fun handleOperation(
-        mods: List<ModBean>,
-        enable: Boolean,
-        isDel: Boolean = false,
-        silent: Boolean = false
+            mods: List<ModBean>,
+            enable: Boolean,
+            isDel: Boolean = false,
+            silent: Boolean = false
     ) {
         if (mods.isEmpty()) return
 
@@ -132,47 +128,44 @@ constructor(
     /** 开启 MOD（使用新的 Flow-based UseCase） */
     private suspend fun enableMods(mods: List<ModBean>, gameInfo: GameInfoBean) {
         enableJob =
-            viewModelScope.launch {
-                enableModsUseCase.execute(mods, gameInfo).collect { state ->
-                    when (state) {
-                        is EnableState.Progress -> {
-                            _uiState.update {
-                                it.copy(
-                                    modSwitchEnable = false,
-                                    enableProgress =
-                                        EnableProgressState(
-                                            isProcessing = true,
-                                            step = state.step,
-                                            modName = state.modName,
-                                            currentFile = state.message,
-                                            progress =
-                                                if (state.total > 0)
-                                                    state.current
-                                                        .toFloat() /
-                                                            state.total
-                                                else 0f,
-                                            current = state.current,
-                                            total = state.total,
-                                            subProgress = state.subProgress
-                                        )
-                                )
+                viewModelScope.launch {
+                    enableModsUseCase.execute(mods, gameInfo).collect { state ->
+                        when (state) {
+                            is EnableState.Progress -> {
+                                _uiState.update {
+                                    it.copy(
+                                            modSwitchEnable = false,
+                                            enableProgress =
+                                                    EnableProgressState(
+                                                            isProcessing = true,
+                                                            step = state.step,
+                                                            modName = state.modName,
+                                                            currentFile = state.message,
+                                                            progress =
+                                                                    if (state.total > 0)
+                                                                            state.current
+                                                                                    .toFloat() /
+                                                                                    state.total
+                                                                    else 0f,
+                                                            current = state.current,
+                                                            total = state.total,
+                                                            subProgress = state.subProgress
+                                                    )
+                                    )
+                                }
                             }
-                        }
-
-                        is EnableState.Success -> {
-                            handleEnableSuccess(state.result, false)
-                        }
-
-                        is EnableState.Error -> {
-                            handleEnableError(state.error, gameInfo)
-                        }
-
-                        is EnableState.Cancel -> {
-                            handleEnableSuccess(state.result, true)
+                            is EnableState.Success -> {
+                                handleEnableSuccess(state.result, false)
+                            }
+                            is EnableState.Error -> {
+                                handleEnableError(state.error, gameInfo)
+                            }
+                            is EnableState.Cancel -> {
+                                handleEnableSuccess(state.result, true)
+                            }
                         }
                     }
                 }
-            }
     }
 
     /**
@@ -180,68 +173,65 @@ constructor(
      * @param silent 静默模式：不显示进度覆盖层，只显示 Snackbar 提示
      */
     private suspend fun disableMods(
-        mods: List<ModBean>,
-        gameInfo: GameInfoBean,
-        silent: Boolean = false
+            mods: List<ModBean>,
+            gameInfo: GameInfoBean,
+            silent: Boolean = false
     ) {
         enableJob =
-            viewModelScope.launch {
-                enableModsUseCase.disable(mods, gameInfo).collect { state ->
-                    when (state) {
-                        is EnableState.Progress -> {
-                            // 静默模式下跳过进度UI更新
-                            if (!silent) {
-                                _uiState.update {
-                                    it.copy(
-                                        modSwitchEnable = false,
-                                        enableProgress =
-                                            EnableProgressState(
-                                                isProcessing = true,
-                                                step = state.step,
-                                                modName = state.modName,
-                                                currentFile = state.message,
-                                                progress =
-                                                    if (state.total > 0)
-                                                        state.current
-                                                            .toFloat() /
-                                                                state.total
-                                                    else 0f,
-                                                current = state.current,
-                                                total = state.total,
-                                                subProgress = state.subProgress
-                                            )
-                                    )
+                viewModelScope.launch {
+                    enableModsUseCase.disable(mods, gameInfo).collect { state ->
+                        when (state) {
+                            is EnableState.Progress -> {
+                                // 静默模式下跳过进度UI更新
+                                if (!silent) {
+                                    _uiState.update {
+                                        it.copy(
+                                                modSwitchEnable = false,
+                                                enableProgress =
+                                                        EnableProgressState(
+                                                                isProcessing = true,
+                                                                step = state.step,
+                                                                modName = state.modName,
+                                                                currentFile = state.message,
+                                                                progress =
+                                                                        if (state.total > 0)
+                                                                                state.current
+                                                                                        .toFloat() /
+                                                                                        state.total
+                                                                        else 0f,
+                                                                current = state.current,
+                                                                total = state.total,
+                                                                subProgress = state.subProgress
+                                                        )
+                                        )
+                                    }
                                 }
                             }
-                        }
-
-                        is EnableState.Success -> {
-                            handleDisableSuccess(state.result, false, silent)
-                        }
-
-                        is EnableState.Error -> {
-                            // 即使静默模式下也需要显示错误界面
-                            handleEnableError(state.error, gameInfo)
-                        }
-
-                        is EnableState.Cancel -> {
-                            handleDisableSuccess(state.result, true, silent)
+                            is EnableState.Success -> {
+                                handleDisableSuccess(state.result, false, silent)
+                            }
+                            is EnableState.Error -> {
+                                // 即使静默模式下也需要显示错误界面
+                                handleEnableError(state.error, gameInfo)
+                            }
+                            is EnableState.Cancel -> {
+                                handleDisableSuccess(state.result, true, silent)
+                            }
                         }
                     }
                 }
-            }
     }
 
     /** 处理开启成功结果 */
     private fun handleEnableSuccess(result: EnableResult, isCancel: Boolean) {
         // 计算失败的 MOD 数量
         val failedCount =
-            result.needPasswordMods.size +
-                    result.fileMissingMods.size +
-                    result.backupFailedMods.size +
-                    result.enableFailedMods.size +
-                    result.mutualConflictMods.size +
-                    result.enabledConflictMods.size
+                result.needPasswordMods.size +
+                        result.fileMissingMods.size +
+                        result.backupFailedMods.size +
+                        result.enableFailedMods.size +
+                        result.mutualConflictMods.size +
+                        result.enabledConflictMods.size
 
         // 如果只有1个MOD成功开启且没有失败的MOD，使用Snackbar提示
         if (result.enabledCount == 1 && failedCount == 0 && !isCancel) {
@@ -254,23 +244,23 @@ constructor(
         // 多个MOD或有失败的情况，显示结果卡片
         _uiState.update {
             it.copy(
-                modSwitchEnable = true,
-                enableProgress =
-                    EnableProgressState(
-                        isProcessing = false,
-                        step = EnableStep.COMPLETE,
-                        result =
-                            EnableResultState(
-                                enabledCount = result.enabledCount,
-                                needPasswordMods = result.needPasswordMods,
-                                fileMissingMods = result.fileMissingMods,
-                                backupFailedMods = result.backupFailedMods,
-                                enableFailedMods = result.enableFailedMods,
-                                restoreFailedMods = result.restoreFailedMods,
-                                mutualConflictMods = result.mutualConflictMods,
-                                enabledConflictMods = result.enabledConflictMods
+                    modSwitchEnable = true,
+                    enableProgress =
+                            EnableProgressState(
+                                    isProcessing = false,
+                                    step = EnableStep.COMPLETE,
+                                    result =
+                                            EnableResultState(
+                                                    enabledCount = result.enabledCount,
+                                                    needPasswordMods = result.needPasswordMods,
+                                                    fileMissingMods = result.fileMissingMods,
+                                                    backupFailedMods = result.backupFailedMods,
+                                                    enableFailedMods = result.enableFailedMods,
+                                                    restoreFailedMods = result.restoreFailedMods,
+                                                    mutualConflictMods = result.mutualConflictMods,
+                                                    enabledConflictMods = result.enabledConflictMods
+                                            )
                             )
-                    )
             )
         }
 
@@ -303,9 +293,9 @@ constructor(
      * @param silent 静默模式：不更新进度UI，只显示 Snackbar
      */
     private fun handleDisableSuccess(
-        result: EnableResult,
-        isCancel: Boolean,
-        silent: Boolean = false
+            result: EnableResult,
+            isCancel: Boolean,
+            silent: Boolean = false
     ) {
         val failedCount = result.restoreFailedMods.size
 
@@ -321,17 +311,17 @@ constructor(
         if (!silent) {
             _uiState.update {
                 it.copy(
-                    modSwitchEnable = true,
-                    enableProgress =
-                        EnableProgressState(
-                            isProcessing = false,
-                            step = EnableStep.COMPLETE,
-                            result =
-                                EnableResultState(
-                                    enabledCount = result.enabledCount,
-                                    restoreFailedMods = result.restoreFailedMods
+                        modSwitchEnable = true,
+                        enableProgress =
+                                EnableProgressState(
+                                        isProcessing = false,
+                                        step = EnableStep.COMPLETE,
+                                        result =
+                                                EnableResultState(
+                                                        enabledCount = result.enabledCount,
+                                                        restoreFailedMods = result.restoreFailedMods
+                                                )
                                 )
-                        )
                 )
             }
         } else {
@@ -339,7 +329,7 @@ constructor(
             _uiState.update { it.copy(modSwitchEnable = true) }
         }
 
- /*       if (isCancel) {
+        /*       if (isCancel) {
             snackbarManager.showMessageAsync(
                 R.string.toast_swtch_cancel_mods_result,
                 result.enabledCount.toString(),
@@ -359,8 +349,8 @@ constructor(
         // 直接显示错误对话框，用户需要点击按钮进行操作
         _uiState.update {
             it.copy(
-                modSwitchEnable = true,
-                enableProgress = EnableProgressState(isProcessing = false, error = error)
+                    modSwitchEnable = true,
+                    enableProgress = EnableProgressState(isProcessing = false, error = error)
             )
         }
     }
@@ -371,12 +361,12 @@ constructor(
         _uiState.update { it.copy(modSwitchEnable = true, enableProgress = null) }*/
         _uiState.update {
             it.copy(
-                modSwitchEnable = false,
-                enableProgress =
-                    EnableProgressState(
-                        isProcessing = true,
-                        step = EnableStep.CANCELING,
-                    )
+                    modSwitchEnable = false,
+                    enableProgress =
+                            EnableProgressState(
+                                    isProcessing = true,
+                                    step = EnableStep.CANCELING,
+                            )
             )
         }
         enableModsUseCase.cancel()
@@ -396,15 +386,12 @@ constructor(
                 is AppError.PermissionError.StoragePermissionDenied -> {
                     showPermissionDialog(gamePath, PermissionType.STORAGE)
                 }
-
                 is AppError.PermissionError.UriPermissionNotGranted -> {
                     showPermissionDialog(gamePath, PermissionType.URI_SAF)
                 }
-
                 is AppError.PermissionError -> {
                     showPermissionDialog(gamePath, PermissionType.URI_SAF)
                 }
-
                 else -> {
                     // 其他错误不需要权限操作
                 }
@@ -426,68 +413,67 @@ constructor(
     fun deleteMods(mods: List<ModBean>, deleteIntegratedPackage: Boolean = false) {
         deleteJob?.cancel()
         deleteJob =
-            viewModelScope.launch {
-                deleteModsUseCase.execute(mods, deleteIntegratedPackage).collect { state ->
-                    when (state) {
-                        is DeleteState.Progress -> {
-                            _uiState.update {
-                                it.copy(
-                                    deleteProgress =
-                                        DeleteProgressState(
-                                            isProcessing = true,
-                                            step = state.step,
-                                            modName = state.modName,
-                                            progress = state.progress,
-                                            current = state.current,
-                                            total = state.total
-                                        )
-                                )
+                viewModelScope.launch {
+                    deleteModsUseCase.execute(mods, deleteIntegratedPackage).collect { state ->
+                        when (state) {
+                            is DeleteState.Progress -> {
+                                _uiState.update {
+                                    it.copy(
+                                            deleteProgress =
+                                                    DeleteProgressState(
+                                                            isProcessing = true,
+                                                            step = state.step,
+                                                            modName = state.modName,
+                                                            progress = state.progress,
+                                                            current = state.current,
+                                                            total = state.total
+                                                    )
+                                    )
+                                }
                             }
-                        }
-
-                        is DeleteState.Success -> {
-                            handleDeleteSuccess(state.result)
-                        }
-
-                        is DeleteState.Error -> {
-                            _uiState.update {
-                                it.copy(
-                                    deleteProgress =
-                                        DeleteProgressState(
-                                            isProcessing = false,
-                                            error = state.error
-                                        )
-                                )
+                            is DeleteState.Success -> {
+                                handleDeleteSuccess(state.result)
                             }
-                        }
-
-                        is DeleteState.Cancel -> {
-                            _uiState.update { it.copy(deleteProgress = null) }
-                            snackbarManager.showMessage("删除已取消")
+                            is DeleteState.Error -> {
+                                _uiState.update {
+                                    it.copy(
+                                            deleteProgress =
+                                                    DeleteProgressState(
+                                                            isProcessing = false,
+                                                            error = state.error
+                                                    )
+                                    )
+                                }
+                            }
+                            is DeleteState.Cancel -> {
+                                _uiState.update { it.copy(deleteProgress = null) }
+                                snackbarManager.showMessage("删除已取消")
+                            }
                         }
                     }
                 }
-            }
     }
 
     /** 处理删除成功结果 */
     private fun handleDeleteSuccess(result: DeleteResult) {
         _uiState.update {
             it.copy(
-                deleteProgress =
-                    DeleteProgressState(
-                        isProcessing = false,
-                        step = DeleteStep.COMPLETED,
-                        result =
-                            DeleteResultState(
-                                deletedCount = result.deletedMods.size + result.deletedEnabledMods.size,
-                                deletedMods = result.deletedMods,
-                                deletedEnabledMods = result.deletedEnabledMods,
-                                skippedIntegratedMods =
-                                    result.skippedIntegratedMods,
-                                failedMods = result.failedMods
+                    deleteProgress =
+                            DeleteProgressState(
+                                    isProcessing = false,
+                                    step = DeleteStep.COMPLETED,
+                                    result =
+                                            DeleteResultState(
+                                                    deletedCount =
+                                                            result.deletedMods.size +
+                                                                    result.deletedEnabledMods.size,
+                                                    deletedMods = result.deletedMods,
+                                                    deletedEnabledMods = result.deletedEnabledMods,
+                                                    skippedIntegratedMods =
+                                                            result.skippedIntegratedMods,
+                                                    failedMods = result.failedMods
+                                            )
                             )
-                    )
             )
         }
     }
@@ -513,15 +499,12 @@ constructor(
                     val checkResult = result.data
                     /* if (checkResult.hasIntegratedPackages) {*/
                     // 存在整合包，显示确认对话框
-                    _uiState.update {
-                        it.copy(deleteCheckState = DeleteCheckState(checkResult))
-                    }
+                    _uiState.update { it.copy(deleteCheckState = DeleteCheckState(checkResult)) }
                     /*   } else {
-                           // 没有整合包，直接删除
-                           deleteMods(mods, deleteIntegratedPackage = false)
-                       }*/
+                        // 没有整合包，直接删除
+                        deleteMods(mods, deleteIntegratedPackage = false)
+                    }*/
                 }
-
                 is Result.Error -> {
                     snackbarManager.showMessage("检查失败: ${result.error}")
                 }
@@ -550,7 +533,6 @@ constructor(
         _uiState.update { it.copy(deleteCheckState = null) }
     }
 
-
     /** 进度更新回调 */
     override fun onProgressUpdate(progress: String) {
         // 旧的回调，保留兼容性
@@ -560,8 +542,8 @@ constructor(
     fun setShowPasswordDialog(show: Boolean) {
         _uiState.update {
             it.copy(
-                showPasswordDialog = show,
-                passwordRequestMod = if (!show) null else it.passwordRequestMod
+                    showPasswordDialog = show,
+                    passwordRequestMod = if (!show) null else it.passwordRequestMod
             )
         }
     }
@@ -585,14 +567,14 @@ constructor(
     }
 
     private fun showPermissionDialog(
-        gamePath: String,
-        permissionType: PermissionType = PermissionType.URI_SAF
+            gamePath: String,
+            permissionType: PermissionType = PermissionType.URI_SAF
     ) {
         _permissionState.update {
             PermissionRequestState(
-                showDialog = true,
-                requestPath = permissionService.getRequestPermissionPath(gamePath),
-                permissionType = permissionType
+                    showDialog = true,
+                    requestPath = permissionService.getRequestPermissionPath(gamePath),
+                    permissionType = permissionType
             )
         }
     }
@@ -607,30 +589,23 @@ constructor(
     /** 权限拒绝回调 */
     fun onPermissionDenied(permissionType: PermissionType) {
         _permissionState.update { PermissionRequestState() }
-        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+       // snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
     }
 
     /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
         viewModelScope.launch {
-            // Log.d(TAG, "requestShizukuPermission: 发起权限请求")
-
-            // 先获取当前缓存的数量，用于跳过旧值
-            val resultDeferred = async {
-                permissionService.shizukuPermissionResult.drop(1).first()
-            }
-
-            // 发起权限请求
-            permissionService.requestShizukuPermission()
-
-            // 等待新的结果
-            val shizukuPermissionResult = resultDeferred.await()
-            // Log.d(TAG, "requestShizukuPermission: 权限请求结果: $shizukuPermissionResult")
-
-            if (shizukuPermissionResult) {
-                snackbarManager.showMessageAsync(R.string.toast_permission_granted)
-            } else {
-                snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+            when (val result = permissionService.requestShizukuPermission()) {
+                is Result.Success -> {
+                    if (result.data) {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+                    } else {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                    }
+                }
+                is Result.Error -> {
+                    snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                }
             }
         }
     }
@@ -644,10 +619,10 @@ constructor(
     fun dismissPasswordDialog() {
         _uiState.update {
             it.copy(
-                showPasswordDialog = false,
-                passwordRequestMod = null,
-                pendingEnableAfterDecrypt = null,
-                passwordError = null
+                    showPasswordDialog = false,
+                    passwordRequestMod = null,
+                    pendingEnableAfterDecrypt = null,
+                    passwordError = null
             )
         }
     }
@@ -663,47 +638,45 @@ constructor(
         // 关闭对话框，显示解密进度
         _uiState.update {
             it.copy(
-                showPasswordDialog = false,
-                passwordError = null,
-                decryptProgress = DecryptProgressState(isProcessing = true)
+                    showPasswordDialog = false,
+                    passwordError = null,
+                    decryptProgress = DecryptProgressState(isProcessing = true)
             )
         }
 
         decryptJob =
-            viewModelScope.launch {
-                decryptModsUseCase.execute(mod.path, password).collect { state ->
-                    when (state) {
-                        is DecryptState.Progress -> {
-                            _uiState.update {
-                                it.copy(
-                                    decryptProgress =
-                                        DecryptProgressState(
-                                            isProcessing = true,
-                                            step = state.step,
-                                            modName = state.modName,
-                                            current = state.current,
-                                            total = state.total,
-                                            progress =
-                                                if (state.total > 0)
-                                                    state.current
-                                                        .toFloat() /
-                                                            state.total
-                                                else 0f
-                                        )
-                                )
+                viewModelScope.launch {
+                    decryptModsUseCase.execute(mod.path, password).collect { state ->
+                        when (state) {
+                            is DecryptState.Progress -> {
+                                _uiState.update {
+                                    it.copy(
+                                            decryptProgress =
+                                                    DecryptProgressState(
+                                                            isProcessing = true,
+                                                            step = state.step,
+                                                            modName = state.modName,
+                                                            current = state.current,
+                                                            total = state.total,
+                                                            progress =
+                                                                    if (state.total > 0)
+                                                                            state.current
+                                                                                    .toFloat() /
+                                                                                    state.total
+                                                                    else 0f
+                                                    )
+                                    )
+                                }
                             }
-                        }
-
-                        is DecryptState.Success -> {
-                            handleDecryptSuccess(mod, state.result.decryptedCount, password)
-                        }
-
-                        is DecryptState.Error -> {
-                            handleDecryptError(state.error)
+                            is DecryptState.Success -> {
+                                handleDecryptSuccess(mod, state.result.decryptedCount, password)
+                            }
+                            is DecryptState.Error -> {
+                                handleDecryptError(state.error)
+                            }
                         }
                     }
                 }
-            }
     }
 
     /** 取消解密操作 */
@@ -719,15 +692,15 @@ constructor(
 
         _uiState.update {
             it.copy(
-                decryptProgress =
-                    DecryptProgressState(
-                        isProcessing = false,
-                        isComplete = true,
-                        decryptedCount = decryptedCount,
-                        pendingPassword = password,
-                        pendingMod = pendingMod
-                    ),
-                pendingEnableAfterDecrypt = null
+                    decryptProgress =
+                            DecryptProgressState(
+                                    isProcessing = false,
+                                    isComplete = true,
+                                    decryptedCount = decryptedCount,
+                                    pendingPassword = password,
+                                    pendingMod = pendingMod
+                            ),
+                    pendingEnableAfterDecrypt = null
             )
         }
     }
@@ -741,10 +714,10 @@ constructor(
     /** 解密失败处理 */
     private fun handleDecryptError(error: AppError) {
         val errorMessage =
-            when (error) {
-                is AppError.ModError.DecryptFailed -> error.reason
-                else -> "解密失败"
-            }
+                when (error) {
+                    is AppError.ModError.DecryptFailed -> error.reason
+                    else -> "解密失败"
+                }
 
         // 重新显示密码对话框，显示错误信息
         _uiState.update {

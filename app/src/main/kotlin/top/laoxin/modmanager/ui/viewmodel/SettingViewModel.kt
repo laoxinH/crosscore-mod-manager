@@ -4,14 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -20,16 +18,16 @@ import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.FileAccessType
 import top.laoxin.modmanager.constant.PathConstants
+import top.laoxin.modmanager.data.repository.UserPreferencesRepositoryImpl
 import top.laoxin.modmanager.domain.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.domain.bean.InfoBean
 import top.laoxin.modmanager.domain.bean.ThanksBean
-import top.laoxin.modmanager.data.repository.UserPreferencesRepositoryImpl
-import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.AppDataRepository
 import top.laoxin.modmanager.domain.repository.GameInfoRepository
 import top.laoxin.modmanager.domain.repository.UpdateInfo
+import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.service.FileService
 import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.domain.usercase.app.CheckUpdateUserCase
@@ -43,15 +41,15 @@ import top.laoxin.modmanager.ui.state.SnackbarManager
 class SettingViewModel
 @Inject
 constructor(
-    private val gameInfoRepository: GameInfoRepository,
-    private val appDataRepository: AppDataRepository,
-    private val userPreferencesRepository: UserPreferencesRepositoryImpl,
-    private val checkUpdateUserCase: CheckUpdateUserCase,
-    private val getCurrentInformationUserCase: GetCurrentInformationUserCase,
-    private val appInfoService: AppInfoService,
-    private val permissionService: PermissionService,
-    private val snackbarManager: SnackbarManager,
-    private val fileService: FileService
+        private val gameInfoRepository: GameInfoRepository,
+        private val appDataRepository: AppDataRepository,
+        private val userPreferencesRepository: UserPreferencesRepositoryImpl,
+        private val checkUpdateUserCase: CheckUpdateUserCase,
+        private val getCurrentInformationUserCase: GetCurrentInformationUserCase,
+        private val appInfoService: AppInfoService,
+        private val permissionService: PermissionService,
+        private val snackbarManager: SnackbarManager,
+        private val fileService: FileService
 ) : ViewModel() {
 
     companion object {
@@ -59,51 +57,50 @@ constructor(
     }
 
     private val _internalState = MutableStateFlow(InternalState())
-    private val _shizukuPermissionResult = permissionService.shizukuPermissionResult
     // 权限请求状态
     private val _permissionState = MutableStateFlow(PermissionRequestState())
     val permissionState: StateFlow<PermissionRequestState> = _permissionState.asStateFlow()
     val uiState: StateFlow<SettingUiState> =
-        combine(
-            _internalState,
-            gameInfoRepository.getGameInfoList(),
-            userPreferencesRepository.selectedGame
-        ) { internal, gameList, currentGame ->
-            SettingUiState(
-                showDeleteBackupDialog = internal.showDeleteBackupDialog,
-                showDeleteCacheDialog = internal.showDeleteCacheDialog,
-                showAcknowledgmentsDialog = internal.showAcknowledgmentsDialog,
-                showSwitchGameDialog = internal.showSwitchGameDialog,
-                showGameTipsDialog = internal.showGameTipsDialog,
-                showUpdateDialog = internal.showUpdateDialog,
-                showDownloadGameConfigDialog =
-                    internal.showDownloadGameConfigDialog,
-                showNotificationDialog = internal.showNotificationDialog,
-                openPermissionRequestDialog = internal.openPermissionRequestDialog,
-                showAboutDialog = internal.showAboutDialog,
-                thanksList = internal.thanksList,
-                gameInfoList = gameList,
-                currentGame = currentGame,
-                targetGame = internal.targetGame,
-                downloadGameConfigList = internal.downloadGameConfigList,
-                infoBean = internal.infoBean,
-                updateInfo = internal.updateInfo,
-                versionName =
-                    appInfoService
-                        .getVersionName(appInfoService.getPackageName())
-                        .getOrNull()
-                        ?: "",
-                requestPermissionPath = internal.requestPermissionPath,
-                isLoading = false,
-                isDownloading = internal.isDownloading,
-                isAboutPage = internal.isAboutPage
-            )
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = SettingUiState(isLoading = true)
-            )
+            combine(
+                            _internalState,
+                            gameInfoRepository.getGameInfoList(),
+                            userPreferencesRepository.selectedGame
+                    ) { internal, gameList, currentGame ->
+                        SettingUiState(
+                                showDeleteBackupDialog = internal.showDeleteBackupDialog,
+                                showDeleteCacheDialog = internal.showDeleteCacheDialog,
+                                showAcknowledgmentsDialog = internal.showAcknowledgmentsDialog,
+                                showSwitchGameDialog = internal.showSwitchGameDialog,
+                                showGameTipsDialog = internal.showGameTipsDialog,
+                                showUpdateDialog = internal.showUpdateDialog,
+                                showDownloadGameConfigDialog =
+                                        internal.showDownloadGameConfigDialog,
+                                showNotificationDialog = internal.showNotificationDialog,
+                                openPermissionRequestDialog = internal.openPermissionRequestDialog,
+                                showAboutDialog = internal.showAboutDialog,
+                                thanksList = internal.thanksList,
+                                gameInfoList = gameList,
+                                currentGame = currentGame,
+                                targetGame = internal.targetGame,
+                                downloadGameConfigList = internal.downloadGameConfigList,
+                                infoBean = internal.infoBean,
+                                updateInfo = internal.updateInfo,
+                                versionName =
+                                        appInfoService
+                                                .getVersionName(appInfoService.getPackageName())
+                                                .getOrNull()
+                                                ?: "",
+                                requestPermissionPath = internal.requestPermissionPath,
+                                isLoading = false,
+                                isDownloading = internal.isDownloading,
+                                isAboutPage = internal.isAboutPage
+                        )
+                    }
+                    .stateIn(
+                            scope = viewModelScope,
+                            started = SharingStarted.WhileSubscribed(5000),
+                            initialValue = SettingUiState(isLoading = true)
+                    )
 
     init {
         checkUpdate()
@@ -114,30 +111,25 @@ constructor(
         val currentGame = uiState.value.currentGame
         if (game.packageName != currentGame.packageName) {
             viewModelScope.launch {
-
                 val gameInfo =
-                    gameInfoRepository.enrichGameInfo(
-                        game,
-                        PathConstants.getFullModPath(
-                            userPreferencesRepository.selectedDirectory.first()
+                        gameInfoRepository.enrichGameInfo(
+                                game,
+                                PathConstants.getFullModPath(
+                                        userPreferencesRepository.selectedDirectory.first()
+                                )
                         )
-                    )
                 userPreferencesRepository.saveSelectedGame(gameInfo)
                 snackbarManager.showMessage(
-                    R.string.toast_setect_game_success,
-                    game.gameName,
-                    game.serviceName
+                        R.string.toast_setect_game_success,
+                        game.gameName,
+                        game.serviceName
                 )
-                _internalState.update {
-                    it.copy(targetGame = null, showGameTipsDialog = false)
-                }
+                _internalState.update { it.copy(targetGame = null, showGameTipsDialog = false) }
                 // snackbarManager.showMessage(R.string.toast_setect_game_success,game.gameName,game.serviceName)
-
 
             }
         }
     }
-
 
     fun clearCache() {
         viewModelScope.launch {
@@ -146,7 +138,6 @@ constructor(
                 is Result.Success -> {
                     snackbarManager.showMessage("清理成功")
                 }
-
                 is Result.Error -> {
                     snackbarManager.showMessage("清理失败")
                 }
@@ -163,7 +154,6 @@ constructor(
                         it.copy(thanksList = result.data, showAcknowledgmentsDialog = true)
                     }
                 }
-
                 is Result.Error -> {
                     Log.e(TAG, "获取感谢名单失败: ${result.error}")
                     snackbarManager.showMessageAsync(R.string.thanks_list_fetch_failed)
@@ -195,12 +185,11 @@ constructor(
                 is Result.Success -> {
                     _internalState.update {
                         it.copy(
-                            downloadGameConfigList = result.data,
-                            showDownloadGameConfigDialog = true
+                                downloadGameConfigList = result.data,
+                                showDownloadGameConfigDialog = true
                         )
                     }
                 }
-
                 is Result.Error -> {
                     snackbarManager.showMessageAsync(R.string.game_config_fetch_failed)
                 }
@@ -214,14 +203,13 @@ constructor(
             when (val result = gameInfoRepository.downloadRemoteGameConfig(config)) {
                 is Result.Success -> {
                     snackbarManager.showMessageAsync(
-                        R.string.game_config_added,
-                        result.data.gameName
+                            R.string.game_config_added,
+                            result.data.gameName
                     )
                     _internalState.update {
                         it.copy(isDownloading = false, showDownloadGameConfigDialog = false)
                     }
                 }
-
                 is Result.Error -> {
                     snackbarManager.showMessageAsync(R.string.game_config_download_failed)
                     _internalState.update { it.copy(isDownloading = false) }
@@ -235,67 +223,63 @@ constructor(
 
     // Dialog state setters
     fun setShowDeleteBackupDialog(show: Boolean) =
-        _internalState.update { it.copy(showDeleteBackupDialog = show) }
+            _internalState.update { it.copy(showDeleteBackupDialog = show) }
 
     fun setShowDeleteCacheDialog(show: Boolean) =
-        _internalState.update { it.copy(showDeleteCacheDialog = show) }
+            _internalState.update { it.copy(showDeleteCacheDialog = show) }
 
     fun setShowAcknowledgmentsDialog(show: Boolean) =
-        _internalState.update { it.copy(showAcknowledgmentsDialog = show) }
+            _internalState.update { it.copy(showAcknowledgmentsDialog = show) }
 
     fun setShowSwitchGameDialog(show: Boolean) =
-        _internalState.update { it.copy(showSwitchGameDialog = show) }
+            _internalState.update { it.copy(showSwitchGameDialog = show) }
 
     fun setShowGameTipsDialog(show: Boolean) =
-        _internalState.update { it.copy(showGameTipsDialog = show) }
+            _internalState.update { it.copy(showGameTipsDialog = show) }
 
     fun setShowUpdateDialog(show: Boolean) =
-        _internalState.update { it.copy(showUpdateDialog = show) }
+            _internalState.update { it.copy(showUpdateDialog = show) }
 
     fun setShowDownloadGameConfigDialog(show: Boolean) =
-        _internalState.update { it.copy(showDownloadGameConfigDialog = show) }
+            _internalState.update { it.copy(showDownloadGameConfigDialog = show) }
 
     fun setShowNotificationDialog(show: Boolean) =
-        _internalState.update { it.copy(showNotificationDialog = show) }
-
+            _internalState.update { it.copy(showNotificationDialog = show) }
 
     fun setAboutPage(bool: Boolean) = _internalState.update { it.copy(isAboutPage = bool) }
     fun setGameInfo(targetGame: GameInfoBean) {
-        if (targetGame.packageName == userPreferencesRepository.selectedGameValue.packageName) return
+        if (targetGame.packageName == userPreferencesRepository.selectedGameValue.packageName)
+                return
         Log.d(TAG, "setGameInfo: $targetGame")
         if (permissionService.getFileAccessType(targetGame.gamePath) != FileAccessType.NONE) {
-            //appInfoService.isAppInstalled(targetGame.packageName)
+            // appInfoService.isAppInstalled(targetGame.packageName)
             if (appInfoService.isAppInstalled(targetGame.packageName).isSuccess) {
                 if (targetGame.tips.isNotEmpty()) {
                     _internalState.update {
-                        it.copy(
-                            targetGame = targetGame,
-                            showGameTipsDialog = true
-                        )
+                        it.copy(targetGame = targetGame, showGameTipsDialog = true)
                     }
                 } else {
                     onSwitchGame(targetGame)
                 }
-
             } else {
-                //Log.d(TAG, "setGameInfo: app not installed")
+                // Log.d(TAG, "setGameInfo: app not installed")
                 snackbarManager.showMessageAsync(
-                    R.string.toast_set_game_info_failed,
-                    targetGame.gameName, targetGame.serviceName
+                        R.string.toast_set_game_info_failed,
+                        targetGame.gameName,
+                        targetGame.serviceName
                 )
             }
-            //onSwitchGame(targetGame)
+            // onSwitchGame(targetGame)
         } else {
             showPermissionDialog(targetGame.gamePath)
         }
     }
 
-
     fun reloadGameConfig() {
         viewModelScope.launch {
             val modPath = userPreferencesRepository.selectedDirectory.first()
             val customConfigPath =
-                PathConstants.getFullModPath(modPath) + PathConstants.GAME_CONFIG_PATH
+                    PathConstants.getFullModPath(modPath) + PathConstants.GAME_CONFIG_PATH
 
             when (val result = gameInfoRepository.importCustomGameConfigs(customConfigPath)) {
                 is Result.Success -> {
@@ -304,24 +288,21 @@ constructor(
                         data.successCount == 0 && data.failedCount == 0 -> {
                             snackbarManager.showMessageAsync(R.string.game_config_import_no_files)
                         }
-
                         data.failedCount == 0 -> {
                             snackbarManager.showMessageAsync(
-                                R.string.game_config_import_success,
-                                data.successCount
+                                    R.string.game_config_import_success,
+                                    data.successCount
                             )
                         }
-
                         else -> {
                             snackbarManager.showMessageAsync(
-                                R.string.game_config_import_partial,
-                                data.successCount,
-                                data.failedCount
+                                    R.string.game_config_import_partial,
+                                    data.successCount,
+                                    data.failedCount
                             )
                         }
                     }
                 }
-
                 is Result.Error -> {
                     snackbarManager.showMessageAsync(R.string.game_config_import_failed)
                 }
@@ -330,14 +311,14 @@ constructor(
     }
 
     private fun showPermissionDialog(
-        gamePath: String,
-        permissionType: PermissionType = PermissionType.URI_SAF
+            gamePath: String,
+            permissionType: PermissionType = PermissionType.URI_SAF
     ) {
         _permissionState.update {
             PermissionRequestState(
-                showDialog = true,
-                requestPath = permissionService.getRequestPermissionPath(gamePath),
-                permissionType = permissionType
+                    showDialog = true,
+                    requestPath = permissionService.getRequestPermissionPath(gamePath),
+                    permissionType = permissionType
             )
         }
     }
@@ -352,34 +333,25 @@ constructor(
     /** 权限拒绝回调 */
     fun onPermissionDenied(permissionType: PermissionType) {
         _permissionState.update { PermissionRequestState() }
-        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+        //snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
     }
 
     /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
         viewModelScope.launch {
-           // Log.d(TAG, "requestShizukuPermission: 发起权限请求")
-
-            // 先获取当前缓存的数量，用于跳过旧值
-            val resultDeferred = async {
-                permissionService.shizukuPermissionResult.drop(1).first()
-            }
-
-            // 发起权限请求
-            permissionService.requestShizukuPermission()
-
-            // 等待新的结果
-            val shizukuPermissionResult = resultDeferred.await()
-           // Log.d(TAG, "requestShizukuPermission: 权限请求结果: $shizukuPermissionResult")
-
-            if (shizukuPermissionResult) {
-                snackbarManager.showMessageAsync(R.string.toast_permission_granted)
-            } else {
-                snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+            when (val result = permissionService.requestShizukuPermission()) {
+                is Result.Success -> {
+                    if (result.data) {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+                    } else {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                    }
+                }
+                is Result.Error -> {
+                    snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                }
             }
         }
-
-
     }
 
     /** Shizuku 是否可用 */
@@ -387,23 +359,23 @@ constructor(
 
     // Internal state data class
     private data class InternalState(
-        val showDeleteBackupDialog: Boolean = false,
-        val showDeleteCacheDialog: Boolean = false,
-        val showAcknowledgmentsDialog: Boolean = false,
-        val showSwitchGameDialog: Boolean = false,
-        val showGameTipsDialog: Boolean = false,
-        val showUpdateDialog: Boolean = false,
-        val showDownloadGameConfigDialog: Boolean = false,
-        val showNotificationDialog: Boolean = false,
-        val openPermissionRequestDialog: Boolean = false,
-        val showAboutDialog: Boolean = false,
-        val thanksList: List<ThanksBean> = emptyList(),
-        val targetGame: GameInfoBean? = null,
-        val downloadGameConfigList: List<DownloadGameConfigBean> = emptyList(),
-        val infoBean: InfoBean? = null,
-        val updateInfo: UpdateInfo? = null,
-        val requestPermissionPath: String = "",
-        val isAboutPage: Boolean = false,
-        val isDownloading: Boolean = false,
+            val showDeleteBackupDialog: Boolean = false,
+            val showDeleteCacheDialog: Boolean = false,
+            val showAcknowledgmentsDialog: Boolean = false,
+            val showSwitchGameDialog: Boolean = false,
+            val showGameTipsDialog: Boolean = false,
+            val showUpdateDialog: Boolean = false,
+            val showDownloadGameConfigDialog: Boolean = false,
+            val showNotificationDialog: Boolean = false,
+            val openPermissionRequestDialog: Boolean = false,
+            val showAboutDialog: Boolean = false,
+            val thanksList: List<ThanksBean> = emptyList(),
+            val targetGame: GameInfoBean? = null,
+            val downloadGameConfigList: List<DownloadGameConfigBean> = emptyList(),
+            val infoBean: InfoBean? = null,
+            val updateInfo: UpdateInfo? = null,
+            val requestPermissionPath: String = "",
+            val isAboutPage: Boolean = false,
+            val isDownloading: Boolean = false,
     )
 }

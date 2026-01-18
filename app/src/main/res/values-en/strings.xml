@@ -184,7 +184,7 @@
     <string name="dialog_del_mod_title">Warning!</string>
     <string name="dialog_del_mod_content">Files cannot be recovered after deletion! If the corresponding archive contains multiple MODs, they will also be deleted together!</string>
     <string name="dialog_reqest_notification_title">Request Notification Permission</string>
-    <string name="dialog_reqest_notification_message">MOD LAB needs to keep the background service for some games (e.g., Dust White Forbidden Zone) MOD injection service, to prevent the system from closing the background, a notification needs to be displayed!</string>
+    <string name="dialog_reqest_notification_message">MOD Labs requires background scanning to be maintained; a notification needs to be displayed to prevent the system from closing the background process!</string>
     <string name="open_mod_failed_dialog_title">Enable Failed</string>
     <string name="open_mod_failed_dialog_desc">%1$s MODs failed to enable, rollback? (only the failed MODs will be rolled back)</string>
     <string name="mod_refreshing">Refreshing Readme</string>

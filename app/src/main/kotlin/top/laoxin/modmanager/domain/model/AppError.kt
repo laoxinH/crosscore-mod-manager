@@ -118,6 +118,10 @@ sealed class AppError {
         object StoragePermissionDenied : PermissionError()
         /** URI 权限未授予 */
         object UriPermissionNotGranted : PermissionError()
+        /** 未知权限错误 */
+        data class Unknown(val message: String) : PermissionError()
+        /** shizhuku 请求权限错误 */
+        data class ShizukuPermissionRequestFailed(val message: String) : PermissionError()
     }
 
     // ==================== 游戏相关错误 ====================

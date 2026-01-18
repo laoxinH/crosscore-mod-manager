@@ -185,7 +185,7 @@
     <string name="dialog_del_mod_title">Предупреждение!</string>
     <string name="dialog_del_mod_content">Удаленные файлы не могут быть восстановлены! Если архив содержит несколько модов, они также будут удалены вместе!</string>
     <string name="dialog_reqest_notification_title">Запрос разрешения на уведомления</string>
-    <string name="dialog_reqest_notification_message">MOD Лаборатория запускает сервис внедрения модов для некоторых игр (например Dust Forbidden) и нуждается в фоновом сервисе. Для предотвращения отключения фона требуется отображение уведомления!</string>
+    <string name="dialog_reqest_notification_message">Для работы MOD Labs необходимо постоянное фоновое сканирование; для предотвращения завершения фонового процесса системой необходимо отображать соответствующее уведомление!</string>
     <string name="open_mod_failed_dialog_title">Ошибка включения</string>
     <string name="open_mod_failed_dialog_desc">%1$s модов не включилось. Хотите выполнить откат (откат затронет только неудачно включённые моды)?</string>
     <string name="mod_refreshing">Переполнение Readme</string>

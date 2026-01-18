@@ -8,7 +8,6 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -27,6 +25,7 @@ import top.laoxin.modmanager.constant.FileAccessType
 import top.laoxin.modmanager.constant.PathConstants
 import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.domain.model.AppError
+import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
 import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.service.PermissionService
@@ -48,18 +47,18 @@ import top.laoxin.modmanager.ui.state.UserPreferencesState
 class ConsoleViewModel
 @Inject
 constructor(
-    private val userPreferencesRepository: UserPreferencesRepository,
-    private val checkUpdateUserCase: CheckUpdateUserCase,
-    private val getCurrentInformationUserCase: GetCurrentInformationUserCase,
-    private val checkInstallModUseCase: CheckInstallModUseCase,
-    private val updateLogServiceUserCase: UpdateLogServiceUserCase,
-    private val getCurrentGameAntiHarmonyStateUserCase: GetCurrentGameAntiHarmonyStateUserCase,
-    private val switchAntiHarmonyUserCase: SwitchAntiHarmonyUserCase,
-    private val getGameModsCountUserCase: GetGameModsCountUserCase,
-    private val getGameEnableModsCountUserCase: GetGameEnableModsCountUserCase,
-    private val permissionService: PermissionService,
-    private val snackbarManager: SnackbarManager,
-    private val appInfoService: AppInfoService,
+        private val userPreferencesRepository: UserPreferencesRepository,
+        private val checkUpdateUserCase: CheckUpdateUserCase,
+        private val getCurrentInformationUserCase: GetCurrentInformationUserCase,
+        private val checkInstallModUseCase: CheckInstallModUseCase,
+        private val updateLogServiceUserCase: UpdateLogServiceUserCase,
+        private val getCurrentGameAntiHarmonyStateUserCase: GetCurrentGameAntiHarmonyStateUserCase,
+        private val switchAntiHarmonyUserCase: SwitchAntiHarmonyUserCase,
+        private val getGameModsCountUserCase: GetGameModsCountUserCase,
+        private val getGameEnableModsCountUserCase: GetGameEnableModsCountUserCase,
+        private val permissionService: PermissionService,
+        private val snackbarManager: SnackbarManager,
+        private val appInfoService: AppInfoService,
 ) : ViewModel() {
 
     // 内部 UI 状态
@@ -70,83 +69,83 @@ constructor(
     val permissionState: StateFlow<PermissionRequestState> = _permissionState.asStateFlow()
 
     private val userPreferencesState: StateFlow<UserPreferencesState> =
-        combine(
-            userPreferencesRepository.selectedGame,
-            userPreferencesRepository.scanQQDirectory,
-            userPreferencesRepository.selectedDirectory,
-            userPreferencesRepository.scanDownload,
             combine(
-                userPreferencesRepository.scanDirectoryMods,
-                userPreferencesRepository.deleteUnzipDirectory,
-                userPreferencesRepository.showCategoryView,
-                userPreferencesRepository.conflictDetectionEnabled
-            ) { scanMods, delUnzip, category, conflictDetection ->
-                object {
-                    val scanMods = scanMods
-                    val delUnzip = delUnzip
-                    val category = category
-                    val conflictDetection = conflictDetection
-                }
-            }
-        ) { game, qq, dir, download, settings ->
-            UserPreferencesState(
-                selectedGame = game,
-                scanQQDirectory = qq,
-                selectedDirectory = dir,
-                scanDownload = download,
-                scanDirectoryMods = settings.scanMods,
-                delUnzipDictionary = settings.delUnzip,
-                showCategoryView = settings.category,
-                conflictDetectionEnabled = settings.conflictDetection
-            )
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = UserPreferencesState()
-            )
+                            userPreferencesRepository.selectedGame,
+                            userPreferencesRepository.scanQQDirectory,
+                            userPreferencesRepository.selectedDirectory,
+                            userPreferencesRepository.scanDownload,
+                            combine(
+                                    userPreferencesRepository.scanDirectoryMods,
+                                    userPreferencesRepository.deleteUnzipDirectory,
+                                    userPreferencesRepository.showCategoryView,
+                                    userPreferencesRepository.conflictDetectionEnabled
+                            ) { scanMods, delUnzip, category, conflictDetection ->
+                                object {
+                                    val scanMods = scanMods
+                                    val delUnzip = delUnzip
+                                    val category = category
+                                    val conflictDetection = conflictDetection
+                                }
+                            }
+                    ) { game, qq, dir, download, settings ->
+                        UserPreferencesState(
+                                selectedGame = game,
+                                scanQQDirectory = qq,
+                                selectedDirectory = dir,
+                                scanDownload = download,
+                                scanDirectoryMods = settings.scanMods,
+                                delUnzipDictionary = settings.delUnzip,
+                                showCategoryView = settings.category,
+                                conflictDetectionEnabled = settings.conflictDetection
+                        )
+                    }
+                    .stateIn(
+                            scope = viewModelScope,
+                            started = SharingStarted.WhileSubscribed(5000),
+                            initialValue = UserPreferencesState()
+                    )
 
     val uiState: StateFlow<ConsoleUiState> =
-        combine(
-            _uiState,
-            getCurrentGameAntiHarmonyStateUserCase(),
-            userPreferencesState,
             combine(
-                getGameModsCountUserCase(),
-                getGameEnableModsCountUserCase(),
-                checkInstallModUseCase()
-            ) { modCount, enableCount, canInstall ->
-                Triple(modCount, enableCount, canInstall)
-            },
-        ) { uiState, antiHarmonyBean, prefs, lastThree ->
-            ConsoleUiState(
-                infoBean = uiState.infoBean,
-                updateInfo = uiState.updateInfo,
-                showInfoDialog = uiState.showInfoDialog,
-                showUpgradeDialog = uiState.showUpgradeDialog,
-                gameInfo = prefs.selectedGame,
-                canInstallMod = lastThree.third,
-                showScanDirectoryModsDialog = uiState.showScanDirectoryModsDialog,
-                openPermissionRequestDialog = uiState.openPermissionRequestDialog,
-                requestPermissionPath = uiState.requestPermissionPath,
-                modCount = lastThree.first,
-                enableModCount = lastThree.second,
-                antiHarmony = antiHarmonyBean?.isEnable ?: false,
-                scanQQDirectory = prefs.scanQQDirectory,
-                selectedDirectory = prefs.selectedDirectory,
-                scanDownload = prefs.scanDownload,
-                scanDirectoryMods = prefs.scanDirectoryMods,
-                delUnzipDictionary = prefs.delUnzipDictionary,
-                showCategoryView = prefs.showCategoryView,
-                conflictDetectionEnabled = prefs.conflictDetectionEnabled,
-                isLoading = false
-            )
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = ConsoleUiState(isLoading = true)
-            )
+                            _uiState,
+                            getCurrentGameAntiHarmonyStateUserCase(),
+                            userPreferencesState,
+                            combine(
+                                    getGameModsCountUserCase(),
+                                    getGameEnableModsCountUserCase(),
+                                    checkInstallModUseCase()
+                            ) { modCount, enableCount, canInstall ->
+                                Triple(modCount, enableCount, canInstall)
+                            },
+                    ) { uiState, antiHarmonyBean, prefs, lastThree ->
+                        ConsoleUiState(
+                                infoBean = uiState.infoBean,
+                                updateInfo = uiState.updateInfo,
+                                showInfoDialog = uiState.showInfoDialog,
+                                showUpgradeDialog = uiState.showUpgradeDialog,
+                                gameInfo = prefs.selectedGame,
+                                canInstallMod = lastThree.third,
+                                showScanDirectoryModsDialog = uiState.showScanDirectoryModsDialog,
+                                openPermissionRequestDialog = uiState.openPermissionRequestDialog,
+                                requestPermissionPath = uiState.requestPermissionPath,
+                                modCount = lastThree.first,
+                                enableModCount = lastThree.second,
+                                antiHarmony = antiHarmonyBean?.isEnable ?: false,
+                                scanQQDirectory = prefs.scanQQDirectory,
+                                selectedDirectory = prefs.selectedDirectory,
+                                scanDownload = prefs.scanDownload,
+                                scanDirectoryMods = prefs.scanDirectoryMods,
+                                delUnzipDictionary = prefs.delUnzipDictionary,
+                                showCategoryView = prefs.showCategoryView,
+                                conflictDetectionEnabled = prefs.conflictDetectionEnabled,
+                                isLoading = false
+                        )
+                    }
+                    .stateIn(
+                            scope = viewModelScope,
+                            started = SharingStarted.WhileSubscribed(5000),
+                            initialValue = ConsoleUiState(isLoading = true)
+                    )
 
     init {
         checkStoragePermission()
@@ -166,9 +165,9 @@ constructor(
         if (!permissionService.hasStoragePermission()) {
             _permissionState.update {
                 PermissionRequestState(
-                    showDialog = true,
-                    requestPath = "",
-                    permissionType = PermissionType.STORAGE
+                        showDialog = true,
+                        requestPath = "",
+                        permissionType = PermissionType.STORAGE
                 )
             }
         }
@@ -200,17 +199,15 @@ constructor(
 
     fun openAntiHarmony(flag: Boolean) {
         viewModelScope.launch {
-            switchAntiHarmonyUserCase(flag).onSuccess { /* 成功处理 */ }.onError { error ->
+            switchAntiHarmonyUserCase(flag).onSuccess { /* 成功处理 */}.onError { error ->
                 when (error) {
                     is AppError.AntiHarmonyError.NotSupported ->
-                        snackbarManager.showMessage(R.string.toast_game_not_suppose_anti)
+                            snackbarManager.showMessage(R.string.toast_game_not_suppose_anti)
                     // ToastUtils.longCall(R.string.toast_game_not_suppose_anti)
                     is AppError.PermissionError.StoragePermissionDenied ->
-                        showPermissionDialog(_uiState.value.gameInfo.gamePath)
-
+                            showPermissionDialog(_uiState.value.gameInfo.gamePath)
                     is AppError.PermissionError.UriPermissionNotGranted ->
-                        showPermissionDialog(_uiState.value.gameInfo.gamePath)
-
+                            showPermissionDialog(_uiState.value.gameInfo.gamePath)
                     else -> snackbarManager.showMessage(R.string.toast_unknow_err, error)
                 }
             }
@@ -218,14 +215,14 @@ constructor(
     }
 
     private fun showPermissionDialog(
-        gamePath: String,
-        permissionType: PermissionType = PermissionType.URI_SAF
+            gamePath: String,
+            permissionType: PermissionType = PermissionType.URI_SAF
     ) {
         _permissionState.update {
             PermissionRequestState(
-                showDialog = true,
-                requestPath = permissionService.getRequestPermissionPath(gamePath),
-                permissionType = permissionType
+                    showDialog = true,
+                    requestPath = permissionService.getRequestPermissionPath(gamePath),
+                    permissionType = permissionType
             )
         }
     }
@@ -240,30 +237,23 @@ constructor(
     /** 权限拒绝回调 */
     fun onPermissionDenied(permissionType: PermissionType) {
         _permissionState.update { PermissionRequestState() }
-        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+       // snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
     }
 
     /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
         viewModelScope.launch {
-            // Log.d(TAG, "requestShizukuPermission: 发起权限请求")
-
-            // 先获取当前缓存的数量，用于跳过旧值
-            val resultDeferred = async {
-                permissionService.shizukuPermissionResult.drop(1).first()
-            }
-
-            // 发起权限请求
-            permissionService.requestShizukuPermission()
-
-            // 等待新的结果
-            val shizukuPermissionResult = resultDeferred.await()
-            // Log.d(TAG, "requestShizukuPermission: 权限请求结果: $shizukuPermissionResult")
-
-            if (shizukuPermissionResult) {
-                snackbarManager.showMessageAsync(R.string.toast_permission_granted)
-            } else {
-                snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+            when (val result = permissionService.requestShizukuPermission()) {
+                is Result.Success -> {
+                    if (result.data) {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+                    } else {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                    }
+                }
+                is Result.Error -> {
+                    snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                }
             }
         }
     }
@@ -283,18 +273,17 @@ constructor(
     fun setSelectedDirectory(selectedDirectory: String) {
         viewModelScope.launch {
             userPreferencesRepository
-                .prepareAndSetModDirectory(selectedDirectory)
-                .onSuccess {}
-                .onError {
-                    when (it) {
-                        is AppError.FileError.PermissionDenied ->
-                            snackbarManager.showMessage(
-                                R.string.toast_this_dir_has_no_prim_android
-                            )
-
-                        else -> snackbarManager.showMessage(R.string.toast_unknow_err, it)
+                    .prepareAndSetModDirectory(selectedDirectory)
+                    .onSuccess {}
+                    .onError {
+                        when (it) {
+                            is AppError.FileError.PermissionDenied ->
+                                    snackbarManager.showMessage(
+                                            R.string.toast_this_dir_has_no_prim_android
+                                    )
+                            else -> snackbarManager.showMessage(R.string.toast_unknow_err, it)
+                        }
                     }
-                }
         }
     }
 
@@ -332,7 +321,7 @@ constructor(
     }
 
     fun setOpenPermissionRequestDialog(show: Boolean) =
-        _uiState.update { it.copy(openPermissionRequestDialog = show) }
+            _uiState.update { it.copy(openPermissionRequestDialog = show) }
 
     fun switchDelUnzip(bool: Boolean) {
         viewModelScope.launch { userPreferencesRepository.saveDeleteUnzipDirectory(bool) }

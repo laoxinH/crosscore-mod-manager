@@ -1,47 +1,38 @@
 package top.laoxin.modmanager.ui.viewmodel
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.domain.bean.ModBean
 import top.laoxin.modmanager.domain.model.AppError
-import top.laoxin.modmanager.domain.model.ScanStep
+import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.ModRepository
+import top.laoxin.modmanager.domain.repository.ScanStateRepository
 import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
 import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.domain.usercase.mod.DeleteModsUserCase
 import top.laoxin.modmanager.domain.usercase.mod.ScanAndSyncModsUseCase
-import top.laoxin.modmanager.domain.usercase.mod.ScanState
 import top.laoxin.modmanager.notification.AppNotificationManager
 import top.laoxin.modmanager.observer.FlashModsObserverManager
 import top.laoxin.modmanager.observer.FlashObserverInterface
+import top.laoxin.modmanager.service.ScanForegroundService
 import top.laoxin.modmanager.ui.state.ModScanUiState
 import top.laoxin.modmanager.ui.state.PermissionRequestState
 import top.laoxin.modmanager.ui.state.PermissionType
-import top.laoxin.modmanager.ui.state.ScanProgressState
-import top.laoxin.modmanager.ui.state.ScanResultState
 import top.laoxin.modmanager.ui.state.SnackbarManager
-import top.laoxin.modmanager.domain.repository.ScanStateRepository
-import top.laoxin.modmanager.service.ScanForegroundService
-import android.app.Application
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
 
 /** Mod扫描和刷新ViewModel */
 @HiltViewModel
@@ -61,7 +52,7 @@ constructor(
 ) : ViewModel(), FlashObserverInterface {
 
     private val _internalState = MutableStateFlow(InternalState())
-    
+
     // 从 ScanStateRepository 获取扫描状态
     private val _scanProgress = scanStateRepository.scanState
 
@@ -73,10 +64,11 @@ constructor(
     val permissionState: StateFlow<PermissionRequestState> = _permissionState.asStateFlow()
 
     val uiState: StateFlow<ModScanUiState> =
-            combine(userPreferencesRepository.selectedGame, _internalState, scanStateRepository.scanState) {
-                            selectedGame,
-                            internalState,
-                            scanProgress ->
+            combine(
+                            userPreferencesRepository.selectedGame,
+                            _internalState,
+                            scanStateRepository.scanState
+                    ) { selectedGame, internalState, scanProgress ->
                         ModScanUiState(
                                 isLoading = internalState.isLoading,
                                 loadingPath = internalState.loadingPath,
@@ -121,10 +113,10 @@ constructor(
             snackbarManager.showMessageAsync(R.string.scan_task_already_exists)
             return
         }
-        
+
         // 保存当前扫描模式
         isForceScan = forceScan
-        
+
         // 启动 Foreground Service 执行扫描
         ScanForegroundService.startScan(application, forceScan)
     }
@@ -192,7 +184,9 @@ constructor(
         }
     }*/
 
-/*    *//** 处理扫描成功 *//*
+    /*    */
+    /** 处理扫描成功 */
+    /*
     private fun handleScanSuccess(state: ScanState.Success) {
         val result = state.result
         val hasDeletedEnabledMods = result.deletedEnabledMods.isNotEmpty()
@@ -251,7 +245,9 @@ constructor(
         }
     }
 
-    *//** 处理扫描错误 *//*
+    */
+    /** 处理扫描错误 */
+    /*
     private fun handleScanError(state: ScanState.Error) {
         val wasBackgroundMode = isBackgroundMode
         isBackgroundMode = false
@@ -303,8 +299,6 @@ constructor(
         ScanForegroundService.switchToBackground(application)
     }
 
-
-
     /** 检查是否有通知权限 */
     fun hasNotificationPermission(): Boolean = appNotificationManager.hasNotificationPermission()
 
@@ -316,12 +310,12 @@ constructor(
     /** 从错误对话框请求权限 */
     fun requestPermissionFromError() {
         // 关闭扫描进度
-      //  scanJob?.cancel()
-     //   scanJob = null
+        //  scanJob?.cancel()
+        //   scanJob = null
         // 获取游戏路径并弹出权限对话框
         val gamePath = userPreferencesRepository.selectedGameValue.gamePath
         _scanProgress.value?.error?.let { error ->
-          //  _scanProgress.update { null }
+            //  _scanProgress.update { null }
             Log.d("ModScanViewModel", "权限缺失类型: $error")
             when (error) {
                 is AppError.PermissionError.StoragePermissionDenied -> {
@@ -334,7 +328,7 @@ constructor(
                 else -> {}
             }
         }
-      //  _scanProgress.update { null }
+        //  _scanProgress.update { null }
         showPermissionDialog(gamePath, PermissionType.URI_SAF)
     }
 
@@ -395,35 +389,27 @@ constructor(
     /** 权限拒绝回调 */
     fun onPermissionDenied(permissionType: PermissionType) {
         _permissionState.update { PermissionRequestState() }
-        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+       // snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
         if (permissionType == PermissionType.NOTIFICATION) {
             // 如果有待处理的后台切换，执行切换
             pendingBackgroundSwitch = false
         }
-
     }
 
     /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
         viewModelScope.launch {
-            // Log.d(TAG, "requestShizukuPermission: 发起权限请求")
-
-            // 先获取当前缓存的数量，用于跳过旧值
-            val resultDeferred = async {
-                permissionService.shizukuPermissionResult.drop(1).first()
-            }
-
-            // 发起权限请求
-            permissionService.requestShizukuPermission()
-
-            // 等待新的结果
-            val shizukuPermissionResult = resultDeferred.await()
-            // Log.d(TAG, "requestShizukuPermission: 权限请求结果: $shizukuPermissionResult")
-
-            if (shizukuPermissionResult) {
-                snackbarManager.showMessageAsync(R.string.toast_permission_granted)
-            } else {
-                snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+            when (val result = permissionService.requestShizukuPermission()) {
+                is Result.Success -> {
+                    if (result.data) {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+                    } else {
+                        snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                    }
+                }
+                is Result.Error -> {
+                    snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
+                }
             }
         }
     }
@@ -433,7 +419,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        //scanJob?.cancel()
+        // scanJob?.cancel()
         flashModsObserverManager.stopWatching()
     }
 

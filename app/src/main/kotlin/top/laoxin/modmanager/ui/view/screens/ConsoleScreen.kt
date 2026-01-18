@@ -71,7 +71,7 @@ fun ConsoleScreen(viewModel: ConsoleViewModel = hiltViewModel()) {
                 title = stringResource(id = R.string.console_upgrade_title),
                 content = it.changelog,
                 onConfirm = { context.openUrl(it.downloadUrl) },
-                onDismiss = { context.openUrl(it.downloadUrl) },
+                onDismiss = { viewModel.setShowUpgradeDialog(false) },
                 showDialog = uiState.showUpgradeDialog
         )
     }

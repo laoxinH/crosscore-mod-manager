@@ -157,7 +157,7 @@ fun SettingScreen(
             title = stringResource(id = R.string.console_upgrade_title),
             content = it.changelog,
             onConfirm = { it.downloadUrl.let { url -> context.openUrl(url) } },
-            onDismiss = { it.universalUrl.let { url -> context.openUrl(url) } },
+            onDismiss = { viewModel.setShowUpdateDialog(false) },
             showDialog = uiState.showUpdateDialog
         )
     }
