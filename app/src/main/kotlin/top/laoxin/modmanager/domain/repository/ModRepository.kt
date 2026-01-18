@@ -64,6 +64,8 @@ interface ModRepository {
     /** 更新数据库中一个Mod的启用状态。 */
     suspend fun updateModEnableState(modId: Int, isEnable: Boolean)
 
+    fun getModsByVirtualPath(virtualPath: String) : Flow<List<ModBean>>
+
     /**
      * 备份一个Mod的原始游戏文件。
      * @return 返回一个包含备份信息的 BackupBean 列表。

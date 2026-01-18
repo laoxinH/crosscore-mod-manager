@@ -33,7 +33,7 @@ import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.domain.model.AppError
 import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
-import top.laoxin.modmanager.ui.view.modView.NavigationIndex
+
 
 private const val PREFERENCE_NAME = "mod_manager_preferences"
 private val Context.dataStore: DataStore<Preferences> by
@@ -264,10 +264,7 @@ constructor(
         override suspend fun saveUserTips(shouldShow: Boolean) =
                 savePreference(Keys.USER_TIPS, shouldShow)
 
-        override val modsViewIndex: Flow<Int> =
-                getPreference(Keys.MODS_VIEW_INDEX, NavigationIndex.MODS_BROWSER.index)
-        override suspend fun saveModsViewIndex(index: Int) =
-                savePreference(Keys.MODS_VIEW_INDEX, index)
+
 
         override val modListDisplayMode: Flow<Int> = getPreference(Keys.MOD_LIST_DISPLAY_MODE, 0)
         override suspend fun saveModListDisplayMode(mode: Int) =

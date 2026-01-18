@@ -204,6 +204,7 @@
     <string name="console_top_bar_start_game">Start Game</string>
     <string name="download">Default</string>
     <string name="download_universal">Universal</string>
+    <string name="update_later">Later</string>
     <string name="toast_start_scan">Scan Starts</string>
     <string name="toast_flash_failed">Failed to Refresh Mods</string>
     <string name="tosat_game_already_update">%1$s has been updated. Please reselect the game in the settings and perform the prompt operation again</string>
@@ -250,6 +251,20 @@
     <string name="scan_step_transferring">Transferring external MOD…</string>
     <string name="scan_step_scanning_directory">Scanning MOD directory…</string>
     <string name="scan_step_syncing_database">Syncing database…</string>
+    <!-- Background Scan -->
+    <string name="scan_background_button">Background Scan</string>
+    <string name="scan_notification_channel_name">Scan Service</string>
+    <string name="scan_notification_channel_description">Show MOD scan progress</string>
+    <string name="scan_notification_title">Scanning MOD</string>
+    <string name="scan_notification_progress">Scanning: %1$s</string>
+    <string name="scan_notification_complete">Scan complete: Added %1$d, Updated %2$d, Deleted %3$d</string>
+    <string name="scan_notification_preparing">Preparing to scan...</string>
+    <string name="scan_notification_error">Scan failed</string>
+    <string name="scan_notification_channel_id" translatable="false">scan_channel</string>
+    <string name="scan_complete_toast">Scan complete: Added %1$d, Updated %2$d, Deleted %3$d</string>
+    <string name="scan_task_already_exists">A scan task is already running</string>
+    <string name="scan_notification_cancel">Cancel</string>
+    <string name="operation_task_in_progress">A task is already in progress</string>
 
     <!-- Enable Progress Overlay -->
     <string name="enable_progress_title">MOD Processing</string>
@@ -395,5 +410,8 @@
 
     <!-- Thanks List -->
     <string name="thanks_list_fetch_failed">Failed to get thanks list</string>
+    <string name="mod_bean_loading_desc">Loading Readme...</string>
+    <string name="scan_notification_complete_simple">Scan complete: Added %1$d, Updated %2$d</string>
+    <string name="toast_mod_enable_success">%1$s is enabled</string>
 </resources>
 

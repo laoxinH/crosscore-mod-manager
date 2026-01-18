@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import top.laoxin.modmanager.data.service.AppInfoServiceImpl
 import top.laoxin.modmanager.data.service.ArchiveServiceImpl
 import top.laoxin.modmanager.data.service.BackupServiceImpl
 import top.laoxin.modmanager.data.service.FileServiceImpl
@@ -16,6 +17,7 @@ import top.laoxin.modmanager.data.service.PermissionServiceImpl
 import top.laoxin.modmanager.data.service.TraditionalModEnableServiceImpl
 import top.laoxin.modmanager.data.service.TraditionalModScanServiceImpl
 import top.laoxin.modmanager.data.service.specialgame.SpecialGameServiceImpl
+import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.service.ArchiveService
 import top.laoxin.modmanager.domain.service.BackupService
 import top.laoxin.modmanager.domain.service.FileService
@@ -32,6 +34,8 @@ import top.laoxin.modmanager.domain.service.TraditionalModScanService
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ServiceModule {
+
+        @Binds @Singleton abstract fun bindAppInfoService(impl: AppInfoServiceImpl): AppInfoService
 
         @Binds @Singleton abstract fun bindFileService(impl: FileServiceImpl): FileService
 

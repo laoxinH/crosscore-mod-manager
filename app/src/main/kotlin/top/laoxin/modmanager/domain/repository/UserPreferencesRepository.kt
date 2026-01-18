@@ -45,9 +45,7 @@ interface UserPreferencesRepository {
     val userTips: Flow<Boolean>
     suspend fun saveUserTips(shouldShow: Boolean)
 
-    /** MOD页面导航索引 (NavigationIndex.index) */
-    val modsViewIndex: Flow<Int>
-    suspend fun saveModsViewIndex(index: Int)
+
 
     /** MOD列表显示模式 (0=列表视图, 1=大图网格视图) */
     val modListDisplayMode: Flow<Int>

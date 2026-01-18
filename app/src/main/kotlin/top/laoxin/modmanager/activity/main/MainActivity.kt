@@ -18,8 +18,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import top.laoxin.modmanager.activity.userAgreement.UserAgreementActivity
 import top.laoxin.modmanager.domain.service.PermissionService
+import top.laoxin.modmanager.notification.AppNotificationManager
+import top.laoxin.modmanager.service.ScanForegroundService
+import top.laoxin.modmanager.ui.view.ModernModManagerApp
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
-import top.laoxin.modmanager.ui.view.ModManagerApp
 
 @AndroidEntryPoint
 class MainActivity() : ComponentActivity() {
@@ -45,8 +47,35 @@ class MainActivity() : ComponentActivity() {
         setContent {
             ModManagerTheme {
                 ConfigureSystemBars()
-                Surface(Modifier.fillMaxSize()) { ModManagerApp() }
+                Surface(Modifier.fillMaxSize()) {
+                    // ModManagerApp()
+                    ModernModManagerApp()
+                }
             }
+        }
+
+        // 处理从通知点击进入
+        handleNotificationClick(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // 处理从通知点击进入
+        handleNotificationClick(intent)
+    }
+
+    /**
+     * 处理通知点击
+     * 退出后台模式，重新显示扫描覆盖层
+     */
+    private fun handleNotificationClick(intent: Intent?) {
+        val uri = intent?.data ?: return
+        
+        // 检查是否来自扫描通知的 Deep Link
+        if (uri.toString().startsWith(AppNotificationManager.DEEP_LINK_SCAN_PROGRESS) ||
+            uri.toString().startsWith(AppNotificationManager.DEEP_LINK_SCAN_RESULT)) {
+            // 通知 Service 退出后台模式，让覆盖层重新出现
+            ScanForegroundService.exitBackground(this)
         }
     }
 
@@ -55,7 +84,7 @@ class MainActivity() : ComponentActivity() {
         cleanupShizuku()
 
         if (isFinishing) {
-           // LogTools.flushAll()
+            // LogTools.flushAll()
         }
     }
 
@@ -85,3 +114,4 @@ class MainActivity() : ComponentActivity() {
         }
     }
 }
+

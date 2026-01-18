@@ -140,6 +140,8 @@ androidComponents {
 
 dependencies {
     implementation(libs.androidx.security.state.provider)
+    implementation(libs.androidx.animation)
+    implementation(libs.androidx.foundation.layout)
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.rules)
@@ -189,6 +191,13 @@ dependencies {
     // AndroidX Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+
+    // Navigation 3
+    //implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.material3.navigation3)
+    implementation(libs.androidx.navigation3.runtime)
 
     // Room
     implementation(libs.androidx.room.runtime)

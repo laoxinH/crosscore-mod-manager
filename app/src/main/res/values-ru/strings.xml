@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MOD LAB</string>
+    <string name="console">Консоль</string>
+    <string name="mod">Мod</string>
+    <string name="settings">Настройки</string>
+    <string name="permission">Разрешение: %s</string>
+    <string name="toast_shizuku_load_file_failed">Ошибка чтения файла через shizuku, пожалуйста повторно авторизуйтесь</string>
+    <string name="toast_shizuku_connected">shizuku подключен</string>
+    <string name="toast_shizuku_disconnected">shizuku не подключен</string>
+    <string name="dialog_storage_title">Предоставить разрешение на хранилище</string>
+    <string name="dialog_button_request_close">Закрыть</string>
+    <string name="dialog_storage_message">После Android 11, лаборатория требует полный доступ к хранилищу для управления вашими модами</string>
+    <string name="toast_permission_granted">Разрешение успешно предоставлено</string>
+    <string name="toast_permission_not_granted">Ошибка предоставления разрешения</string>
+    <string name="toast_shizuku_permission_denied">Ошибка авторизации shizuku</string>
+    <string name="toast_shizuku_permission_granted">Авторизация shizuku успешна</string>
+    <string name="toast_shizuku_not_available">shizuku не установлен или не запущен</string>
+    <string name="console_game_name">Название: %s</string>
+    <string name="console_game_packegname">Пакет: %s</string>
+    <string name="console_game_version">Версия: %s</string>
+    <string name="console_game_service">Сервер: %s</string>
+    <string name="console_setting_info_configuration">Статус</string>
+    <string name="console_setting_info_mod" translatable="false">MOD</string>
+    <string name="console_setting_info_mod_total">Количество модов: %s</string>
+    <string name="console_setting_info_mod_enable">Включено: %s</string>
+    <string name="console_setting_info_configuration_anti_harmony">Анти-гармония: %s</string>
+    <string name="console_setting_info_configuration_install_loction">Моды установлены: %s</string>
+    <string name="console_configuration_title">Параметры конфигурации</string>
+    <string name="console_configuration_anti_harmony">Анти-гармония</string>
+    <string name="console_configuration_scanQQ">Сканировать папку загрузок QQ (может быть неэффективно)</string>
+    <string name="console_configuration_scan_download">Сканировать системную папку DOWNLOAD</string>
+    <string name="console_configuration_conflict_detection">Обнаружение конфликтов модов</string>
+    <string name="console_configuration_select_mod_directory">Выберите папку модов</string>
+    <string name="toast_copy_failed">Ошибка копирования файла мода</string>
+    <string name="toast_restore_failed">Ошибка восстановления файлов игры</string>
+    <string name="dialog_button_confirm">Подтвердить</string>
+    <string name="console_setting_info_configuration_anti_harmony_enable">Включено</string>
+    <string name="console_setting_info_configuration_anti_harmony_disable">Отключено</string>
+    <string name="mod_page_dropdownMenu_show_enable_mods">Показать только включённые</string>
+    <string name="mod_page_dropdownMenu_show_disable_mods">Показать только отключённые</string>
+    <string name="mod_page_dropdownMenu_show_all_mods">Показать все</string>
+    <string name="mod_page_search_hit">Поиск модов</string>
+    <string name="mod_page_mod_detail_dialog_detali_title">Подробности</string>
+    <string name="mod_page_mod_detail_dialog_detali_descript">Описание: %1$s</string>
+    <string name="mod_page_mod_detail_dialog_detali_version">Версия: %1$s</string>
+    <string name="mod_page_mod_detail_dialog_detali_path">Путь: %1$s</string>
+    <string name="mod_page_mod_detail_dialog_detali_path_images">Путь к изображениям: %1$s</string>
+    <string name="mod_page_mod_detail_dialog_detali_author">Автор: %1$s</string>
+    <string name="mod_page_mod_detail_dialog_detali_perview">Предпросмотр</string>
+    <string name="mod_page_mod_detail_dialog_close">Закрыть</string>
+    <string name="setting_page_app_title">О программе</string>
+    <string name="setting_page_app_del_backup">Удалить резервные копии</string>
+    <string name="setting_page_app_del_descript">Это удалит все файлы резервной копии игры!</string>
+    <string name="setting_page_app_clean_cache">Очистить кэш</string>
+    <string name="setting_page_app_clean_cache_descript">Очистить кэшированные изображения и другие файлы, это может привести к проблемам с отображением изображений</string>
+    <string name="setting_page_about_author">Автор: laoxin &amp; 角砂糖 </string>
+    <string name="setting_page_about_title">О приложении</string>
+    <string name="setting_page_about_pay">Поддержать разработчика</string>
+    <string name="setting_page_about_pay_descript">Нравится приложение? Поддержите разработчика</string>
+    <string name="setting_page_about_github">Перейти на Github для скачивания последней версии</string>
+    <string name="toast_del_buckup_when_mod_enable">Пожалуйста, отключите все моды перед удалением резервных копий</string>
+    <string name="toast_del_buckup_success">%s : Резервная копия успешно удалена</string>
+    <string name="toast_del_buckup_failed">%s : Ошибка удаления резервной копии</string>
+    <string name="setting_del_backups_dialog_title">Предупреждение</string>
+    <string name="setting_del_backups_dialog_content_txt">После удаления резервных копий вы не сможете восстановить файлы игры. Пожалуйста, будьте осторожны! Отключите все моды перед выполнением</string>
+    <string name="setting_del_cache_dialog_content_txt">Очистить кэшированные изображения и другие файлы. Приложение попытается перезагрузить их при использовании, но это может привести к ошибкам</string>
+    <string name="toast_del_cache_success">Кэш успешно удален</string>
+    <string name="toast_del_cache_filed">Ошибка удаления кэша</string>
+    <string name="github_url_releases" translatable="false">https://github.com/laoxinH/crosscore-mod-manager/releases</string>
+    <string name="github_url_releases_latest" translatable="false">https://github.com/laoxinH/crosscore-mod-manager/releases/latest</string>
+    <string name="github_url" translatable="false">https://github.com/laoxinH/crosscore-mod-manager</string>
+    <string name="alipay_url" translatable="false">https://qr.alipay.com/fkx13953osk3jretx8ehg48</string>
+    <string name="mod_page_no_mod">((٩(//̀Д/́/)۶))Здесь ничего нет</string>
+    <string name="mod_page_no_mod_dir">Текущая папка пуста</string>
+    <string name="mod_pag_loading">Сканирование : %1$s</string>
+    <string name="mod_page_title_all_mods" translatable="false">MOD</string>
+    <string name="mod_page_title_enable_mods">Включено</string>
+    <string name="mod_page_title_disable_mods">Отключено</string>
+    <string name="mod_page_title_search_mods">Поиск</string>
+    <string name="mod_page_force_update_mod_warning">Используйте эту функцию для принудительного сканирования всех архивов, когда есть архивированные моды, не обнаруженные сканером (сканирование медленнее)</string>
+    <string name="toast_password_error">Неправильный пароль</string>
+    <string name="toast_password_right">Пароль правильный</string>
+    <string name="password_dialog_title">Пожалуйста введите пароль для повторного включения</string>
+    <string name="password_dialog_label">Пароль (ZIP архивы не поддерживают китайские пароли)</string>
+    <string name="dialog_info_title">Пользовательское соглашение</string>
+    <string name="dialog_info_important">* MOD Лаборатория - это открытое ПО, полностью бесплатное. Любые платежи не связаны с этим ПО, и мы не несем ответственности за любые споры\n\n* Любые модификации сопряжены с риском. Согласие с этим соглашением означает, что вы берете на себя всю ответственность за последствия</string>
+    <string name="dialog_info_message">1. Лаборатория требует установленную игру для использования\n2. На Android 11+ некоторые устройства требуют авторизацию shizuku\n3. После авторизации нажмите обновить для сканирования\n4. По умолчанию не сканирует папки загрузок QQ и системную папку download, если нужно - включите в консоли\n5. Лаборатория автоматически перемещает найденные моды в папку модов в консоли\n6. Если мод не обновился после добавления/удаления - нажмите обновить вручную</string>
+    <string name="dialog_button_info_permission">Согласиться и продолжить</string>
+    <string name="setting_page_app_other">Ещё</string>
+    <string name="setting_page_more_shizuku">Скачать shizuku</string>
+    <string name="shzuiku_url" translatable="false">https://shizuku.rikka.app/zh-hans/download/</string>
+    <string name="setting_page_more_shizuku_descript">Перейти на страницу загрузки shizuku</string>
+    <string name="setting_page_more_reference">Руководство лаборатории</string>
+    <string name="setting_page_more_reference_descript">Посмотреть инструкции на Gitee</string>
+    <string name="reference_url" translatable="false">https://gitee.com/laoxinH/Mod_Manager</string>
+    <string name="setting_page_app_clean_temp">Удалить распакованные файлы</string>
+    <string name="setting_page_app_clean_temp_descript">Удалить распакованные файлы модов (будут пересозданы при включении мода)</string>
+    <string name="toast_del_temp_success">Папка распакованных модов удалена</string>
+    <string name="toast_del_temp_filed">Ошибка удаления папки распакованных модов</string>
+    <string name="setting_page_more_acknowledgments">Благодарности</string>
+    <string name="setting_page_more_acknowledgments_descript">Список благодарности (энтузиастам, помогавшим с разработкой)</string>
+    <string name="setting_acknowledgments">Список благодарности</string>
+    <string name="tips_btn_close">Скрыть</string>
+    <string name="tips_open_mod">Включение мода</string>
+    <string name="tips_unzip_mod">Распаковка мода</string>
+    <string name="tips_backups_game_files">Резервное копирование файлов игры</string>
+    <string name="tips_copy_mod_to_game">Копирование файлов мода в папку игры</string>
+    <string name="tips_close_mod">Отключение мода</string>
+    <string name="tips_restore_game_files">Восстановление файлов игры</string>
+    <string name="tips_check_password">Проверка пароля</string>
+    <string name="setting_page_app_swtch_game">Выбрать игру</string>
+    <string name="setting_page_app_swtch_game_descript">Выберите игру для управления модами</string>
+    <string name="switch_game_service_tiltle">Выбрать игру</string>
+    <string name="setting_page_more_qq">群чат лаборатории</string>
+    <string name="qq_url" translatable="false"><![CDATA[http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=lynCj4WRXPNwATYiZKfYkySm0utpUAAO&authKey=qFoE9Wpp9h5%2FCqMSXF7yQAG%2BG6WSxjGkjU7mwez%2BU%2FO7MpmzSbpivyx1OjCHFldQ&noverify=0&group_code=939934555]]></string>
+    <string name="setting_page_more_qq_descript">Обсуждение модов для игр</string>
+    <string name="tips_copy_mod_failed">Ошибка копирования файла мода, попытка потоковой записи</string>
+    <string name="choose_method_title">Пожалуйста выберите способ авторизации</string>
+    <string name="select_permission_dialog_descript">Из-за ограничений Android требуется разрешение на чтение и запись для нормального использования</string>
+    <string name="select_permission_dialog_by_file">Авторизация через менеджер файлов</string>
+    <string name="select_permission_dialog_by_file_descript">Предоставьте разрешение на чтение и запись через менеджер файлов (в последних патчах Android это может быть недоступно, если авторизация не пройдет - используйте shizuku)</string>
+    <string name="select_permission_dialog_by_shizuku">Авторизация через shizuku</string>
+    <string name="select_permission_dialog_by_shizuku_descript">Получить разрешение на чтение и запись файлов через shizuku</string>
+    <string name="dialog_storage_message_a6">Лаборатория требует разрешение на управление файлами для продолжения использования</string>
+    <string name="toast_setect_game_success">Выбрана: %1$s %2$s</string>
+    <string name="toast_set_game_info_failed">Игра не установлена: %1$s %2$s</string>
+    <string name="toast_please_select_game">Пожалуйста выберите игру в настройках</string>
+    <string name="console_configuration_disable_scan_dictionary">Сканировать модели в папках</string>
+    <string name="console_scan_directory_mods">Внимание</string>
+    <string name="console_scan_directory_mods_content">Когда эта функция отключена, модели, хранящиеся в виде папок в папке модов, больше не будут сканироваться</string>
+    <string name="toast_this_dir_has_no_prim">Недостаточно прав доступа к этой папке</string>
+    <string name="toast_has_no_prim">Не авторизировано</string>
+    <string name="setting_page_app_flash_game_config">Загрузить пользовательский файл конфигурации игры</string>
+    <string name="setting_page_app_flash_game_config_descript">Поместите файл конфигурации в папку GameConfig в папке модов, настроенной в консоли</string>
+    <string name="toast_game_not_suppose_anti">Эта игра не имеет конфигурации анти-гармонии</string>
+    <string name="mod_page_mod_detail_dialog_detali_modType">Тип мода: %1$s</string>
+    <string name="toast_load_game_config_err">Ошибка загрузки конфигурации игры: %1$s</string>
+    <string name="console_setting_info_configuration_can_install">Да</string>
+    <string name="console_setting_info_configuration_not_install">Нет</string>
+    <string name="dialog_dis_enable_mods_title">Следующие моды были удалены. Хотите их отключить? Если не отключить, они останутся активными!</string>
+    <string name="console_upgrade_title">Доступна новая версия</string>
+    <string name="setting_page_about_update">Проверить обновления</string>
+    <string name="setting_page_about_update_descript">Текущая версия : %1$s</string>
+    <string name="toast_no_update">Вы используете последнюю версию</string>
+    <string name="setting_page_app_download_game_config">Загрузить конфигурацию игры</string>
+    <string name="setting_page_app_download_game_config_descript">Загрузить конфигурацию игры, предоставляемую лабораторией</string>
+    <string name="toast_download_game_config_success">Загрузка успешна</string>
+    <string name="toast_download_game_config_failed">Ошибка загрузки</string>
+    <string name="toast_get_game_config_failed">Ошибка получения конфигурации игры</string>
+    <string name="toast_special_operation_failed">Ошибка анти-детекции</string>
+    <string name="switch_download_game_tiltle">Загрузить конфигурацию игры</string>
+    <string name="setting_thinks_link_desc" translatable="false">JOB: %1$s</string>
+    <string name="tips_special_operation">Выполнить специальные операции игры</string>
+    <string name="tips_reload_decrypted_mod_info">Загрузить информацию расшифрованного мода</string>
+    <string name="toast_decompression_failed">Ошибка распаковки</string>
+    <string name="toast_this_dir_has_no_prim_android">Нельзя использовать системную папку Android</string>
+    <string name="channel_name">Сервис запуска игры</string>
+    <string name="channel_id" translatable="false">114514</string>
+    <string name="channel_title">Сервис внедрения модов в игру</string>
+    <string name="channel_content">Уведомление сервиса внедрения модов в игру</string>
+    <string name="toast_game_not_found">Ошибка запуска игры</string>
+    <string name="setting_page_app_swtch_permission_shizuku">Запросить авторизацию shizuku</string>
+    <string name="setting_page_app_swtch_permission_shizuku_desc">Запросить авторизацию shizuku (некоторые игры поддерживают только авторизацию shizuku)</string>
+    <string name="console_game_tips_title">Важное внимание!</string>
+    <string name="setting_page_more_community">Сообщество модов</string>
+    <string name="setting_page_more_community_descript">Это сообщество для обмена и обсуждения модов различных игр</string>
+    <string name="disscord_url" translatable="false">https://discord.gg/4UJsfDSxZ7</string>
+    <string name="mod_temp_bean_name_dictionary_desc">Папка</string>
+    <string name="mod_bean_no_readme">Нет файла readme</string>
+    <string name="mod_bean_no_author">Неизвестно</string>
+    <string name="mod_bean_encrypted_version">Зашифровано</string>
+    <string name="mod_bean_encrypted_desc">Файл мода зашифрован. Пожалуйста нажмите на переключатель и введите пароль для расшифровки</string>
+    <string name="mod_page_mod_detail_dialog_detali_modNums">Количество файлов модов: %1$s</string>
+    <string name="console_info_title">Уведомление</string>
+    <string name="setting_page_about_info">Просмотр уведомлений</string>
+    <string name="show_snackbar">Показать прогресс</string>
+    <string name="setting_page_about_info_descript">Просмотр последних уведомлений лаборатории</string>
+    <string name="mod_page_mod_detail_dialog_detali_imgs">Количество изображений предпросмотра: %s</string>
+    <string name="mod_page_mod_detail_dialog_detali_create_time">Время создания: %s</string>
+    <string name="toast_swtch_mods_result">Успешно: %1$s Ошибка: %2$s</string>
+    <string name="toast_del_mods_success">Успешно удалено: %s</string>
+    <string name="dialog_del_selected_mods_content">Это удалит выбранные моды и не может быть восстановлено! Если выбранный мод находится в архиве с несколькими модами, это будет пропущено и требует отдельного удаления в подробностях мода!</string>
+    <string name="dialog_del_selected_mods_title">Предупреждение!</string>
+    <string name="dialog_del_mod_title">Предупреждение!</string>
+    <string name="dialog_del_mod_content">Удаленные файлы не могут быть восстановлены! Если архив содержит несколько модов, они также будут удалены вместе!</string>
+    <string name="dialog_reqest_notification_title">Запрос разрешения на уведомления</string>
+    <string name="dialog_reqest_notification_message">MOD Лаборатория запускает сервис внедрения модов для некоторых игр (например Dust Forbidden) и нуждается в фоновом сервисе. Для предотвращения отключения фона требуется отображение уведомления!</string>
+    <string name="open_mod_failed_dialog_title">Ошибка включения</string>
+    <string name="open_mod_failed_dialog_desc">%1$s модов не включилось. Хотите выполнить откат (откат затронет только неудачно включённые моды)?</string>
+    <string name="mod_refreshing">Переполнение Readme</string>
+    <string name="console_configuration_del_unzip">Всегда удалять распакованные файлы</string>
+    <string name="console_del_unzip_dictionary_content">Будет всегда удалять распакованные файлы после включения мода, это экономит место, но повторное включение того же мода будет медленнее из-за повторной распаковки!</string>
+    <string name="mod_page_dropdownMenu_mods_browser">Просмотр категорий</string>
+    <string name="mod_page_title_mods_browser">Категории</string>
+    <string name="console_configuration_disable_browswer">Отключить просмотр категорий</string>
+    <string name="mod_browser_file_list_back">Вернуться в предыдущую категорию</string>
+    <string name="mod_browser_file_description">Количество модов: %1$s Включено: %2$s</string>
+    <string name="mod_top_bar_count">Статистика: %1$s</string>
+    <string name="mod_top_bar_tips">Общий прогресс : %1$s</string>
+    <string name="toast_quit_app">Нажмите еще раз для выхода из приложения</string>
+    <string name="unknown">Неизвестно</string>
+    <string name="toast_flash_complate">Добавлено: %1$s Обновлено: %2$s Удалено: %3$s</string>
+    <string name="console_status_no_permission">Нет разрешения</string>
+    <string name="console_top_bar_start_game">Запустить игру</string>
+    <string name="download">Версия устройства</string>
+    <string name="download_universal">Универсальная версия</string>
+    <string name="update_later">Позже</string>
+    <string name="toast_start_scan">Начало сканирования</string>
+    <string name="toast_flash_failed">Ошибка обновления модов</string>
+    <string name="tosat_game_already_update">%1$s обновлена, пожалуйста повторно выберите игру в настройках и повторно выполните подсказанные операции</string>
+    <string name="mod_page_mod_detail_dialog_detali_password">Пароль мода: %1$s</string>
+    <string name="mod_page_mod_detail_dialog_detali_readme" translatable="false">Readme</string>
+    <string name="mod_modlist_item_desrcipt">Нажмите для просмотра подробностей</string>
+    <string name="lincence">Лицензия</string>
+    <string name="show_lincence">Просмотр лицензий открытого исходного кода</string>
+    <string name="mod_page_no_game">Игра еще не выбрана (QWQ)</string>
+    <string name="mod_page_initializing">Инициализация…</string>
+    <string name="uninstall_title">Вы действительно хотите удалить MOD Лаборатория?</string>
+    <string name="uninstall_summary">Удаление MOD Лаборатория не отключит автоматически включенные моды, и из-за потери базы данных переустановка не сможет распознать и отключить включенные моды. Требуется удаление и переустановка игры для решения. Вы уверены, что хотите удалить?</string>
+    <string name="log_path_empty">Путь журнала пуст</string>
+    <string name="log_path_not_writable">Папка журнала не доступна для записи</string>
+    <string name="log_create_dir_failed">Не удалось создать папку журнала</string>
+    <string name="log_logcat_running">logcat уже запущен</string>
+    <string name="toast_unknow_err">Неизвестная ошибка: %1$s</string>
+    <string name="log_path_is_root">Корневая папка хранилища не может использоваться как папка журнала</string>
+
+    <!-- Scan Progress Overlay -->
+    <string name="scan_progress_title">Сканирование модов</string>
+    <string name="scan_progress_found_mods">Найдено модов: %d</string>
+    <string name="scan_progress_cancel">Отменить сканирование</string>
+    <string name="scan_progress_processing">Сканирование…</string>
+    <string name="scan_result_title">Сканирование завершено</string>
+    <string name="scan_result_total">Найдено модов</string>
+    <string name="scan_result_added">Добавлено</string>
+    <string name="scan_result_updated">Обновлено</string>
+    <string name="scan_result_deleted">Удалено</string>
+    <string name="scan_result_transferred">Передано</string>
+    <string name="scan_result_skipped">Пропущено</string>
+    <string name="scan_error_title">Ошибка сканирования</string>
+    <string name="scan_step_permission">Проверка разрешений</string>
+    <string name="scan_step_transfer">Передача внешних модов</string>
+    <string name="scan_step_scanning">Сканирование файлов модов</string>
+    <string name="scan_step_syncing">Синхронизация базы данных</string>
+    <string name="scan_step_complete">Сканирование завершено</string>
+    <!-- ScanStep enum i18n strings -->
+    <string name="scan_step_checking_encryption">Проверка статуса шифрования…</string>
+    <string name="scan_step_listing_files">Чтение списка файлов…</string>
+    <string name="scan_step_analyzing_files">Анализ файла %1$d/%2$d</string>
+    <string name="scan_step_identifying_mods">Определение модов…</string>
+    <string name="scan_step_checking_folder">Проверка папок…</string>
+    <string name="scan_step_transferring">Передача внешних модов…</string>
+    <string name="scan_step_scanning_directory">Сканирование папки модов…</string>
+    <string name="scan_step_syncing_database">Синхронизация базы данных…</string>
+    <!-- Background Scan -->
+    <string name="scan_background_button">Фоновое сканирование</string>
+    <string name="scan_notification_channel_name">Сервис сканирования</string>
+    <string name="scan_notification_channel_description">Показать прогресс сканирования модов</string>
+    <string name="scan_notification_title">Сканирование модов</string>
+    <string name="scan_notification_progress">Сканирование: %1$s</string>
+    <string name="scan_notification_complete">Сканирование завершено: добавлено %1$d, обновлено %2$d, удалено %3$d</string>
+    <string name="scan_notification_complete_simple">Сканирование завершено: добавлено %1$d, обновлено %2$d</string>
+    <string name="scan_notification_preparing">Подготовка к сканированию...</string>
+    <string name="scan_notification_error">Ошибка сканирования</string>
+    <string name="scan_notification_channel_id" translatable="false">scan_channel</string>
+    <string name="scan_complete_toast">Сканирование завершено: добавлено %1$d, обновлено %2$d, удалено %3$d</string>
+    <string name="scan_task_already_exists">Задача сканирования уже существует</string>
+    <string name="scan_notification_cancel">Отменить</string>
+    <string name="operation_task_in_progress">Выполняется задача</string>
+    <!-- Enable Progress Overlay -->
+    <string name="enable_progress_title">Обработка модов</string>
+    <string name="enable_progress_processing">Обработка…</string>
+    <string name="enable_progress_count">Прогресс: %1$d/%2$d</string>
+    <string name="enable_result_title">Обработка завершена</string>
+    <string name="enable_result_success">Успешно</string>
+    <string name="enable_result_need_password">Требуется пароль</string>
+    <string name="enable_result_file_missing">Файл отсутствует</string>
+    <string name="enable_result_backup_failed">Ошибка резервной копии</string>
+    <string name="enable_result_enable_failed">Ошибка включения</string>
+    <string name="enable_result_restore_failed">Ошибка восстановления</string>
+    <string name="enable_error_title">Ошибка обработки</string>
+    <string name="enable_step_validating">Проверка модов…</string>
+    <string name="enable_step_backing_up">Резервная копия файлов игры…</string>
+    <string name="enable_step_enabling">Включение мода %1$d/%2$d</string>
+    <string name="enable_step_disabling">Отключение мода %1$d/%2$d</string>
+    <string name="enable_step_special_process">Специальная обработка…</string>
+    <string name="enable_step_updating_db">Обновление базы данных…</string>
+    <string name="enable_step_complete">Обработка завершена</string>
+    <string name="enable_result_mutual_conflict">Конфликт в списке</string>
+    <string name="enable_result_enabled_conflict">Конфликт с включенными модами</string>
+    <string name="toast_swtch_cancel_mods_result">Отменено, успешно: %1$s ошибок: %2$s</string>
+    <string name="enable_progress_canceling">Отмена…</string>
+    <string name="enable_progress_cancel">Отменить задачу</string>
+    <string name="enable_step_canceling">Отмена…</string>
+    <string name="toast_mod_enable_success">%1$s включен</string>
+    <string name="toast_mod_disable_success">%1$s отключен</string>
+
+    <!-- 解密相关 -->
+    <string name="decrypt_dialog_title">Введите пароль</string>
+    <string name="decrypt_dialog_message">Этот мод зашифрован, введите пароль для разблокировки:</string>
+    <string name="decrypt_dialog_password_hint">Пароль</string>
+    <string name="decrypt_dialog_confirm">Подтвердить</string>
+    <string name="decrypt_dialog_cancel">Отменить</string>
+    <string name="decrypt_progress_title">Расшифровка</string>
+    <string name="decrypt_step_validating">Проверка пароля...</string>
+    <string name="decrypt_step_extracting_icon">Извлечение значка...</string>
+    <string name="decrypt_step_extracting_images">Извлечение изображений предпросмотра...</string>
+    <string name="decrypt_step_reading_readme">Чтение инструкций...</string>
+    <string name="decrypt_step_updating_db">Обновление данных...</string>
+    <string name="toast_decrypt_success">Расшифровка успешна</string>
+    <string name="toast_decrypt_failed">Ошибка расшифровки: %1$s</string>
+    <string name="decrypt_result_modCount">Успешно расшифровано %1$d модов</string>
+
+    <!-- 游戏错误相关 -->
+    <string name="error_game_not_selected">Пожалуйста выберите игру в настройках</string>
+    <string name="error_game_not_installed">%1$s не установлена</string>
+    <string name="error_permission_denied">Разрешение запрещено</string>
+    <string name="error_action_go_settings">Перейти в настройки</string>
+    <string name="error_action_grant_permission">Предоставить разрешение</string>
+
+    <!-- 刷新MOD详情相关 -->
+    <string name="refresh_detail_success">Подробности мода успешно обновлены</string>
+    <string name="refresh_detail_failed">Ошибка обновления подробностей мода</string>
+
+    <!-- 扫描结果 - 已删除但启用的MOD -->
+    <string name="scan_result_deleted_enabled_warning">Физические файлы следующих модов были удалены но остаются включенными</string>
+    <string name="scan_result_deleted_enabled_hint">Если не отключить, эти моды останутся включенными и не будут отображаться в списке</string>
+    <string name="scan_result_deleted_enabled_count">Удалено но включено</string>
+    <string name="scan_result_disable_mod">Отключить</string>
+    <string name="scan_result_disable_all">Отключить все</string>
+    <string name="scan_result_keep_enabled">Сохранить включение</string>
+    <string name="scan_result_show_stats">Просмотр статистики</string>
+    <string name="scan_result_hide_stats">Скрыть статистику</string>
+    <string name="toast_disable_filed">Ошибка отключения: %1$s</string>
+
+    <!-- 开启结果 - 冲突详情 -->
+    <string name="enable_result_show_conflict_details">Показать детали конфликта</string>
+    <string name="enable_result_hide_conflict_details">Скрыть детали конфликта</string>
+    <string name="enable_result_mutual_conflict_title">Моды с внутренним конфликтом</string>
+    <string name="enable_result_mutual_conflict_hint">Следующие моды конфликтуют друг с другом и не могут быть включены одновременно</string>
+    <string name="enable_result_enabled_conflict_title">Конфликт с включенными модами</string>
+    <string name="enable_result_enabled_conflict_hint">Следующие моды конфликтуют с уже включенными модами</string>
+    <string name="enable_result_remove_selection">Удалить выделение</string>
+
+    <!-- 删除 MOD 相关 -->
+    <string name="delete_step_authenticating">Проверка прав доступа…</string>
+    <string name="delete_step_collecting">Сбор файлов…</string>
+    <string name="delete_step_filtering">Фильтрация…</string>
+    <string name="delete_step_deleting">Удаление…</string>
+    <string name="delete_step_completed">Удаление завершено</string>
+    <string name="delete_progress_title">Удаление модов</string>
+    <string name="delete_progress_current">%1$d / %2$d</string>
+    <string name="delete_result_success">Успешно удалено %d модов</string>
+    <string name="delete_result_deleted_mods">Удалено %d модов</string>
+    <string name="delete_result_deleted_mods_hint">Следующие моды полностью удалены</string>
+    <string name="delete_result_deleted_enabled">%d включенных модов удалены</string>
+    <string name="delete_result_deleted_enabled_hint">Физические файлы следующих включенных модов удалены, пожалуйста отключите и обновите список для очистки</string>
+    <string name="delete_result_keep_enabled">Сохранить включение</string>
+    <string name="delete_result_disable_all">Отключить все</string>
+    <string name="delete_result_skipped_enabled">Пропущено %d включенных модов</string>
+    <string name="delete_result_skipped_integrated">Пропущено %d интегрированных модов</string>
+    <string name="delete_result_failed">%d модов не удалось удалить</string>
+    <string name="delete_result_show_skipped">Показать пропущенные моды</string>
+    <string name="delete_result_hide_skipped">Скрыть пропущенные моды</string>
+    <string name="delete_result_show_failed">Показать ошибочные моды</string>
+    <string name="delete_result_hide_failed">Скрыть ошибочные моды</string>
+    <string name="delete_result_skipped_enabled_title">Пропущены включенные моды</string>
+    <string name="delete_result_skipped_enabled_hint">Следующие моды включены, их нужно отключить перед удалением</string>
+    <string name="delete_result_skipped_integrated_title">Пропущены интегрированные моды</string>
+    <string name="delete_result_skipped_integrated_hint">Следующие моды являются частью интегрированного пакета, пропущены при невыборе удаления пакета</string>
+    <string name="delete_result_failed_title">Ошибочные моды</string>
+    <string name="delete_result_failed_hint">При удалении следующих модов произошла ошибка</string>
+    <string name="delete_error_permission_denied">Недостаточно прав для удаления файла</string>
+    <string name="delete_error_file_not_found">Файл не найден</string>
+    <string name="delete_error_delete_failed">Ошибка удаления файла</string>
+    <string name="delete_confirm_title">Подтверждение удаления</string>
+    <string name="delete_confirm_message">Вы уверены, что хотите удалить %d выбранных модов? Это действие невозможно отменить.</string>
+    <string name="delete_option_include_integrated">Удалить также интегрированные пакеты</string>
+    <string name="delete_option_include_integrated_hint">Если отмечено, будут удалены все моды в интегрированном пакете</string>
+    <string name="delete_button_cancel">Отменить</string>
+    <string name="delete_button_confirm">Подтвердить удаление</string>
+    <string name="delete_button_dismiss">Завершить</string>
+
+    <!-- 删除确认对话框 - 整合包警告 -->
+    <string name="delete_check_title">Подтверждение удаления</string>
+    <string name="delete_check_integrated_warning">Обнаружены интегрированные пакеты</string>
+    <string name="delete_check_integrated_count">Найдено %d интегрированных пакетов</string>
+    <string name="delete_check_other_mods_warning">Удаление интегрированного пакета также удалит следующие %d невыбранных модов:</string>
+    <string name="delete_check_enabled_warning">Всего %d модов находятся в состоянии включения:</string>
+    <string name="delete_check_enabled_hint">Рекомендуется отключить эти моды в результатах выше или нажать кнопку отключить все</string>
+    <string name="delete_check_package_name">Интегрированный пакет: %s</string>
+    <string name="delete_check_package_mods_count">Содержит %d модов</string>
+    <string name="delete_check_selected_mods">Выбранные моды (%d)</string>
+    <string name="delete_check_other_mods">Другие моды (%d)</string>
+    <string name="delete_check_enabled_mods">Включено (%d)</string>
+    <string name="delete_button_skip_integrated">Пропустить интегрированные пакеты</string>
+    <string name="delete_button_delete_all">Удалить все</string>
+    <string name="delete_button_disable_mod">Отключить</string>
+    <string name="delete_button_disable_all">Отключить все</string>
+    <string name="delete_check_deletion_Pending">Следующие неинтегрированные моды будут удалены после подтверждения (%d)</string>
+
+    <!-- 游戏配置下载 -->
+    <string name="game_config_fetch_failed">Ошибка получения списка конфигураций</string>
+    <string name="game_config_added">Добавлено: %s</string>
+    <string name="game_config_download_failed">Ошибка загрузки</string>
+
+    <!-- 自定义游戏配置导入 -->
+    <string name="game_config_import_success">Успешно импортировано %d конфигураций</string>
+    <string name="game_config_import_partial">Импорт завершен: успешно %1$d, ошибок %2$d</string>
+    <string name="game_config_import_no_files">Файлы конфигурации не найдены</string>
+    <string name="game_config_import_failed">Ошибка импорта</string>
+    <string name="game_config_import_dir_not_found">Папка конфигурации не найдена</string>
+
+    <!-- 感谢名单 -->
+    <string name="thanks_list_fetch_failed">Ошибка получения списка благодарности</string>
+    <string name="mod_bean_loading_desc">Загрузка Readme...</string>
+</resources>
+

@@ -25,6 +25,7 @@
         android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -34,14 +35,21 @@
         android:theme="@style/Theme.ModManager"
         tools:targetApi="36">
 
-        <!--主页面-->
+    <!--主页面-->
         <activity
             android:name=".activity.main.MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.ModManager.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Deep Link for notification clicks -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="modmanager" android:host="scan" />
             </intent-filter>
         </activity>
         <!--用户协议-->
@@ -66,6 +74,12 @@
         <meta-data
             android:name="app_description_content"
             android:resource="@string/uninstall_summary" />
+
+        <!-- 扫描前台服务 -->
+        <service
+            android:name=".service.ScanForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
     <!-- 需要添加这个才能获取到完整的应用程序列表 -->
     <queries>

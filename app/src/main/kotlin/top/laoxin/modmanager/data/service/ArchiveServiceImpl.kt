@@ -1,6 +1,7 @@
 package top.laoxin.modmanager.data.service
 
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileNotFoundException
@@ -28,6 +29,9 @@ class ArchiveServiceImpl @Inject constructor(
     ) :
     ArchiveService {
 
+        companion object {
+            private const val TAG = "ArchiveServiceImpl"
+        }
     private val tempDir: File
         get() = File(PathConstants.MODS_TEMP_PATH, "temp_archive").also { if (!it.exists()) it.mkdirs() }
 
@@ -178,6 +182,7 @@ class ArchiveServiceImpl @Inject constructor(
                 } catch (e: SecurityException) {
                     Result.Error(AppError.FileError.PermissionDenied)
                 } catch (e: Exception) {
+                   // e.printStackTrace()
                     when {
                         e.message?.contains("password", ignoreCase = true) == true ->
                             Result.Error(AppError.ArchiveError.WrongPassword)
@@ -316,6 +321,7 @@ class ArchiveServiceImpl @Inject constructor(
         operation: suspend (actualPath: String) -> Result<T>
     ): Result<T> {
         val accessType = fileToolsManager.getFileAccessType(originalPath)
+       // Log.d(TAG, "当前压缩包文件权限:,$originalPath $accessType")
 
         return when (accessType) {
             FileAccessType.SHIZUKU -> {

@@ -677,12 +677,16 @@ constructor(private val archiveService: ArchiveService, private val fileService:
                 iconPath = imageFiles.first()
                 imagePaths = imageFiles
             } else if (isZip) {
+               // iconPath = imageFiles.first()
+                //imagePaths = imageFiles
+                // 不解压测试
                 // 未加密压缩包：提取到缓存目录
                 iconPath =
                     extractImageToCache(
                         sourcePath,
                         imageFiles.first(),
                         isIcon = true,
+                        isExtract = false,
                         modName = name
                     )
                 imagePaths =
@@ -692,6 +696,7 @@ constructor(private val archiveService: ArchiveService, private val fileService:
                                 sourcePath,
                                 it,
                                 isIcon = false,
+                                isExtract = false,
                                 modName = name
                             )
                         }
@@ -718,12 +723,17 @@ constructor(private val archiveService: ArchiveService, private val fileService:
             rootReadmePath = rootReadmeFile
             description = "mod已加密"
         } else if (isZip && (readmeFile != null || rootReadmeFile != null)) {
-            // 未加密压缩包：提取 readme 文本内容到 description
             readmePath = readmeFile
+            rootReadmePath = rootReadmeFile
+            // 未加密压缩包：提取 readme 文本内容到 description
+            /*readmePath = readmeFile
             rootReadmePath = rootReadmeFile
             description = readmeFile?.let { extractReadmeContent(sourcePath, it) } ?: ""
             rootDescription = rootReadmeFile?.let { extractReadmeContent(sourcePath, it) } ?: ""
             if (description.isEmpty()) description = rootDescription
+            */
+            description = "正在读取中..."
+
         } else if (!isZip && (readmeFile != null || rootReadmeFile != null)) {
             // 文件夹：读取 readme 文件内容
             readmePath = "$sourcePath/$readmeFile"
@@ -781,6 +791,8 @@ constructor(private val archiveService: ArchiveService, private val fileService:
         archivePath: String,
         entryPath: String,
         isIcon: Boolean,
+        // 是否提取
+        isExtract: Boolean,
         modName: String
     ): String? {
         val cacheDir = if (isIcon) PathConstants.MODS_ICON_PATH else PathConstants.MODS_IMAGE_PATH
@@ -788,7 +800,7 @@ constructor(private val archiveService: ArchiveService, private val fileService:
         // 使用 .webp 扩展名
         val targetPath = "$cacheDir$fileName.webp"
         val targetFile = File(targetPath)
-
+        if (!isExtract) return targetPath
         // 确保目录存在
         targetFile.parentFile?.mkdirs()
 
@@ -830,6 +842,8 @@ constructor(private val archiveService: ArchiveService, private val fileService:
         } catch (e: Exception) {
             Log.e(TAG, "Failed to extract and compress image: $entryPath", e)
             null
+        } finally {
+            archiveService.clearTempDirectory()
         }
     }
 

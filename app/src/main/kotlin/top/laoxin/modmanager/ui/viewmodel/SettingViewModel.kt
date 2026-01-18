@@ -23,7 +23,7 @@ import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.domain.bean.InfoBean
 import top.laoxin.modmanager.domain.bean.ThanksBean
 import top.laoxin.modmanager.data.repository.UserPreferencesRepositoryImpl
-import top.laoxin.modmanager.data.service.AppInfoService
+import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.AppDataRepository
 import top.laoxin.modmanager.domain.repository.GameInfoRepository
@@ -125,6 +125,7 @@ constructor(
                 _internalState.update {
                     it.copy(targetGame = null, showGameTipsDialog = false)
                 }
+               // snackbarManager.showMessage(R.string.toast_setect_game_success,game.gameName,game.serviceName)
 
 
             }
@@ -332,14 +333,14 @@ constructor(
     }
 
     /** 权限授予回调 */
-    fun onPermissionGranted() {
+    fun onPermissionGranted(permissionType: PermissionType) {
         _permissionState.update { PermissionRequestState() }
         snackbarManager.showMessageAsync(R.string.toast_permission_granted)
         // TODO: 重试之前的操作
     }
 
     /** 权限拒绝回调 */
-    fun onPermissionDenied() {
+    fun onPermissionDenied(permissionType: PermissionType) {
         _permissionState.update { PermissionRequestState() }
         snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
     }
@@ -349,7 +350,8 @@ constructor(
         val result = permissionService.requestShizukuPermission()
         result
             .onSuccess {
-                // Shizuku 权限请求已发起，等待结果
+                _permissionState.update { PermissionRequestState() }
+                snackbarManager.showMessageAsync(R.string.toast_permission_granted)
             }
             .onError {
                 snackbarManager.showMessageAsync(R.string.toast_shizuku_not_available)

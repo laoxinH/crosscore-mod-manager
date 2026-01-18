@@ -102,6 +102,8 @@ sealed class AppError {
         data class CreateDirectoryFailed(val reason: String) : ModError()
         /** 解密失败 */
         data class DecryptFailed(val reason: String) : ModError()
+        // 特殊操作失败
+        data class SpecialOperationFailed(val reason: String) : ModError()
     }
 
     // ==================== 权限相关错误 ====================

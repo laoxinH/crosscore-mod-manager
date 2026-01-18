@@ -22,8 +22,10 @@ import top.laoxin.modmanager.domain.repository.GameInfoRepository
 import top.laoxin.modmanager.domain.repository.InformationRepository
 import top.laoxin.modmanager.domain.repository.ModRepository
 import top.laoxin.modmanager.domain.repository.ScanFileRepository
+import top.laoxin.modmanager.domain.repository.ScanStateRepository
 import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
 import top.laoxin.modmanager.domain.repository.VersionRepository
+import top.laoxin.modmanager.data.repository.ScanStateRepositoryImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -97,4 +99,16 @@ abstract class RepositoryModule {
     abstract fun bindAppDataRepository(
             appDataRepositoryImpl: AppDataRepositoryImpl
     ): AppDataRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFileBrowserRepository(
+            fileBrowserRepositoryImpl: top.laoxin.modmanager.data.repository.FileBrowserRepositoryImpl
+    ): top.laoxin.modmanager.domain.repository.FileBrowserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindScanStateRepository(
+            scanStateRepositoryImpl: ScanStateRepositoryImpl
+    ): ScanStateRepository
 }

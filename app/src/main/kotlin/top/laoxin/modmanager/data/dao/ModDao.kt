@@ -62,10 +62,14 @@ interface ModDao {
     )
     fun getModsByGamePackageNameAndName(gamePackageName: String, name: String): Flow<List<ModBean>>
 
+    @Query("SELECT * FROM mods WHERE virtualPaths = :virtualPath")
+    fun getModsByVirtualPath(virtualPath: String): Flow<List<ModBean>>
+
     // ==================== 插入操作 ====================
 
     /** 插入单个 MOD（冲突时替换） */
-    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(mod: ModBean)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(mod: ModBean)
 
     /** 批量插入 MODs（冲突时替换） */
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(mods: List<ModBean>)
@@ -93,4 +97,7 @@ interface ModDao {
     /** 删除指定 gamePackageName 下所有未启用的 MODs */
     @Query("DELETE FROM mods WHERE gamePackageName = :gamePackageName AND isEnable = 0")
     fun deleteDisableMods(gamePackageName: String)
+
+
+
 }

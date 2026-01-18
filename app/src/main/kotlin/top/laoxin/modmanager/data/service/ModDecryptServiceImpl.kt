@@ -21,6 +21,7 @@ import top.laoxin.modmanager.domain.service.DecryptEvent
 import top.laoxin.modmanager.domain.service.DecryptResult
 import top.laoxin.modmanager.domain.service.DecryptStep
 import top.laoxin.modmanager.domain.service.ModDecryptService
+import kotlin.io.path.Path
 
 /** MOD 解密服务实现 */
 class ModDecryptServiceImpl @Inject constructor(private val archiveService: ArchiveService) :
@@ -248,9 +249,10 @@ class ModDecryptServiceImpl @Inject constructor(private val archiveService: Arch
         // 1. 获取图片流
         val inputStreamResult = archiveService.getFileInputStream(archivePath, entryPath, password)
         if (inputStreamResult is Result.Error) {
-            Log.w(TAG, "Failed to get input stream for $entryPath: ${inputStreamResult.error}")
+            Log.w(TAG, "读取流失败 $entryPath: ${inputStreamResult.error}")
             return null
         }
+
 
         val inputStream = (inputStreamResult as Result.Success).data
 
@@ -279,6 +281,7 @@ class ModDecryptServiceImpl @Inject constructor(private val archiveService: Arch
                 }
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             Log.e(TAG, "Failed to extract and compress image: $entryPath", e)
             null
         }
@@ -332,6 +335,7 @@ class ModDecryptServiceImpl @Inject constructor(private val archiveService: Arch
      * @return 压缩包内的相对路径，解码失败返回 null
      */
     private fun decodeImageFileName(cacheFilePath: String, archivePath: String): String {
+        if (!cacheFilePath.contains(PathConstants.ROOT_PATH)) return cacheFilePath
         val cacheDir = if (cacheFilePath.contains(PathConstants.MODS_ICON_PATH)) PathConstants.MODS_ICON_PATH else PathConstants.MODS_IMAGE_PATH
         val nameWithoutExt = cacheFilePath.substringBeforeLast(".")
         return nameWithoutExt.removePrefix(cacheDir + File(archivePath).nameWithoutExtension + "/")
@@ -376,10 +380,11 @@ class ModDecryptServiceImpl @Inject constructor(private val archiveService: Arch
                 //val iconFileName = mod.icon
                // val iconCachePath = "${PathConstants.MODS_ICON_PATH}${iconFileName.substringBeforeLast(".")}.webp"
                 File(mod.icon).delete()
-                
+
+                Log.d(TAG, "Extracting icon: ${decodeImageFileName(File(mod.icon).path, archivePath)}")
                 extractImageToCache(
                     archivePath = archivePath,
-                    entryPath = decodeImageFileName(File(mod.icon).path, archivePath)!!,
+                    entryPath = decodeImageFileName(File(mod.icon).path, archivePath),
                     isIcon = true,
                     modName = mod.name,
                     password = mod.password
@@ -391,10 +396,11 @@ class ModDecryptServiceImpl @Inject constructor(private val archiveService: Arch
                 //val imageFileName = imagePath
                 //val imageCachePath = "${PathConstants.MODS_IMAGE_PATH}${imageFileName.substringBeforeLast(".")}.webp"
                 File(imagePath).delete()
-                
+                Log.d(TAG, "Extracting image: ${decodeImageFileName(File(imagePath).path, archivePath)}")
+
                 extractImageToCache(
                     archivePath = archivePath,
-                    entryPath = decodeImageFileName(File(imagePath).name, archivePath)!!,
+                    entryPath = decodeImageFileName(File(imagePath).path, archivePath),
                     isIcon = false,
                     modName = mod.name,
                     password = mod.password

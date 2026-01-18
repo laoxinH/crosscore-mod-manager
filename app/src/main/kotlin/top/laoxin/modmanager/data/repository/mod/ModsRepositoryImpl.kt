@@ -97,5 +97,9 @@ constructor(
         modDao.updateEnableState(modId, isEnable)
     }
 
+    override fun getModsByVirtualPath(virtualPath: String): Flow<List<ModBean>> {
+        return modDao.getModsByVirtualPath(virtualPath)
+    }
+
 
 }

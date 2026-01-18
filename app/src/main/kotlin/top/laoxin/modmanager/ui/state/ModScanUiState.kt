@@ -23,6 +23,8 @@ data class ModScanUiState(
 /** 扫描进度状态 */
 data class ScanProgressState(
         val isScanning: Boolean = true,
+        val isBackgroundMode: Boolean = false, // 后台扫描模式
+        val isForceScan: Boolean = false, // 是否为强制扫描
         val step: ScanStep = ScanStep.LISTING_FILES, // 当前扫描步骤（用于 i18n）
         val sourceName: String = "", // 当前扫描的压缩包/文件夹名
         val currentFile: String = "", // 当前处理的文件名
@@ -48,4 +50,3 @@ data class ScanResultState(
         /** 物理文件已删除但仍处于启用状态的MOD列表 */
         val deletedEnabledMods: List<ModBean> = emptyList()
 )
-

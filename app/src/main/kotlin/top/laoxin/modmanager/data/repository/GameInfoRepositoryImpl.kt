@@ -16,7 +16,7 @@ import top.laoxin.modmanager.constant.PathConstants
 import top.laoxin.modmanager.domain.bean.DownloadGameConfigBean
 import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.data.network.ModManagerApi
-import top.laoxin.modmanager.data.service.AppInfoService
+import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.model.AppError
 import top.laoxin.modmanager.domain.model.Result
 import top.laoxin.modmanager.domain.repository.GameInfoRepository

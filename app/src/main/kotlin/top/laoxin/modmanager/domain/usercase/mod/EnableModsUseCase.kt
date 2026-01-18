@@ -297,6 +297,7 @@ constructor(
             }
 
             if (!enableSuccess) {
+
                 enableFailedMods.add(mod)
                 Log.e(TAG, "Enable failed for ${mod.name}: $enableError")
                 continue
@@ -317,7 +318,9 @@ constructor(
                 // TODO: 调用 specialGameService 进行特殊处理
                 specialGameService.onModEnable(mod, gameInfo.packageName).onError {
                     enableFailedMods.add(mod)
-                    continue@loop
+                    emit(EnableState.Error(AppError.ModError.SpecialOperationFailed(it.toString())))
+                    return@flow
+
                 }
             }
 
@@ -502,7 +505,8 @@ constructor(
                 // TODO: 调用 specialGameService 进行特殊处理
                 specialGameService.onModDisable(backups, gameInfo.packageName, mod).onError {
                     restoreFailedMods.add(mod)
-                    continue@loop
+                    emit(EnableState.Error(AppError.ModError.SpecialOperationFailed(it.toString())))
+                    return@flow
                 }
             }
 

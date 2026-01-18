@@ -2,6 +2,16 @@ package top.laoxin.modmanager.ui.state
 
 import top.laoxin.modmanager.domain.bean.ModBean
 
+
+/**
+ * Mod列表过滤类型
+ */
+enum class ModListFilter {
+    ALL,
+    ENABLE,
+    DISABLE
+}
+
 /**
  * Mod 列表 UI 状态
  */
@@ -13,5 +23,8 @@ data class ModListUiState(
     val modsSelected: Set<Int> = emptySet(),
     val isLoading: Boolean = true,
     // 开关状态是否可点击
-    val modSwitchEnable : Boolean = true
+    val modSwitchEnable : Boolean = true,
+    // 当前过滤状态
+    val filter: ModListFilter = ModListFilter.ALL,
+    val isBrowser: Boolean = false
 )
