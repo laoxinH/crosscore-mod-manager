@@ -8,6 +8,11 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.drop
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
 import rikka.sui.Sui
@@ -33,13 +38,23 @@ constructor(@param:ApplicationContext private val context: Context) : Permission
 
     private val rootPath: String = Environment.getExternalStorageDirectory().path
 
+    // Shizuku 权限结果 Flow（replay = 1 确保订阅者能收到最近一次的结果）
+    private val _shizukuPermissionResult = MutableSharedFlow<Boolean>(replay = 1)
+
+    /** Shizuku 权限结果 Flow，外部可订阅获取授权结果 */
+    override val shizukuPermissionResult: Flow<Boolean> = _shizukuPermissionResult.asSharedFlow()
+
     // Shizuku 权限请求回调监听器
     val requestPermissionResultListener =
             OnRequestPermissionResultListener { requestCode, grantResult ->
                 if (requestCode == RequestCode.SHIZUKU) {
-                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                    val granted = grantResult == PackageManager.PERMISSION_GRANTED
+                    if (granted) {
                         FileExplorerServiceManager.bindService()
                     }
+                    // 发送权限结果到 Flow
+                    Log.d(TAG, "Shizuku permission result: $granted")
+                    _shizukuPermissionResult.tryEmit(granted)
                 }
             }
 
@@ -125,6 +140,7 @@ constructor(@param:ApplicationContext private val context: Context) : Permission
                 Result.Error(AppError.PermissionError.ShizukuNotRunning)
             } else {
                 Shizuku.requestPermission(RequestCode.SHIZUKU)
+
                 Result.Success(Unit)
             }
         } catch (e: Exception) {

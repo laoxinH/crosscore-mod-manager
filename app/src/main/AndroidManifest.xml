@@ -40,7 +40,7 @@
             android:name=".activity.main.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.ModManager.SplashScreen">
+            android:theme="@style/Theme.ModManager">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

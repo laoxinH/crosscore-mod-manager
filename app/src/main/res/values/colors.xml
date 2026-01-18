@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <!-- Splash Screen 背景色 -->
+    <color name="splash_background">#FFFFFF</color>
+    <!-- Splash Screen 图标背景色（Android 12+ 显示的圆形背景） -->
+    <color name="splash_icon_background">#FFFFFF</color>
+</resources>

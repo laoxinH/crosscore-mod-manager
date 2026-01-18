@@ -11,7 +11,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,6 +20,7 @@ import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.notification.AppNotificationManager
 import top.laoxin.modmanager.service.ScanForegroundService
 import top.laoxin.modmanager.ui.view.ModernModManagerApp
+import top.laoxin.modmanager.ui.view.splash.RandomSplashScreen
 import top.laoxin.modmanager.ui.theme.ModManagerTheme
 
 @AndroidEntryPoint
@@ -29,8 +29,6 @@ class MainActivity() : ComponentActivity() {
     @Inject lateinit var permissionService: PermissionService
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // SplashScreen
-        installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
@@ -48,8 +46,14 @@ class MainActivity() : ComponentActivity() {
             ModManagerTheme {
                 ConfigureSystemBars()
                 Surface(Modifier.fillMaxSize()) {
-                    // ModManagerApp()
-                    ModernModManagerApp()
+                    // 使用随机启动屏包裹主内容
+                    // 如果不需要随机启动屏，直接使用 ModernModManagerApp()
+                    RandomSplashScreen(
+                        durationMillis = 1500L,
+                        onSplashFinished = { /* 启动屏结束回调 */ }
+                    ) {
+                        ModernModManagerApp()
+                    }
                 }
             }
         }

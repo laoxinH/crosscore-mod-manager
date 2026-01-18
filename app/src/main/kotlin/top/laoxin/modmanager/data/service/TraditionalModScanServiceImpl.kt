@@ -765,7 +765,7 @@ constructor(private val archiveService: ArchiveService, private val fileService:
             if (modRelativePath.isNotEmpty()) "$sourcePath/$modRelativePath" else sourcePath
         //Log.d(TAG,"当前mod: $name, 描述文本: ${description}")
         return ModBean(
-            name = name,
+            name = name.replace("($ROOT_DIR_KEY)",""),
             path = modPath,
             modFiles = finalFiles,
             gameFilesPath = gameFilesPath,

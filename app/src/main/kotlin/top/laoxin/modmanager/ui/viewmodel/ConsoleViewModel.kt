@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -23,10 +25,10 @@ import top.laoxin.modmanager.BuildConfig
 import top.laoxin.modmanager.R
 import top.laoxin.modmanager.constant.FileAccessType
 import top.laoxin.modmanager.constant.PathConstants
-import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.bean.GameInfoBean
 import top.laoxin.modmanager.domain.model.AppError
 import top.laoxin.modmanager.domain.repository.UserPreferencesRepository
+import top.laoxin.modmanager.domain.service.AppInfoService
 import top.laoxin.modmanager.domain.service.PermissionService
 import top.laoxin.modmanager.domain.usercase.app.CheckUpdateUserCase
 import top.laoxin.modmanager.domain.usercase.app.GetCurrentInformationUserCase
@@ -243,16 +245,27 @@ constructor(
 
     /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
-        val result = permissionService.requestShizukuPermission()
-        result
-            .onSuccess {
-                _permissionState.update { PermissionRequestState() }
+        viewModelScope.launch {
+            // Log.d(TAG, "requestShizukuPermission: 发起权限请求")
+
+            // 先获取当前缓存的数量，用于跳过旧值
+            val resultDeferred = async {
+                permissionService.shizukuPermissionResult.drop(1).first()
+            }
+
+            // 发起权限请求
+            permissionService.requestShizukuPermission()
+
+            // 等待新的结果
+            val shizukuPermissionResult = resultDeferred.await()
+            // Log.d(TAG, "requestShizukuPermission: 权限请求结果: $shizukuPermissionResult")
+
+            if (shizukuPermissionResult) {
                 snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+            } else {
+                snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
             }
-            .onError {
-                snackbarManager.showMessageAsync(R.string.toast_shizuku_not_available)
-                _permissionState.update { PermissionRequestState() }
-            }
+        }
     }
 
     /** Shizuku 是否可用 */

@@ -4,12 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -57,7 +59,7 @@ constructor(
     }
 
     private val _internalState = MutableStateFlow(InternalState())
-
+    private val _shizukuPermissionResult = permissionService.shizukuPermissionResult
     // 权限请求状态
     private val _permissionState = MutableStateFlow(PermissionRequestState())
     val permissionState: StateFlow<PermissionRequestState> = _permissionState.asStateFlow()
@@ -121,18 +123,20 @@ constructor(
                         )
                     )
                 userPreferencesRepository.saveSelectedGame(gameInfo)
-                snackbarManager.showMessage(R.string.toast_setect_game_success,game.gameName,game.serviceName)
+                snackbarManager.showMessage(
+                    R.string.toast_setect_game_success,
+                    game.gameName,
+                    game.serviceName
+                )
                 _internalState.update {
                     it.copy(targetGame = null, showGameTipsDialog = false)
                 }
-               // snackbarManager.showMessage(R.string.toast_setect_game_success,game.gameName,game.serviceName)
+                // snackbarManager.showMessage(R.string.toast_setect_game_success,game.gameName,game.serviceName)
 
 
             }
         }
     }
-
-
 
 
     fun clearCache() {
@@ -155,10 +159,11 @@ constructor(
         viewModelScope.launch {
             when (val result = appDataRepository.getThanksList()) {
                 is Result.Success -> {
-                    _internalState.update { 
-                        it.copy(thanksList = result.data, showAcknowledgmentsDialog = true) 
+                    _internalState.update {
+                        it.copy(thanksList = result.data, showAcknowledgmentsDialog = true)
                     }
                 }
+
                 is Result.Error -> {
                     Log.e(TAG, "获取感谢名单失败: ${result.error}")
                     snackbarManager.showMessageAsync(R.string.thanks_list_fetch_failed)
@@ -254,7 +259,6 @@ constructor(
         _internalState.update { it.copy(showNotificationDialog = show) }
 
 
-
     fun setAboutPage(bool: Boolean) = _internalState.update { it.copy(isAboutPage = bool) }
     fun setGameInfo(targetGame: GameInfoBean) {
         if (targetGame.packageName == userPreferencesRepository.selectedGameValue.packageName) return
@@ -287,12 +291,12 @@ constructor(
     }
 
 
-
     fun reloadGameConfig() {
         viewModelScope.launch {
             val modPath = userPreferencesRepository.selectedDirectory.first()
-            val customConfigPath = PathConstants.getFullModPath(modPath) + PathConstants.GAME_CONFIG_PATH
-            
+            val customConfigPath =
+                PathConstants.getFullModPath(modPath) + PathConstants.GAME_CONFIG_PATH
+
             when (val result = gameInfoRepository.importCustomGameConfigs(customConfigPath)) {
                 is Result.Success -> {
                     val data = result.data
@@ -300,9 +304,14 @@ constructor(
                         data.successCount == 0 && data.failedCount == 0 -> {
                             snackbarManager.showMessageAsync(R.string.game_config_import_no_files)
                         }
+
                         data.failedCount == 0 -> {
-                            snackbarManager.showMessageAsync(R.string.game_config_import_success, data.successCount)
+                            snackbarManager.showMessageAsync(
+                                R.string.game_config_import_success,
+                                data.successCount
+                            )
                         }
+
                         else -> {
                             snackbarManager.showMessageAsync(
                                 R.string.game_config_import_partial,
@@ -312,6 +321,7 @@ constructor(
                         }
                     }
                 }
+
                 is Result.Error -> {
                     snackbarManager.showMessageAsync(R.string.game_config_import_failed)
                 }
@@ -347,16 +357,29 @@ constructor(
 
     /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
-        val result = permissionService.requestShizukuPermission()
-        result
-            .onSuccess {
-                _permissionState.update { PermissionRequestState() }
+        viewModelScope.launch {
+           // Log.d(TAG, "requestShizukuPermission: 发起权限请求")
+
+            // 先获取当前缓存的数量，用于跳过旧值
+            val resultDeferred = async {
+                permissionService.shizukuPermissionResult.drop(1).first()
+            }
+
+            // 发起权限请求
+            permissionService.requestShizukuPermission()
+
+            // 等待新的结果
+            val shizukuPermissionResult = resultDeferred.await()
+           // Log.d(TAG, "requestShizukuPermission: 权限请求结果: $shizukuPermissionResult")
+
+            if (shizukuPermissionResult) {
                 snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+            } else {
+                snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
             }
-            .onError {
-                snackbarManager.showMessageAsync(R.string.toast_shizuku_not_available)
-                _permissionState.update { PermissionRequestState() }
-            }
+        }
+
+
     }
 
     /** Shizuku 是否可用 */

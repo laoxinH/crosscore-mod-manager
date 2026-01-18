@@ -1,5 +1,7 @@
 package top.laoxin.modmanager.domain.service
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import top.laoxin.modmanager.constant.FileAccessType
 import top.laoxin.modmanager.constant.OSVersion
 import top.laoxin.modmanager.domain.model.Result
@@ -8,6 +10,9 @@ import top.laoxin.modmanager.domain.model.Result
 interface PermissionService {
 
     // ==================== Shizuku 相关 ====================
+
+    /** Shizuku 权限结果 Flow，外部可订阅获取授权结果 */
+    val shizukuPermissionResult: Flow<Boolean>
 
     /** 注册 Shizuku 权限请求监听器 应在 Activity.onCreate 中调用 */
     fun registerShizukuListener(): Result<Unit>

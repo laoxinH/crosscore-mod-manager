@@ -1,14 +1,31 @@
 package top.laoxin.modmanager.ui.view.components.common
 
 import androidx.compose.material3.SnackbarDuration as M3SnackbarDuration
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import top.laoxin.modmanager.R
 import top.laoxin.modmanager.ui.state.SnackbarDuration
 import top.laoxin.modmanager.ui.state.SnackbarManager
 import top.laoxin.modmanager.ui.state.SnackbarMessage
@@ -38,6 +55,9 @@ fun GlobalSnackbarHost(
     // 监听消息流
     LaunchedEffect(snackbarManager, snackbarHostState) {
         snackbarManager.messages.collect { message ->
+            // 关闭之前的 Snackbar
+            snackbarHostState.currentSnackbarData?.dismiss()
+
             // 这里不能使用 @Composable 的 stringResource 函数，因为它不在 Composable 上下文中。
             // 应该使用 context.getString()。
             val text =
@@ -72,7 +92,47 @@ fun GlobalSnackbarHost(
         }
     }
 
-    SnackbarHost(hostState = snackbarHostState)
+    // 自定义 SnackbarHost，使用 zIndex 确保在顶层显示
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.zIndex(Float.MAX_VALUE),
+        snackbar = { snackbarData ->
+            Snackbar(
+                modifier = Modifier.fillMaxWidth(0.8f),
+                shape = RoundedCornerShape(12.dp),
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                actionContentColor = MaterialTheme.colorScheme.inversePrimary,
+                action = snackbarData.visuals.actionLabel?.let { actionLabel ->
+                    {
+                        TextButton(onClick = { snackbarData.performAction() }) {
+                            Text(
+                                text = actionLabel,
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            )
+                        }
+                    }
+                }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // App 图标
+                    Image(
+                        painter = painterResource(id = R.drawable.app_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    // 消息文本
+                    Text(
+                        text = snackbarData.visuals.message,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    )
 }
 
 /** 将自定义 SnackbarDuration 转换为 Material3 的 SnackbarDuration */

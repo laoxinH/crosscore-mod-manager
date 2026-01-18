@@ -6,9 +6,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import top.laoxin.modmanager.R
@@ -608,16 +612,27 @@ constructor(
 
     /** 请求 Shizuku 权限 */
     fun requestShizukuPermission() {
-        val result = permissionService.requestShizukuPermission()
-        result
-            .onSuccess {
-                _permissionState.update { PermissionRequestState() }
+        viewModelScope.launch {
+            // Log.d(TAG, "requestShizukuPermission: 发起权限请求")
+
+            // 先获取当前缓存的数量，用于跳过旧值
+            val resultDeferred = async {
+                permissionService.shizukuPermissionResult.drop(1).first()
+            }
+
+            // 发起权限请求
+            permissionService.requestShizukuPermission()
+
+            // 等待新的结果
+            val shizukuPermissionResult = resultDeferred.await()
+            // Log.d(TAG, "requestShizukuPermission: 权限请求结果: $shizukuPermissionResult")
+
+            if (shizukuPermissionResult) {
                 snackbarManager.showMessageAsync(R.string.toast_permission_granted)
+            } else {
+                snackbarManager.showMessageAsync(R.string.toast_permission_not_granted)
             }
-            .onError {
-                snackbarManager.showMessageAsync(R.string.toast_shizuku_not_available)
-                _permissionState.update { PermissionRequestState() }
-            }
+        }
     }
 
     /** Shizuku 是否可用 */

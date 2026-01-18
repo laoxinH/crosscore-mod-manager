@@ -543,7 +543,7 @@ constructor(
                 if (existing.isEncrypted)
                     (existing.icon != scanned.icon || existing.description != scanned.description)
                             && existing.password.isEmpty()
-                else existing.icon != scanned.icon || existing.description != scanned.description
+                else existing.icon != scanned.icon 
 
     }
 
