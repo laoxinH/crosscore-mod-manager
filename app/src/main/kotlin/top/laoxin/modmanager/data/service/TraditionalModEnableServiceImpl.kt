@@ -132,7 +132,7 @@ constructor(private val fileService: FileService, private val archiveService: Ar
                         emit(
                             EnableFileEvent.Complete(
                                 false,
-                                AppError.ModError.ReadFailed(modFilePath)
+                                AppError.ModError.ReadFailed("$modFilePath: ${streamResult.error}")
                             )
                         )
                         return@flow

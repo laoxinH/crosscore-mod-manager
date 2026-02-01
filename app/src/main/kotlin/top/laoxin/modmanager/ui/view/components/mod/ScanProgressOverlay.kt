@@ -808,6 +808,11 @@ private fun ErrorContent(
                                         stringResource(R.string.error_action_grant_permission),
                                         onGrantPermission
                                 )
+                        is AppError.FileError.ShizukuDisconnected ->  Triple(
+                                stringResource(R.string.error_shizuku_disconnected),
+                                null,
+                                null
+                        )
                         else -> Triple(error.toString(), null, null)
                 }
 

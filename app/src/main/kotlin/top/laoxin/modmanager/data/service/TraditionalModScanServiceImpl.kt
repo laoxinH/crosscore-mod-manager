@@ -677,8 +677,8 @@ constructor(private val archiveService: ArchiveService, private val fileService:
                 iconPath = imageFiles.first()
                 imagePaths = imageFiles
             } else if (isZip) {
-               // iconPath = imageFiles.first()
-                //imagePaths = imageFiles
+               /* iconPath = imageFiles.first()
+                imagePaths = imageFiles*/
                 // 不解压测试
                 // 未加密压缩包：提取到缓存目录
                 iconPath =

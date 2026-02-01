@@ -340,6 +340,22 @@
     <string name="enable_result_enabled_conflict_title">与已开启MOD冲突</string>
     <string name="enable_result_enabled_conflict_hint">以下MOD与已开启的MOD存在冲突</string>
     <string name="enable_result_remove_selection">移除选中</string>
+    <!-- 开启结果 - 失败详情 -->
+    <string name="enable_result_show_failed_details">查看失败详情</string>
+    <string name="enable_result_hide_failed_details">隐藏失败详情</string>
+    <string name="enable_result_view_details">查看详情</string>
+    <string name="enable_result_error_details">错误详情:</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="error_file_not_found">文件未找到</string>
+    <string name="error_backup_failed">备份 %1$s 失败</string>
+    <string name="error_enable_failed">开启 %1$s 失败</string>
+    <string name="error_disable_failed">关闭 %1$s 失败</string>
+    <string name="error_restore_failed">还原 %1$s 失败</string>
+    <string name="error_mod_file_missing">MOD %1$s 文件缺失</string>
+    <string name="error_write_failed">写入失败: %1$s</string>
+    <string name="error_read_failed">读取失败: %1$s</string>
+    <string name="error_copy_failed">复制失败: %1$s</string>
+    <string name="error_shizuku_disconnected">shizuku已断开链接,请到shizuku中关闭MOD实验室授权后重新启动MOD实验室并申请shizuku权限</string>
 
     <!-- 删除 MOD 相关 -->
     <string name="delete_step_authenticating">正在验证权限…</string>
@@ -413,4 +429,5 @@
     <!-- 感谢名单 -->
     <string name="thanks_list_fetch_failed">获取感谢名单失败</string>
     <string name="mod_bean_loading_desc">正在加载Readme...</string>
+
 </resources>

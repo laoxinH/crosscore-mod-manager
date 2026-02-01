@@ -32,8 +32,8 @@ android {
         applicationId = "com.mod.manager"
         minSdk = 28
         targetSdk = 36
-        versionCode = 504
-        versionName = "5.0.4"
+        versionCode = 510
+        versionName = "5.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("release")

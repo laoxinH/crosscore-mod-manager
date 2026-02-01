@@ -24,20 +24,20 @@ object FileExplorerServiceManager {
 
     val SERVICE_CONNECTION: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            Log.d(TAG, "onServiceConnected: ")
+            if (!isBind) {
+                Log.d(TAG, "shizuku服务已连接 onServiceConnected: $name")
+            }
+
             isBind = true
 
             ShizukuFileTools.iFileExplorerService = IFileExplorerService.Stub.asInterface(service)
-            if (!isBind) {
-                ToastUtils.shortCall(R.string.toast_shizuku_connected)
-            }
+
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            Log.d(TAG, "onServiceDisconnected: ")
+            Log.d(TAG, "shizuku服务已关闭 onServiceDisconnected: $name")
             isBind = false
             ShizukuFileTools.iFileExplorerService = null
-            ToastUtils.shortCall(R.string.toast_shizuku_disconnected)
         }
     }
 
@@ -48,8 +48,9 @@ object FileExplorerServiceManager {
             Log.e(TAG, "Cannot bind service before application initialization!")
             return
         }
-
-        Log.d(TAG, "bindService: isBind = $isBind")
+        if (!isBind) {
+            Log.d(TAG, "bindService: isBind = $isBind")
+        }
         Shizuku.bindUserService(USER_SERVICE_ARGS, SERVICE_CONNECTION)
     }
 }

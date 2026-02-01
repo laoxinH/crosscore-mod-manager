@@ -93,6 +93,15 @@ constructor(
                 return@flow
             }
 
+            // 1. 鉴权检查和安装检测
+            emit(ScanState.Preparing("检查权限..."))
+            val authResult = permissionService.checkPathPermissions(gameInfo.gamePath)
+            if (authResult is Result.Error) {
+                emit(ScanState.Error(authResult.error))
+                return@flow
+            }
+            // Log.d(TAG, "Permission check passed")
+
             fileService
                 .listFiles(gameInfo.gamePath)
                 .onSuccess {
@@ -113,14 +122,7 @@ constructor(
 
             Log.d(TAG, "开始检查权限o")
 
-            // 1. 鉴权检查
-            emit(ScanState.Preparing("检查权限..."))
-            val authResult = permissionService.checkPathPermissions(gameInfo.gamePath)
-            if (authResult is Result.Error) {
-                emit(ScanState.Error(authResult.error))
-                return@flow
-            }
-            Log.d(TAG, "Permission check passed")
+
 
             // 获取配置路径
             val modPath =

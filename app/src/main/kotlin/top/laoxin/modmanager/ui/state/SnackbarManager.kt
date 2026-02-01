@@ -78,12 +78,13 @@ sealed class SnackbarMessage {
     ) : SnackbarMessage()
 
     data class Resource(
-            @StringRes val resId: Int,
+            val resId: Int,
             override val duration: SnackbarDuration = SnackbarDuration.Short
     ) : SnackbarMessage()
 
     data class ResourceWithArgs(
-            @StringRes val resId: Int,
+
+            val resId: Int,
             val formatArgs: List<Any>,
             override val duration: SnackbarDuration = SnackbarDuration.Short
     ) : SnackbarMessage()

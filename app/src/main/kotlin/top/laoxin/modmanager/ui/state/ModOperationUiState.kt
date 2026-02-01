@@ -56,9 +56,9 @@ data class EnableResultState(
         val enabledCount: Int,
         val needPasswordMods: List<ModBean> = emptyList(),
         val fileMissingMods: List<ModBean> = emptyList(),
-        val backupFailedMods: List<ModBean> = emptyList(),
-        val enableFailedMods: List<ModBean> = emptyList(),
-        val restoreFailedMods: List<ModBean> = emptyList(),
+        val backupFailedMods: List<Pair<ModBean, AppError?>> = emptyList(),
+        val enableFailedMods: List<Pair<ModBean, AppError?>> = emptyList(),
+        val restoreFailedMods: List<Pair<ModBean, AppError?>> = emptyList(),
         /** 互相冲突的 MOD（待开启列表内部冲突） */
         val mutualConflictMods: List<ModBean> = emptyList(),
         /** 与已开启 MOD 冲突的 MOD */

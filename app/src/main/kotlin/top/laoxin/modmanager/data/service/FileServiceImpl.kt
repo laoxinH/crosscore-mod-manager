@@ -60,6 +60,8 @@ class FileServiceImpl @Inject constructor(
                 }
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
             } catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "复制文件失败"))
             }
@@ -81,7 +83,9 @@ class FileServiceImpl @Inject constructor(
                 }
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Log.e("FileService", "删除文件失败", e)
                 Result.Error(AppError.FileError.Unknown(e.message ?: "删除文件失败"))
             }
@@ -114,7 +118,9 @@ class FileServiceImpl @Inject constructor(
                 }
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "移动文件失败"))
             }
         }
@@ -131,7 +137,9 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(fileTools.isFileExist(path))
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "检查文件存在失败"))
             }
         }
@@ -148,7 +156,9 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(fileTools.isFile(path))
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "检查是否为文件失败"))
             }
         }
@@ -165,6 +175,8 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(fileTools.getFilesNames(path))
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
+            }catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
             } catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "获取文件名列表失败"))
             }
@@ -182,6 +194,8 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(fileTools.listFiles(path))
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
+            }catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
             } catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "列出文件失败"))
             }
@@ -199,7 +213,9 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(fileTools.readFile(path))
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.ReadFailed)
             }
         }
@@ -224,7 +240,9 @@ class FileServiceImpl @Inject constructor(
                 }
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "写入文件失败"))
             }
         }
@@ -249,6 +267,8 @@ class FileServiceImpl @Inject constructor(
                 }
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
+            }catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
             } catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "通过流创建文件失败"))
             }
@@ -270,7 +290,9 @@ class FileServiceImpl @Inject constructor(
                 }
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "创建目录失败"))
             }
         }
@@ -291,7 +313,9 @@ class FileServiceImpl @Inject constructor(
                 }
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "重命名目录失败"))
             }
         }
@@ -308,6 +332,8 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(fileTools.isFileChanged(path))
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
+            }catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
             } catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "获取文件修改时间失败"))
             }
@@ -334,6 +360,8 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(files)
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
+            }catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
             } catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "递归列出文件失败"))
             }
@@ -354,7 +382,9 @@ class FileServiceImpl @Inject constructor(
                 Result.Success(directories)
             } catch (e: SecurityException) {
                 Result.Error(AppError.FileError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
+            }catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "列出目录失败"))
             }
         }
@@ -376,6 +406,8 @@ class FileServiceImpl @Inject constructor(
                 Result.Error(AppError.FileError.PermissionDenied)
             } catch (e: FileNotFoundException) {
                 Result.Error(AppError.FileError.FileNotFound(path))
+            }catch (e :IllegalStateException) {
+                Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
             } catch (e: Exception) {
                 Result.Error(AppError.FileError.Unknown(e.message ?: "读取MOD失败"))
             }
@@ -400,6 +432,8 @@ class FileServiceImpl @Inject constructor(
             Result.Error(AppError.FileError.PermissionDenied)
         } catch (e: FileNotFoundException) {
             Result.Error(AppError.FileError.FileNotFound(absolutePath))
+        } catch (e :IllegalStateException) {
+            Result.Error(AppError.FileError.ShizukuDisconnected(e.message ?: "复制文件失败"))
         } catch (e: Exception) {
             Result.Error(AppError.FileError.Unknown(e.message ?: "读取MOD失败"))
         }

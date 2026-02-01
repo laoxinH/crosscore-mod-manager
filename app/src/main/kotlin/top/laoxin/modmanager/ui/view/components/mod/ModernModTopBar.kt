@@ -36,6 +36,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
@@ -253,7 +254,10 @@ fun ModernModTopBar(
                             IconButton(onClick = { modSearchViewModel.setSearchBoxVisible(true) }) {
                                 Icon(Icons.Filled.Search, "Search")
                             }
-                            IconButton(onClick = { modScanViewModel.flashMods(true, false) }) {
+                            IconButton(onClick = { modScanViewModel.flashMods(
+                                isLoading = true,
+                                forceScan = false
+                            ) }) {
                                 Icon(Icons.Filled.Refresh, "Refresh")
                             }
                             IconButton(onClick = { modScanViewModel.setShowForceScanDialog(true) }) {
@@ -261,7 +265,7 @@ fun ModernModTopBar(
                             }
                             IconButton(onClick = { modBrowserViewModel.toggleDisplayMode() }) {
                                 Icon(
-                                    imageVector = if (modBrowserUiState.isGridView) Icons.Filled.ViewList else Icons.Filled.GridView,
+                                    imageVector = if (modBrowserUiState.isGridView) Icons.AutoMirrored.Filled.ViewList else Icons.Filled.GridView,
                                     contentDescription = if (modBrowserUiState.isGridView) "List View" else "Grid View"
                                 )
                             }

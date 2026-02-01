@@ -338,8 +338,23 @@
     <string name="enable_result_enabled_conflict_title">Conflict with Enabled MOD</string>
     <string name="enable_result_enabled_conflict_hint">The following MODs conflict with already enabled MODs</string>
     <string name="enable_result_remove_selection">Remove Selection</string>
+    <string name="enable_result_show_failed_details">View Failed Details</string>
+    <string name="enable_result_hide_failed_details">Hide Failed Details</string>
+    <string name="enable_result_view_details">View Details</string>
+    <string name="enable_result_error_details">Error Details:</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_file_not_found">File not found</string>
+    <string name="error_backup_failed">Failed to backup %1$s</string>
+    <string name="error_enable_failed">Failed to enable %1$s</string>
+    <string name="error_disable_failed">Failed to disable %1$s</string>
+    <string name="error_restore_failed">Failed to restore %1$s</string>
+    <string name="error_mod_file_missing">MOD %1$s file missing</string>
+    <string name="error_write_failed">Write failed: %1$s</string>
+    <string name="error_read_failed">Read failed: %1$s</string>
+    <string name="error_copy_failed">Copy failed: %1$s</string>
 
     <!-- Delete MOD Related -->
+    <string name="error_shizuku_disconnected">Shizuku has disconnected. Please disable Shizuku authorization in the MOD Lab settings, then restart MOD Lab and request Shizuku permissions again.</string>
     <string name="delete_step_authenticating">Authenticating permission…</string>
     <string name="delete_step_collecting">Collecting files…</string>
     <string name="delete_step_filtering">Filtering…</string>

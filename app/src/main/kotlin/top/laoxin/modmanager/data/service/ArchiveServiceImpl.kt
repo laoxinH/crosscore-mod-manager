@@ -328,7 +328,7 @@ class ArchiveServiceImpl @Inject constructor(
                 val tempFile = File(tempDir, File(originalPath).name)
                 try {
                     val shizukuTools = fileToolsManager.getShizukuFileTools()
-                    val copySuccess = shizukuTools.copyFileByDF(originalPath, tempFile.absolutePath)
+                    val copySuccess = shizukuTools.copyFile(originalPath, tempFile.absolutePath)
 
                     if (!copySuccess) {
                         return Result.Error(AppError.FileError.CopyFailed)

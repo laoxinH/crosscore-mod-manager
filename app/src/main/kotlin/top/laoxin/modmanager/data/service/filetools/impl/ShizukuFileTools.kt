@@ -56,6 +56,7 @@ class ShizukuFileTools @Inject constructor(
                 RemoteResult.ERROR_MOVE_FAILED,
                 RemoteResult.ERROR_WRITE_FAILED,
                 RemoteResult.ERROR_READ_FAILED -> {
+                    result.errorMessage
                     IOException(result.getErrorDescription())
                 }
                 RemoteResult.ERROR_INVALID_ARGUMENT,

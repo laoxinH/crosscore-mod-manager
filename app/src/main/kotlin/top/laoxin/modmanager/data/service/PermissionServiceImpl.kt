@@ -308,6 +308,7 @@ constructor(@param:ApplicationContext private val context: Context) : Permission
     override fun getRootPath(): String = rootPath
 
     override fun checkPathPermissions(gamePath: String): Result<Unit> {
+        //Log.d(TAG, "checkPathPermissions: $gamePath")
         // 检查存储权限
         if (!hasStoragePermission()) {
             return Result.Error(AppError.PermissionError.StoragePermissionDenied)
@@ -317,7 +318,10 @@ constructor(@param:ApplicationContext private val context: Context) : Permission
         if (isUnderAppDataPath(gamePath)) {
             // 检查 Shizuku 权限
             if (isShizukuAvailable() && hasShizukuPermission()) {
-                return Result.Success(Unit)
+                val bindResult = checkAndBindShizuku()
+                if (bindResult is Result.Success && bindResult.data) {
+                    return Result.Success(Unit)
+                }
             }
 
             // 检查 URI 权限

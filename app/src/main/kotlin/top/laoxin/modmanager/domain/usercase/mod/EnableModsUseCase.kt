@@ -33,15 +33,15 @@ import top.laoxin.modmanager.domain.service.ValidationResult
 class EnableModsUseCase
 @Inject
 constructor(
-    private val modEnableService: ModEnableService,
-    private val backupService: BackupService,
-    private val specialGameService: SpecialGameService,
-    private val modRepository: ModRepository,
-    private val backupRepository: BackupRepository,
-    private val permissionService: PermissionService,
-    private val replacedFileRepository: ReplacedFileRepository,
-    private val fileService: FileService,
-    private val userPreferencesRepository: UserPreferencesRepository
+        private val modEnableService: ModEnableService,
+        private val backupService: BackupService,
+        private val specialGameService: SpecialGameService,
+        private val modRepository: ModRepository,
+        private val backupRepository: BackupRepository,
+        private val permissionService: PermissionService,
+        private val replacedFileRepository: ReplacedFileRepository,
+        private val fileService: FileService,
+        private val userPreferencesRepository: UserPreferencesRepository
 ) {
     companion object {
         private const val TAG = "EnableModsUseCase"
@@ -58,50 +58,31 @@ constructor(
      */
     fun execute(modsToEnable: List<ModBean>, gameInfo: GameInfoBean): Flow<EnableState> = flow {
         val mods =
-            modsToEnable.mapNotNull { modRepository.getModById(it.id) }.filter { !it.isEnable }
+                modsToEnable.mapNotNull { modRepository.getModById(it.id) }.filter { !it.isEnable }
         if (mods.isEmpty()) return@flow
         // 初始化结果统计
         val needPasswordMods = mutableListOf<ModBean>()
         val fileMissingMods = mutableListOf<ModBean>()
-        val backupFailedMods = mutableListOf<ModBean>()
-        val enableFailedMods = mutableListOf<ModBean>()
+        val backupFailedMods = mutableListOf<Pair<ModBean, AppError?>>()
+        val enableFailedMods = mutableListOf<Pair<ModBean, AppError?>>()
         val enabledSucceededMods = mutableListOf<ModBean>()
         // var enabledCount = 0
         val total = mods.size
 
         // 0. 游戏选择检查
         emit(
-            EnableState.Progress(
-                step = EnableStep.VALIDATING,
-                modName = "",
-                current = 0,
-                total = total,
-                message = "检查游戏配置..."
-            )
+                EnableState.Progress(
+                        step = EnableStep.VALIDATING,
+                        modName = "",
+                        current = 0,
+                        total = total,
+                        message = "检查游戏配置..."
+                )
         )
         if (gameInfo == GameInfoConstant.NO_GAME || gameInfo.packageName.isEmpty()) {
             emit(EnableState.Error(AppError.GameError.GameNotSelected))
             return@flow
         }
-
-        // 0.1 游戏安装检查
-        fileService
-            .listFiles(gameInfo.gamePath)
-            .onSuccess {
-                if (it.isEmpty()) {
-                    emit(
-                        EnableState.Error(
-                            AppError.GameError.GameNotInstalled(gameInfo.gameName)
-                        )
-                    )
-                    return@flow
-                }
-            }
-            .onError {
-                emit(EnableState.Error(it))
-                return@flow
-            }
-
         // 1. 权限检查
         emit(
             EnableState.Progress(
@@ -118,6 +99,25 @@ constructor(
             emit(EnableState.Error(permissionResult.error))
             return@flow
         }
+        // 1.1 游戏安装检查
+        fileService
+                .listFiles(gameInfo.gamePath)
+                .onSuccess {
+                    if (it.isEmpty()) {
+                        emit(
+                                EnableState.Error(
+                                        AppError.GameError.GameNotInstalled(gameInfo.gameName)
+                                )
+                        )
+                        return@flow
+                    }
+                }
+                .onError {
+                    emit(EnableState.Error(it))
+                    return@flow
+                }
+
+
 
         // 2. 冲突检测（可配置）
         val conflictDetectionEnabled = userPreferencesRepository.conflictDetectionEnabled.first()
@@ -128,22 +128,19 @@ constructor(
 
         if (conflictDetectionEnabled) {
             emit(
-                EnableState.Progress(
-                    step = EnableStep.VALIDATING,
-                    modName = "",
-                    current = 0,
-                    total = total,
-                    message = "检测冲突..."
-                )
+                    EnableState.Progress(
+                            step = EnableStep.VALIDATING,
+                            modName = "",
+                            current = 0,
+                            total = total,
+                            message = "检测冲突..."
+                    )
             )
 
             // 2.1 检测待开启 MOD 之间的内部冲突
             val (mutual, noInternalConflict) = detectMutualConflicts(mods)
             mutualConflictMods = mutual
-            Log.d(
-                TAG,
-                "内部冲突 MOD: ${mutualConflictMods.size}, 无冲突: ${noInternalConflict.size}"
-            )
+            Log.d(TAG, "内部冲突 MOD: ${mutualConflictMods.size}, 无冲突: ${noInternalConflict.size}")
 
             // 2.2 获取已开启的 MOD 列表
             val enabledMods = modRepository.getEnableMods(gameInfo.packageName).first()
@@ -170,13 +167,13 @@ constructor(
 
             // 2.1 验证 MOD
             emit(
-                EnableState.Progress(
-                    step = EnableStep.VALIDATING,
-                    modName = mod.name,
-                    current = currentIndex,
-                    total = total,
-                    message = "验证 MOD..."
-                )
+                    EnableState.Progress(
+                            step = EnableStep.VALIDATING,
+                            modName = mod.name,
+                            current = currentIndex,
+                            total = total,
+                            message = "验证 MOD..."
+                    )
             )
 
             val validationResult = modEnableService.validateMod(mod)
@@ -186,13 +183,11 @@ constructor(
                     needPasswordMods.add(mod)
                     continue
                 }
-
                 ValidationResult.FILE_MISSING -> {
                     // emit(EnableState.Error(AppError.ModError.FileMissing(mod.name)))
                     fileMissingMods.add(mod)
                     continue
                 }
-
                 ValidationResult.VALID -> {
                     /* 继续处理 */
                 }
@@ -200,13 +195,13 @@ constructor(
 
             // 2.2 备份游戏文件（流式处理）
             emit(
-                EnableState.Progress(
-                    step = EnableStep.BACKING_UP,
-                    modName = mod.name,
-                    current = currentIndex,
-                    total = total,
-                    message = "备份游戏文件..."
-                )
+                    EnableState.Progress(
+                            step = EnableStep.BACKING_UP,
+                            modName = mod.name,
+                            current = currentIndex,
+                            total = total,
+                            message = "备份游戏文件..."
+                    )
             )
 
             var backupSuccess = false
@@ -215,34 +210,32 @@ constructor(
 
             // 查询已替换文件记录，用于智能备份检测
             val replacedFilesMap =
-                mod.gameFilesPath
-                    .mapNotNull { path ->
-                        replacedFileRepository.getByGameFilePath(path)?.let { path to it }
-                    }
-                    .toMap()
+                    mod.gameFilesPath
+                            .mapNotNull { path ->
+                                replacedFileRepository.getByGameFilePath(path)?.let { path to it }
+                            }
+                            .toMap()
 
             backupService.backupGameFiles(mod, gameInfo, replacedFilesMap).collect { event ->
                 when (event) {
                     is BackupEvent.FileProgress -> {
                         emit(
-                            EnableState.Progress(
-                                step = EnableStep.BACKING_UP,
-                                modName = mod.name,
-                                current = currentIndex,
-                                total = total,
-                                message = "备份文件: ${event.fileName}",
-                                subProgress = event.current.toFloat() / event.total
-                            )
+                                EnableState.Progress(
+                                        step = EnableStep.BACKING_UP,
+                                        modName = mod.name,
+                                        current = currentIndex,
+                                        total = total,
+                                        message = "备份文件: ${event.fileName}",
+                                        subProgress = event.current.toFloat() / event.total
+                                )
                         )
                     }
-
                     is BackupEvent.Success -> {
                         // 插入备份数据库
                         // event.backups.forEach { backup -> backupRepository.insert(backup) }
                         backups = event.backups
                         backupSuccess = true
                     }
-
                     is BackupEvent.Failed -> {
                         // emit(EnableState.Error(AppError.ModError.BackupFailed(mod.name)))
                         backupSuccess = false
@@ -253,20 +246,20 @@ constructor(
 
             // 备份失败则跳过该 MOD
             if (!backupSuccess) {
-                backupFailedMods.add(mod)
+                backupFailedMods.add(mod to backupError)
                 Log.e(TAG, "Backup failed for ${mod.name}: $backupError")
                 continue
             }
 
             // 2.3 开启 MOD（收集 Service 的文件级进度）
             emit(
-                EnableState.Progress(
-                    step = EnableStep.ENABLING,
-                    modName = mod.name,
-                    current = currentIndex,
-                    total = total,
-                    message = "开启 MOD..."
-                )
+                    EnableState.Progress(
+                            step = EnableStep.ENABLING,
+                            modName = mod.name,
+                            current = currentIndex,
+                            total = total,
+                            message = "开启 MOD..."
+                    )
             )
 
             var enableSuccess = false
@@ -277,17 +270,16 @@ constructor(
                 when (event) {
                     is EnableFileEvent.FileProgress -> {
                         emit(
-                            EnableState.Progress(
-                                step = EnableStep.ENABLING,
-                                modName = mod.name,
-                                current = currentIndex,
-                                total = total,
-                                message = event.fileName,
-                                subProgress = event.current.toFloat() / event.total
-                            )
+                                EnableState.Progress(
+                                        step = EnableStep.ENABLING,
+                                        modName = mod.name,
+                                        current = currentIndex,
+                                        total = total,
+                                        message = event.fileName,
+                                        subProgress = event.current.toFloat() / event.total
+                                )
                         )
                     }
-
                     is EnableFileEvent.Complete -> {
                         enableSuccess = event.success
                         enableError = event.error
@@ -298,7 +290,7 @@ constructor(
 
             if (!enableSuccess) {
 
-                enableFailedMods.add(mod)
+                enableFailedMods.add(mod to enableError)
                 Log.e(TAG, "Enable failed for ${mod.name}: $enableError")
                 continue
             }
@@ -306,51 +298,52 @@ constructor(
             if (specialGameService.isSpecialGame(gameInfo.packageName)) {
                 // 2.4 特殊游戏处理
                 emit(
-                    EnableState.Progress(
-                        step = EnableStep.SPECIAL_PROCESS,
-                        modName = mod.name,
-                        current = currentIndex,
-                        total = total,
-                        message = "特殊处理..."
-                    )
+                        EnableState.Progress(
+                                step = EnableStep.SPECIAL_PROCESS,
+                                modName = mod.name,
+                                current = currentIndex,
+                                total = total,
+                                message = "特殊处理..."
+                        )
                 )
 
                 // TODO: 调用 specialGameService 进行特殊处理
                 specialGameService.onModEnable(mod, gameInfo.packageName).onError {
-                    enableFailedMods.add(mod)
+                    enableFailedMods.add(
+                            mod to AppError.ModError.SpecialOperationFailed(it.toString())
+                    )
                     emit(EnableState.Error(AppError.ModError.SpecialOperationFailed(it.toString())))
                     return@flow
-
                 }
             }
 
             // 2.5 更新数据库状态
             emit(
-                EnableState.Progress(
-                    step = EnableStep.UPDATING_DB,
-                    modName = mod.name,
-                    current = currentIndex,
-                    total = total,
-                    message = "更新状态..."
-                )
+                    EnableState.Progress(
+                            step = EnableStep.UPDATING_DB,
+                            modName = mod.name,
+                            current = currentIndex,
+                            total = total,
+                            message = "更新状态..."
+                    )
             )
 
             // 保存替换文件记录（智能更新：存在则更新ID，不存在则新增）
             if (fileMd5Map.isNotEmpty()) {
                 val currentTime = System.currentTimeMillis()
                 val replacedFiles =
-                    fileMd5Map.map { (gameFilePath, md5) ->
-                        val existingRecord = replacedFilesMap[gameFilePath]
-                        ReplacedFileBean(
-                            id = existingRecord?.id ?: 0, // 存在则使用原ID进行更新，否则新增
-                            modId = mod.id,
-                            filename = gameFilePath.substringAfterLast("/"),
-                            gameFilePath = gameFilePath,
-                            md5 = md5,
-                            gamePackageName = gameInfo.packageName,
-                            replaceTime = currentTime
-                        )
-                    }
+                        fileMd5Map.map { (gameFilePath, md5) ->
+                            val existingRecord = replacedFilesMap[gameFilePath]
+                            ReplacedFileBean(
+                                    id = existingRecord?.id ?: 0, // 存在则使用原ID进行更新，否则新增
+                                    modId = mod.id,
+                                    filename = gameFilePath.substringAfterLast("/"),
+                                    gameFilePath = gameFilePath,
+                                    md5 = md5,
+                                    gamePackageName = gameInfo.packageName,
+                                    replaceTime = currentTime
+                            )
+                        }
                 replacedFileRepository.saveReplacedFiles(replacedFiles)
             }
             if (backups.isNotEmpty()) {
@@ -362,23 +355,23 @@ constructor(
             // 判断是否取消
             if (isCanceled) {
                 emit(
-                    EnableState.Cancel(
-                        EnableResult(
-                            enabledCount = enabledSucceededMods.size,
-                            enabledSucceededMods = enabledSucceededMods,
-                            skippedCount =
-                                needPasswordMods.size +
-                                        fileMissingMods.size +
-                                        mutualConflictMods.size +
-                                        enabledConflictMods.size,
-                            needPasswordMods = needPasswordMods,
-                            fileMissingMods = fileMissingMods,
-                            backupFailedMods = backupFailedMods,
-                            enableFailedMods = enableFailedMods,
-                            mutualConflictMods = mutualConflictMods,
-                            enabledConflictMods = enabledConflictMods
+                        EnableState.Cancel(
+                                EnableResult(
+                                        enabledCount = enabledSucceededMods.size,
+                                        enabledSucceededMods = enabledSucceededMods,
+                                        skippedCount =
+                                                needPasswordMods.size +
+                                                        fileMissingMods.size +
+                                                        mutualConflictMods.size +
+                                                        enabledConflictMods.size,
+                                        needPasswordMods = needPasswordMods,
+                                        fileMissingMods = fileMissingMods,
+                                        backupFailedMods = backupFailedMods,
+                                        enableFailedMods = enableFailedMods,
+                                        mutualConflictMods = mutualConflictMods,
+                                        enabledConflictMods = enabledConflictMods
+                                )
                         )
-                    )
                 )
                 isCanceled = false
                 return@flow
@@ -387,23 +380,23 @@ constructor(
 
         // 4. 发射最终结果
         emit(
-            EnableState.Success(
-                EnableResult(
-                    enabledCount = enabledSucceededMods.size,
-                    enabledSucceededMods = enabledSucceededMods,
-                    skippedCount =
-                        needPasswordMods.size +
-                                fileMissingMods.size +
-                                mutualConflictMods.size +
-                                enabledConflictMods.size,
-                    needPasswordMods = needPasswordMods,
-                    fileMissingMods = fileMissingMods,
-                    backupFailedMods = backupFailedMods,
-                    enableFailedMods = enableFailedMods,
-                    mutualConflictMods = mutualConflictMods,
-                    enabledConflictMods = enabledConflictMods
+                EnableState.Success(
+                        EnableResult(
+                                enabledCount = enabledSucceededMods.size,
+                                enabledSucceededMods = enabledSucceededMods,
+                                skippedCount =
+                                        needPasswordMods.size +
+                                                fileMissingMods.size +
+                                                mutualConflictMods.size +
+                                                enabledConflictMods.size,
+                                needPasswordMods = needPasswordMods,
+                                fileMissingMods = fileMissingMods,
+                                backupFailedMods = backupFailedMods,
+                                enableFailedMods = enableFailedMods,
+                                mutualConflictMods = mutualConflictMods,
+                                enabledConflictMods = enabledConflictMods
+                        )
                 )
-            )
         )
     }
 
@@ -415,9 +408,9 @@ constructor(
      */
     fun disable(modsToDisable: List<ModBean>, gameInfo: GameInfoBean): Flow<EnableState> = flow {
         val mods =
-            modsToDisable.mapNotNull { modRepository.getModById(it.id) }.filter { it.isEnable }
+                modsToDisable.mapNotNull { modRepository.getModById(it.id) }.filter { it.isEnable }
         if (mods.isEmpty()) return@flow
-        val restoreFailedMods = mutableListOf<ModBean>()
+        val restoreFailedMods = mutableListOf<Pair<ModBean, AppError?>>()
         val disabledSucceededMods = mutableListOf<ModBean>()
         // var disabledCount = 0
         val total = mods.size
@@ -426,6 +419,7 @@ constructor(
         val permissionResult = permissionService.checkPathPermissions(gameInfo.gamePath)
         if (permissionResult is Result.Error) {
             emit(EnableState.Error(permissionResult.error))
+
             return@flow
         }
 
@@ -435,13 +429,13 @@ constructor(
 
             // 2.1 还原备份（流式处理）
             emit(
-                EnableState.Progress(
-                    step = EnableStep.DISABLING,
-                    modName = mod.name,
-                    current = currentIndex,
-                    total = total,
-                    message = "还原游戏文件..."
-                )
+                    EnableState.Progress(
+                            step = EnableStep.DISABLING,
+                            modName = mod.name,
+                            current = currentIndex,
+                            total = total,
+                            message = "还原游戏文件..."
+                    )
             )
 
             var restoreSuccess = false
@@ -450,33 +444,31 @@ constructor(
 
             // 构建 gameFilePath -> ReplacedFileBean 映射用于智能还原
             val replacedFilesMap =
-                mod.gameFilesPath
-                    .mapNotNull { path ->
-                        replacedFileRepository.getByGameFilePath(path)?.let { path to it }
-                    }
-                    .toMap()
+                    mod.gameFilesPath
+                            .mapNotNull { path ->
+                                replacedFileRepository.getByGameFilePath(path)?.let { path to it }
+                            }
+                            .toMap()
 
             backupService.restoreBackups(backups, replacedFilesMap, mod, gameInfo).collect { event
                 ->
                 when (event) {
                     is BackupEvent.FileProgress -> {
                         emit(
-                            EnableState.Progress(
-                                step = EnableStep.DISABLING,
-                                modName = mod.name,
-                                current = currentIndex,
-                                total = total,
-                                message = event.fileName,
-                                subProgress = event.current.toFloat() / event.total
-                            )
+                                EnableState.Progress(
+                                        step = EnableStep.DISABLING,
+                                        modName = mod.name,
+                                        current = currentIndex,
+                                        total = total,
+                                        message = event.fileName,
+                                        subProgress = event.current.toFloat() / event.total
+                                )
                         )
                     }
-
                     is BackupEvent.Success -> {
 
                         restoreSuccess = true
                     }
-
                     is BackupEvent.Failed -> {
                         restoreSuccess = false
                         restoreError = event.error
@@ -485,7 +477,7 @@ constructor(
             }
 
             if (!restoreSuccess) {
-                restoreFailedMods.add(mod)
+                restoreFailedMods.add(mod to restoreError)
                 Log.e(TAG, "Restore failed for ${mod.name}: $restoreError")
                 continue
             }
@@ -493,18 +485,20 @@ constructor(
             if (specialGameService.isSpecialGame(gameInfo.packageName)) {
                 // 2.4 特殊游戏处理
                 emit(
-                    EnableState.Progress(
-                        step = EnableStep.SPECIAL_PROCESS,
-                        modName = mod.name,
-                        current = currentIndex,
-                        total = total,
-                        message = "特殊处理..."
-                    )
+                        EnableState.Progress(
+                                step = EnableStep.SPECIAL_PROCESS,
+                                modName = mod.name,
+                                current = currentIndex,
+                                total = total,
+                                message = "特殊处理..."
+                        )
                 )
 
                 // TODO: 调用 specialGameService 进行特殊处理
                 specialGameService.onModDisable(backups, gameInfo.packageName, mod).onError {
-                    restoreFailedMods.add(mod)
+                    restoreFailedMods.add(
+                            mod to AppError.ModError.SpecialOperationFailed(it.toString())
+                    )
                     emit(EnableState.Error(AppError.ModError.SpecialOperationFailed(it.toString())))
                     return@flow
                 }
@@ -512,13 +506,13 @@ constructor(
 
             // 2.2 更新数据库状态
             emit(
-                EnableState.Progress(
-                    step = EnableStep.UPDATING_DB,
-                    modName = mod.name,
-                    current = currentIndex,
-                    total = total,
-                    message = "更新状态..."
-                )
+                    EnableState.Progress(
+                            step = EnableStep.UPDATING_DB,
+                            modName = mod.name,
+                            current = currentIndex,
+                            total = total,
+                            message = "更新状态..."
+                    )
             )
 
             // 删除替换文件记录
@@ -526,13 +520,13 @@ constructor(
 
             // 检查mod物理文件是否存在
             val isExist =
-                when (val existResult = fileService.isFileExist(mod.path)) {
-                    is Result.Success -> existResult.data
-                    is Result.Error -> {
-                        Log.e(TAG, "Check file exist failed: ${existResult.error}")
-                        false
+                    when (val existResult = fileService.isFileExist(mod.path)) {
+                        is Result.Success -> existResult.data
+                        is Result.Error -> {
+                            Log.e(TAG, "Check file exist failed: ${existResult.error}")
+                            false
+                        }
                     }
-                }
             if (isExist) {
                 // 物理文件存在，只更新状态为关闭
                 modRepository.updateMod(mod.copy(isEnable = false))
@@ -554,24 +548,21 @@ constructor(
                     fileService.deleteFile(backup.backupPath)
                     Log.d(TAG, "删除备份物理文件: ${backup.backupPath}")
                 } else {
-                    Log.d(
-                        TAG,
-                        "备份文件仍被 $refCount 个其他 MOD 引用，跳过删除: ${backup.backupPath}"
-                    )
+                    Log.d(TAG, "备份文件仍被 $refCount 个其他 MOD 引用，跳过删除: ${backup.backupPath}")
                 }
             }
 
             // 检查是否取消任务
             if (isCanceled) {
                 emit(
-                    EnableState.Cancel(
-                        EnableResult(
-                            enabledCount = disabledSucceededMods.size,
-                            disabledSucceededMods = disabledSucceededMods,
-                            skippedCount = 0,
-                            restoreFailedMods = restoreFailedMods
+                        EnableState.Cancel(
+                                EnableResult(
+                                        enabledCount = disabledSucceededMods.size,
+                                        disabledSucceededMods = disabledSucceededMods,
+                                        skippedCount = 0,
+                                        restoreFailedMods = restoreFailedMods
+                                )
                         )
-                    )
                 )
                 isCanceled = false
                 return@flow
@@ -580,14 +571,14 @@ constructor(
 
         // 3. 发射最终结果
         emit(
-            EnableState.Success(
-                EnableResult(
-                    enabledCount = disabledSucceededMods.size,
-                    disabledSucceededMods = disabledSucceededMods,
-                    skippedCount = 0,
-                    restoreFailedMods = restoreFailedMods
+                EnableState.Success(
+                        EnableResult(
+                                enabledCount = disabledSucceededMods.size,
+                                disabledSucceededMods = disabledSucceededMods,
+                                skippedCount = 0,
+                                restoreFailedMods = restoreFailedMods
+                        )
                 )
-            )
         )
     }
 
@@ -628,8 +619,8 @@ constructor(
      * @return Pair<与冲突的已开启MOD列表, 无冲突的待开启MOD列表>
      */
     private fun detectEnabledConflicts(
-        mods: List<ModBean>,
-        enabledMods: List<ModBean>
+            mods: List<ModBean>,
+            enabledMods: List<ModBean>
     ): Pair<List<ModBean>, List<ModBean>> {
         if (enabledMods.isEmpty()) return Pair(emptyList(), mods)
 
@@ -667,12 +658,12 @@ constructor(
 sealed class EnableState {
     /** 进度更新 */
     data class Progress(
-        val step: EnableStep,
-        val modName: String,
-        val current: Int,
-        val total: Int,
-        val message: String = "",
-        val subProgress: Float = -1f
+            val step: EnableStep,
+            val modName: String,
+            val current: Int,
+            val total: Int,
+            val message: String = "",
+            val subProgress: Float = -1f
     ) : EnableState()
 
     /** 完成 */
@@ -687,17 +678,17 @@ sealed class EnableState {
 
 /** 开启结果 */
 data class EnableResult(
-    val enabledCount: Int,
-    val skippedCount: Int = 0,
-    val enabledSucceededMods: List<ModBean> = emptyList(),
-    val disabledSucceededMods: List<ModBean> = emptyList(),
-    val needPasswordMods: List<ModBean> = emptyList(),
-    val fileMissingMods: List<ModBean> = emptyList(),
-    val backupFailedMods: List<ModBean> = emptyList(),
-    val enableFailedMods: List<ModBean> = emptyList(),
-    val restoreFailedMods: List<ModBean> = emptyList(),
-    /** 互相冲突的 MOD（待开启列表内部冲突） */
-    val mutualConflictMods: List<ModBean> = emptyList(),
-    /** 与已开启 MOD 冲突的 MOD */
-    val enabledConflictMods: List<ModBean> = emptyList()
+        val enabledCount: Int,
+        val skippedCount: Int = 0,
+        val enabledSucceededMods: List<ModBean> = emptyList(),
+        val disabledSucceededMods: List<ModBean> = emptyList(),
+        val needPasswordMods: List<ModBean> = emptyList(),
+        val fileMissingMods: List<ModBean> = emptyList(),
+        val backupFailedMods: List<Pair<ModBean, AppError?>> = emptyList(),
+        val enableFailedMods: List<Pair<ModBean, AppError?>> = emptyList(),
+        val restoreFailedMods: List<Pair<ModBean, AppError?>> = emptyList(),
+        /** 互相冲突的 MOD（待开启列表内部冲突） */
+        val mutualConflictMods: List<ModBean> = emptyList(),
+        /** 与已开启 MOD 冲突的 MOD */
+        val enabledConflictMods: List<ModBean> = emptyList()
 )

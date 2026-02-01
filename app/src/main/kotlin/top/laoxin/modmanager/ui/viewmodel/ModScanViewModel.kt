@@ -39,7 +39,7 @@ import top.laoxin.modmanager.ui.state.SnackbarManager
 class ModScanViewModel
 @Inject
 constructor(
-        private val application: Application,
+                private val application: Application,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val modRepository: ModRepository,
         private val scanAndSyncUseCase: ScanAndSyncModsUseCase,
@@ -319,7 +319,6 @@ constructor(
             Log.d("ModScanViewModel", "权限缺失类型: $error")
             when (error) {
                 is AppError.PermissionError.StoragePermissionDenied -> {
-
                     return showPermissionDialog(gamePath, PermissionType.STORAGE)
                 }
                 is AppError.PermissionError.UriPermissionNotGranted -> {

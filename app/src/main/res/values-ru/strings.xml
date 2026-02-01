@@ -343,6 +343,8 @@
     <string name="enable_result_remove_selection">Удалить выделение</string>
 
     <!-- 删除 MOD 相关 -->
+    <string name="error_copy_failed">Копирование не удалось: %1$s</string>
+    <string name="error_shizuku_disconnected">Соединение с Shizuku разорвано. Пожалуйста, отключите авторизацию Shizuku в настройках MOD Lab, затем перезапустите MOD Lab и запросите разрешение Shizuku снова.</string>
     <string name="delete_step_authenticating">Проверка прав доступа…</string>
     <string name="delete_step_collecting">Сбор файлов…</string>
     <string name="delete_step_filtering">Фильтрация…</string>
@@ -414,5 +416,18 @@
     <!-- 感谢名单 -->
     <string name="thanks_list_fetch_failed">Ошибка получения списка благодарности</string>
     <string name="mod_bean_loading_desc">Загрузка Readme...</string>
+    <string name="enable_result_show_failed_details">Просмотреть подробности сбоя</string>
+    <string name="enable_result_hide_failed_details">Скрыть подробности сбоя</string>
+    <string name="enable_result_view_details">проверьте подробности</string>
+    <string name="enable_result_error_details">Подробности ошибки:</string>
+    <string name="error_unknown">Неизвестная ошибка</string>
+    <string name="error_file_not_found">файл не найден</string>
+    <string name="error_backup_failed">Резервное копирование %1$s не удалось</string>
+    <string name="error_enable_failed">Не удалось включить %1$s</string>
+    <string name="error_disable_failed">Закрытие %1$s не удалось</string>
+    <string name="error_restore_failed">Восстановление %1$s не удалось.</string>
+    <string name="error_mod_file_missing">Файл MOD %1$s отсутствует.</string>
+    <string name="error_write_failed">Ошибка записи: %1$s</string>
+    <string name="error_read_failed">Ошибка чтения: %1$</string>
 </resources>
 
